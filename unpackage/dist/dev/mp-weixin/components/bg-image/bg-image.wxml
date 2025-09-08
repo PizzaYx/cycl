@@ -1,0 +1,1 @@
+<view class="bg-image-wrap data-v-c0a7bcbd"><image class="bg-image data-v-c0a7bcbd" src="{{a}}" mode="widthFix"></image><view class="bg-content data-v-c0a7bcbd"><slot/></view></view>

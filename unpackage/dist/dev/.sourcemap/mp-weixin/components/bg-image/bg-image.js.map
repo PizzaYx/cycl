@@ -1,0 +1,1 @@
+{"version":3,"file":"bg-image.js","sources":["/Users/yx/Documents/Vue3Projects/cycl/components/bg-image/bg-image.vue?type=component"],"sourcesContent":["import Component from '/Users/yx/Documents/Vue3Projects/cycl/components/bg-image/bg-image.vue'\nwx.createComponent(Component)"],"names":[],"mappings":";;;;;;;;;;;;;;;;;;;;;;;AACA,GAAG,gBAAgB,SAAS;"}
