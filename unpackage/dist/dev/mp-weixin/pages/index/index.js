@@ -4,13 +4,11 @@ const common_assets = require("../../common/assets.js");
 const api_apis = require("../../api/apis.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _easycom_bg_image2 = common_vendor.resolveComponent("bg-image");
-  (_easycom_uni_icons2 + _easycom_bg_image2)();
+  _easycom_uni_icons2();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-const _easycom_bg_image = () => "../../components/bg-image/bg-image.js";
 if (!Math) {
-  (_easycom_uni_icons + _easycom_bg_image)();
+  _easycom_uni_icons();
 }
 const _sfc_main = {
   __name: "index",
@@ -21,12 +19,24 @@ const _sfc_main = {
       agreed.value = !agreed.value;
     };
     const openAgreement = (type) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:71", "打开协议:", type);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:77", "打开协议:", type);
     };
     const formData = common_vendor.reactive({
       account: "",
       password: ""
     });
+    const handleRegister = () => {
+      common_vendor.index.showToast({
+        title: "注册功能待实现",
+        icon: "none"
+      });
+    };
+    const handleForgotPassword = () => {
+      common_vendor.index.showToast({
+        title: "忘记密码功能待实现",
+        icon: "none"
+      });
+    };
     const handleLogin = () => {
       if (!formData.account) {
         common_vendor.index.showToast({
@@ -82,7 +92,7 @@ const _sfc_main = {
           title: "网络请求失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/index/index.vue:166", "登录请求失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:192", "登录请求失败:", err);
       } finally {
         common_vendor.index.hideLoading();
       }
@@ -93,40 +103,45 @@ const _sfc_main = {
         if (userInfoRes.code === 200) {
           common_vendor.index.setStorageSync("userInfo", userInfoRes.data);
         } else {
-          common_vendor.index.__f__("error", "at pages/index/index.vue:180", "获取用户信息失败:", userInfoRes.msg);
+          common_vendor.index.__f__("error", "at pages/index/index.vue:206", "获取用户信息失败:", userInfoRes.msg);
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:183", "获取用户信息异常:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:209", "获取用户信息异常:", error);
       }
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_assets._imports_0,
-        b: activeTab.value === 0
+        b: common_assets._imports_1,
+        c: activeTab.value === 0
       }, activeTab.value === 0 ? {} : {}, {
-        c: activeTab.value === 0 ? 1 : "",
-        d: common_vendor.o(($event) => activeTab.value = 0),
-        e: activeTab.value === 1
+        d: activeTab.value === 0 ? 1 : "",
+        e: common_vendor.o(($event) => activeTab.value = 0),
+        f: activeTab.value === 1
       }, activeTab.value === 1 ? {} : {}, {
-        f: activeTab.value === 1 ? 1 : "",
-        g: common_vendor.o(($event) => activeTab.value = 1),
-        h: formData.account,
-        i: common_vendor.o(($event) => formData.account = $event.detail.value),
-        j: formData.password,
-        k: common_vendor.o(($event) => formData.password = $event.detail.value),
-        l: common_vendor.o(handleLogin),
-        m: common_vendor.o(toggleAgreement),
-        n: common_vendor.p({
+        g: activeTab.value === 1 ? 1 : "",
+        h: common_vendor.o(($event) => activeTab.value = 1),
+        i: formData.account,
+        j: common_vendor.o(($event) => formData.account = $event.detail.value),
+        k: formData.password,
+        l: common_vendor.o(($event) => formData.password = $event.detail.value),
+        m: activeTab.value === 0
+      }, activeTab.value === 0 ? {
+        n: common_vendor.o(handleForgotPassword)
+      } : {}, {
+        o: common_vendor.o(handleLogin),
+        p: activeTab.value === 0
+      }, activeTab.value === 0 ? {
+        q: common_vendor.o(handleRegister)
+      } : {}, {
+        r: common_vendor.o(toggleAgreement),
+        s: common_vendor.p({
           type: agreed.value ? "circle-filled" : "circle",
-          size: "24",
+          size: "22",
           color: agreed.value ? "rgba(7, 193, 96, 1)" : "rgba(19, 19, 19, 0.5)"
         }),
-        o: common_vendor.o(($event) => openAgreement("user")),
-        p: common_vendor.o(($event) => openAgreement("privacy")),
-        q: common_vendor.p({
-          height: "442rpx",
-          src: "/static/headTopBg.png"
-        })
+        t: common_vendor.o(($event) => openAgreement("user")),
+        v: common_vendor.o(($event) => openAgreement("privacy"))
       });
     };
   }
