@@ -2,13 +2,24 @@
   "pages": [
     "pages/index/index",
     "pages/merchant/merchant",
-    "pages/collection/collection"
+    "pages/collection/collection",
+    "pages/merchant/certification",
+    "pages/merchant/sydChecklist",
+    "pages/merchant/sydAllList"
   ],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "uni-app",
     "navigationBarBackgroundColor": "#F8F8F8",
     "backgroundColor": "#F8F8F8"
+  },
+  "requiredPrivateInfos": [
+    "chooseLocation"
+  ],
+  "permission": {
+    "scope.userLocation": {
+      "desc": "您的位置信息将用于选择商户地址"
+    }
   },
   "usingComponents": {}
 }

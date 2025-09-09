@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const api_apis = require("../../api/apis.js");
+const stores_user = require("../../stores/user.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -15,11 +16,12 @@ const _sfc_main = {
   setup(__props) {
     const activeTab = common_vendor.ref(0);
     const agreed = common_vendor.ref(false);
+    const userStore = stores_user.useUserStore();
     const toggleAgreement = () => {
       agreed.value = !agreed.value;
     };
     const openAgreement = (type) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:77", "打开协议:", type);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:81", "打开协议:", type);
     };
     const formData = common_vendor.reactive({
       account: "",
@@ -71,11 +73,11 @@ const _sfc_main = {
           password: formData.password
         });
         if (res.code === 200) {
+          await fetchUserInfo();
           common_vendor.index.showToast({
             title: "登录成功",
             icon: "success"
           });
-          await fetchUserInfo();
           setTimeout(() => {
             common_vendor.index.navigateTo({
               url: activeTab.value ? "/pages/collection/collection" : "/pages/merchant/merchant"
@@ -92,21 +94,21 @@ const _sfc_main = {
           title: "网络请求失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/index/index.vue:192", "登录请求失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:197", "登录请求失败:", err);
       } finally {
         common_vendor.index.hideLoading();
       }
     };
     const fetchUserInfo = async () => {
       try {
-        const userInfoRes = await api_apis.apiGetInfo();
-        if (userInfoRes.code === 200) {
-          common_vendor.index.setStorageSync("userInfo", userInfoRes.data);
-        } else {
-          common_vendor.index.__f__("error", "at pages/index/index.vue:206", "获取用户信息失败:", userInfoRes.msg);
-        }
+        await userStore.fetchUserInfo();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:209", "获取用户信息异常:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:208", "获取用户信息失败:", error);
+        common_vendor.index.showToast({
+          title: "获取用户信息失败，请稍后重试",
+          icon: "none",
+          duration: 2e3
+        });
       }
     };
     return (_ctx, _cache) => {

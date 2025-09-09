@@ -1,32 +1,60 @@
 {
-	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			"path": "pages/index/index",
-			"style": {
-				"navigationBarTitleText": "uni-app",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/merchant/merchant",
-			"style": {
-				"navigationBarTitleText": "商户首页",
-				"navigationStyle": "custom"
-			}
-		},
-		{
-			"path": "pages/collection/collection",
-			"style": {
-				"navigationBarTitleText": "收运端",
-				"navigationStyle": "custom"
-			}
-		}
-	],
-	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
-	},
-	"uniIdRouter": {}
+    "pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+        {
+            "path": "pages/index/index",
+            "style": {
+                "navigationBarTitleText": "uni-app",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/merchant/merchant",
+            "style": {
+                "navigationBarTitleText": "商户首页",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/collection/collection",
+            "style": {
+                "navigationBarTitleText": "收运端",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/merchant/certification",
+            "style": {
+                "navigationBarTitleText": "商户认证",
+                "navigationBarBackgroundColor": "#fff"
+            }
+        },
+        {
+        	"path" : "pages/merchant/sydChecklist",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "收运清单"
+        	}
+        },
+        {
+        	"path" : "pages/merchant/sydAllList",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "收运记录"
+        	}
+        },
+        {
+        	"path" : "pages/merchant/sydStatistics",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "收运统计"
+        	}
+        }
+    ],
+    "globalStyle": {
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "uni-app",
+        "navigationBarBackgroundColor": "#fff",
+        "backgroundColor": "#F8F8F8"
+    },
+    "uniIdRouter": {}
 }

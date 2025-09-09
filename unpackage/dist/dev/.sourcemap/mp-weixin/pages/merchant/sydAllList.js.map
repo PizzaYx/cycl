@@ -1,0 +1,1 @@
+{"version":3,"file":"sydAllList.js","sources":["pages/merchant/sydAllList.vue?type=page"],"sourcesContent":["import MiniProgramPage from '/Users/yx/Documents/Vue3Projects/cycl/pages/merchant/sydAllList.vue'\nwx.createPage(MiniProgramPage)"],"names":["MiniProgramPage"],"mappings":";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;AACA,GAAG,WAAWA,SAAe;"}

@@ -60,12 +60,16 @@ import {
     apiPostLogin,
     apiGetInfo
 } from '@/api/apis.js'
+import { useUserStore } from '@/stores/user.js'
 
 //商户端/收运端
 const activeTab = ref(0)
 
 //是否同意
 const agreed = ref(false)
+
+// 使用用户 store
+const userStore = useUserStore()
 
 const toggleAgreement = () => {
     agreed.value = !agreed.value
@@ -164,12 +168,13 @@ const loginRequest = async () => {
         })
 
         if (res.code === 200) {
+            // 先获取用户信息
+            await fetchUserInfo()
+
             uni.showToast({
                 title: '登录成功',
                 icon: 'success',
             })
-
-            await fetchUserInfo()
 
             // 延迟跳转确保toast显示
             setTimeout(() => {
@@ -198,15 +203,15 @@ const loginRequest = async () => {
 // 获取用户信息
 const fetchUserInfo = async () => {
     try {
-        const userInfoRes = await apiGetInfo() // 使用你在
-        if (userInfoRes.code === 200) {
-            // 保存用户信息到本地缓存
-            uni.setStorageSync('userInfo', userInfoRes.data)
-        } else {
-            console.error('获取用户信息失败:', userInfoRes.msg)
-        }
+        await userStore.fetchUserInfo()
     } catch (error) {
-        console.error('获取用户信息异常:', error)
+        console.error('获取用户信息失败:', error)
+        // 即使获取用户信息失败，也不阻止登录流程
+        uni.showToast({
+            title: '获取用户信息失败，请稍后重试',
+            icon: 'none',
+            duration: 2000
+        })
     }
 }
 </script>
@@ -348,7 +353,7 @@ const fetchUserInfo = async () => {
                 width: 608rpx; // 与input宽度一致
                 text-align: right; // 右对齐
                 font-size: 24rpx;
-                color: rgba(61, 61, 61, 0.30); 
+                color: rgba(61, 61, 61, 0.30);
                 margin-top: 10rpx; // 与上方元素保持间距
                 padding-right: 30rpx; // 与input的padding-right对齐
             }
@@ -412,7 +417,7 @@ const fetchUserInfo = async () => {
 
     .footer {
         flex-shrink: 0;
-        padding-bottom: calc(0rpx + env(safe-area-inset-bottom));
+        padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
         display: flex;
         align-items: center;
         justify-content: center;

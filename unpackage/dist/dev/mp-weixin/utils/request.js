@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const BASE_URL = "http://192.168.0.200:8080";
+const BASE_URL = "http://192.168.0.118:8089";
 let refreshingPromise = null;
 common_vendor.index.addInterceptor("request", {
   invoke(args) {
@@ -36,9 +36,7 @@ common_vendor.index.addInterceptor("request", {
         return Promise.reject(res);
       }
     } else if (res.data.code === 200) {
-      if (res.config && res.config.url && res.config.url.includes("/api/apiLogin") && res.data.data && res.data.data.access_token) {
-        common_vendor.index.__f__("log", "at utils/request.js:62", "登录接口");
-        common_vendor.index.__f__("log", "at utils/request.js:63", res.data.data);
+      if (res.data.data && res.data.data.access_token && res.data.data.refresh_token) {
         saveToken(res.data.data);
       }
       return res.data;

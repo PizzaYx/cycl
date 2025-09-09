@@ -193,7 +193,7 @@
 }
 .loginLayout .footer.data-v-1cf27b2a {
   flex-shrink: 0;
-  padding-bottom: calc(0rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
   display: flex;
   align-items: center;
   justify-content: center;

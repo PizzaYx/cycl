@@ -3,11 +3,25 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/merchant/merchant",
-          "pathName": "pages/merchant/merchant",
+          "name": "pages/index/index",
+          "pathName": "pages/index/index",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "pages/merchant/certification",
+          "pathName": "pages/merchant/certification",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/merchant/merchant",
+          "pathName": "pages/merchant/merchant",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         }
       ]
     }
