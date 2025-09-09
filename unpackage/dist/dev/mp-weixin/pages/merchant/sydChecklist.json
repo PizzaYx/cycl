@@ -1,4 +1,8 @@
 {
   "navigationBarTitleText": "收运清单",
-  "usingComponents": {}
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "uni-badge": "../../uni_modules/uni-badge/components/uni-badge/uni-badge",
+    "uni-load-more": "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more"
+  }
 }

@@ -5,12 +5,13 @@
     "pages/collection/collection",
     "pages/merchant/certification",
     "pages/merchant/sydChecklist",
-    "pages/merchant/sydAllList"
+    "pages/merchant/sydAllList",
+    "pages/merchant/sydStatistics"
   ],
   "window": {
     "navigationBarTextStyle": "black",
     "navigationBarTitleText": "uni-app",
-    "navigationBarBackgroundColor": "#F8F8F8",
+    "navigationBarBackgroundColor": "#fff",
     "backgroundColor": "#F8F8F8"
   },
   "requiredPrivateInfos": [

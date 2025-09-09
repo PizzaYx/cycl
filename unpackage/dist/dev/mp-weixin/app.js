@@ -8,6 +8,7 @@ if (!Math) {
   "./pages/merchant/certification.js";
   "./pages/merchant/sydChecklist.js";
   "./pages/merchant/sydAllList.js";
+  "./pages/merchant/sydStatistics.js";
 }
 const _sfc_main = {
   onLaunch: function() {

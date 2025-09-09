@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "收运统计",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+  }
+}
