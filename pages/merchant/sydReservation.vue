@@ -85,9 +85,10 @@
                     </uni-forms-item>
 
                     <uni-forms-item label="预约时间" name="estimatedTime" required>
-                        <uni-easyinput v-model="formData.estimatedTime" placeholder="请选择预约时间" type="text"
-                            :clearable="false" :disabled="isReadOnly">
-                        </uni-easyinput>
+                        <uni-datetime-picker v-model="formData.estimatedTime" type="datetime" 
+                            :start="minDate" :end="maxDate" 
+                            placeholder="请选择预约时间" :clearable="false" :disabled="isReadOnly">
+                        </uni-datetime-picker>
                     </uni-forms-item>
 
                     <uni-forms-item label="备注说明" name="estimatedRemarks" required>
@@ -158,6 +159,17 @@ const formData = reactive({
     estimatedRemarks: '',
 })
 
+// 计算最小和最大可选日期
+const minDate = computed(() => {
+    const now = new Date()
+    return now.toISOString().slice(0, 19).replace('T', ' ')
+})
+
+const maxDate = computed(() => {
+    const now = new Date()
+    const max = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000) // 30天后
+    return max.toISOString().slice(0, 19).replace('T', ' ')
+})
 
 // //0:未审核/待审核 1:审核成功 2: 审核不通过
 const currentStep = computed(() => {
@@ -537,7 +549,6 @@ const submitAuth = async () => {
                     transform: translateY(10rpx) !important; // 清除按钮也向下偏移
                 }
             }
-            
 
             // uni-data-select样式调整，与uni-easyinput保持一致
             :deep(.uni-data-select) {
@@ -590,6 +601,51 @@ const submitAuth = async () => {
                 // 移除可能存在的其他边框
                 &>view {
                     border: none !important;
+                }
+            }
+
+            // 日期时间选择器样式，与其他输入框保持一致
+            :deep(.uni-datetime-picker) {
+                .uni-date-editor--x {
+                    border: none !important;
+                    border-bottom: 2rpx solid #e5e5e5 !important;
+                    background: transparent !important;
+                    padding: 0 30rpx 10rpx 30rpx !important;
+                    height: 60rpx !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: flex-start !important;
+                    position: relative !important;
+                    
+                    .uni-date__x-input {
+                        font-size: 28rpx !important;
+                        color: rgba(38, 38, 38, 1) !important;
+                        height: 40rpx !important;
+                        line-height: 40rpx !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        flex: 1 !important;
+                        text-align: left !important;
+                        transform: translateY(5rpx) !important;
+                        box-sizing: border-box !important;
+                    }
+                    
+                    .uni-date__x-input-placeholder {
+                        color: rgba(191, 191, 191, 1) !important;
+                        font-size: 28rpx !important;
+                        line-height: 40rpx !important;
+                        text-align: left !important;
+                        transform: translateY(5rpx) !important;
+                    }
+                }
+                
+                &.uni-date-x--border {
+                    border: none !important;
+                }
+                
+                .uni-date-single--x,
+                .uni-date-range--x {
+                    top: 60rpx !important;
                 }
             }
 
@@ -687,6 +743,16 @@ const submitAuth = async () => {
                         background-color: #f5f5f5 !important;
 
                         .uni-data-select__input {
+                            color: #999 !important;
+                        }
+                    }
+                }
+                
+                :deep(.uni-datetime-picker) {
+                    .uni-date-editor--x {
+                        background-color: #f5f5f5 !important;
+                        
+                        .uni-date__x-input {
                             color: #999 !important;
                         }
                     }

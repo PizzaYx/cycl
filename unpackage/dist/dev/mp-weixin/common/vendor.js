@@ -7398,9 +7398,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "127.0.0.1,192.168.0.133";
+  const hosts = "192.168.0.113,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_6kKnqe";
+  const id = "mp-weixin__Laocx";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9188,7 +9188,8 @@ const pages = [
   {
     path: "pages/user/user",
     style: {
-      navigationBarTitleText: "个人"
+      navigationBarTitleText: "个人",
+      navigationStyle: "custom"
     }
   },
   {

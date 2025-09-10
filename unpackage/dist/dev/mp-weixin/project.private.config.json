@@ -3,57 +3,15 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/merchant/sydReservation",
-          "pathName": "pages/merchant/sydReservation",
+          "name": "pages/merchant/merchant",
+          "pathName": "pages/merchant/merchant",
           "query": "",
           "scene": null,
           "launchMode": "default"
         },
         {
-          "name": "pages/merchant/sydStatistics",
-          "pathName": "pages/merchant/sydStatistics",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/test/request",
-          "pathName": "pages/test/request",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/merchant/sydAllList",
-          "pathName": "pages/merchant/sydAllList",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/merchant/sydChecklist",
-          "pathName": "pages/merchant/sydChecklist",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/index/index",
-          "pathName": "pages/index/index",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/merchant/certification",
-          "pathName": "pages/merchant/certification",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/merchant/merchant",
-          "pathName": "pages/merchant/merchant",
+          "name": "pages/user/user",
+          "pathName": "pages/user/user",
           "query": "",
           "launchMode": "default",
           "scene": null

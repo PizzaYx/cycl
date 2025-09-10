@@ -7,7 +7,7 @@
                 <image src="/static/headTopBg.png" mode="aspectFill"></image>
             </view>
 
-            <view class="header">
+            <view class="header" @tap="getUserInfo">
                 <view class="avatar">
                     <view class="avatar-text">{{ userStore.userAvatar }}</view>
                 </view>
@@ -16,7 +16,11 @@
                     <view class="sub-name">{{ userStore.userName || '未设置用户名' }}</view>
                     <view class="auth-tag" :class="getAuthTagClass()">{{ getAuthStatusText() }}</view>
                 </view>
+                <uni-icons type="right" size="30rpx"></uni-icons>
+
             </view>
+
+
 
             <!-- 数据统计 -->
             <view class="statistics">
@@ -111,15 +115,58 @@ onMounted(async () => {
         console.log('用户信息加载完成')
 
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
-        const merchantStatus = userStore.merchantStatus
-        if (merchantStatus === null || merchantStatus === 2) {
-            showAuthModal.value = true
-        }
+        checkAndShowAuthModal()
     } catch (error) {
         // request.js已经处理了401跳转，这里只需要记录错误
         console.error('页面初始化失败:', error)
     }
 })
+
+/**
+ * 检查用户认证状态并显示相应提示
+ * @returns {boolean} true表示已认证，false表示未认证或审核不通过
+ */
+const checkUserAuthStatus = () => {
+    const merchantStatus = userStore.merchantStatus
+    // 未认证或审核不通过，显示认证弹窗
+    if (merchantStatus === null || merchantStatus === 2) {
+        showAuthModal.value = true
+        return false
+    }
+    // 审核中状态，显示提示
+    else if (merchantStatus === 0) {
+        uni.showToast({
+            title: '认证审核中，请耐心等待',
+            icon: 'none'
+        })
+        return false
+    }
+    // 已认证
+    else {
+        return true
+    }
+}
+
+/**
+ * 检查认证状态并在需要时显示认证弹窗
+ * 用于页面加载时检查
+ */
+const checkAndShowAuthModal = () => {
+    const merchantStatus = userStore.merchantStatus
+    if (merchantStatus === null || merchantStatus === 2) {
+        showAuthModal.value = true
+    }
+}
+
+const getUserInfo = () => {
+    // 检查用户认证状态并执行相应操作
+    if (checkUserAuthStatus()) {
+        // 已认证，跳转到用户页面
+        uni.navigateTo({
+            url: '/pages/user/user'
+        })
+    }
+}
 
 // 下拉刷新处理
 const onRefresh = async () => {
@@ -130,10 +177,7 @@ const onRefresh = async () => {
         console.log('刷新完成')
 
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
-        const merchantStatus = userStore.merchantStatus
-        if (merchantStatus === null || merchantStatus === 2) {
-            showAuthModal.value = true
-        }
+        checkAndShowAuthModal()
     } catch (error) {
         console.error('刷新失败:', error)
         uni.showToast({
@@ -190,7 +234,11 @@ const quickActions = ref([
 // 统一的快捷操作跳转处理
 const handleQuickAction = (action) => {
     console.log('快捷操作点击:', action.name)
-
+    // 检查用户认证状态
+    if (!checkUserAuthStatus()) {
+        // 未通过认证检查，不继续执行
+        return
+    }
     // 检查页面是否存在（可以根据实际情况调整）
     if (action.url) {
         uni.navigateTo({
@@ -286,20 +334,14 @@ const records = ref([
     },
 ])
 
-// 根据状态获取样式类名
-const getStatusClass = (status) => {
-    switch (status) {
-        case '待确定':
-            return 'status-pending'
-        case '已完成':
-            return 'status-completed'
-        default:
-            return 'status-default'
-    }
-}
-
 // 跳转到收运总列表页面
 const goToSydAllList = () => {
+    // 检查用户认证状态
+    if (!checkUserAuthStatus()) {
+        // 未通过认证检查，不继续执行
+        return
+    }
+    
     uni.navigateTo({
         url: '/pages/merchant/sydAllList'
     })

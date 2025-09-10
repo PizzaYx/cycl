@@ -1,1 +1,0 @@
-{"version":3,"file":"sydChecklist.js","sources":["pages/merchant/sydChecklist/sydChecklist.vue?type=page"],"sourcesContent":["import MiniProgramPage from '/Users/yx/Documents/Vue3Projects/cycl/pages/merchant/sydChecklist/sydChecklist.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;AACA,GAAG,WAAW,eAAe;"}

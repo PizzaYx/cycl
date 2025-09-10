@@ -2,6 +2,14 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const stores_user = require("../../stores/user.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+if (!Math) {
+  _easycom_uni_icons();
+}
 const _sfc_main = {
   __name: "merchant",
   setup(__props) {
@@ -11,26 +19,48 @@ const _sfc_main = {
     common_vendor.onMounted(async () => {
       try {
         await userStore.ensureUserInfo();
-        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:111", "用户信息加载完成");
-        const merchantStatus = userStore.merchantStatus;
-        if (merchantStatus === null || merchantStatus === 2) {
-          showAuthModal.value = true;
-        }
+        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:115", "用户信息加载完成");
+        checkAndShowAuthModal();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:120", "页面初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:121", "页面初始化失败:", error);
       }
     });
+    const checkUserAuthStatus = () => {
+      const merchantStatus = userStore.merchantStatus;
+      if (merchantStatus === null || merchantStatus === 2) {
+        showAuthModal.value = true;
+        return false;
+      } else if (merchantStatus === 0) {
+        common_vendor.index.showToast({
+          title: "认证审核中，请耐心等待",
+          icon: "none"
+        });
+        return false;
+      } else {
+        return true;
+      }
+    };
+    const checkAndShowAuthModal = () => {
+      const merchantStatus = userStore.merchantStatus;
+      if (merchantStatus === null || merchantStatus === 2) {
+        showAuthModal.value = true;
+      }
+    };
+    const getUserInfo = () => {
+      if (checkUserAuthStatus()) {
+        common_vendor.index.navigateTo({
+          url: "/pages/user/user"
+        });
+      }
+    };
     const onRefresh = async () => {
       refreshing.value = true;
       try {
         await userStore.fetchUserInfo();
-        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:130", "刷新完成");
-        const merchantStatus = userStore.merchantStatus;
-        if (merchantStatus === null || merchantStatus === 2) {
-          showAuthModal.value = true;
-        }
+        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:177", "刷新完成");
+        checkAndShowAuthModal();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:138", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:182", "刷新失败:", error);
         common_vendor.index.showToast({
           title: "刷新失败",
           icon: "none"
@@ -79,12 +109,15 @@ const _sfc_main = {
       }
     ]);
     const handleQuickAction = (action) => {
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:192", "快捷操作点击:", action.name);
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:236", "快捷操作点击:", action.name);
+      if (!checkUserAuthStatus()) {
+        return;
+      }
       if (action.url) {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:199", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:247", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"
@@ -169,6 +202,9 @@ const _sfc_main = {
       }
     ]);
     const goToSydAllList = () => {
+      if (!checkUserAuthStatus()) {
+        return;
+      }
       common_vendor.index.navigateTo({
         url: "/pages/merchant/sydAllList"
       });
@@ -181,7 +217,12 @@ const _sfc_main = {
         d: common_vendor.t(common_vendor.unref(userStore).userName || "未设置用户名"),
         e: common_vendor.t(getAuthStatusText()),
         f: common_vendor.n(getAuthTagClass()),
-        g: common_vendor.f(quickActions.value, (action, index, i0) => {
+        g: common_vendor.p({
+          type: "right",
+          size: "30rpx"
+        }),
+        h: common_vendor.o(getUserInfo),
+        i: common_vendor.f(quickActions.value, (action, index, i0) => {
           return {
             a: action.icon,
             b: common_vendor.t(action.name),
@@ -189,8 +230,8 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleQuickAction(action), action.id)
           };
         }),
-        h: common_vendor.o(goToSydAllList),
-        i: common_vendor.f(records.value, (item, index, i0) => {
+        j: common_vendor.o(goToSydAllList),
+        k: common_vendor.f(records.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.name),
             b: common_vendor.t(item.time),
@@ -199,17 +240,17 @@ const _sfc_main = {
             e: index
           };
         }),
-        j: refreshing.value,
-        k: common_vendor.o(onRefresh),
-        l: showAuthModal.value
+        l: refreshing.value,
+        m: common_vendor.o(onRefresh),
+        n: showAuthModal.value
       }, showAuthModal.value ? {
-        m: common_assets._imports_1$1,
-        n: common_assets._imports_2,
-        o: common_vendor.o(handleAuth),
-        p: common_vendor.o(closeModal),
-        q: common_vendor.o(() => {
+        o: common_assets._imports_1$1,
+        p: common_assets._imports_2,
+        q: common_vendor.o(handleAuth),
+        r: common_vendor.o(closeModal),
+        s: common_vendor.o(() => {
         }),
-        r: common_vendor.o(closeModal)
+        t: common_vendor.o(closeModal)
       } : {});
     };
   }
