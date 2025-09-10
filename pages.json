@@ -25,38 +25,45 @@
             "path": "pages/merchant/certification",
             "style": {
                 "navigationBarTitleText": "商户认证",
-                "navigationBarBackgroundColor": "#fff"
+                "navigationStyle": "custom"
             }
         },
         {
-        	"path" : "pages/merchant/sydChecklist",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "收运清单",
-				"enablePullDownRefresh": true
-        	}
+            "path": "pages/merchant/sydChecklist",
+            "style": {
+                "navigationBarTitleText": "收运清单",
+                "enablePullDownRefresh": true,
+                "navigationStyle": "custom"
+            }
         },
         {
-        	"path" : "pages/merchant/sydAllList",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "收运记录",
-				"enablePullDownRefresh": true
-        	}
+            "path": "pages/merchant/sydAllList",
+            "style": {
+                "navigationBarTitleText": "收运记录",
+                "enablePullDownRefresh": true,
+                "navigationStyle": "custom"
+            }
         },
         {
-        	"path" : "pages/merchant/sydStatistics",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "收运统计",
-				"enablePullDownRefresh": true
-        	}
+            "path": "pages/merchant/sydStatistics",
+            "style": {
+                "navigationBarTitleText": "收运统计",
+                "enablePullDownRefresh": true,
+                "navigationStyle": "custom"
+            }
         },
         {
-        	"path" : "pages/user/user",
+            "path": "pages/user/user",
+            "style": {
+                "navigationBarTitleText": "个人"
+            }
+        },
+        {
+        	"path" : "pages/merchant/sydReservation",
         	"style" : 
         	{
-        		"navigationBarTitleText" : "个人"
+        		"navigationBarTitleText" : "临时预约",
+				"navigationStyle": "custom"
         	}
         }
     ],

@@ -9,6 +9,7 @@ common_vendor.index.addInterceptor("request", {
     }
     const accessToken = common_vendor.index.getStorageSync("access_token");
     common_vendor.index.__f__("log", "at utils/request.js:17", "Access Token:", accessToken);
+    common_vendor.index.__f__("log", "at utils/request.js:20", "【Request】", args.url, args.method || "GET", args.data || {});
     if (accessToken) {
       args.header = args.header || {};
       args.header["authorization"] = `Bearer ${accessToken}`;
@@ -18,6 +19,8 @@ common_vendor.index.addInterceptor("request", {
 });
 common_vendor.index.addInterceptor("request", {
   success: async (res) => {
+    var _a;
+    common_vendor.index.__f__("log", "at utils/request.js:35", "【Response】", (_a = res.config) == null ? void 0 : _a.url, res.statusCode, res.data);
     if (res.statusCode === 401) {
       try {
         await handleUnauthorized();

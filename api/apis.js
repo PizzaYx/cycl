@@ -21,16 +21,27 @@ export function apiGetInfo() {
 //商户首页收运统计
 export function apiGetMerchantStatistics(data = {}) {
     return request({
-        url: "/api/merchantapi/getMerchantStatistics"
+        url: "/api/merchantapi/getMerchantStatistics",
+        data
     })
 }
 
-//商户首页收运统计
+//商户首页收运记录全部
 export function apiGetPlanAllPage(data = {}) {
     return request({
-        url: "/api/merchantapi/getPlanAllPage"
+        url: "/api/merchantapi/getPlanAllPage",
+        data
     })
 }
+
+//商户首页收运清单分页/api/merchantapi/getPlanPage
+export function apiGetPlanPage(data = {}) {
+    return request({
+        url: "/api/merchantapi/getPlanPage",
+        data
+    })
+}
+
 
 //商户提交认证
 export function apiPostMerchantCheck(data = {}) {
@@ -62,6 +73,15 @@ export function apiGetMerchantCheck(data = {}) {
 export function apiPostwebupload(data = {}) {
     return request({
         url: "/api/merchantapi/webupload",
+        data,
+        method: "POST"
+    })
+}
+
+//临时预约 api/merchantapi/addPlanTemporary
+export function apiPostaddPlanTemporary(data = {}) {
+    return request({
+        url: "/api/merchantapi/addPlanTemporary",
         data,
         method: "POST"
     })

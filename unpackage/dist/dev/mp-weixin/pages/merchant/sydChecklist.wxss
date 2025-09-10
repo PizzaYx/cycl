@@ -29,16 +29,17 @@
   flex-direction: column;
   background-color: #f7f7f7;
 }
-.container .tab-bar.data-v-888270ea {
-  display: flex;
-  align-items: center;
-  height: 88rpx;
-  background-color: white;
-  padding: 0 30rpx;
+.container .menu.data-v-888270ea {
   position: relative;
   margin-top: 2rpx;
+  background-color: #ffffff;
+  height: 88rpx;
 }
-.container .tab-bar .tab-item.data-v-888270ea {
+.container .menu .tab-bar.data-v-888270ea {
+  display: flex;
+  height: 100%;
+}
+.container .menu .tab-bar .tab-item.data-v-888270ea {
   flex: 1;
   height: 100%;
   display: flex;
@@ -48,11 +49,11 @@
   color: #3d3d3d;
   position: relative;
 }
-.container .tab-bar .tab-item.active.data-v-888270ea {
+.container .menu .tab-bar .tab-item.active.data-v-888270ea {
   color: #07c160;
   font-weight: 500;
 }
-.container .tab-bar .tab-item .tab-line.data-v-888270ea {
+.container .menu .tab-bar .tab-item .tab-line.data-v-888270ea {
   position: absolute;
   bottom: 0;
   left: 50%;
@@ -68,6 +69,7 @@
 }
 .container .content-wrapper .content.data-v-888270ea {
   height: 100%;
+  background-color: #ffffff;
 }
 .container .content-wrapper .order-list.data-v-888270ea {
   padding: 0 30rpx;
@@ -166,4 +168,36 @@
 }
 .container .loadMore.data-v-888270ea {
   padding-bottom: calc(env(safe-area-inset-bottom) + 50);
+}
+.container .empty-state.data-v-888270ea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 200rpx);
+  padding: 120rpx 60rpx;
+  text-align: center;
+  background-color: #ffffff;
+}
+.container .empty-state .empty-icon.data-v-888270ea {
+  font-size: 120rpx;
+  margin-bottom: 30rpx;
+  opacity: 0.3;
+}
+.container .empty-state .empty-text.data-v-888270ea {
+  font-size: 32rpx;
+  color: rgba(61, 61, 61, 0.6);
+  margin-bottom: 16rpx;
+  font-weight: 500;
+}
+.container .empty-state .empty-desc.data-v-888270ea {
+  font-size: 26rpx;
+  color: rgba(61, 61, 61, 0.4);
+  line-height: 1.5;
+}
+.container.data-v-888270ea .uni-navbar__content-title {
+  font-size: 34rpx !important;
+}
+.container.data-v-888270ea .uni-nav-bar-text {
+  font-size: 34rpx !important;
 }

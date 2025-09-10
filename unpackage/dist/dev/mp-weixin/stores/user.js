@@ -22,6 +22,11 @@ const useUserStore = common_vendor.defineStore("user", {
       var _a;
       return ((_a = state.userInfo) == null ? void 0 : _a.userId) || null;
     },
+    //merchant 商户信息
+    merchant: (state) => {
+      var _a;
+      return ((_a = state.userInfo) == null ? void 0 : _a.merchant) || null;
+    },
     // 头像（使用昵称第一个字）
     userAvatar: (state) => {
       var _a;
@@ -73,7 +78,7 @@ const useUserStore = common_vendor.defineStore("user", {
     setUserInfo(userInfo) {
       this.userInfo = userInfo;
       this.isLoggedIn = true;
-      common_vendor.index.__f__("log", "at stores/user.js:70", "用户信息已设置:", userInfo);
+      common_vendor.index.__f__("log", "at stores/user.js:73", "完整userInfo对象:", JSON.stringify(userInfo, null, 2));
     },
     // 从服务器获取用户信息
     async fetchUserInfo() {
@@ -81,14 +86,14 @@ const useUserStore = common_vendor.defineStore("user", {
         const res = await api_apis.apiGetInfo();
         if (res.code === 200) {
           this.setUserInfo(res.user);
-          common_vendor.index.__f__("log", "at stores/user.js:79", "用户信息获取成功:", res.user);
+          common_vendor.index.__f__("log", "at stores/user.js:82", "用户信息获取成功:", res.user);
           return res.user;
         } else {
-          common_vendor.index.__f__("error", "at stores/user.js:82", "获取用户信息失败:", res.msg);
+          common_vendor.index.__f__("error", "at stores/user.js:85", "获取用户信息失败:", res.msg);
           throw new Error(res.msg || "获取用户信息失败");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at stores/user.js:86", "获取用户信息异常:", error);
+        common_vendor.index.__f__("error", "at stores/user.js:89", "获取用户信息异常:", error);
         throw error;
       }
     },
@@ -96,7 +101,7 @@ const useUserStore = common_vendor.defineStore("user", {
     updateUserInfo(updates) {
       if (this.userInfo) {
         this.userInfo = { ...this.userInfo, ...updates };
-        common_vendor.index.__f__("log", "at stores/user.js:95", "用户信息已更新:", this.userInfo);
+        common_vendor.index.__f__("log", "at stores/user.js:98", "用户信息已更新:", this.userInfo);
       }
     },
     // 检查是否有用户信息，没有则自动获取
@@ -108,7 +113,7 @@ const useUserStore = common_vendor.defineStore("user", {
         await this.fetchUserInfo();
         return this.userInfo;
       } catch (error) {
-        common_vendor.index.__f__("error", "at stores/user.js:111", "获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at stores/user.js:114", "获取用户信息失败:", error);
         throw error;
       }
     },
@@ -116,7 +121,7 @@ const useUserStore = common_vendor.defineStore("user", {
     clearUserInfo() {
       this.userInfo = null;
       this.isLoggedIn = false;
-      common_vendor.index.__f__("log", "at stores/user.js:121", "用户信息已清除");
+      common_vendor.index.__f__("log", "at stores/user.js:124", "用户信息已清除");
     },
     // 退出登录
     logout() {
@@ -125,7 +130,7 @@ const useUserStore = common_vendor.defineStore("user", {
       common_vendor.index.removeStorageSync("access_expire_time");
       common_vendor.index.removeStorageSync("refresh_token");
       common_vendor.index.removeStorageSync("refresh_expire_time");
-      common_vendor.index.__f__("log", "at stores/user.js:135", "用户已退出登录");
+      common_vendor.index.__f__("log", "at stores/user.js:138", "用户已退出登录");
       common_vendor.index.redirectTo({
         url: "/pages/index/index"
       });

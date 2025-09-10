@@ -12,7 +12,7 @@
                     <view class="avatar-text">{{ userStore.userAvatar }}</view>
                 </view>
                 <view class="info">
-                    <view class="name">{{ userStore.nickName || '用户' }}</view>
+                    <view class="name">{{ userStore.nickName || '未登录' }}</view>
                     <view class="sub-name">{{ userStore.userName || '未设置用户名' }}</view>
                     <view class="auth-tag" :class="getAuthTagClass()">{{ getAuthStatusText() }}</view>
                 </view>
@@ -51,7 +51,7 @@
             <!-- 收运记录 -->
             <view class="records-header">
                 <text class="title">收运记录</text>
-                <text class="more">更多 >></text>
+                <text class="more" @tap="goToSydAllList">更多 》 </text>
             </view>
             <view class="records">
                 <view class="record-list">
@@ -165,19 +165,19 @@ const quickActions = ref([
         id: 'appointment',
         name: '临时预约',
         icon: '/static/shd/lsyy.png',
-        url: '/pages/appointment/appointment' // 临时预约页面
+        url: '/pages/merchant/sydReservation' // 临时预约页面
     },
     {
         id: 'records',
-        name: '收运记录',
+        name: '收运清单',
         icon: '/static/shd/syjl.png',
-        url: '/pages/records/records' // 收运记录页面
+        url: '/pages/merchant/sydChecklist' // 收运清单页面
     },
     {
         id: 'statistics',
         name: '数据统计',
         icon: '/static/shd/sjtj.png',
-        url: '/pages/statistics/statistics' // 数据统计页面
+        url: '/pages/merchant/sydStatistics' // 数据统计页面
     },
     {
         id: 'certification',
@@ -296,6 +296,13 @@ const getStatusClass = (status) => {
         default:
             return 'status-default'
     }
+}
+
+// 跳转到收运总列表页面
+const goToSydAllList = () => {
+    uni.navigateTo({
+        url: '/pages/merchant/sydAllList'
+    })
 }
 </script>
 

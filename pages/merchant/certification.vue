@@ -1,6 +1,8 @@
 <!-- 认证界面 -->
 <template>
     <view class="auth-container">
+        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="商户认证"
+            @clickLeft="back" />
         <!-- 步骤条 -->
         <view class="step-container">
             <view class="step-item" :class="{ active: currentStep >= 1, completed: currentStep > 1 }">
@@ -77,7 +79,7 @@
                                 <view v-if="formData.latitude && formData.longitude" class="location-info">
                                     <text class="location-name">{{ formData.locationName || '已选择位置' }}</text>
                                     <text class="location-coords">经度: {{ formData.longitude }}, 纬度: {{ formData.latitude
-                                        }}</text>
+                                    }}</text>
                                 </view>
                                 <text class="location-placeholder" v-else>点击选择商户位置</text>
                                 <uni-icons type="location" size="20" color="#999"></uni-icons>
@@ -138,6 +140,11 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { apiPostMerchantCheck, apiGetMerchantCheck } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
 
+//返回上一页
+const back = () => {
+    uni.navigateBack()
+}
+
 //商户信息
 const userStore = useUserStore();
 
@@ -176,20 +183,6 @@ const authStatus = computed(() => {
     }
 })
 
-// 认证状态显示文本
-const authStatusText = computed(() => {
-    switch (authStatus.value) {
-        case 'pending':
-            return '认证中'
-        case 'approved':
-            return '已认证'
-        case 'rejected':
-        case 'none':
-            return '未认证'
-        default:
-            return '未认证'
-    }
-})
 
 // 是否为只读状态
 const isReadOnly = computed(() => {
@@ -700,8 +693,8 @@ const submitAuth = async () => {
 .auth-container {
     min-height: 100vh;
     background: $bg-theme-color;
-
-    padding: 20rpx 30rpx 40rpx 30rpx;
+    padding: 0 30rpx 30rpx;
+  
 
     // 步骤条样式
     .step-container {
@@ -710,8 +703,9 @@ const submitAuth = async () => {
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 30rpx;
+        margin: 30rpx 0;
         height: 144rpx;
+        border-radius: 20rpx;
 
         .step-item {
             display: flex;
@@ -1135,6 +1129,15 @@ const submitAuth = async () => {
                 transform: scale(0.98);
             }
         }
+    }
+
+    // 自定义导航栏字体大小为34rpx
+    :deep(.uni-navbar__content-title) {
+        font-size: 34rpx !important;
+    }
+
+    :deep(.uni-nav-bar-text) {
+        font-size: 34rpx !important;
     }
 }
 </style>

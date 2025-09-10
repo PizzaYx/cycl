@@ -3,11 +3,25 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/test/request",
-          "pathName": "pages/test/request",
+          "name": "pages/merchant/sydReservation",
+          "pathName": "pages/merchant/sydReservation",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "pages/merchant/sydStatistics",
+          "pathName": "pages/merchant/sydStatistics",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/test/request",
+          "pathName": "pages/test/request",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "pages/merchant/sydAllList",

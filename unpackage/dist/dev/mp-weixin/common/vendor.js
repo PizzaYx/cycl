@@ -7398,9 +7398,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.0.104,127.0.0.1";
+  const hosts = "127.0.0.1,192.168.0.133";
   const port = "8090";
-  const id = "mp-weixin_4STDv-";
+  const id = "mp-weixin_6kKnqe";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9117,8 +9117,18 @@ const Pinia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
 const createLifeCycleHook = (lifecycle, flag = 0) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
+const onLoad = /* @__PURE__ */ createLifeCycleHook(
+  ON_LOAD,
+  2
+  /* HookFlags.PAGE */
+);
 const onReachBottom = /* @__PURE__ */ createLifeCycleHook(
   ON_REACH_BOTTOM,
+  2
+  /* HookFlags.PAGE */
+);
+const onPullDownRefresh = /* @__PURE__ */ createLifeCycleHook(
+  ON_PULL_DOWN_REFRESH,
   2
   /* HookFlags.PAGE */
 );
@@ -9148,28 +9158,44 @@ const pages = [
     path: "pages/merchant/certification",
     style: {
       navigationBarTitleText: "商户认证",
-      navigationBarBackgroundColor: "#fff"
+      navigationStyle: "custom"
     }
   },
   {
     path: "pages/merchant/sydChecklist",
     style: {
       navigationBarTitleText: "收运清单",
-      enablePullDownRefresh: true
+      enablePullDownRefresh: true,
+      navigationStyle: "custom"
     }
   },
   {
     path: "pages/merchant/sydAllList",
     style: {
       navigationBarTitleText: "收运记录",
-      enablePullDownRefresh: true
+      enablePullDownRefresh: true,
+      navigationStyle: "custom"
     }
   },
   {
     path: "pages/merchant/sydStatistics",
     style: {
       navigationBarTitleText: "收运统计",
-      enablePullDownRefresh: true
+      enablePullDownRefresh: true,
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/user/user",
+    style: {
+      navigationBarTitleText: "个人"
+    }
+  },
+  {
+    path: "pages/merchant/sydReservation",
+    style: {
+      navigationBarTitleText: "临时预约",
+      navigationStyle: "custom"
     }
   }
 ];
@@ -12045,7 +12071,9 @@ exports.index = index;
 exports.initVueI18n = initVueI18n;
 exports.n = n$1;
 exports.o = o$1;
+exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
 exports.p = p$1;
 exports.r = r$1;

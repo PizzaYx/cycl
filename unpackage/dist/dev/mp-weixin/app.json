@@ -6,7 +6,9 @@
     "pages/merchant/certification",
     "pages/merchant/sydChecklist",
     "pages/merchant/sydAllList",
-    "pages/merchant/sydStatistics"
+    "pages/merchant/sydStatistics",
+    "pages/user/user",
+    "pages/merchant/sydReservation"
   ],
   "window": {
     "navigationBarTextStyle": "black",

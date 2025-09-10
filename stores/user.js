@@ -18,6 +18,9 @@ export const useUserStore = defineStore('user', {
         // 用户ID
         userId: (state) => state.userInfo?.userId || null,
 
+        //merchant 商户信息
+        merchant: (state) => state.userInfo?.merchant || null,
+
         // 头像（使用昵称第一个字）
         userAvatar: (state) => {
             const nickName = state.userInfo?.nickName
@@ -67,7 +70,7 @@ export const useUserStore = defineStore('user', {
         setUserInfo(userInfo) {
             this.userInfo = userInfo
             this.isLoggedIn = true
-            console.log('用户信息已设置:', userInfo)
+            console.log('完整userInfo对象:', JSON.stringify(userInfo, null, 2))
         },
 
         // 从服务器获取用户信息

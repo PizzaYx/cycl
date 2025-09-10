@@ -15,6 +15,10 @@ uni.addInterceptor('request', {
         // 添加access token到请求头
         const accessToken = uni.getStorageSync('access_token')
         console.log('Access Token:', accessToken); // 调试输出
+        
+        // 打印请求信息
+        console.log('【Request】', args.url, args.method || 'GET', args.data || {});
+        
         if (accessToken) {
             args.header = args.header || {}
             args.header['authorization'] = `Bearer ${accessToken}`
@@ -27,6 +31,9 @@ uni.addInterceptor('request', {
 // 响应拦截器
 uni.addInterceptor('request', {
     success: async (res) => {
+        // 打印响应信息
+        console.log('【Response】', res.config?.url, res.statusCode, res.data);
+        
         // 处理401未授权
         if (res.statusCode === 401) {
             try {

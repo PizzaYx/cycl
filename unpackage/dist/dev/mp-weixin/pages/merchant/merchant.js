@@ -53,21 +53,21 @@ const _sfc_main = {
         id: "appointment",
         name: "临时预约",
         icon: "/static/shd/lsyy.png",
-        url: "/pages/appointment/appointment"
+        url: "/pages/merchant/sydReservation"
         // 临时预约页面
       },
       {
         id: "records",
-        name: "收运记录",
+        name: "收运清单",
         icon: "/static/shd/syjl.png",
-        url: "/pages/records/records"
-        // 收运记录页面
+        url: "/pages/merchant/sydChecklist"
+        // 收运清单页面
       },
       {
         id: "statistics",
         name: "数据统计",
         icon: "/static/shd/sjtj.png",
-        url: "/pages/statistics/statistics"
+        url: "/pages/merchant/sydStatistics"
         // 数据统计页面
       },
       {
@@ -168,11 +168,16 @@ const _sfc_main = {
         status: "已完成"
       }
     ]);
+    const goToSydAllList = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/merchant/sydAllList"
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_assets._imports_0,
         b: common_vendor.t(common_vendor.unref(userStore).userAvatar),
-        c: common_vendor.t(common_vendor.unref(userStore).nickName || "用户"),
+        c: common_vendor.t(common_vendor.unref(userStore).nickName || "未登录"),
         d: common_vendor.t(common_vendor.unref(userStore).userName || "未设置用户名"),
         e: common_vendor.t(getAuthStatusText()),
         f: common_vendor.n(getAuthTagClass()),
@@ -184,7 +189,8 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleQuickAction(action), action.id)
           };
         }),
-        h: common_vendor.f(records.value, (item, index, i0) => {
+        h: common_vendor.o(goToSydAllList),
+        i: common_vendor.f(records.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.name),
             b: common_vendor.t(item.time),
@@ -193,17 +199,17 @@ const _sfc_main = {
             e: index
           };
         }),
-        i: refreshing.value,
-        j: common_vendor.o(onRefresh),
-        k: showAuthModal.value
+        j: refreshing.value,
+        k: common_vendor.o(onRefresh),
+        l: showAuthModal.value
       }, showAuthModal.value ? {
-        l: common_assets._imports_1$1,
-        m: common_assets._imports_2,
-        n: common_vendor.o(handleAuth),
-        o: common_vendor.o(closeModal),
-        p: common_vendor.o(() => {
+        m: common_assets._imports_1$1,
+        n: common_assets._imports_2,
+        o: common_vendor.o(handleAuth),
+        p: common_vendor.o(closeModal),
+        q: common_vendor.o(() => {
         }),
-        q: common_vendor.o(closeModal)
+        r: common_vendor.o(closeModal)
       } : {});
     };
   }

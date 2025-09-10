@@ -1,26 +1,32 @@
 <!-- 收运清单 -->
 <template>
     <view class="container">
-        <!-- 不再固定在顶部的tab -->
-        <view class="tab-bar">
-            <view v-for="(tab, index) in tabs" :key="index" class="tab-item" :class="{ active: currentTab === index }"
-                @click="handleTabClick(index)">
-                {{ tab }}
-                <!-- 为预约中tab添加uni-badge -->
-                <uni-badge v-if="tab === '预约中'" class="uni-badge" type="error" :text="bookingBadgeText" :dot="false"
-                    :absolute="'rightTop'" :offset="[-5, -12]"></uni-badge>
-                <!-- 为进行中tab添加uni-badge -->
-                <uni-badge v-if="tab === '进行中'" class="uni-badge" type="error" :text="processingBadgeText" :dot="true"
-                    :absolute="'rightTop'" :offset="[-5, -12]"></uni-badge>
-                <view class="tab-line" v-if="currentTab === index"></view>
+        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运清单"
+            @clickLeft="back" />
+        <view class="menu">
+            <view class="tab-bar">
+                <view v-for="(tab, index) in tabs" :key="index" class="tab-item"
+                    :class="{ active: currentTab === index }" @click="handleTabClick(index)">
+                    {{ tab.value }}
+                    <!-- 为预约中tab添加uni-badge -->
+                    <uni-badge v-if="tab.value === '预约中' && bookingBadgeText !== '0' && bookingBadgeText !== ''"
+                        class="uni-badge" type="error" :text="bookingBadgeText" :is-dot="false" absolute="rightTop"
+                        :offset="[-5, -12]"></uni-badge>
+                    <!-- 为进行中tab添加uni-badge -->
+                    <uni-badge v-if="tab.value === '进行中' && processingBadgeText !== '0' && processingBadgeText !== ''"
+                        class="uni-badge" type="error" :text="processingBadgeText" :is-dot="false" absolute="rightTop"
+                        :offset="[-5, -12]"></uni-badge>
+                    <view class="tab-line" v-if="currentTab === index"></view>
+                </view>
             </view>
         </view>
 
         <!-- 内容区域 -->
         <view class="content-wrapper">
             <scroll-view class="content" scroll-y>
-                <view class="order-list">
-                    <view class="order-item" v-for="(item, index) in orderList" :key="index">
+                <!-- 数据列表 -->
+                <view class="order-list" v-if="allOrderList.length > 0">
+                    <view class="order-item" v-for="(item, index) in allOrderList" :key="index">
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.shopName }}</text>
@@ -58,14 +64,22 @@
                             </uni-button>
                         </view>
                     </view>
+
+                    <!-- 加载更多组件 - 只在有数据时显示 -->
+                    <view class="loadMore">
+                        <uni-load-more :status="loadingStatus" :content-text="{
+                            contentdown: '上拉显示更多',
+                            contentrefresh: '正在加载...',
+                            contentnomore: '没有更多数据了'
+                        }"></uni-load-more>
+                    </view>
                 </view>
 
-                <view class="loadMore">
-                    <uni-load-more :status="loadingStatus" :content-text="{
-                        contentdown: '上拉显示更多',
-                        contentrefresh: '正在加载...',
-                        contentnomore: '没有更多数据了'
-                    }"></uni-load-more>
+                <!-- 暂无数据状态 -->
+                <view class="empty-state" v-else-if="loadingStatus !== 'loading'">
+                    <view class="empty-icon">📋</view>
+                    <text class="empty-text">暂无数据</text>
+                    <text class="empty-desc">当前分类下暂时没有相关信息</text>
                 </view>
             </scroll-view>
         </view>
@@ -74,170 +88,133 @@
 <script setup>
 import {
     ref,
-    computed
+    computed,
+    onMounted
 } from 'vue';
 import {
     onPullDownRefresh,
     onReachBottom
 } from '@dcloudio/uni-app';
 
-const tabs = ['预约中', '进行中', '已完成'];
+import {
+    apiGetPlanPage
+} from '@/api/apis.js';
+
+import { useUserStore } from '@/stores/user.js'
+
+//3 预约中 0 待收运 1 已完成
+const tabs = [{ key: "3", value: "预约中" }, { key: "0", value: "进行中" }, { key: "1", value: "已完成" }];
+//下标
 const currentTab = ref(0);
+
+const userStore = useUserStore();
+
+//返回上一页
+const back = () => {
+    uni.navigateBack()
+}
+
+//点击菜单
+function handleTabClick(index) {
+    currentTab.value = index;
+    allOrderList.value = [];
+    pageNum.value = 1; // 重置页码为1
+    getNetwork();
+}
+
 // 添加badgeText的ref变量
-const bookingBadgeText = ref('11');
-const processingBadgeText = ref('123');
+const bookingBadgeText = ref('0');
+const processingBadgeText = ref('0');
+
+// 添加页码和加载状态变量
+const pageNum = ref(1);
+const loadingStatus = ref('more'); // more-加载前/loading-加载中/nomore-没有更多数据
 
 // 数据列表
-const allOrderList = ref([
-    // 预约中数据
-    {
-        id: 1,
-        shopName: '川味小厨(总店)',
-        status: '预约中',
-        deliveryCount: '5',
-        weight: '451kg',
-        carInfo: '川A3D47M',
-        time: '2025-08-20 14:30-15:30'
-    },
-    {
-        id: 2,
-        shopName: '老北京烤鸭店',
-        status: '预约中',
-        deliveryCount: '3',
-        weight: '210kg',
-        carInfo: '川B5H29N',
-        time: '2025-08-21 10:00-11:00'
-    },
-    {
-        id: 3,
-        shopName: '兰州拉面',
-        status: '预约中',
-        deliveryCount: '4',
-        weight: '320kg',
-        carInfo: '川C1D2E3',
-        time: '2025-08-21 14:00-15:00'
-    },
-    {
-        id: 4,
-        shopName: '黄焖鸡米饭',
-        status: '预约中',
-        deliveryCount: '2',
-        weight: '180kg',
-        carInfo: '川D4F5G6',
-        time: '2025-08-21 16:00-17:00'
-    },
-    // 进行中数据
-    {
-        id: 5,
-        shopName: '湘菜馆',
-        status: '进行中',
-        deliveryCount: '7',
-        weight: '625kg',
-        carInfo: '川C8K45P',
-        time: '2025-08-20 09:15-10:15'
-    },
-    {
-        id: 6,
-        shopName: '粤式茶餐厅',
-        status: '进行中',
-        deliveryCount: '4',
-        weight: '312kg',
-        carInfo: '川D1M67Q',
-        time: '2025-08-20 13:45-14:45'
-    },
-    {
-        id: 7,
-        shopName: '日式料理',
-        status: '进行中',
-        deliveryCount: '6',
-        weight: '480kg',
-        carInfo: '川E2N3O4',
-        time: '2025-08-21 11:30-12:30'
-    },
-    // 已完成数据
-    {
-        id: 8,
-        shopName: '东北饺子王',
-        status: '已完成',
-        deliveryCount: '6',
-        weight: '523kg',
-        carInfo: '川E3R89S',
-        time: '2025-08-19 16:30-17:30'
-    },
-    {
-        id: 9,
-        shopName: '重庆小面',
-        status: '已完成',
-        deliveryCount: '2',
-        weight: '156kg',
-        carInfo: '川F6T23U',
-        time: '2025-08-19 11:20-12:20'
-    },
-    {
-        id: 10,
-        shopName: '新疆羊肉串',
-        status: '已完成',
-        deliveryCount: '8',
-        weight: '742kg',
-        carInfo: '川G9Y56V',
-        time: '2025-08-18 15:40-16:40'
-    },
-    {
-        id: 11,
-        shopName: '韩式烤肉',
-        status: '已完成',
-        deliveryCount: '5',
-        weight: '420kg',
-        carInfo: '川H7U8I9',
-        time: '2025-08-18 12:00-13:00'
-    },
-    {
-        id: 12,
-        shopName: '意大利餐厅',
-        status: '已完成',
-        deliveryCount: '3',
-        weight: '280kg',
-        carInfo: '川J1K2L3',
-        time: '2025-08-17 18:30-19:30'
-    }
-]);
+const allOrderList = ref([]);
 
-// 根据当前tab过滤数据
-const orderList = computed(() => {
-    if (currentTab.value === 0) { // 预约中
-        return allOrderList.value.filter(item => item.status === '预约中');
-    } else if (currentTab.value === 1) { // 进行中
-        return allOrderList.value.filter(item => item.status === '进行中');
-    } else { // 已完成
-        return allOrderList.value.filter(item => item.status === '已完成');
-    }
-});
+//后获取数据
+const getNetwork = async () => {
+    try {
+        // 如果不是第一页，设置加载状态为加载中
+        if (pageNum.value > 1) {
+            loadingStatus.value = 'loading';
+        }
 
-const handleTabClick = (index) => {
-    currentTab.value = index;
+
+        const res = await apiGetPlanPage({
+            pageNum: pageNum.value,
+            merchantId: userStore.merchant?.id,
+            status: tabs[currentTab.value].key // 使用tabs中的key值
+        });
+
+
+        // 处理下拉刷新
+        if (pageNum.value === 1) {
+            allOrderList.value = res.data.records || [];
+            uni.stopPullDownRefresh();
+        } else {
+            // 处理上拉加载更多
+            allOrderList.value = [...allOrderList.value, ...(res.data.records || [])];
+        }
+
+        // 判断是否还有更多数据
+        if (res.data.records && res.data.records.length < 10) {
+            // 如果返回的数据少于每页数量，说明没有更多数据了
+            loadingStatus.value = 'nomore';
+        } else {
+            // 否则还有更多数据
+            loadingStatus.value = 'more';
+        }
+    } catch (error) {
+        console.error('获取数据失败:', error);
+
+        // 停止下拉刷新
+        uni.stopPullDownRefresh();
+
+        // 重置加载状态
+        loadingStatus.value = 'more';
+
+        // 如果是第一页加载失败，确保显示暂无数据状态
+        if (pageNum.value === 1) {
+            allOrderList.value = [];
+        }
+
+        uni.showToast({
+            title: '数据加载失败，请重试',
+            icon: 'none',
+            duration: 2000
+        });
+    }
 };
 
-// 上拉加载更多相关
-const loadingStatus = ref('more'); // more-加载前/loading-加载中/nomore-没有更多数据
 
 // 上拉加载更多方法
 const onLoadMore = () => {
     if (loadingStatus.value === 'nomore') return;
-
-    loadingStatus.value = 'loading';
-    // 模拟加载更多数据
-    setTimeout(() => {
-        // 这里可以请求更多数据并添加到列表中
-        loadingStatus.value = 'more';
-        // 如果没有更多数据了，设置为 'nomore'
-        // loadingStatus.value = 'nomore';
-    }, 1500);
+    // 页码增加
+    pageNum.value++;
+    getNetwork();
 };
 
 
 // 触底加载更多
 onReachBottom(() => {
     onLoadMore();
+});
+
+//下拉刷新
+onPullDownRefresh(() => {
+    allOrderList.value = [];
+    currentTab.value = 0;
+    pageNum.value = 1; // 重置页码为1
+    getNetwork();
+})
+
+// 组件挂载时初始化数据
+onMounted(() => {
+    pageNum.value = 1;
+    getNetwork();
 });
 </script>
 
@@ -248,49 +225,52 @@ onReachBottom(() => {
     flex-direction: column;
     background-color: $bg-theme-color;
 
-    .tab-bar {
-        display: flex;
-        align-items: center;
-        height: 88rpx;
-        background-color: rgba(255, 255, 255, 1);
-        padding: 0 30rpx;
+    .menu {
         position: relative;
-        margin-top: 2rpx; // 距离导航栏2rpx
+        margin-top: 2rpx;
+        background-color: #ffffff;
+        height: 88rpx;
 
-        .tab-item {
-            flex: 1;
-            height: 100%;
+        .tab-bar {
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28rpx;
-            color: rgba(61, 61, 61, 1);
-            position: relative;
+            height: 100%;
 
-            &.active {
-                color: rgba(7, 193, 96, 1);
-                font-weight: 500;
-            }
+            .tab-item {
+                flex: 1;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28rpx;
+                color: rgba(61, 61, 61, 1);
+                position: relative;
 
-            .tab-line {
-                position: absolute;
-                bottom: 0;
-                left: 50%;
-                transform: translateX(-50%);
-                width: 56rpx;
-                height: 4rpx;
-                background-color: rgba(7, 193, 96, 1);
-                border-radius: 2rpx;
+                &.active {
+                    color: rgba(7, 193, 96, 1);
+                    font-weight: 500;
+                }
+
+                .tab-line {
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 56rpx;
+                    height: 4rpx;
+                    background-color: rgba(7, 193, 96, 1);
+                    border-radius: 2rpx;
+                }
             }
         }
     }
 
     .content-wrapper {
         flex: 1;
-         margin-top: 30rpx; // 为固定tab留出空间
+        margin-top: 30rpx; 
 
         .content {
             height: 100%;
+            background-color: #ffffff;
         }
 
         .order-list {
@@ -412,5 +392,73 @@ onReachBottom(() => {
     .loadMore {
         padding-bottom: calc(env(safe-area-inset-bottom) + 50);
     }
+
+    // 暂无数据状态
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 200rpx); // 确保占满剩余屏幕高度
+        padding: 120rpx 60rpx;
+        text-align: center;
+        background-color: #ffffff;
+
+        .empty-icon {
+            font-size: 120rpx;
+            margin-bottom: 30rpx;
+            opacity: 0.3;
+        }
+
+        .empty-text {
+            font-size: 32rpx;
+            color: rgba(61, 61, 61, 0.6);
+            margin-bottom: 16rpx;
+            font-weight: 500;
+        }
+
+        .empty-desc {
+            font-size: 26rpx;
+            color: rgba(61, 61, 61, 0.4);
+            line-height: 1.5;
+        }
+    }
+
+    // 自定义导航栏字体大小为34rpx
+    :deep(.uni-navbar__content-title) {
+        font-size: 34rpx !important;
+    }
+
+    :deep(.uni-nav-bar-text) {
+        font-size: 34rpx !important;
+    }
 }
 </style>
+
+<!-- "list": [
+{
+"id": 1,
+"recordNo": "1",
+"merchantId": 448,
+"carId": 4,
+"driverId": 1,
+"type": 0,
+"appointmentTime": "2025-09-10",//收运时间
+"weight": 100, //收运重量
+"bucketNum": 2,//桶数
+"arrivalTime": null,
+"merchantConfirm": null,
+"merchantCode": null,
+"status": 0,// 0 进行中 1已完成
+"createTime": "2025-09-10T14:54:54.000+08:00",
+"updateTime": null,
+"merchantName": "杨洵测试",//店名
+"driverName": null,
+"lon": null,
+"lat": null,
+"address": null,
+"contactTruename": null,
+"contactTel": null,
+"trashWeight": null,
+"registrationNumber": null//车牌
+} -->
