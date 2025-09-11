@@ -2885,15 +2885,6 @@ function inject(key, defaultValue, treatDefaultAsFactory = false) {
 function hasInjectionContext() {
   return !!(currentInstance || currentRenderingInstance || currentApp);
 }
-/*! #__NO_SIDE_EFFECTS__ */
-// @__NO_SIDE_EFFECTS__
-function defineComponent(options, extraOptions) {
-  return isFunction(options) ? (
-    // #8326: extend call and options.name access are considered side-effects
-    // by Rollup, so we have to wrap it in a pure-annotated IIFE.
-    /* @__PURE__ */ (() => extend({ name: options.name }, extraOptions, { setup: options }))()
-  ) : options;
-}
 const isKeepAlive = (vnode) => vnode.type.__isKeepAlive;
 function onActivated(hook, target) {
   registerKeepAliveHook(hook, "a", target);
@@ -7398,9 +7389,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "127.0.0.1,192.168.0.133";
+  const hosts = "192.168.0.104,127.0.0.1";
   const port = "8090";
-  const id = "mp-weixin_zOZi7l";
+  const id = "mp-weixin_ntTuM3";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9209,7 +9200,15 @@ const pages = [
   {
     path: "pages/collection/syReport",
     style: {
-      navigationBarTitleText: "收运上报"
+      navigationBarTitleText: "收运上报",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/collection/sfsyRecord",
+    style: {
+      navigationBarTitleText: "收运记录",
+      navigationStyle: "custom"
     }
   }
 ];
@@ -12077,7 +12076,6 @@ exports._export_sfc = _export_sfc;
 exports.computed = computed;
 exports.createPinia = createPinia;
 exports.createSSRApp = createSSRApp;
-exports.defineComponent = defineComponent;
 exports.defineStore = defineStore;
 exports.e = e$1;
 exports.f = f$1;

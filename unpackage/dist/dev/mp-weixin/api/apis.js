@@ -68,14 +68,7 @@ function apiGetDriverInfo(data = {}) {
     data
   });
 }
-function apiGetDriverTodayPlan(data = {}) {
-  return utils_request.request({
-    url: "/api/driver/getDriverTodayPlan",
-    data
-  });
-}
 exports.apiGetDriverInfo = apiGetDriverInfo;
-exports.apiGetDriverTodayPlan = apiGetDriverTodayPlan;
 exports.apiGetDriverTodayStatistics = apiGetDriverTodayStatistics;
 exports.apiGetInfo = apiGetInfo;
 exports.apiGetMerchantCheck = apiGetMerchantCheck;

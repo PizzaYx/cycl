@@ -68,37 +68,61 @@
             </view>
         </view>
         <view class="task-list">
-            <view class="task-item">
+            <view class="task-item" v-for="task in taskList" :key="task.id">
                 <view class="task-header">
                     <view class="time-info">
-                        <uni-text class="date">2025-08-24 14:30</uni-text>
+                        <uni-text class="date">{{ task.appointmentTime }}</uni-text>
                     </view>
-                    <uni-text class="status processing">进行中</uni-text>
+                    <uni-text class="status" :class="{
+                            'processing': task.status === 0, 
+                            'completed': task.status === 1, 
+                            'cancelled': task.status === 2
+                        }">
+                        {{ getStatusText(task.status) }}
+                    </uni-text>
                 </view>
+                <view class="divider"></view>
                 <view class="task-content">
                     <view class="merchant-info">
                         <uni-text class="label">商户名称：</uni-text>
-                        <uni-text class="value">三顾冒菜</uni-text>
+                        <uni-text class="value">{{ task.merchantName }}</uni-text>
                     </view>
                     <view class="weight-info">
                         <uni-text class="label">预估重量：</uni-text>
-                        <uni-text class="value">1.46kg</uni-text>
+                        <uni-text class="value">{{ task.estimateWeight }}kg</uni-text>
                     </view>
                     <view class="bin-info">
                         <uni-text class="label">桶数：</uni-text>
-                        <uni-text class="value">{{ bucketNum }}个</uni-text>
+                        <uni-text class="value">{{ task.estimateBucketNum || 0 }}个</uni-text>
                     </view>
                     <view class="address-info">
                         <uni-text class="label">地址：</uni-text>
-                        <uni-text class="value">成都市锦江区春熙路123号</uni-text>
+                        <uni-text class="value">{{ task.address }}</uni-text>
                         <uni-icons type="location" size="16" color="#00B578"></uni-icons>
                     </view>
                 </view>
                 <view class="task-footer">
-                    <uni-button size="mini" class="cancel-btn">取消</uni-button>
-                    <uni-button size="mini" type="primary" class="view-btn">查看</uni-button>
+                    <template v-if="task.status === 0">
+                        <!-- 进行中状态 -->
+                        <uni-button size="mini" class="cancel-btn" @tap="cancelTask(task)">取消</uni-button>
+                        <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
+                    </template>
+                    <template v-else-if="task.status === 1">
+                        <!-- 已完成状态 -->
+                        <uni-button size="mini" type="primary" class="report-btn"
+                            @tap="reportTask(task)">收运上报</uni-button>
+                        <uni-button size="mini" type="primary" class="collect-btn"
+                            @tap="collectTask(task)">收运</uni-button>
+                    </template>
+                    <template v-else-if="task.status === 2">
+                        <!-- 已取消状态 -->
+                        <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
+                    </template>
                 </view>
             </view>
+        </view>
+        <view class="headImage">
+            <image src="/static/headTopBg.png" mode="aspectFill"></image>
         </view>
     </view>
 
@@ -125,25 +149,35 @@ const bucketNum = ref(0) // 垃圾桶数
 const registrationNumber = ref('') // 车牌号
 const name = ref('') // 司机名称
 const currentDate = getCurrentDate() // 当前日期
-const weightValue = ref('') // 重量输入框的值
+const weightInput = ref('') // 重量输入框的值
+const taskList = ref([]) // 任务列表
 
 // 计算进度百分比
 const progressPercentage = computed(() => {
-   
-    if (confirmNum === 0 && weightNum === 0) return 0;
+    if (confirmNum.value === 0 && weightNum.value === 0) return 0;
     console.log('confirmNum:', confirmNum.value, 'weightNum:', weightNum.value);
     return Math.round((confirmNum.value / weightNum.value) * 100);
 });
 
+// 获取状态文本
+const getStatusText = (status) => {
+    switch (status) {
+        case 0: return '进行中';
+        case 1: return '待完成';
+        case 2: return '已完成';
+        default: return '未知状态';
+    }
+};
+
 onMounted(async () => {
     // 页面加载时的逻辑
     try {
-        const userInfo = await userStore.ensureUserInfo()
-        if (userInfo === null) {
-            // 用户未登录，已跳转到登录页，不需要继续执行
-            console.log('用户未登录，已跳转到登录页')
-            return
-        }
+        // const userInfo = await userStore.ensureUserInfo()
+        // if (userInfo === null) {
+        //     // 用户未登录，已跳转到登录页，不需要继续执行
+        //     console.log('用户未登录，已跳转到登录页')
+        //     return
+        // }
         getapiGetDriverInfo();
         getapiGetDriverTodayPlan();
     } catch (error) {
@@ -172,17 +206,81 @@ const getapiGetDriverInfo = async () => {
 
 //司机今日收运管理列表
 const getapiGetDriverTodayPlan = async () => {
-    const res = await apiGetDriverTodayPlan({
-        driverId: userStore.sfmerchant?.id,
-        page: 1,
-        pageSize: 10
-    })
+    
+   const res = taskList.value = [
+        {
+            id: 1,
+            appointmentTime: "2025-09-11 09:45:09",
+            merchantName: "杨洵测试",
+            estimateWeight: 4,
+            estimateBucketNum: 2,
+            address: "成都市锦江区春熙路123号",
+            status: 0 // 进行中
+        },
+        {
+            id: 2,
+            appointmentTime: "2025-09-11 10:30:00",
+            merchantName: "蜀大侠火锅",
+            estimateWeight: 6.5,
+            estimateBucketNum: 3,
+            address: "成都市锦江区IFS国际金融中心",
+            status: 1 // 待完成
+        },
+        {
+            id: 3,
+            appointmentTime: "2025-09-11 14:15:00",
+            merchantName: "小龙坎老火锅",
+            estimateWeight: 5.2,
+            estimateBucketNum: 2,
+            address: "成都市锦江区太古里",
+            status: 2 // 已完成
+        }
+    ];
+    return res
 
-    if (res.code === 200) {
-        taskList.value = res.data.records;
-    }
+    // const res = await apiGetDriverTodayPlan({
+    //     driverId: userStore.sfmerchant?.id,
+    //     page: 1,
+    // })
+
+    // if (res.code === 200) {
+    //     taskList.value = res.data.records;
+    // } else {
+       
+    // }
 }
 
+// 取消任务
+const cancelTask = (task) => {
+    console.log('取消任务:', task.id);
+    // 这里添加取消任务的逻辑
+};
+
+// 查看任务
+const viewTask = (task) => {
+    console.log('查看任务:', task.id);
+    // 这里添加查看任务的逻辑
+};
+
+// 收运上报
+const reportTask = (task) => {
+    console.log('收运上报:', task.id);
+
+    uni.navigateTo({
+       url: '/pages/collection/syReport'
+  });
+};
+
+// 收运
+const collectTask = (task) => {
+    console.log('收运:', task.id);
+    // 这里添加收运的逻辑
+};
+
+// 返回上一页
+const back = () => {
+    uni.navigateBack();
+};
 
 // 组件逻辑
 </script>
@@ -198,6 +296,7 @@ const getapiGetDriverTodayPlan = async () => {
         border-radius: 16rpx;
         padding: 30rpx;
         margin-bottom: 20rpx;
+        margin-top: 20rpx;
     }
 
     .header {
@@ -258,10 +357,12 @@ const getapiGetDriverTodayPlan = async () => {
         border-radius: 0;
         padding: 0;
         margin-bottom: 0;
+        
 
         .progress-title {
             font-size: 34rpx;
             color: rgba(61, 61, 61, 1);
+           
             margin-bottom: 30rpx;
         }
 
@@ -428,7 +529,7 @@ const getapiGetDriverTodayPlan = async () => {
             background: #FFFFFF;
             border-radius: 16rpx;
             padding: 30rpx;
-            margin-bottom: 20rpx;
+            margin-bottom: 0; /* 移除任务项之间的间隔 */
 
             .task-header {
                 display: flex;
@@ -444,26 +545,49 @@ const getapiGetDriverTodayPlan = async () => {
                     .date {
                         font-size: 14px;
                         color: #666666;
+                        margin: 0 22rpx 0 55rpx;
                     }
                 }
 
                 .status {
                     font-size: 12px;
-                    padding: 4rpx 16rpx;
-                    border-radius: 4rpx;
+                    width: 100rpx;
+                    height: 40rpx;
+                    border-radius: 8rpx;
+                    margin-right: 15rpx;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
 
                     &.processing {
-                        color: #00B578;
-                        background: rgba(0, 181, 120, 0.1);
+                        color: rgba(0, 170, 255, 1);
+                        background: rgba(0, 170, 255, 0.10);
+                    }
+
+                    &.completed {
+                        color: rgba(255, 161, 0, 1);
+                        background: rgba(255, 161, 0, 0.10);
+                    }
+
+                    &.cancelled {
+                        color: rgba(61, 61, 61, 0.50);
+                        background: rgba(153, 153, 153, 0.1);
                     }
                 }
             }
 
+            .divider {
+                height: 2rpx;
+                background-color: #f0f0f0;
+                margin: 22rpx 22rpx 0 55rpx;
+            }
+
             .task-content {
+                margin: 22rpx 22rpx 0 55rpx;
                 display: flex;
                 flex-direction: column;
                 gap: 20rpx;
-
+              
                 .merchant-info,
                 .weight-info,
                 .bin-info,
@@ -490,51 +614,42 @@ const getapiGetDriverTodayPlan = async () => {
                 justify-content: flex-end;
                 gap: 20rpx;
 
-                .cancel-btn {
-                        color: #07C160;
-                        border-radius: 100rpx;
-                        padding: 6rpx 20rpx;
-                        border: 2rpx solid #07C160;
-                        font-size: 26rpx;
+                .cancel-btn,
+                .view-btn,
+                .report-btn,
+                .collect-btn {
+                    width: 144rpx;
+                    height: 48rpx;
+                    color: #07C160;
+                    border-radius: 100rpx;
+                  
+                    border: 2rpx solid #07C160;
+                    font-size: 26rpx;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
 
-                .view-btn {
-                        color: #07C160;
-                        border-radius: 100rpx;
-                        padding: 6rpx 20rpx;
-                        border: 2rpx solid #07C160;
-                        font-size: 26rpx;
+                .collect-btn {
+                    background-color: #07C160;
+                    color: white;
                 }
             }
         }
     }
+    
+    .headImage {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        z-index: -1;
+        
+        image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    }
 }
 </style>
-
-
-<!-- address: "成都"
-appointmentTime: "2025-09-11"
-arrivalTime: null
-bucketNum: null
-carId: 1
-contactTel: "18628003126"
-contactTruename: "1yx"
-createTime: "2025-09-11 09:45:09"
-driverId: 3
-driverName: "李是"
-estimateBucketNum: 4
-estimateWeight: 4
-id: 5
-lat: "30.63706"
-lon: "104.08276"
-merchantCode: null
-merchantConfirm: null
-merchantId: 448
-merchantName: "杨洵测试"
-recordNo: "1_20250911"
-registrationNumber: null
-status: 0
-trashWeight: null
-type: 0
-updateTime: null
-weight: null -->

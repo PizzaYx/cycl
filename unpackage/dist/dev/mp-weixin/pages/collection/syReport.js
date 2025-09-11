@@ -1,72 +1,137 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 if (!Array) {
+  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  _easycom_uni_icons2();
+  const _easycom_uni_file_picker2 = common_vendor.resolveComponent("uni-file-picker");
+  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _easycom_uni_file_picker2)();
 }
+const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
+const _easycom_uni_file_picker = () => "../../uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_uni_file_picker)();
 }
-const _sfc_main = /* @__PURE__ */ common_vendor.defineComponent({
+const maxImageCount = 3;
+const maxImageSize = 3 * 1024 * 1024;
+const _sfc_main = {
   __name: "syReport",
   setup(__props) {
+    const ljNum = common_vendor.ref(1);
+    const isInputReadOnly = common_vendor.ref(false);
     const records = common_vendor.ref([
       {
         binCount: "",
         weight: "",
-        image: ""
+        images: []
+        // 改为数组存储多张图片
       }
     ]);
-    const handleUpload = (index) => {
-      common_vendor.index.chooseMedia({
-        count: 1,
-        mediaType: ["video"],
-        sourceType: ["album", "camera"],
-        maxDuration: 60,
+    const handleFileUpload = (event) => {
+      if (!event || !event.file) {
+        common_vendor.index.__f__("warn", "at pages/collection/syReport.vue:90", "文件上传事件参数不完整:", event);
+        return true;
+      }
+      const { file, index } = event;
+      if (file.size && file.size > maxImageSize) {
+        common_vendor.index.showToast({
+          title: "单张图片不能超过3M",
+          icon: "none"
+        });
+        return false;
+      }
+      return true;
+    };
+    const handleScan = () => {
+      common_vendor.index.scanCode({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:68", res);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:112", "扫码结果", res);
+          records.value.push({
+            binCount: "",
+            weight: "",
+            images: []
+          });
+          ljNum.value++;
+        },
+        fail: (err) => {
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:123", "扫码失败", err);
+          records.value.push({
+            binCount: "",
+            weight: "",
+            images: []
+          });
+          ljNum.value++;
         }
       });
     };
     const handleCancel = (index) => {
-      records.value[index] = {
-        binCount: "",
-        weight: "",
-        image: ""
-      };
+      if (records.value.length <= 1) {
+        common_vendor.index.showToast({
+          title: "至少保留一条数据",
+          icon: "none"
+        });
+        return;
+      }
+      common_vendor.index.showModal({
+        title: "确认删除",
+        content: "是否确认删除当前数据？",
+        success: (res) => {
+          if (res.confirm) {
+            records.value.splice(index, 1);
+            ljNum.value--;
+          }
+        }
+      });
     };
     const handleConfirm = (index) => {
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:82", "确认提交", records.value[index]);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:162", "确认提交", records.value[index]);
     };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.p({
-          type: "more-filled",
-          size: "24",
-          color: "#333333"
+        a: common_vendor.o(_ctx.back),
+        b: common_vendor.p({
+          dark: true,
+          fixed: true,
+          ["background-color"]: "#fff",
+          ["status-bar"]: true,
+          ["left-icon"]: "left",
+          color: "#000",
+          title: "收运记录"
         }),
-        b: common_vendor.f(records.value, (item, index, i0) => {
+        c: common_vendor.t(ljNum.value),
+        d: common_vendor.o(handleScan),
+        e: common_vendor.p({
+          type: "scan",
+          size: "24",
+          color: "#07C160"
+        }),
+        f: common_vendor.f(records.value, (item, index, i0) => {
           return {
             a: item.binCount,
             b: common_vendor.o(($event) => item.binCount = $event.detail.value, index),
             c: item.weight,
             d: common_vendor.o(($event) => item.weight = $event.detail.value, index),
-            e: "31477fa9-1-" + i0,
-            f: common_vendor.o(($event) => handleUpload(), index),
-            g: common_vendor.o(($event) => handleCancel(index), index),
-            h: common_vendor.o(($event) => handleConfirm(index), index),
-            i: index
+            e: common_vendor.o(handleFileUpload, index),
+            f: "e09b3d48-2-" + i0,
+            g: common_vendor.o(($event) => item.images = $event, index),
+            h: common_vendor.p({
+              ["file-mediatype"]: "image",
+              limit: maxImageCount,
+              readonly: isInputReadOnly.value,
+              modelValue: item.images
+            }),
+            i: common_vendor.o(($event) => handleCancel(index), index),
+            j: common_vendor.o(($event) => handleConfirm(index), index),
+            k: index
           };
         }),
-        c: common_vendor.p({
-          type: "plusempty",
-          size: "32",
-          color: "#CCCCCC"
-        })
+        g: isInputReadOnly.value,
+        h: isInputReadOnly.value,
+        i: common_vendor.t(maxImageCount)
       };
     };
   }
-});
-wx.createPage(_sfc_main);
+};
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-e09b3d48"]]);
+wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/collection/syReport.js.map

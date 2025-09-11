@@ -33,6 +33,7 @@
   border-radius: 16rpx;
   padding: 30rpx;
   margin-bottom: 20rpx;
+  margin-top: 20rpx;
 }
 .container .header.data-v-b624ea25 {
   background: none;
@@ -229,7 +230,8 @@
   background: #FFFFFF;
   border-radius: 16rpx;
   padding: 30rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 0;
+  /* 移除任务项之间的间隔 */
 }
 .container .task-list .task-item .task-header.data-v-b624ea25 {
   display: flex;
@@ -245,17 +247,37 @@
 .container .task-list .task-item .task-header .time-info .date.data-v-b624ea25 {
   font-size: 14px;
   color: #666666;
+  margin: 0 22rpx 0 55rpx;
 }
 .container .task-list .task-item .task-header .status.data-v-b624ea25 {
   font-size: 12px;
-  padding: 4rpx 16rpx;
-  border-radius: 4rpx;
+  width: 100rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
+  margin-right: 15rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .container .task-list .task-item .task-header .status.processing.data-v-b624ea25 {
-  color: #00B578;
-  background: rgba(0, 181, 120, 0.1);
+  color: #00aaff;
+  background: rgba(0, 170, 255, 0.1);
+}
+.container .task-list .task-item .task-header .status.completed.data-v-b624ea25 {
+  color: #ffa100;
+  background: rgba(255, 161, 0, 0.1);
+}
+.container .task-list .task-item .task-header .status.cancelled.data-v-b624ea25 {
+  color: rgba(61, 61, 61, 0.5);
+  background: rgba(153, 153, 153, 0.1);
+}
+.container .task-list .task-item .divider.data-v-b624ea25 {
+  height: 2rpx;
+  background-color: #f0f0f0;
+  margin: 22rpx 22rpx 0 55rpx;
 }
 .container .task-list .task-item .task-content.data-v-b624ea25 {
+  margin: 22rpx 22rpx 0 55rpx;
   display: flex;
   flex-direction: column;
   gap: 20rpx;
@@ -288,17 +310,33 @@
   justify-content: flex-end;
   gap: 20rpx;
 }
-.container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25 {
+.container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25,
+.container .task-list .task-item .task-footer .view-btn.data-v-b624ea25,
+.container .task-list .task-item .task-footer .report-btn.data-v-b624ea25,
+.container .task-list .task-item .task-footer .collect-btn.data-v-b624ea25 {
+  width: 144rpx;
+  height: 48rpx;
   color: #07C160;
   border-radius: 100rpx;
-  padding: 6rpx 20rpx;
   border: 2rpx solid #07C160;
   font-size: 26rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.container .task-list .task-item .task-footer .view-btn.data-v-b624ea25 {
-  color: #07C160;
-  border-radius: 100rpx;
-  padding: 6rpx 20rpx;
-  border: 2rpx solid #07C160;
-  font-size: 26rpx;
+.container .task-list .task-item .task-footer .collect-btn.data-v-b624ea25 {
+  background-color: #07C160;
+  color: white;
+}
+.container .headImage.data-v-b624ea25 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: -1;
+}
+.container .headImage image.data-v-b624ea25 {
+  width: 100%;
+  height: auto;
+  display: block;
 }

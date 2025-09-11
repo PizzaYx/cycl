@@ -110,9 +110,6 @@ const _sfc_main = {
       }
     };
     const goToSydAllList = () => {
-      if (!checkUserAuthStatus()) {
-        return;
-      }
       common_vendor.index.navigateTo({
         url: "/pages/merchant/sydAllList"
       });
@@ -120,7 +117,7 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       var _a;
       return common_vendor.e({
-        a: common_assets._imports_0,
+        a: common_assets._imports_4,
         b: common_vendor.t(common_vendor.unref(userStore).userSFAvatar),
         c: common_vendor.t(common_vendor.unref(userStore).nickName || "未登录"),
         d: common_vendor.t(((_a = common_vendor.unref(userStore).sfmerchant) == null ? void 0 : _a.registrationNumber) || "未设置车牌"),

@@ -235,11 +235,8 @@ const getRecordStatusText = (status) => {
 
 // 跳转到收运明细页面
 const goToSydAllList = () => {
-    // 检查用户认证状态
-    if (!checkUserAuthStatus()) {
-        // 未通过认证检查，不继续执行
-        return
-    }
+  
+   
     uni.navigateTo({
         url: '/pages/merchant/sydAllList'
     })
@@ -403,25 +400,22 @@ const goToSydAllList = () => {
 
     .quick-actions {
         position: relative;
-
-        border-radius: 16rpx;
-        height: 168rpx;
-        padding: 18rpx 20rpx;
-        margin: 0 30rpx 30rpx 30rpx;
+        height: 120rpx;
         display: flex;
-        // justify-content: space-around;
+        justify-content: space-around;
         align-items: center;
-        background-color: #fff;
+        padding: 0 20rpx;
 
         .action-item {
-            flex: 1;
             display: flex;
             flex-direction: row;
             align-items: center;
             justify-content: center;
-            gap: 16rpx;
+            border-radius: 20rpx;
+         
             width: 336rpx;
             height: 120rpx;
+            background-color: #fff;
 
             image {
                 width: 96rpx;
@@ -443,6 +437,8 @@ const goToSydAllList = () => {
         align-items: center;
         padding: 10rpx 30rpx;
         margin-bottom: 10rpx;
+        margin-top: 20rpx;
+        ;
 
         .title {
             font-size: 28rpx;

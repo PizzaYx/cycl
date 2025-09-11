@@ -10,7 +10,8 @@
     "pages/user/user",
     "pages/merchant/sydReservation",
     "pages/collection/sfDetails",
-    "pages/collection/syReport"
+    "pages/collection/syReport",
+    "pages/collection/sfsyRecord"
   ],
   "window": {
     "navigationBarTextStyle": "black",

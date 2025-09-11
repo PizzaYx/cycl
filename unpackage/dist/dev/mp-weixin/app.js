@@ -13,6 +13,7 @@ if (!Math) {
   "./pages/merchant/sydReservation.js";
   "./pages/collection/sfDetails.js";
   "./pages/collection/syReport.js";
+  "./pages/collection/sfsyRecord.js";
 }
 const _sfc_main = {
   onLaunch: function() {

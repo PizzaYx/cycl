@@ -216,7 +216,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_0,
+        a: common_assets._imports_4,
         b: common_vendor.t(common_vendor.unref(userStore).userAvatar),
         c: common_vendor.t(common_vendor.unref(userStore).nickName || "未登录"),
         d: common_vendor.t(common_vendor.unref(userStore).userName || "未设置用户名"),

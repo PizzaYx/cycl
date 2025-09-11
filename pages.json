@@ -79,9 +79,19 @@
         	"path" : "pages/collection/syReport",
         	"style" : 
         	{
-        		"navigationBarTitleText" : "收运上报"
+        		"navigationBarTitleText" : "收运上报",
+                 "navigationStyle": "custom"
+        	}
+        },
+        {
+        	"path" : "pages/collection/sfsyRecord",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "收运记录",
+				"navigationStyle": "custom"
         	}
         }
+        
     ],
     "globalStyle": {
         "navigationBarTextStyle": "black",
