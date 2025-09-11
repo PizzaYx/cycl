@@ -20,7 +20,6 @@ if (!Math) {
 const _sfc_main = {
   __name: "sydStatistics",
   setup(__props) {
-    const currentTab = common_vendor.ref(0);
     const userStore = stores_user.useUserStore();
     const bucketCount = common_vendor.ref(13);
     const totalWeight = common_vendor.ref(414);
@@ -83,7 +82,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/sydStatistics.vue:217", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/sydStatistics.vue:215", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {

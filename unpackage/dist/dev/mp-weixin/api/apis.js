@@ -12,6 +12,12 @@ function apiGetInfo() {
     url: "/api/getInfo"
   });
 }
+function apiGetMerchantStatistics(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/getMerchantStatistics",
+    data
+  });
+}
 function apiGetPlanAllPage(data = {}) {
   return utils_request.request({
     url: "/api/merchantapi/getPlanAllPage",
@@ -37,10 +43,47 @@ function apiGetMerchantCheck(data = {}) {
     data
   });
 }
+function apiPostaddPlanTemporary(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/addPlanTemporary",
+    data,
+    method: "POST"
+  });
+}
+function apiGetconfirmPlanById(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/confirmPlanById",
+    data
+  });
+}
+function apiGetDriverTodayStatistics(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverTodayStatistics",
+    data
+  });
+}
+function apiGetDriverInfo(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverInfo",
+    data
+  });
+}
+function apiGetDriverTodayPlan(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverTodayPlan",
+    data
+  });
+}
+exports.apiGetDriverInfo = apiGetDriverInfo;
+exports.apiGetDriverTodayPlan = apiGetDriverTodayPlan;
+exports.apiGetDriverTodayStatistics = apiGetDriverTodayStatistics;
 exports.apiGetInfo = apiGetInfo;
 exports.apiGetMerchantCheck = apiGetMerchantCheck;
+exports.apiGetMerchantStatistics = apiGetMerchantStatistics;
 exports.apiGetPlanAllPage = apiGetPlanAllPage;
 exports.apiGetPlanPage = apiGetPlanPage;
+exports.apiGetconfirmPlanById = apiGetconfirmPlanById;
 exports.apiPostLogin = apiPostLogin;
 exports.apiPostMerchantCheck = apiPostMerchantCheck;
+exports.apiPostaddPlanTemporary = apiPostaddPlanTemporary;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/api/apis.js.map

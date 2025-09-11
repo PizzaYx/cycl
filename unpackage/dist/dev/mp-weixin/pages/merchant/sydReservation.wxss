@@ -326,6 +326,12 @@
 .auth-container .auth-form .form-section .location-picker .location-input.disabled.data-v-309cc59a:active {
   background-color: transparent;
 }
+.auth-container .auth-form .form-section.data-v-309cc59a .uni-easyinput .uni-easyinput__content.is-disabled {
+  background-color: #f5f5f5 !important;
+}
+.auth-container .auth-form .form-section.data-v-309cc59a .uni-easyinput .uni-easyinput__content.is-disabled .uni-easyinput__content-input {
+  color: #999 !important;
+}
 .auth-container .auth-form .form-section.readonly.data-v-309cc59a .uni-easyinput .uni-easyinput__content {
   background-color: #f5f5f5 !important;
 }

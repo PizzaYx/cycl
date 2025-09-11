@@ -1,183 +1,332 @@
 <template>
-	<view class="container">
-		
-		<view class="content">
-			<view class="avatar-section">
-				<image class="avatar" :src="avatarUrl" mode="aspectFill" />
-				<text class="avatar-text">货换头像</text>
-			</view>
+    <view class="container">
+        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="个人信息"
+            @clickLeft="back" />
+        <view class="content">
+            <view class="avatar-section">
+                <view class="avatar-container" @tap="handleAvatarClick">
+                    <image v-if="avatarUrl" class="avatar" :src="avatarUrl" mode="aspectFill" />
+                    <view v-else class="avatar avatar-default">
+                        <text class="avatar-text">{{ userStore.userAvatar }}</text>
+                    </view>
+                    <view class="avatar-edit-overlay">
+                        <uni-icons type="camera-filled" size="32rpx" color="#fff"></uni-icons>
+                    </view>
+                </view>
+                <text class="change-avatar-text">更换头像</text>
+            </view>
 
-			<view class="info-section">
-				<text class="section-title">基本信息</text>
+            <view class="info-section">
+                <text class="section-title">基本信息</text>
 
-				<view class="info-item">
-					<text class="label">名字</text>
-					<text class="value">李师傅</text>
-				</view>
+                <view class="info-item">
+                    <text class="label">昵称</text>
+                    <text class="value">{{ userStore.nickName || '未设置' }}</text>
+                </view>
 
-				<view class="info-item">
-					<text class="label">车牌号码</text>
-					<view class="value-container">
-						<text class="value">川A3D47M</text>
-						<uni-icons class="arrow-right" type="right" size="16" color="#999999" />
-					</view>
-				</view>
+                <view class="info-item">
+                    <text class="label">用户名</text>
+                    <text class="value">{{ userStore.userName || '未设置' }}</text>
+                </view>
 
-				<view class="info-item">
-					<text class="label">联系电话</text>
-					<text class="value">13546781879</text>
-				</view>
-			</view>
-		</view>
+                <view class="info-item">
+                    <text class="label">用户类型</text>
+                    <text class="value">{{ userStore.userTypeText }}</text>
+                </view>
 
-		<view class="footer">
-			<button class="save-btn" type="primary">保存</button>
-		</view>
-	</view>
+                <view class="info-item">
+                    <text class="label">认证状态</text>
+                    <text class="value" :class="getStatusClass()">{{ userStore.merchantStatusText }}</text>
+                </view>
+            </view>
+        </view>
+
+        <!-- 文件选择器 -->
+        <uni-file-picker v-show="false" ref="filePicker" file-mediatype="image" mode="grid" :limit="1"
+            @select="onFileSelect" @success="onUploadSuccess" @fail="onUploadFail">
+        </uni-file-picker>
+
+        <view class="footer">
+            <button class="save-btn" @tap="handleSave">保存</button>
+        </view>
+    </view>
 </template>
 
-<script lang="ts" setup>
-	import { ref } from 'vue';
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user.js'
 
-	const avatarUrl = ref('https://ai-public.mastergo.com/ai/img_res/ad260cc6ead8d4815bc8d1dd5beae8f9.jpg');
+// 使用用户 store
+const userStore = useUserStore()
+
+// 头像URL
+const avatarUrl = ref('')
+const filePicker = ref(null)
+
+onMounted(async () => {
+    // 确保有用户信息
+    await userStore.ensureUserInfo()
+})
+
+// 返回上一页
+const back = () => {
+    uni.navigateBack()
+}
+
+// 点击头像
+const handleAvatarClick = () => {
+    // 触发文件选择器
+    if (filePicker.value) {
+        filePicker.value.chooseFile()
+    }
+}
+
+// 文件选择回调
+const onFileSelect = (e) => {
+    console.log('选择文件:', e)
+}
+
+// 上传成功回调
+const onUploadSuccess = (e) => {
+    console.log('上传成功:', e)
+    if (e.tempFilePaths && e.tempFilePaths.length > 0) {
+        avatarUrl.value = e.tempFilePaths[0]
+    }
+}
+
+// 上传失败回调
+const onUploadFail = (e) => {
+    console.log('上传失败:', e)
+    uni.showToast({
+        title: '上传失败',
+        icon: 'none'
+    })
+}
+
+// 获取认证状态样式类
+const getStatusClass = () => {
+    const status = userStore.merchantStatus
+    switch (status) {
+        case 1:
+            return 'status-success'
+        case 0:
+            return 'status-pending'
+        case 2:
+            return 'status-failed'
+        default:
+            return 'status-default'
+    }
+}
+
+// 保存
+const handleSave = () => {
+    uni.showToast({
+        title: '保存成功',
+        icon: 'success'
+    })
+}
 </script>
 
-<style>
-	page {
-		height: 100%;
-		background-color: #f5f5f5;
-	}
+<style scoped lang="scss">
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 
-	.container {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
+    .header {
+        flex-shrink: 0;
+        background-color: #ffffff;
 
-	.header {
-		flex-shrink: 0;
-		background-color: #ffffff;
-	}
+        .nav-bar {
+            display: flex;
+            align-items: center;
+            padding: 0 32rpx;
+            height: 88rpx;
 
-	.nav-bar {
-		display: flex;
-		align-items: center;
-		padding: 0 32rpx;
-		height: 88rpx;
-	}
+            .back-icon {
+                width: 44rpx;
+                height: 44rpx;
+            }
 
-	.back-icon {
-		width: 44rpx;
-		height: 44rpx;
-	}
+            .title {
+                flex: 1;
+                text-align: center;
+                font-size: 17px;
+                font-weight: 500;
+                color: #333333;
+            }
 
-	.title {
-		flex: 1;
-		text-align: center;
-		font-size: 17px;
-		font-weight: 500;
-		color: #333333;
-	}
+            .right-icons {
+                display: flex;
+                gap: 20rpx;
 
-	.right-icons {
-		display: flex;
-		gap: 20rpx;
-	}
+                .more-icon,
+                .circle-icon {
+                    width: 44rpx;
+                    height: 44rpx;
+                }
+            }
+        }
+    }
 
-	.more-icon,
-	.circle-icon {
-		width: 44rpx;
-		height: 44rpx;
-	}
+    .content {
+        flex: 1;
+        overflow: auto;
+        padding-bottom: 180rpx;
+        /* 为固定的保存按钮留出空间 */
 
-	.content {
-		flex: 1;
-		overflow: auto;
-	}
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40rpx 0;
+            background-color: #ffffff;
 
-	.avatar-section {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 40rpx 0;
-		background-color: #ffffff;
-	}
+            .avatar-container {
+                position: relative;
+                width: 160rpx;
+                height: 160rpx;
+                margin-bottom: 16rpx;
 
-	.avatar {
-		width: 160rpx;
-		height: 160rpx;
-		border-radius: 80rpx;
-		margin-bottom: 16rpx;
-	}
+                .avatar {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 80rpx;
+                }
 
-	.avatar-text {
-		font-size: 14px;
-		color: #999999;
-	}
+                .avatar-default {
+                    background-color: rgba(7, 193, 96, 1);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
 
-	.info-section {
-		margin-top: 20rpx;
-		background-color: #ffffff;
-		padding: 0 32rpx;
-	}
+                    .avatar-text {
+                        font-size: 48rpx;
+                        font-weight: 500;
+                        color: #fff;
+                    }
+                }
 
-	.section-title {
-		font-size: 14px;
-		color: #333333;
-		padding: 24rpx 0;
-		display: block;
-	}
+                .avatar-edit-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
+                    width: 48rpx;
+                    height: 48rpx;
+                    background-color: rgba(0, 0, 0, 0.6);
+                    border-radius: 24rpx;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 4rpx solid #fff;
+                }
+            }
 
-	.info-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 32rpx 0;
-		border-bottom: 1px solid #f5f5f5;
-	}
+            .change-avatar-text {
+                font-size: 14px;
+                color: #999999;
+            }
+        }
 
-	.info-item:last-child {
-		border-bottom: none;
-	}
+        .info-section {
+            margin-top: 20rpx;
+            background-color: #ffffff;
+            padding: 0 32rpx;
 
-	.label {
-		font-size: 16px;
-		color: #333333;
-	}
+            .section-title {
+                font-size: 14px;
+                color: #333333;
+                padding: 24rpx 0;
+                display: block;
+            }
 
-	.value-container {
-		display: flex;
-		align-items: center;
-		gap: 8rpx;
-	}
+            .info-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 32rpx 0;
+                border-bottom: 1px solid #f5f5f5;
 
-	.value {
-		font-size: 16px;
-		color: #666666;
-	}
+                &:last-child {
+                    border-bottom: none;
+                }
 
-	.arrow-right {
-		width: 32rpx;
-		height: 32rpx;
-	}
+                .label {
+                    font-size: 16px;
+                    color: #333333;
+                }
 
-	.footer {
-		flex-shrink: 0;
-		padding: 40rpx 32rpx;
-		background-color: #ffffff;
-	}
+                .value-container {
+                    display: flex;
+                    align-items: center;
+                    gap: 8rpx;
 
-	.save-btn {
-		width: 100%;
-		height: 88rpx;
-		line-height: 88rpx;
-		background-color: #07c160;
-		color: #ffffff;
-		font-size: 16px;
-		border-radius: 8rpx;
-	}
+                    .value {
+                        font-size: 16px;
+                        color: #666666;
+                    }
 
-	.save-btn::after {
-		border: none;
-	}
+                    .arrow-right {
+                        width: 32rpx;
+                        height: 32rpx;
+                    }
+                }
+
+                .value {
+                    font-size: 16px;
+                    color: #666666;
+
+                    &.status-success {
+                        color: #07c160;
+                    }
+
+                    &.status-pending {
+                        color: #ff9500;
+                    }
+
+                    &.status-failed {
+                        color: #ff4444;
+                    }
+
+                    &.status-default {
+                        color: #666666;
+                    }
+                }
+            }
+        }
+    }
+
+    .footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        flex-shrink: 0;
+        padding: 40rpx 32rpx 60rpx;
+        background-color: #ffffff;
+        box-shadow: 0 -2rpx 20rpx rgba(0, 0, 0, 0.1);
+        z-index: 999;
+
+        .save-btn {
+            width: 100%;
+            height: 88rpx;
+            line-height: 88rpx;
+            background: linear-gradient(135deg, #07C160 0%, #05A64F 100%);
+            color: #ffffff;
+            font-size: 16px;
+            border-radius: 44rpx;
+            box-shadow: 0 8rpx 20rpx rgba(7, 193, 96, 0.3);
+            border: none;
+
+            &::after {
+                border: none;
+            }
+
+            &:active {
+                transform: scale(0.98);
+                transition: transform 0.1s;
+            }
+        }
+    }
+}
 </style>

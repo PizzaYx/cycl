@@ -30,36 +30,122 @@ const _sfc_main = {
       pageNum.value = 1;
       getNetwork();
     }
+    const getStatusText = (status) => {
+      if (currentTab.value == 0) {
+        switch (status) {
+          case 0:
+          case "0":
+            return "待审核";
+          case 1:
+          case "1":
+            return "审核通过";
+          case 2:
+          case "2":
+            return "审核不通过";
+          default:
+            return "未知状态";
+        }
+      }
+      return "";
+    };
+    const getStatusClass = (status) => {
+      if (currentTab.value == 0) {
+        switch (status) {
+          case 0:
+          case "0":
+            return "booking";
+          case 1:
+          case "1":
+            return "processing";
+          case 2:
+          case "2":
+            return "completed";
+          default:
+            return "completed";
+        }
+      }
+      return "";
+    };
+    const handleCancel = (item) => {
+      common_vendor.index.__f__("log", "at pages/merchant/sydChecklist.vue:195", "取消按钮被点击", item);
+    };
+    const handleViewDetails = (item) => {
+      common_vendor.index.__f__("log", "at pages/merchant/sydChecklist.vue:200", "查看详情按钮被点击", item);
+    };
+    const handleConfirmTransport = async (item) => {
+      var _a;
+      common_vendor.index.__f__("log", "at pages/merchant/sydChecklist.vue:206", "确认收运按钮被点击", item);
+      if (item.merchantConfirm == null) {
+        common_vendor.index.showToast({
+          title: "请等待师傅确认收运完成!",
+          icon: "none",
+          dduration: 2500
+        });
+        return;
+      }
+      try {
+        common_vendor.index.showLoading({
+          title: "确认中..."
+        });
+        const params = {
+          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+          id: item.id
+        };
+        const res = await api_apis.apiGetconfirmPlanById(params);
+        common_vendor.index.hideLoading();
+        if (res.code === 200 || res.success) {
+          common_vendor.index.showToast({
+            title: "确认收运成功",
+            icon: "success"
+          });
+          allOrderList.value = [];
+          pageNum.value = 1;
+          getNetwork();
+        } else {
+          common_vendor.index.showToast({
+            title: res.message || "确认收运失败",
+            icon: "none"
+          });
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/merchant/sydChecklist.vue:246", "确认收运失败:", error);
+        common_vendor.index.hideLoading();
+        common_vendor.index.showToast({
+          title: "网络错误，请重试",
+          icon: "none"
+        });
+      }
+    };
     const bookingBadgeText = common_vendor.ref("0");
     const processingBadgeText = common_vendor.ref("0");
     const pageNum = common_vendor.ref(1);
     const loadingStatus = common_vendor.ref("more");
     const allOrderList = common_vendor.ref([]);
     const getNetwork = async () => {
-      var _a;
       try {
         if (pageNum.value > 1) {
           loadingStatus.value = "loading";
         }
         const res = await api_apis.apiGetPlanPage({
           pageNum: pageNum.value,
-          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+          merchantId: 448,
+          // merchantId: userStore.merchant?.id,
           status: tabs[currentTab.value].key
           // 使用tabs中的key值
         });
         if (pageNum.value === 1) {
-          allOrderList.value = res.data.records || [];
+          allOrderList.value = res.data.list || [];
           common_vendor.index.stopPullDownRefresh();
         } else {
-          allOrderList.value = [...allOrderList.value, ...res.data.records || []];
+          allOrderList.value = [...allOrderList.value, ...res.data.list || []];
         }
-        if (res.data.records && res.data.records.length < 10) {
+        if (res.data.list && res.data.list.length < 10) {
           loadingStatus.value = "nomore";
         } else {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/sydChecklist.vue:170", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/sydChecklist.vue:301", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -83,7 +169,6 @@ const _sfc_main = {
     });
     common_vendor.onPullDownRefresh(() => {
       allOrderList.value = [];
-      currentTab.value = 0;
       pageNum.value = 1;
       getNetwork();
     });
@@ -139,30 +224,53 @@ const _sfc_main = {
       }, allOrderList.value.length > 0 ? {
         e: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return common_vendor.e({
-            a: common_vendor.t(item.shopName),
-            b: common_vendor.t(item.status),
-            c: common_vendor.n(item.status === "预约中" ? "booking" : item.status === "进行中" ? "processing" : "completed"),
-            d: common_vendor.t(item.deliveryCount),
-            e: common_vendor.t(item.weight),
-            f: common_vendor.t(item.carInfo),
-            g: common_vendor.t(item.time),
-            h: item.status !== "已完成"
-          }, item.status !== "已完成" ? {
-            i: "888270ea-3-" + i0,
-            j: common_vendor.p({
-              size: "mini"
+            a: common_vendor.t(item.merchantName)
+          }, currentTab.value == 0 ? {
+            b: common_vendor.t(getStatusText(item.status)),
+            c: common_vendor.n(getStatusClass(item.status))
+          } : {}, {
+            d: common_vendor.t(item.estimateWeight),
+            e: common_vendor.t(item.estimateBucketNum ?? 0),
+            f: common_vendor.t(item.estimateWeight ?? 0),
+            g: common_vendor.t(item.weight ?? "暂无"),
+            h: common_vendor.t(item.registrationNumber ?? "暂无"),
+            i: common_vendor.t(item.arrivalTime ?? "暂无")
+          }, currentTab.value == 0 ? {
+            j: common_vendor.o(($event) => handleCancel(item), index),
+            k: "888270ea-3-" + i0,
+            l: common_vendor.p({
+              size: "mini",
+              type: "default"
+            }),
+            m: common_vendor.o(($event) => handleViewDetails(item), index),
+            n: "888270ea-4-" + i0,
+            o: common_vendor.p({
+              size: "mini",
+              type: "primary"
+            })
+          } : currentTab.value == 1 ? {
+            p: common_vendor.o(($event) => handleConfirmTransport(item), index),
+            q: "888270ea-5-" + i0,
+            r: common_vendor.p({
+              size: "mini",
+              type: "primary"
+            })
+          } : currentTab.value == 2 ? {
+            s: common_vendor.o(($event) => handleViewDetails(item), index),
+            t: "888270ea-6-" + i0,
+            v: common_vendor.p({
+              size: "mini",
+              type: "default"
             })
           } : {}, {
-            k: common_vendor.t(item.status === "预约中" ? "确认收运" : item.status === "进行中" ? "完成收运" : "查看详情"),
-            l: "888270ea-4-" + i0,
-            m: common_vendor.p({
-              size: "mini",
-              type: item.status === "预约中" ? "primary" : "default"
-            }),
-            n: index
+            w: index
           });
         }),
-        f: common_vendor.p({
+        f: currentTab.value == 0,
+        g: currentTab.value == 0,
+        h: currentTab.value == 1,
+        i: currentTab.value == 2,
+        j: common_vendor.p({
           status: loadingStatus.value,
           ["content-text"]: {
             contentdown: "上拉显示更多",
@@ -171,7 +279,7 @@ const _sfc_main = {
           }
         })
       } : loadingStatus.value !== "loading" ? {} : {}, {
-        g: loadingStatus.value !== "loading"
+        k: loadingStatus.value !== "loading"
       });
     };
   }

@@ -1,0 +1,304 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.container.data-v-b624ea25 {
+  padding: 30rpx;
+  background-color: #f7f7f7;
+  height: 100vh;
+}
+.container .header-progress-container.data-v-b624ea25 {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+.container .header.data-v-b624ea25 {
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0;
+}
+.container .header .header-title.data-v-b624ea25 {
+  margin-bottom: 20rpx;
+}
+.container .header .header-title .title.data-v-b624ea25 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333333;
+}
+.container .header .driver-info.data-v-b624ea25 {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.container .header .driver-info .info-item.data-v-b624ea25 {
+  display: flex;
+  align-items: center;
+}
+.container .header .driver-info .info-item .label.data-v-b624ea25 {
+  color: rgba(61, 61, 61, 0.5);
+  font-size: 28rpx;
+}
+.container .header .driver-info .info-item .value.data-v-b624ea25 {
+  color: #3d3d3d;
+  font-size: 14px;
+}
+.container .header .driver-info .info-item .contact-btn.data-v-b624ea25 {
+  margin-left: auto;
+  color: #07C160;
+  border-radius: 100rpx;
+  padding: 6rpx 20rpx;
+  border: 2rpx solid #07C160;
+  font-size: 26rpx;
+}
+.container .divider.data-v-b624ea25 {
+  height: 2rpx;
+  background-color: #f0f0f0;
+  margin: 20rpx 0;
+}
+.container .progress-section.data-v-b624ea25 {
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  margin-bottom: 0;
+}
+.container .progress-section .progress-title.data-v-b624ea25 {
+  font-size: 34rpx;
+  color: #3d3d3d;
+  margin-bottom: 30rpx;
+}
+.container .progress-section .progress-content.data-v-b624ea25 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.container .progress-section .progress-content .progress-circle.data-v-b624ea25 {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.container .progress-section .progress-content .progress-circle .circle-text.data-v-b624ea25 {
+  text-align: center;
+  background: white;
+  border-radius: 50%;
+  width: 170rpx;
+  height: 170rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+.container .progress-section .progress-content .progress-circle .circle-text .percentage.data-v-b624ea25 {
+  font-size: 48rpx;
+  color: #07C160;
+  font-weight: 400;
+  display: block;
+}
+.container .progress-section .progress-content .progress-circle .circle-text .label.data-v-b624ea25 {
+  font-size: 24rpx;
+  color: rgba(61, 61, 61, 0.5);
+}
+.container .progress-section .progress-content .progress-stats.data-v-b624ea25 {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 40rpx;
+  gap: 20rpx;
+  align-items: flex-end;
+}
+.container .progress-section .progress-content .progress-stats .stat-item.data-v-b624ea25 {
+  width: 300rpx;
+  height: 88rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+.container .progress-section .progress-content .progress-stats .stat-item image.data-v-b624ea25 {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+}
+.container .progress-section .progress-content .progress-stats .stat-item .value.data-v-b624ea25 {
+  font-size: 32rpx;
+  font-weight: 500;
+  display: block;
+  z-index: 1;
+  text-align: center;
+}
+.container .progress-section .progress-content .progress-stats .stat-item .value.green.data-v-b624ea25 {
+  color: #07c160;
+}
+.container .progress-section .progress-content .progress-stats .stat-item .value.orange.data-v-b624ea25 {
+  color: #ffa100;
+}
+.container .progress-section .progress-content .progress-stats .stat-item .value.blue.data-v-b624ea25 {
+  color: #00aaff;
+}
+.container .progress-section .progress-content .progress-stats .stat-item .label.data-v-b624ea25 {
+  font-size: 24rpx;
+  color: rgba(61, 61, 61, 0.5);
+  z-index: 1;
+  text-align: center;
+}
+.container .weight-section.data-v-b624ea25 {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 10rpx;
+}
+.container .weight-section .weight-header.data-v-b624ea25 {
+  font-size: 34rpx;
+  color: #3d3d3d;
+  display: block;
+  margin-bottom: 20rpx;
+}
+.container .weight-section .weight-content.data-v-b624ea25 {
+  display: flex;
+  align-items: center;
+}
+.container .weight-section .weight-content image.data-v-b624ea25 {
+  width: 80rpx;
+  height: 80rpx;
+  margin-right: 40rpx;
+}
+.container .weight-section .weight-content .weight-title.data-v-b624ea25 {
+  font-size: 14px;
+  color: #333333;
+}
+.container .weight-section .weight-content .weight-input.data-v-b624ea25 {
+  margin: 0 10rpx;
+  padding: 10rpx 20rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 10rpx;
+  font-size: 14px;
+  width: 120rpx;
+  text-align: center;
+}
+.container .weight-section .weight-content .weight-unit.data-v-b624ea25 {
+  font-size: 14px;
+  color: #999999;
+  margin-left: 10rpx;
+}
+.container .weight-section .weight-content .weight-btn.data-v-b624ea25 {
+  margin-left: auto;
+  background-color: #00B578;
+}
+.container .weight-section .tj-btn.data-v-b624ea25 {
+  margin-left: auto;
+  color: #07C160;
+  border-radius: 100rpx;
+  padding: 6rpx 20rpx;
+  border: 2rpx solid #07C160;
+  font-size: 26rpx;
+}
+.container .task-list.data-v-b624ea25 {
+  margin-top: 20rpx;
+}
+.container .task-list .task-item.data-v-b624ea25 {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+.container .task-list .task-item .task-header.data-v-b624ea25 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.container .task-list .task-item .task-header .time-info.data-v-b624ea25 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.container .task-list .task-item .task-header .time-info .date.data-v-b624ea25 {
+  font-size: 14px;
+  color: #666666;
+}
+.container .task-list .task-item .task-header .status.data-v-b624ea25 {
+  font-size: 12px;
+  padding: 4rpx 16rpx;
+  border-radius: 4rpx;
+}
+.container .task-list .task-item .task-header .status.processing.data-v-b624ea25 {
+  color: #00B578;
+  background: rgba(0, 181, 120, 0.1);
+}
+.container .task-list .task-item .task-content.data-v-b624ea25 {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.container .task-list .task-item .task-content .merchant-info.data-v-b624ea25,
+.container .task-list .task-item .task-content .weight-info.data-v-b624ea25,
+.container .task-list .task-item .task-content .bin-info.data-v-b624ea25,
+.container .task-list .task-item .task-content .address-info.data-v-b624ea25 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.container .task-list .task-item .task-content .merchant-info .label.data-v-b624ea25,
+.container .task-list .task-item .task-content .weight-info .label.data-v-b624ea25,
+.container .task-list .task-item .task-content .bin-info .label.data-v-b624ea25,
+.container .task-list .task-item .task-content .address-info .label.data-v-b624ea25 {
+  color: #666666;
+  font-size: 14px;
+}
+.container .task-list .task-item .task-content .merchant-info .value.data-v-b624ea25,
+.container .task-list .task-item .task-content .weight-info .value.data-v-b624ea25,
+.container .task-list .task-item .task-content .bin-info .value.data-v-b624ea25,
+.container .task-list .task-item .task-content .address-info .value.data-v-b624ea25 {
+  color: #333333;
+  font-size: 14px;
+}
+.container .task-list .task-item .task-footer.data-v-b624ea25 {
+  margin-top: 30rpx;
+  display: flex;
+  justify-content: flex-end;
+  gap: 20rpx;
+}
+.container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25 {
+  color: #07C160;
+  border-radius: 100rpx;
+  padding: 6rpx 20rpx;
+  border: 2rpx solid #07C160;
+  font-size: 26rpx;
+}
+.container .task-list .task-item .task-footer .view-btn.data-v-b624ea25 {
+  color: #07C160;
+  border-radius: 100rpx;
+  padding: 6rpx 20rpx;
+  border: 2rpx solid #07C160;
+  font-size: 26rpx;
+}

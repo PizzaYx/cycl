@@ -7398,9 +7398,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.0.113,127.0.0.1";
+  const hosts = "127.0.0.1,192.168.0.133";
   const port = "8090";
-  const id = "mp-weixin__Laocx";
+  const id = "mp-weixin_zOZi7l";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9197,6 +9197,19 @@ const pages = [
     style: {
       navigationBarTitleText: "临时预约",
       navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/collection/sfDetails",
+    style: {
+      navigationBarTitleText: "收运详情",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/collection/syReport",
+    style: {
+      navigationBarTitleText: "收运上报"
     }
   }
 ];

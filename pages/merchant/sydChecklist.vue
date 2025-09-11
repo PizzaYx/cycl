@@ -29,39 +29,66 @@
                     <view class="order-item" v-for="(item, index) in allOrderList" :key="index">
                         <view class="order-header">
                             <view class="shop-info">
-                                <text class="shop-name">{{ item.shopName }}</text>
-                                <text
-                                    :class="['status-tag', item.status === '预约中' ? 'booking' : (item.status === '进行中' ? 'processing' : 'completed')]">
-                                    {{ item.status }}
+                                <text class="shop-name">{{ item.merchantName }}</text>
+                                <text v-if="currentTab == 0" :class="['status-tag', getStatusClass(item.status)]">
+                                    {{ getStatusText(item.status) }}
                                 </text>
                             </view>
 
                         </view>
                         <view class="order-content">
                             <view class="info-item">
-                                <text class="label">今日收运：</text>
-                                <text class="value">{{ item.deliveryCount }}桶</text>
+                                <text class="label">预估收运：</text>
+                                <text class="value">{{ item.estimateWeight }} 桶</text>
                             </view>
-
                             <view class="info-item">
-                                <text class="label">收运重量：</text>
-                                <text class="value">{{ item.weight }}</text>
+                                <text class="label">今日收运：</text>
+                                <text class="value">{{ item.estimateBucketNum ?? 0 }} 桶</text>
+                            </view>
+                            <view class="info-item">
+                                <text class="label">预估总量：</text>
+                                <text class="value">{{ item.estimateWeight ?? 0 }} kg</text>
+                            </view>
+                            <view class="info-item">
+                                <text class="label">收运总量：</text>
+                                <text class="value">{{ item.weight ?? '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">车辆信息：</text>
-                                <text class="value">{{ item.carInfo }}</text>
+                                <text class="value">{{ item.registrationNumber ?? '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运时间：</text>
-                                <text class="value">{{ item.time }}</text>
+                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
                             </view>
                         </view>
                         <view class="order-footer">
-                            <uni-button size="mini" class="btn-cancel" v-if="item.status !== '已完成'">取消</uni-button>
-                            <uni-button size="mini" :type="item.status === '预约中' ? 'primary' : 'default'"
-                                class="btn-confirm">
-                                {{ item.status === '预约中' ? '确认收运' : (item.status === '进行中' ? '完成收运' : '查看详情') }}
-                            </uni-button>
+                            <!-- currentTab == 0: 显示取消和查看详情按钮 -->
+                            <template v-if="currentTab == 0">
+                                <uni-button size="mini" type="default" class="btn-cancel" @tap="handleCancel(item)">
+                                    取消
+                                </uni-button>
+                                <uni-button size="mini" type="primary" class="btn-confirm"
+                                    @tap="handleViewDetails(item)">
+                                    查看详情
+                                </uni-button>
+                            </template>
+
+                            <!-- currentTab == 1: 显示确认收运按钮 -->
+                            <template v-else-if="currentTab == 1">
+                                <uni-button size="mini" type="primary" class="btn-confirm"
+                                    @tap="handleConfirmTransport(item)">
+                                    确认收运
+                                </uni-button>
+                            </template>
+
+                            <!-- currentTab == 2: 只显示查看详情按钮 -->
+                            <template v-else-if="currentTab == 2">
+                                <uni-button size="mini" type="default" class="btn-confirm"
+                                    @tap="handleViewDetails(item)">
+                                    查看详情
+                                </uni-button>
+                            </template>
                         </view>
                     </view>
 
@@ -97,7 +124,7 @@ import {
 } from '@dcloudio/uni-app';
 
 import {
-    apiGetPlanPage
+    apiGetPlanPage, apiGetconfirmPlanById
 } from '@/api/apis.js';
 
 import { useUserStore } from '@/stores/user.js'
@@ -122,6 +149,109 @@ function handleTabClick(index) {
     getNetwork();
 }
 
+// 状态转换函数
+const getStatusText = (status) => {
+    if (currentTab.value == 0) {
+        // 审核状态
+        switch (status) {
+            case 0:
+            case '0':
+                return '待审核';
+            case 1:
+            case '1':
+                return '审核通过';
+            case 2:
+            case '2':
+                return '审核不通过';
+            default:
+                return '未知状态';
+        }
+    }
+    return '';
+};
+
+// 获取状态样式类名
+const getStatusClass = (status) => {
+    if (currentTab.value == 0) {
+        switch (status) {
+            case 0:
+            case '0':
+                return 'booking'; // 待审核 - 蓝色
+            case 1:
+            case '1':
+                return 'processing'; // 审核通过 - 绿色
+            case 2:
+            case '2':
+                return 'completed'; // 审核不通过 - 灰色
+            default:
+                return 'completed';
+        }
+    }
+    return '';
+};
+
+// 按钮点击事件处理函数
+const handleCancel = (item) => {
+    console.log('取消按钮被点击', item);
+
+};
+
+const handleViewDetails = (item) => {
+    console.log('查看详情按钮被点击', item);
+
+
+};
+
+const handleConfirmTransport = async (item) => {
+    console.log('确认收运按钮被点击', item);
+    if (item.merchantConfirm == null) {
+        uni.showToast({
+            title: '请等待师傅确认收运完成!',
+            icon: 'none',
+            dduration: 2500
+        });
+        return;
+    }
+    try {
+        uni.showLoading({
+            title: '确认中...'
+        });
+
+        const params = {
+            merchantId: userStore.merchant?.id,
+            id: item.id
+        };
+
+        const res = await apiGetconfirmPlanById(params);
+
+        uni.hideLoading();
+
+        if (res.code === 200 || res.success) {
+            uni.showToast({
+                title: '确认收运成功',
+                icon: 'success'
+            });
+
+            // 刷新当前页面数据，保持在当前标签页
+            allOrderList.value = [];
+            pageNum.value = 1;
+            getNetwork();
+        } else {
+            uni.showToast({
+                title: res.message || '确认收运失败',
+                icon: 'none'
+            });
+        }
+    } catch (error) {
+        console.error('确认收运失败:', error);
+        uni.hideLoading();
+        uni.showToast({
+            title: '网络错误，请重试',
+            icon: 'none'
+        });
+    }
+};
+
 // 添加badgeText的ref变量
 const bookingBadgeText = ref('0');
 const processingBadgeText = ref('0');
@@ -144,22 +274,23 @@ const getNetwork = async () => {
 
         const res = await apiGetPlanPage({
             pageNum: pageNum.value,
-            merchantId: userStore.merchant?.id,
+            merchantId: 448,
+            // merchantId: userStore.merchant?.id,
             status: tabs[currentTab.value].key // 使用tabs中的key值
         });
 
 
         // 处理下拉刷新
         if (pageNum.value === 1) {
-            allOrderList.value = res.data.records || [];
+            allOrderList.value = res.data.list || [];
             uni.stopPullDownRefresh();
         } else {
             // 处理上拉加载更多
-            allOrderList.value = [...allOrderList.value, ...(res.data.records || [])];
+            allOrderList.value = [...allOrderList.value, ...(res.data.list || [])];
         }
 
         // 判断是否还有更多数据
-        if (res.data.records && res.data.records.length < 10) {
+        if (res.data.list && res.data.list.length < 10) {
             // 如果返回的数据少于每页数量，说明没有更多数据了
             loadingStatus.value = 'nomore';
         } else {
@@ -206,7 +337,6 @@ onReachBottom(() => {
 //下拉刷新
 onPullDownRefresh(() => {
     allOrderList.value = [];
-    currentTab.value = 0;
     pageNum.value = 1; // 重置页码为1
     getNetwork();
 })
@@ -266,11 +396,11 @@ onMounted(() => {
 
     .content-wrapper {
         flex: 1;
-        margin-top: 30rpx; 
+        margin-top: 30rpx;
 
         .content {
             height: 100%;
-            background-color: #ffffff;
+
         }
 
         .order-list {
@@ -434,31 +564,3 @@ onMounted(() => {
     }
 }
 </style>
-
-<!-- "list": [
-{
-"id": 1,
-"recordNo": "1",
-"merchantId": 448,
-"carId": 4,
-"driverId": 1,
-"type": 0,
-"appointmentTime": "2025-09-10",//收运时间
-"weight": 100, //收运重量
-"bucketNum": 2,//桶数
-"arrivalTime": null,
-"merchantConfirm": null,
-"merchantCode": null,
-"status": 0,// 0 进行中 1已完成
-"createTime": "2025-09-10T14:54:54.000+08:00",
-"updateTime": null,
-"merchantName": "杨洵测试",//店名
-"driverName": null,
-"lon": null,
-"lat": null,
-"address": null,
-"contactTruename": null,
-"contactTel": null,
-"trashWeight": null,
-"registrationNumber": null//车牌
-} -->

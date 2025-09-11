@@ -25,19 +25,19 @@
             <!-- 数据统计 -->
             <view class="statistics">
                 <view class="stat-item">
-                    <view class="number">4</view>
+                    <view class="number">{{ yyNum }}</view>
                     <view class="label">预约中</view>
                 </view>
                 <view class="stat-item">
-                    <view class="number">45</view>
+                    <view class="number">{{ syNum }}</view>
                     <view class="label">收运中</view>
                 </view>
                 <view class="stat-item">
-                    <view class="number">6</view>
+                    <view class="number">{{ dqNum }}</view>
                     <view class="label">待确认</view>
                 </view>
                 <view class="stat-item">
-                    <view class="number">451</view>
+                    <view class="number">{{ wcNum }}</view>
                     <view class="label">已完成</view>
                 </view>
             </view>
@@ -55,20 +55,28 @@
             <!-- 收运记录 -->
             <view class="records-header">
                 <text class="title">收运记录</text>
-                <text class="more" @tap="goToSydAllList">更多 》 </text>
+                <text class="more" @tap="goToSydAllList">更多 》</text>
+
             </view>
             <view class="records">
                 <view class="record-list">
-                    <view v-for="(item, index) in records" :key="index" class="record-item">
+                    <view v-for="(item, index) in records" :key="index" class="record-item" key="item.id">
                         <view class="record-main">
-                            <view class="shop-name">{{ item.name }}</view>
-                            <view class="record-time">{{ item.time }}</view>
+                            <view class="shop-name">{{ item.merchantName }}</view>
+                            <view class="record-time">{{ item.status === 1 ? item.arrivalTime : item.appointmentTime }}</view>
                         </view>
                         <view class="record-right">
-                            <view class="status">{{ item.status }}</view>
-                            <view class="weight">{{ item.weight }}</view>
+                            <view class="status" :class="{
+                                'status-completed': item.status === 1,
+                                'status-pending': item.status === 0,
+                                'status-default': item.status === 2
+                            }">
+                                {{ getRecordStatusText(item.status) }}
+                            </view>
+                            <view class="weight">{{ item.status === 1 ? item.weight : item.estimateWeight }}kg</view>
                         </view>
                     </view>
+                    <view v-if="records.length === 0" class="no-records">暂无收运记录</view>
                 </view>
             </view>
         </scroll-view>
@@ -98,9 +106,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
+import { apiGetMerchantStatistics, apiGetPlanAllPage } from '@/api/apis.js'
 
 // 使用用户 store
 const userStore = useUserStore()
+
+const yyNum = ref(0) // 预约中
+const syNum = ref(0) // 收运中
+const dqNum = ref(0) // 待确认
+const wcNum = ref(0) // 已完成
 
 // 下拉刷新状态
 const refreshing = ref(false)
@@ -111,16 +125,52 @@ const showAuthModal = ref(false)
 // 页面加载时确保用户信息存在
 onMounted(async () => {
     try {
-        await userStore.ensureUserInfo()
-        console.log('用户信息加载完成')
+        const userInfo = await userStore.ensureUserInfo()
+        if (userInfo === null) {
+            // 用户未登录，已跳转到登录页，不需要继续执行
+            console.log('用户未登录，已跳转到登录页')
+            return
+        }
+
 
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
         checkAndShowAuthModal()
     } catch (error) {
-        // request.js已经处理了401跳转，这里只需要记录错误
+        // 其他非401错误的处理
         console.error('页面初始化失败:', error)
     }
 })
+
+//获取商户首页数据统计
+const getMerchantStatistics = async () => {
+    console.log('获取商户首页数据统计')
+    const res = await apiGetMerchantStatistics({
+        merchantId: userStore.merchant?.id
+    })
+
+    if (res.code === 200) {
+        wcNum.value = res.data.accomplishNum;
+        dqNum.value = res.data.notConfirmNum;
+        yyNum.value = res.data.reservationNum;
+        syNum.value = res.data.underwayNum;
+    }
+}
+
+
+//获取商户首页收运记录显示前5条
+const getMerchantSydList = async () => {
+    const res = await apiGetPlanAllPage({
+        pageNum: 1,
+        pageSize: 5,
+        merchantId: userStore.merchant?.id
+    })
+    if (res.code === 200) {
+        records.value = res.data.list;
+        //0 待确认 1 已完成 2无需收运
+    } else {
+        console.error('商户首页收运记录失败', res.message)
+    }
+}
 
 /**
  * 检查用户认证状态并显示相应提示
@@ -152,9 +202,14 @@ const checkUserAuthStatus = () => {
  * 用于页面加载时检查
  */
 const checkAndShowAuthModal = () => {
+
     const merchantStatus = userStore.merchantStatus
     if (merchantStatus === null || merchantStatus === 2) {
         showAuthModal.value = true
+    }
+    else {
+        getMerchantStatistics();
+        getMerchantSydList();
     }
 }
 
@@ -174,8 +229,7 @@ const onRefresh = async () => {
     try {
         // 重新获取用户信息
         await userStore.fetchUserInfo()
-        console.log('刷新完成')
-
+       
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
         checkAndShowAuthModal()
     } catch (error) {
@@ -289,50 +343,21 @@ const getAuthTagClass = () => {
     }
 }
 
-const records = ref([
-    {
-        name: '川味小厨（总店）',
-        time: '2023-08-20 14:05:30',
-        weight: '1.56kg',
-        status: '待确定',
-    },
-    {
-        name: '川味小厨（总店）',
-        time: '2023-08-20 14:05:30',
-        weight: '1.56kg',
-        status: '已完成',
-    },
-    {
-        name: '川味小厨（总店）',
-        time: '2023-08-20 14:05:30',
-        weight: '1.56kg',
-        status: '已完成',
-    },
-    {
-        name: '川味小厨（总店）',
-        time: '2023-08-20 14:05:30',
-        weight: '1.56kg',
-        status: '已完成',
-    },
-    {
-        name: '川味小厨（总店）',
-        time: '2023-08-20 14:05:30',
-        weight: '1.56kg',
-        status: '已完成',
-    },
-    {
-        name: '川味小厨（总店）',
-        time: '2023-08-20 14:05:30',
-        weight: '1.56kg',
-        status: '已完成',
-    },
-    {
-        name: '川味小厨（总店）',
-        time: '2023-08-20 14:05:30',
-        weight: '1.56kg',
-        status: '已完成',
-    },
-])
+const records = ref([]); // 收运记录列表
+
+// 获取收运记录状态文字
+const getRecordStatusText = (status) => {
+    switch (status) {
+        case 0:
+            return '待确认';
+        case 1:
+            return '已完成';
+        case 2:
+            return '无需收运';
+        default:
+            return '未知状态';
+    }
+};
 
 // 跳转到收运总列表页面
 const goToSydAllList = () => {
@@ -341,7 +366,7 @@ const goToSydAllList = () => {
         // 未通过认证检查，不继续执行
         return
     }
-    
+
     uni.navigateTo({
         url: '/pages/merchant/sydAllList'
     })
@@ -564,6 +589,9 @@ const goToSydAllList = () => {
             font-size: 24rpx;
             font-weight: 400;
             color: rgba(19, 19, 19, 0.50);
+            display: flex;
+            align-items: center;
+            gap: 4rpx;
         }
     }
 
@@ -614,16 +642,21 @@ const goToSydAllList = () => {
                         border-radius: 8rpx;
                         width: 96rpx;
                         height: 40rpx;
-                    }
-
-                    .status-pending {
-                        color: #ff9900;
-                        background-color: rgba(255, 153, 0, 0.1);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                     }
 
                     .status-completed {
-                        color: #4cd964;
-                        background-color: rgba(76, 217, 100, 0.1);
+                        color: #07C160;
+                        background: rgba(7, 193, 96, 0.2);
+                        border-radius: 8rpx 8rpx 8rpx 8rpx;
+                    }
+
+                    .status-pending {
+                        color: #FFA100;
+                        background: rgba(255, 195, 0, 0.16);
+                        border-radius: 8rpx 8rpx 8rpx 8rpx;
                     }
 
                     .status-default {

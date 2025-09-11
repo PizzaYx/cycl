@@ -85,9 +85,8 @@
                     </uni-forms-item>
 
                     <uni-forms-item label="预约时间" name="estimatedTime" required>
-                        <uni-datetime-picker v-model="formData.estimatedTime" type="datetime" 
-                            :start="minDate" :end="maxDate" 
-                            placeholder="请选择预约时间" :clearable="false" :disabled="isReadOnly">
+                        <uni-datetime-picker v-model="formData.estimatedTime" type="date" :start="minDate"
+                            :end="maxDate" placeholder="请选择预约时间" :clearable="false" :disabled="isReadOnly">
                         </uni-datetime-picker>
                     </uni-forms-item>
 
@@ -149,10 +148,10 @@ const isReadOnly = computed(() => {
 
 // 表单数据
 const formData = reactive({
-    merchantName: '上海源达环保科技有限公司',
-    address: '上海市浦东新区川沙新镇川周公路1555号',
-    contactPerson: '张三',
-    contactPhone: '1234567890',
+    merchantName: '',
+    address: '',
+    contactPerson: '',
+    contactPhone: '',
     bucketCount: '',
     estimatedWeight: '',
     estimatedTime: '',
@@ -206,7 +205,7 @@ const formRef = ref()
 
 // 表单验证规则
 const formRules = {
-    
+
     bucketCount: {
         rules: [
             { required: true, errorMessage: '请输入垃圾桶数量' },
@@ -249,27 +248,40 @@ const formRules = {
 const submitting = ref(false)
 
 // 页面加载完成
-onMounted(() => {
-    fillFormData(result.data);
+onMounted(async () => {
+    // 确保用户信息已加载
+    await userStore.ensureUserInfo()
+
+    // 根据页面状态填充表单数据
+    if (props.value.status !== null) {
+        // 如果有状态，说明是查看或编辑已有预约
+        // 这里可以根据需要调用API获取具体的预约数据
+        // const reservationData = await getReservationData(props.value.id)
+        // fillFormData(reservationData)
+    }
+
+    // 填充基本的用户信息
+    fillFormData(null)
 })
 
 
 // 数据回显函数
 const fillFormData = (data) => {
-    if (!data) return
+    console.log('开始数据回显:', data, '用户信息:', userStore.userInfo)
 
-    console.log('开始数据回显:', data)
+    // 基本信息回显 - 从用户store获取
+    formData.merchantName = userStore.merchant?.name || userStore.userInfo?.name || ''
+    formData.address = userStore.merchant?.address || userStore.userInfo?.address || ''
+    formData.contactPerson = userStore.merchant?.contactTruename || userStore.userInfo?.contactTruename || ''
+    formData.contactPhone = userStore.merchant?.contactTel || userStore.userInfo?.contactTel || ''
 
-    // 基本信息回显
-    formData.merchantName = userStore.merchant?.name || ''
-    formData.address = userStore.merchant?.address || ''
-    formData.contactPerson =  userStore.merchant?.contactTruename || ''
-    formData.contactPhone = data.contactTel || userStore.merchant?.contactTel || ''
-
-    formData.bucketCount = data.bucketNum?.toString() || ''
-    formData.estimatedWeight = data.trashWeight?.toString() || ''
-    formData.estimatedTime = data.estimatedTime || ''
-    formData.estimatedRemarks = data.estimatedRemarks || ''
+    // 如果有传入的预约数据，则回显预约相关信息
+    if (data) {
+        formData.bucketCount = data.bucketNum?.toString() || ''
+        formData.estimatedWeight = data.trashWeight?.toString() || ''
+        formData.estimatedTime = data.estimatedTime || ''
+        formData.estimatedRemarks = data.estimatedRemarks || ''
+    }
 
     console.log('数据回显完成:', formData)
 }
@@ -278,7 +290,7 @@ const fillFormData = (data) => {
 // 表单验证（使用uni-forms的验证方式）
 const validateForm = async () => {
     try {
-        return  await formRef.value.validate()
+        return await formRef.value.validate()
     } catch (error) {
         console.log('表单验证失败:', error)
         return false
@@ -292,46 +304,44 @@ const submitAuth = async () => {
     if (!isValid) {
         return
     }
-
     submitting.value = true
-
     try {
-        
-
         // 准备提交数据 - 只包含API需要的字段
         const submitData = {
-            userid: userStore.merchant?.id || 0, // 商户ID
+            merchantId: userStore.merchant?.id, // 用户ID
             name: formData.merchantName,              // 商户名称
             address: formData.address,                // 地址
             contactTruename: formData.contactPerson,  // 联系人姓名
             contactTel: formData.contactPhone,        // 联系电话
             bucketNum: parseInt(formData.bucketCount), // 预计桶数量
-            trashWeight: parseFloat(formData.estimatedWeight), // 预估垃圾重量
-            appointmentTime: formData.appointmentTime,      // 预约时间   
+            trashWeight: parseInt(formData.estimatedWeight), // 预估垃圾重量
+            appointmentTime: formData.estimatedTime,    // 预约时间
+            explain: formData.estimatedRemarks, // 备注说明
         }
 
-        console.log('提交认证数据:', submitData)
+        // 调用临时预约提交API
+        const result = await apiPostaddPlanTemporary(submitData)
+        console.log('预约提交API返回:', submitData)
 
-        // 调用认证提交API
-        const result = await apiPostMerchantCheck(submitData)
-        console.log('认证提交API返回:', result)
+        // 检查返回结果
+        if (result && result.code === 200) {
+            uni.showToast({
+                title: '预约申请提交成功',
+                icon: 'success'
+            })
 
-        uni.showToast({
-            title: '认证申请提交成功',
-            icon: 'success'
-        })
+            // 更新页面状态 - 提交成功后状态为待审核(0)
+            props.value.status = 0
 
-        // 更新认证状态 - 提交成功后状态为待审核(0)
-        merchantData.value = {
-            ...submitData,
-            status: 0, // 待审核状态
-            updateTime: new Date().toLocaleString()
-        }
-
-        // 同时更新用户store中的merchant数据
-        if (userStore.userInfo) {
-            userStore.updateUserInfo({
-                merchant: merchantData.value
+            // 延迟返回上一页，让用户看到成功提示
+            setTimeout(() => {
+                uni.navigateBack()
+            }, 1000)
+        } else {
+            // 处理API返回的错误信息
+            uni.showToast({
+                title: result?.msg || '提交失败，请重试',
+                icon: 'none'
             })
         }
 
@@ -616,7 +626,7 @@ const submitAuth = async () => {
                     align-items: center !important;
                     justify-content: flex-start !important;
                     position: relative !important;
-                    
+
                     .uni-date__x-input {
                         font-size: 28rpx !important;
                         color: rgba(38, 38, 38, 1) !important;
@@ -629,7 +639,7 @@ const submitAuth = async () => {
                         transform: translateY(5rpx) !important;
                         box-sizing: border-box !important;
                     }
-                    
+
                     .uni-date__x-input-placeholder {
                         color: rgba(191, 191, 191, 1) !important;
                         font-size: 28rpx !important;
@@ -638,11 +648,11 @@ const submitAuth = async () => {
                         transform: translateY(5rpx) !important;
                     }
                 }
-                
+
                 &.uni-date-x--border {
                     border: none !important;
                 }
-                
+
                 .uni-date-single--x,
                 .uni-date-range--x {
                     top: 60rpx !important;
@@ -726,6 +736,17 @@ const submitAuth = async () => {
                 }
             }
 
+            // 禁用状态样式（针对disabled的uni-easyinput）
+            :deep(.uni-easyinput) {
+                .uni-easyinput__content.is-disabled {
+                    background-color: #f5f5f5 !important;
+
+                    .uni-easyinput__content-input {
+                        color: #999 !important;
+                    }
+                }
+            }
+
             // 只读状态样式
             &.readonly {
                 :deep(.uni-easyinput) {
@@ -747,11 +768,11 @@ const submitAuth = async () => {
                         }
                     }
                 }
-                
+
                 :deep(.uni-datetime-picker) {
                     .uni-date-editor--x {
                         background-color: #f5f5f5 !important;
-                        
+
                         .uni-date__x-input {
                             color: #999 !important;
                         }

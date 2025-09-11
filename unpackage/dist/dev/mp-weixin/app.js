@@ -11,6 +11,8 @@ if (!Math) {
   "./pages/merchant/sydStatistics.js";
   "./pages/user/user.js";
   "./pages/merchant/sydReservation.js";
+  "./pages/collection/sfDetails.js";
+  "./pages/collection/syReport.js";
 }
 const _sfc_main = {
   onLaunch: function() {

@@ -20,16 +20,45 @@ if (!Math) {
 const _sfc_main = {
   __name: "sydAllList",
   setup(__props) {
-    const tabs = [{ key: "3", value: "预约中" }, { key: "0", value: "进行中" }, { key: "1", value: "已完成" }];
-    const currentTab = common_vendor.ref(0);
-    const userStore = stores_user.useUserStore();
+    stores_user.useUserStore();
     const selectedStatus = common_vendor.ref("");
     const selectedTimeRange = common_vendor.ref([]);
     const statusOptions = common_vendor.ref([
-      { value: "0", text: "待收运" },
+      { value: "0", text: "待确认" },
       { value: "1", text: "已完成" },
       { value: "2", text: "无需收运" }
     ]);
+    const getStatusText = (status) => {
+      common_vendor.index.__f__("log", "at pages/merchant/sydAllList.vue:134", 123);
+      switch (status) {
+        case 0:
+        case "0":
+          return "待确认";
+        case 1:
+        case "1":
+          return "已完成";
+        case 2:
+        case "2":
+          return "无需收运";
+        default:
+          return "未知状态";
+      }
+    };
+    const getStatusClass = (status) => {
+      switch (status) {
+        case 0:
+        case "0":
+          return "booking";
+        case 1:
+        case "1":
+          return "completed";
+        case 2:
+        case "2":
+          return "processing";
+        default:
+          return "completed";
+      }
+    };
     const back = () => {
       common_vendor.index.navigateBack();
     };
@@ -37,19 +66,16 @@ const _sfc_main = {
     const loadingStatus = common_vendor.ref("more");
     const allOrderList = common_vendor.ref([]);
     const getNetwork = async () => {
-      var _a;
       try {
         if (pageNum.value > 1) {
           loadingStatus.value = "loading";
         }
         const params = {
           pageNum: pageNum.value,
-          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
-          status: tabs[currentTab.value].key
-          // 使用tabs中的key值
+          merchantId: 448
         };
         if (selectedStatus.value !== "") {
-          params.filterStatus = selectedStatus.value;
+          params.status = selectedStatus.value;
         }
         if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
           params.startTime = selectedTimeRange.value[0];
@@ -57,18 +83,18 @@ const _sfc_main = {
         }
         const res = await api_apis.apiGetPlanAllPage(params);
         if (pageNum.value === 1) {
-          allOrderList.value = res.data.records || [];
+          allOrderList.value = res.data.list || [];
           common_vendor.index.stopPullDownRefresh();
         } else {
-          allOrderList.value = [...allOrderList.value, ...res.data.records || []];
+          allOrderList.value = [...allOrderList.value, ...res.data.list || []];
         }
-        if (res.data.records && res.data.records.length < 10) {
+        if (res.data.list && res.data.list.length < 10) {
           loadingStatus.value = "nomore";
         } else {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/sydAllList.vue:187", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/sydAllList.vue:223", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -92,7 +118,6 @@ const _sfc_main = {
     });
     common_vendor.onPullDownRefresh(() => {
       allOrderList.value = [];
-      currentTab.value = 0;
       pageNum.value = 1;
       getNetwork();
     });
@@ -173,27 +198,24 @@ const _sfc_main = {
       }, allOrderList.value.length > 0 ? {
         k: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return common_vendor.e({
-            a: common_vendor.t(item.shopName),
-            b: common_vendor.t(item.status),
-            c: common_vendor.n(item.status === "预约中" ? "booking" : item.status === "进行中" ? "processing" : "completed"),
-            d: common_vendor.t(item.deliveryCount),
-            e: common_vendor.t(item.weight),
-            f: common_vendor.t(item.carInfo),
-            g: common_vendor.t(item.time),
-            h: item.status !== "已完成"
-          }, item.status !== "已完成" ? {
-            i: "b6e750bc-4-" + i0,
-            j: common_vendor.p({
-              size: "mini"
+            a: common_vendor.t(item.merchantName),
+            b: common_vendor.t(getStatusText(item.status)),
+            c: common_vendor.n(getStatusClass(item.status)),
+            d: common_vendor.t(item.deliveryCount ?? 0),
+            e: common_vendor.t(item.estimateWeight ?? 0),
+            f: common_vendor.t(item.weight ?? 0),
+            g: common_vendor.t(item.registrationNumber ?? "暂无"),
+            h: common_vendor.t(item.appointmentTime ?? "暂无"),
+            i: common_vendor.t(item.arrivalTime ?? "暂无"),
+            j: item.status != 0
+          }, item.status != 0 ? {
+            k: "b6e750bc-4-" + i0,
+            l: common_vendor.p({
+              size: "mini",
+              type: "default"
             })
           } : {}, {
-            k: common_vendor.t(item.status === "预约中" ? "确认收运" : item.status === "进行中" ? "完成收运" : "查看详情"),
-            l: "b6e750bc-5-" + i0,
-            m: common_vendor.p({
-              size: "mini",
-              type: item.status === "预约中" ? "primary" : "default"
-            }),
-            n: index
+            m: index
           });
         }),
         l: common_vendor.p({

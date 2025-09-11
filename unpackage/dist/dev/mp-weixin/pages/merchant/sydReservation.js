@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
-require("../../utils/request.js");
+const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
@@ -34,16 +34,16 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       props.value.id = options.id ? parseInt(options.id) : null;
       props.value.status = options.status ? parseInt(options.status) : null;
-      common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:135", "接收到的参数:", props.value);
+      common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:134", "接收到的参数:", props.value);
     });
     const isReadOnly = common_vendor.computed(() => {
       return authStatus.value === "pending" || authStatus.value === "approved";
     });
     const formData = common_vendor.reactive({
-      merchantName: "上海源达环保科技有限公司",
-      address: "上海市浦东新区川沙新镇川周公路1555号",
-      contactPerson: "张三",
-      contactPhone: "1234567890",
+      merchantName: "",
+      address: "",
+      contactPerson: "",
+      contactPhone: "",
       bucketCount: "",
       estimatedWeight: "",
       estimatedTime: "",
@@ -124,29 +124,32 @@ const _sfc_main = {
       }
     };
     const submitting = common_vendor.ref(false);
-    common_vendor.onMounted(() => {
-      fillFormData(result.data);
+    common_vendor.onMounted(async () => {
+      await userStore.ensureUserInfo();
+      if (props.value.status !== null)
+        ;
+      fillFormData(null);
     });
     const fillFormData = (data) => {
-      var _a, _b, _c, _d, _e, _f;
-      if (!data)
-        return;
-      common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:261", "开始数据回显:", data);
-      formData.merchantName = ((_a = userStore.merchant) == null ? void 0 : _a.name) || "";
-      formData.address = ((_b = userStore.merchant) == null ? void 0 : _b.address) || "";
-      formData.contactPerson = ((_c = userStore.merchant) == null ? void 0 : _c.contactTruename) || "";
-      formData.contactPhone = data.contactTel || ((_d = userStore.merchant) == null ? void 0 : _d.contactTel) || "";
-      formData.bucketCount = ((_e = data.bucketNum) == null ? void 0 : _e.toString()) || "";
-      formData.estimatedWeight = ((_f = data.trashWeight) == null ? void 0 : _f.toString()) || "";
-      formData.estimatedTime = data.estimatedTime || "";
-      formData.estimatedRemarks = data.estimatedRemarks || "";
-      common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:274", "数据回显完成:", formData);
+      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+      common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:270", "开始数据回显:", data, "用户信息:", userStore.userInfo);
+      formData.merchantName = ((_a = userStore.merchant) == null ? void 0 : _a.name) || ((_b = userStore.userInfo) == null ? void 0 : _b.name) || "";
+      formData.address = ((_c = userStore.merchant) == null ? void 0 : _c.address) || ((_d = userStore.userInfo) == null ? void 0 : _d.address) || "";
+      formData.contactPerson = ((_e = userStore.merchant) == null ? void 0 : _e.contactTruename) || ((_f = userStore.userInfo) == null ? void 0 : _f.contactTruename) || "";
+      formData.contactPhone = ((_g = userStore.merchant) == null ? void 0 : _g.contactTel) || ((_h = userStore.userInfo) == null ? void 0 : _h.contactTel) || "";
+      if (data) {
+        formData.bucketCount = ((_i = data.bucketNum) == null ? void 0 : _i.toString()) || "";
+        formData.estimatedWeight = ((_j = data.trashWeight) == null ? void 0 : _j.toString()) || "";
+        formData.estimatedTime = data.estimatedTime || "";
+        formData.estimatedRemarks = data.estimatedRemarks || "";
+      }
+      common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:286", "数据回显完成:", formData);
     };
     const validateForm = async () => {
       try {
         return await formRef.value.validate();
       } catch (error) {
-        common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:283", "表单验证失败:", error);
+        common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:295", "表单验证失败:", error);
         return false;
       }
     };
@@ -159,8 +162,8 @@ const _sfc_main = {
       submitting.value = true;
       try {
         const submitData = {
-          userid: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 0,
-          // 商户ID
+          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+          // 用户ID
           name: formData.merchantName,
           // 商户名称
           address: formData.address,
@@ -171,31 +174,32 @@ const _sfc_main = {
           // 联系电话
           bucketNum: parseInt(formData.bucketCount),
           // 预计桶数量
-          trashWeight: parseFloat(formData.estimatedWeight),
+          trashWeight: parseInt(formData.estimatedWeight),
           // 预估垃圾重量
-          appointmentTime: formData.appointmentTime
-          // 预约时间   
+          appointmentTime: formData.estimatedTime,
+          // 预约时间
+          explain: formData.estimatedRemarks
+          // 备注说明
         };
-        common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:313", "提交认证数据:", submitData);
-        const result2 = await apiPostMerchantCheck(submitData);
-        common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:317", "认证提交API返回:", result2);
-        common_vendor.index.showToast({
-          title: "认证申请提交成功",
-          icon: "success"
-        });
-        merchantData.value = {
-          ...submitData,
-          status: 0,
-          // 待审核状态
-          updateTime: (/* @__PURE__ */ new Date()).toLocaleString()
-        };
-        if (userStore.userInfo) {
-          userStore.updateUserInfo({
-            merchant: merchantData.value
+        const result = await api_apis.apiPostaddPlanTemporary(submitData);
+        common_vendor.index.__f__("log", "at pages/merchant/sydReservation.vue:324", "预约提交API返回:", submitData);
+        if (result && result.code === 200) {
+          common_vendor.index.showToast({
+            title: "预约申请提交成功",
+            icon: "success"
+          });
+          props.value.status = 0;
+          setTimeout(() => {
+            common_vendor.index.navigateBack();
+          }, 1e3);
+        } else {
+          common_vendor.index.showToast({
+            title: (result == null ? void 0 : result.msg) || "提交失败，请重试",
+            icon: "none"
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/sydReservation.vue:339", "提交认证失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/sydReservation.vue:349", "提交认证失败:", error);
         common_vendor.index.showToast({
           title: "提交失败，请重试",
           icon: "none"
@@ -319,7 +323,7 @@ const _sfc_main = {
         }),
         I: common_vendor.o(($event) => formData.estimatedTime = $event),
         J: common_vendor.p({
-          type: "datetime",
+          type: "date",
           start: minDate.value,
           end: maxDate.value,
           placeholder: "请选择预约时间",

@@ -2,6 +2,7 @@
 const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const stores_user = require("../../stores/user.js");
+const api_apis = require("../../api/apis.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -14,17 +15,50 @@ const _sfc_main = {
   __name: "merchant",
   setup(__props) {
     const userStore = stores_user.useUserStore();
+    const yyNum = common_vendor.ref(0);
+    const syNum = common_vendor.ref(0);
+    const dqNum = common_vendor.ref(0);
+    const wcNum = common_vendor.ref(0);
     const refreshing = common_vendor.ref(false);
     const showAuthModal = common_vendor.ref(false);
     common_vendor.onMounted(async () => {
       try {
-        await userStore.ensureUserInfo();
-        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:115", "用户信息加载完成");
+        const userInfo = await userStore.ensureUserInfo();
+        if (userInfo === null) {
+          common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:131", "用户未登录，已跳转到登录页");
+          return;
+        }
         checkAndShowAuthModal();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:121", "页面初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:140", "页面初始化失败:", error);
       }
     });
+    const getMerchantStatistics = async () => {
+      var _a;
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:146", "获取商户首页数据统计");
+      const res = await api_apis.apiGetMerchantStatistics({
+        merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+      });
+      if (res.code === 200) {
+        wcNum.value = res.data.accomplishNum;
+        dqNum.value = res.data.notConfirmNum;
+        yyNum.value = res.data.reservationNum;
+        syNum.value = res.data.underwayNum;
+      }
+    };
+    const getMerchantSydList = async () => {
+      var _a;
+      const res = await api_apis.apiGetPlanAllPage({
+        pageNum: 1,
+        pageSize: 5,
+        merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+      });
+      if (res.code === 200) {
+        records.value = res.data.list;
+      } else {
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:171", "商户首页收运记录失败", res.message);
+      }
+    };
     const checkUserAuthStatus = () => {
       const merchantStatus = userStore.merchantStatus;
       if (merchantStatus === null || merchantStatus === 2) {
@@ -44,6 +78,9 @@ const _sfc_main = {
       const merchantStatus = userStore.merchantStatus;
       if (merchantStatus === null || merchantStatus === 2) {
         showAuthModal.value = true;
+      } else {
+        getMerchantStatistics();
+        getMerchantSydList();
       }
     };
     const getUserInfo = () => {
@@ -57,10 +94,9 @@ const _sfc_main = {
       refreshing.value = true;
       try {
         await userStore.fetchUserInfo();
-        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:177", "刷新完成");
         checkAndShowAuthModal();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:182", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:236", "刷新失败:", error);
         common_vendor.index.showToast({
           title: "刷新失败",
           icon: "none"
@@ -109,7 +145,7 @@ const _sfc_main = {
       }
     ]);
     const handleQuickAction = (action) => {
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:236", "快捷操作点击:", action.name);
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:290", "快捷操作点击:", action.name);
       if (!checkUserAuthStatus()) {
         return;
       }
@@ -117,7 +153,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:247", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:301", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"
@@ -157,50 +193,19 @@ const _sfc_main = {
           return "auth-none";
       }
     };
-    const records = common_vendor.ref([
-      {
-        name: "川味小厨（总店）",
-        time: "2023-08-20 14:05:30",
-        weight: "1.56kg",
-        status: "待确定"
-      },
-      {
-        name: "川味小厨（总店）",
-        time: "2023-08-20 14:05:30",
-        weight: "1.56kg",
-        status: "已完成"
-      },
-      {
-        name: "川味小厨（总店）",
-        time: "2023-08-20 14:05:30",
-        weight: "1.56kg",
-        status: "已完成"
-      },
-      {
-        name: "川味小厨（总店）",
-        time: "2023-08-20 14:05:30",
-        weight: "1.56kg",
-        status: "已完成"
-      },
-      {
-        name: "川味小厨（总店）",
-        time: "2023-08-20 14:05:30",
-        weight: "1.56kg",
-        status: "已完成"
-      },
-      {
-        name: "川味小厨（总店）",
-        time: "2023-08-20 14:05:30",
-        weight: "1.56kg",
-        status: "已完成"
-      },
-      {
-        name: "川味小厨（总店）",
-        time: "2023-08-20 14:05:30",
-        weight: "1.56kg",
-        status: "已完成"
+    const records = common_vendor.ref([]);
+    const getRecordStatusText = (status) => {
+      switch (status) {
+        case 0:
+          return "待确认";
+        case 1:
+          return "已完成";
+        case 2:
+          return "无需收运";
+        default:
+          return "未知状态";
       }
-    ]);
+    };
     const goToSydAllList = () => {
       if (!checkUserAuthStatus()) {
         return;
@@ -222,7 +227,11 @@ const _sfc_main = {
           size: "30rpx"
         }),
         h: common_vendor.o(getUserInfo),
-        i: common_vendor.f(quickActions.value, (action, index, i0) => {
+        i: common_vendor.t(yyNum.value),
+        j: common_vendor.t(syNum.value),
+        k: common_vendor.t(dqNum.value),
+        l: common_vendor.t(wcNum.value),
+        m: common_vendor.f(quickActions.value, (action, index, i0) => {
           return {
             a: action.icon,
             b: common_vendor.t(action.name),
@@ -230,27 +239,32 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleQuickAction(action), action.id)
           };
         }),
-        j: common_vendor.o(goToSydAllList),
-        k: common_vendor.f(records.value, (item, index, i0) => {
+        n: common_vendor.o(goToSydAllList),
+        o: common_vendor.f(records.value, (item, index, i0) => {
           return {
-            a: common_vendor.t(item.name),
-            b: common_vendor.t(item.time),
-            c: common_vendor.t(item.status),
-            d: common_vendor.t(item.weight),
-            e: index
+            a: common_vendor.t(item.merchantName),
+            b: common_vendor.t(item.status === 1 ? item.arrivalTime : item.appointmentTime),
+            c: common_vendor.t(getRecordStatusText(item.status)),
+            d: item.status === 1 ? 1 : "",
+            e: item.status === 0 ? 1 : "",
+            f: item.status === 2 ? 1 : "",
+            g: common_vendor.t(item.status === 1 ? item.weight : item.estimateWeight),
+            h: index
           };
         }),
-        l: refreshing.value,
-        m: common_vendor.o(onRefresh),
-        n: showAuthModal.value
+        p: records.value.length === 0
+      }, records.value.length === 0 ? {} : {}, {
+        q: refreshing.value,
+        r: common_vendor.o(onRefresh),
+        s: showAuthModal.value
       }, showAuthModal.value ? {
-        o: common_assets._imports_1$1,
-        p: common_assets._imports_2,
-        q: common_vendor.o(handleAuth),
-        r: common_vendor.o(closeModal),
-        s: common_vendor.o(() => {
+        t: common_assets._imports_1$1,
+        v: common_assets._imports_2,
+        w: common_vendor.o(handleAuth),
+        x: common_vendor.o(closeModal),
+        y: common_vendor.o(() => {
         }),
-        t: common_vendor.o(closeModal)
+        z: common_vendor.o(closeModal)
       } : {});
     };
   }

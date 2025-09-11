@@ -36,10 +36,9 @@
                     <view class="order-item" v-for="(item, index) in allOrderList" :key="index">
                         <view class="order-header">
                             <view class="shop-info">
-                                <text class="shop-name">{{ item.shopName }}</text>
-                                <text
-                                    :class="['status-tag', item.status === '预约中' ? 'booking' : (item.status === '进行中' ? 'processing' : 'completed')]">
-                                    {{ item.status }}
+                                <text class="shop-name">{{ item.merchantName }}</text>
+                                <text :class="['status-tag', getStatusClass(item.status)]">
+                                    {{ getStatusText(item.status) }}
                                 </text>
                             </view>
 
@@ -47,27 +46,32 @@
                         <view class="order-content">
                             <view class="info-item">
                                 <text class="label">今日收运：</text>
-                                <text class="value">{{ item.deliveryCount }}桶</text>
+                                <text class="value">{{ item.deliveryCount ?? 0 }} 桶</text>
                             </view>
-
+                            <view class="info-item">
+                                <text class="label">预估重量：</text>
+                                <text class="value">{{ item.estimateWeight ?? 0 }} kg</text>
+                            </view>
                             <view class="info-item">
                                 <text class="label">收运重量：</text>
-                                <text class="value">{{ item.weight }}</text>
+                                <text class="value">{{ item.weight ?? 0 }} kg</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">车辆信息：</text>
-                                <text class="value">{{ item.carInfo }}</text>
+                                <text class="value">{{ item.registrationNumber ?? "暂无" }}</text>
+                            </view>
+                            <view class="info-item">
+                                <text class="label">预估时间：</text>
+                                <text class="value">{{ item.appointmentTime ?? "暂无" }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运时间：</text>
-                                <text class="value">{{ item.time }}</text>
+                                <text class="value">{{ item.arrivalTime ?? "暂无" }}</text>
                             </view>
                         </view>
                         <view class="order-footer">
-                            <uni-button size="mini" class="btn-cancel" v-if="item.status !== '已完成'">取消</uni-button>
-                            <uni-button size="mini" :type="item.status === '预约中' ? 'primary' : 'default'"
-                                class="btn-confirm">
-                                {{ item.status === '预约中' ? '确认收运' : (item.status === '进行中' ? '完成收运' : '查看详情') }}
+                            <uni-button v-if="item.status != 0" size="mini" type="default" class="btn-confirm">
+                                查看详情
                             </uni-button>
                         </view>
                     </view>
@@ -109,10 +113,8 @@ import {
 
 import { useUserStore } from '@/stores/user.js'
 
-//3 预约中 0 待收运 1 已完成
-const tabs = [{ key: "3", value: "预约中" }, { key: "0", value: "进行中" }, { key: "1", value: "已完成" }];
-//下标
-const currentTab = ref(0);
+
+
 
 const userStore = useUserStore();
 
@@ -120,12 +122,47 @@ const userStore = useUserStore();
 const selectedStatus = ref(''); // 选中的状态
 const selectedTimeRange = ref([]); // 选中的时间范围
 
-// 状态选项配置 (0 待收运 1 已完成 2 无需收运)
+// 状态选项配置 (0 待确认 1 已完成 2 无需收运)
 const statusOptions = ref([
-    { value: '0', text: '待收运' },
+    { value: '0', text: '待确认' },
     { value: '1', text: '已完成' },
     { value: '2', text: '无需收运' }
 ]);
+
+// 状态转换函数
+const getStatusText = (status) => {
+    console.log(123)
+    switch (status) {
+        case 0:
+        case '0':
+            return '待确认';
+        case 1:
+        case '1':
+            return '已完成';
+        case 2:
+        case '2':
+            return '无需收运';
+        default:
+            return '未知状态';
+    }
+};
+
+// 获取状态样式类名
+const getStatusClass = (status) => {
+    switch (status) {
+        case 0:
+        case '0':
+            return 'booking'; // 待确认 - 蓝色
+        case 1:
+        case '1':
+            return 'completed'; // 已完成 - 灰色
+        case 2:
+        case '2':
+            return 'processing'; // 无需收运 - 绿色
+        default:
+            return 'completed';
+    }
+};
 //返回上一页
 const back = () => {
     uni.navigateBack()
@@ -149,13 +186,12 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            merchantId: userStore.merchant?.id,
-            status: tabs[currentTab.value].key // 使用tabs中的key值
+            merchantId: 448,
         };
 
         // 添加筛选条件
         if (selectedStatus.value !== '') {
-            params.filterStatus = selectedStatus.value;
+            params.status = selectedStatus.value;
         }
 
         if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
@@ -168,15 +204,15 @@ const getNetwork = async () => {
 
         // 处理下拉刷新
         if (pageNum.value === 1) {
-            allOrderList.value = res.data.records || [];
+            allOrderList.value = res.data.list || [];
             uni.stopPullDownRefresh();
         } else {
             // 处理上拉加载更多
-            allOrderList.value = [...allOrderList.value, ...(res.data.records || [])];
+            allOrderList.value = [...allOrderList.value, ...(res.data.list || [])];
         }
 
         // 判断是否还有更多数据
-        if (res.data.records && res.data.records.length < 10) {
+        if (res.data.list && res.data.list.length < 10) {
             // 如果返回的数据少于每页数量，说明没有更多数据了
             loadingStatus.value = 'nomore';
         } else {
@@ -223,7 +259,6 @@ onReachBottom(() => {
 //下拉刷新
 onPullDownRefresh(() => {
     allOrderList.value = [];
-    currentTab.value = 0;
     pageNum.value = 1; // 重置页码为1
     getNetwork();
 })
@@ -373,21 +408,25 @@ onMounted(() => {
 
     .content-wrapper {
         flex: 1;
-        margin-top: 30rpx; // 为固定tab留出空间
+
 
         .content {
             height: 100%;
-            background-color: #ffffff;
         }
 
         .order-list {
-            padding: 0 30rpx; // 左右30rpx
+            padding: 30rpx; // 上下左右30rpx
 
             .order-item {
-                margin-bottom: 20rpx;
+                margin-bottom: 30rpx;
                 padding: 30rpx;
-                background-color: #ffffff;
+                background-color: #fff;
                 border-radius: 12rpx;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+
 
                 .order-header {
                     margin-bottom: 20rpx;
@@ -452,6 +491,7 @@ onMounted(() => {
                         }
 
                         .value {
+                            margin-left: 100rpx;
                             font-size: 26rpx;
                             color: rgba(61, 61, 61, 1);
                         }

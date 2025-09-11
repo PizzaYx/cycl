@@ -14,11 +14,11 @@ uni.addInterceptor('request', {
 
         // 添加access token到请求头
         const accessToken = uni.getStorageSync('access_token')
-        console.log('Access Token:', accessToken); // 调试输出
-        
+        console.log('Access Token:', accessToken) // 调试输出
+
         // 打印请求信息
-        console.log('【Request】', args.url, args.method || 'GET', args.data || {});
-        
+        console.log('【Request】', args.url, args.method || 'GET', args.data || {})
+
         if (accessToken) {
             args.header = args.header || {}
             args.header['authorization'] = `Bearer ${accessToken}`
@@ -32,41 +32,46 @@ uni.addInterceptor('request', {
 uni.addInterceptor('request', {
     success: async (res) => {
         // 打印响应信息
-        console.log('【Response】', res.config?.url, res.statusCode, res.data);
-        
-        // 处理401未授权
-        if (res.statusCode === 401) {
-            try {
-                await handleUnauthorized()
-                // 刷新token后重新发起请求
-                const newToken = uni.getStorageSync('access_token')
-                if (newToken) {
-                    // 重新发起请求
-                    const originalRequest = res.config || {}
-                    originalRequest.header = originalRequest.header || {}
-                    originalRequest.header['authorization'] = `Bearer ${newToken}`
+        console.log('【Response】', res.config?.url, res.statusCode, res.data)
 
-                    return uni.request(originalRequest)
-                } else {
-                    // 刷新失败，跳转登录
+        if (res.statusCode === 200) {
+            // 处理401未授权
+            if (res.data.code === 401) {
+                try {
+                    await handleUnauthorized()
+                    // 刷新token后重新发起请求
+                    const newToken = uni.getStorageSync('access_token')
+                    if (newToken) {
+                        // 重新发起请求
+                        const originalRequest = res.config || {}
+                        originalRequest.header = originalRequest.header || {}
+                        originalRequest.header['authorization'] = `Bearer ${newToken}`
+
+                        return uni.request(originalRequest)
+                    } else {
+                        // 刷新失败，跳转登录，但不抛出异常
+                        logout()
+                        // 返回一个空的成功响应，避免错误日志
+                        return Promise.resolve({ data: { code: 401, msg: '登录已过期' } })
+                    }
+                } catch (error) {
+                    // 刷新失败，跳转登录，但不抛出异常
+                    console.log('Token刷新失败:', error.message)
                     logout()
-                    return Promise.reject(res)
+                    // 返回一个空的成功响应，避免错误日志
+                    return Promise.resolve({ data: { code: 401, msg: '登录已过期' } })
                 }
-            } catch (error) {
-                // 刷新失败，跳转登录
-                logout()
-                return Promise.reject(res)
             }
-        } else if (res.data.code === 200) {
-            // 特殊处理：如果响应包含token信息，自动保存token（登录接口）
-            if (
-                res.data.data &&
-                res.data.data.access_token &&
-                res.data.data.refresh_token
-            ) {
-                saveToken(res.data.data)
+            if (res.data.code === 200) {
+                // 特殊处理：如果响应包含token信息，自动保存token（登录接口）
+                if (res.data.data && res.data.data.access_token && res.data.data.refresh_token) {
+                    saveToken(res.data.data)
+                }
+                return res.data
+            } else {
+                // 处理业务错误（如500等），仍然返回数据而不是undefined
+                return res.data
             }
-            return res.data
         } else {
             handleRequestError(res.data)
             return Promise.reject(res.data)
@@ -101,25 +106,37 @@ async function handleUnauthorized() {
 
     try {
         // 检查refresh token是否过期
+        console.log('未授权，正在处理...')
         const refreshTokenStr = uni.getStorageSync('refresh_token')
         const refreshExpireTime = uni.getStorageSync('refresh_expire_time')
+        console.log('检查refresh token:', refreshTokenStr ? '存在' : '不存在', refreshExpireTime)
 
         if (!refreshTokenStr || !refreshExpireTime) {
             // refresh token不存在，直接跳转登录
-            throw new Error('未登录')
+            console.log('refresh token不存在，跳转登录')
+            logout()
+            // 不抛出异常，而是返回失败状态
+            return Promise.resolve(false)
         }
 
         // 检查refresh token是否过期
         const now = Date.now()
         if (now > refreshExpireTime) {
             // refresh token过期，跳转登录
-            throw new Error('登录已过期')
+            console.log('refresh token已过期，跳转登录')
+            logout()
+            // 不抛出异常，而是返回失败状态
+            return Promise.resolve(false)
         }
 
         // 刷新token
         refreshingPromise = refreshAccessToken(refreshTokenStr)
-
-        await refreshingPromise
+        const result = await refreshingPromise
+        return result
+    } catch (error) {
+        console.log('处理未授权异常:', error.message)
+        logout()
+        return Promise.resolve(false)
     } finally {
         // 清除刷新状态
         refreshingPromise = null
@@ -130,18 +147,29 @@ async function handleUnauthorized() {
  * 刷新access token
  */
 async function refreshAccessToken(refreshTokenStr) {
-    const res = await post('/api/apiRefresh', {
-        refresh_token: refreshTokenStr,
-    })
+    try {
+        const res = await post('/api/apiRefresh', {
+            refresh_token: refreshTokenStr,
+        })
 
-    if (res.code === 200) {
-        // 保存新的token信息
-        saveToken(res.data)
-        return res
-    } else {
-        // 刷新失败，清除本地存储
+        if (res.code === 200) {
+            // 保存新的token信息
+            saveToken(res.data)
+            console.log('Token刷新成功')
+            return true
+        } else {
+            // 刷新失败，清除本地存储
+            console.log('Token刷新失败:', res.msg || '未知错误')
+            clearToken()
+            logout()
+            return false
+        }
+    } catch (error) {
+        // 网络错误等异常情况
+        console.log('Token刷新网络异常:', error.message || '未知错误')
         clearToken()
-        throw new Error(res.msg || '刷新token失败')
+        logout()
+        return false
     }
 }
 
@@ -193,6 +221,27 @@ function handleRequestError(data) {
     }
 }
 
+// 基础HTTP方法
+export function get(url, data = {}, config = {}) {
+    return request({ url, data, method: 'GET', ...config })
+}
+
+export function post(url, data = {}, config = {}) {
+    return request({ url, data, method: 'POST', ...config })
+}
+
+export function put(url, data = {}, config = {}) {
+    return request({ url, data, method: 'PUT', ...config })
+}
+
+export function del(url, data = {}, config = {}) {
+    return request({ url, data, method: 'DELETE', ...config })
+}
+
 export default {
-    request
+    request,
+    get,
+    post,
+    put,
+    del,
 }

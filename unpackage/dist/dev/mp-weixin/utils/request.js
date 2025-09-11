@@ -21,28 +21,34 @@ common_vendor.index.addInterceptor("request", {
   success: async (res) => {
     var _a;
     common_vendor.index.__f__("log", "at utils/request.js:35", "【Response】", (_a = res.config) == null ? void 0 : _a.url, res.statusCode, res.data);
-    if (res.statusCode === 401) {
-      try {
-        await handleUnauthorized();
-        const newToken = common_vendor.index.getStorageSync("access_token");
-        if (newToken) {
-          const originalRequest = res.config || {};
-          originalRequest.header = originalRequest.header || {};
-          originalRequest.header["authorization"] = `Bearer ${newToken}`;
-          return common_vendor.index.request(originalRequest);
-        } else {
+    if (res.statusCode === 200) {
+      if (res.data.code === 401) {
+        try {
+          await handleUnauthorized();
+          const newToken = common_vendor.index.getStorageSync("access_token");
+          if (newToken) {
+            const originalRequest = res.config || {};
+            originalRequest.header = originalRequest.header || {};
+            originalRequest.header["authorization"] = `Bearer ${newToken}`;
+            return common_vendor.index.request(originalRequest);
+          } else {
+            logout();
+            return Promise.resolve({ data: { code: 401, msg: "登录已过期" } });
+          }
+        } catch (error) {
+          common_vendor.index.__f__("log", "at utils/request.js:59", "Token刷新失败:", error.message);
           logout();
-          return Promise.reject(res);
+          return Promise.resolve({ data: { code: 401, msg: "登录已过期" } });
         }
-      } catch (error) {
-        logout();
-        return Promise.reject(res);
       }
-    } else if (res.data.code === 200) {
-      if (res.data.data && res.data.data.access_token && res.data.data.refresh_token) {
-        saveToken(res.data.data);
+      if (res.data.code === 200) {
+        if (res.data.data && res.data.data.access_token && res.data.data.refresh_token) {
+          saveToken(res.data.data);
+        }
+        return res.data;
+      } else {
+        return res.data;
       }
-      return res.data;
     } else {
       handleRequestError(res.data);
       return Promise.reject(res.data);
@@ -67,31 +73,52 @@ async function handleUnauthorized() {
     return refreshingPromise;
   }
   try {
+    common_vendor.index.__f__("log", "at utils/request.js:109", "未授权，正在处理...");
     const refreshTokenStr = common_vendor.index.getStorageSync("refresh_token");
     const refreshExpireTime = common_vendor.index.getStorageSync("refresh_expire_time");
+    common_vendor.index.__f__("log", "at utils/request.js:112", "检查refresh token:", refreshTokenStr ? "存在" : "不存在", refreshExpireTime);
     if (!refreshTokenStr || !refreshExpireTime) {
-      throw new Error("未登录");
+      common_vendor.index.__f__("log", "at utils/request.js:116", "refresh token不存在，跳转登录");
+      logout();
+      return Promise.resolve(false);
     }
     const now = Date.now();
     if (now > refreshExpireTime) {
-      throw new Error("登录已过期");
+      common_vendor.index.__f__("log", "at utils/request.js:126", "refresh token已过期，跳转登录");
+      logout();
+      return Promise.resolve(false);
     }
     refreshingPromise = refreshAccessToken(refreshTokenStr);
-    await refreshingPromise;
+    const result = await refreshingPromise;
+    return result;
+  } catch (error) {
+    common_vendor.index.__f__("log", "at utils/request.js:137", "处理未授权异常:", error.message);
+    logout();
+    return Promise.resolve(false);
   } finally {
     refreshingPromise = null;
   }
 }
 async function refreshAccessToken(refreshTokenStr) {
-  const res = await post("/api/apiRefresh", {
-    refresh_token: refreshTokenStr
-  });
-  if (res.code === 200) {
-    saveToken(res.data);
-    return res;
-  } else {
+  try {
+    const res = await post("/api/apiRefresh", {
+      refresh_token: refreshTokenStr
+    });
+    if (res.code === 200) {
+      saveToken(res.data);
+      common_vendor.index.__f__("log", "at utils/request.js:158", "Token刷新成功");
+      return true;
+    } else {
+      common_vendor.index.__f__("log", "at utils/request.js:162", "Token刷新失败:", res.msg || "未知错误");
+      clearToken();
+      logout();
+      return false;
+    }
+  } catch (error) {
+    common_vendor.index.__f__("log", "at utils/request.js:169", "Token刷新网络异常:", error.message || "未知错误");
     clearToken();
-    throw new Error(res.msg || "刷新token失败");
+    logout();
+    return false;
   }
 }
 function saveToken(tokenData) {
@@ -120,6 +147,9 @@ function handleRequestError(data) {
       icon: "none"
     });
   }
+}
+function post(url, data = {}, config = {}) {
+  return request({ url, data, method: "POST", ...config });
 }
 exports.request = request;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/utils/request.js.map

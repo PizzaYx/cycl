@@ -87,20 +87,21 @@
 }
 .container .content-wrapper.data-v-b6e750bc {
   flex: 1;
-  margin-top: 30rpx;
 }
 .container .content-wrapper .content.data-v-b6e750bc {
   height: 100%;
-  background-color: #ffffff;
 }
 .container .content-wrapper .order-list.data-v-b6e750bc {
-  padding: 0 30rpx;
+  padding: 30rpx;
 }
 .container .content-wrapper .order-list .order-item.data-v-b6e750bc {
-  margin-bottom: 20rpx;
+  margin-bottom: 30rpx;
   padding: 30rpx;
-  background-color: #ffffff;
+  background-color: #fff;
   border-radius: 12rpx;
+}
+.container .content-wrapper .order-list .order-item.data-v-b6e750bc:last-child {
+  margin-bottom: 0;
 }
 .container .content-wrapper .order-list .order-item .order-header.data-v-b6e750bc {
   margin-bottom: 20rpx;
@@ -154,6 +155,7 @@
   color: rgba(61, 61, 61, 0.5);
 }
 .container .content-wrapper .order-list .order-item .order-content .info-item .value.data-v-b6e750bc {
+  margin-left: 100rpx;
   font-size: 26rpx;
   color: #3d3d3d;
 }

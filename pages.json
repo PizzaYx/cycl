@@ -66,6 +66,21 @@
         		"navigationBarTitleText" : "临时预约",
 				"navigationStyle": "custom"
         	}
+        },
+        {
+        	"path" : "pages/collection/sfDetails",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "收运详情",
+                "navigationStyle": "custom"
+        	}
+        },
+        {
+        	"path" : "pages/collection/syReport",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "收运上报"
+        	}
         }
     ],
     "globalStyle": {

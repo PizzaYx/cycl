@@ -21,11 +21,21 @@ export const useUserStore = defineStore('user', {
         //merchant 商户信息
         merchant: (state) => state.userInfo?.merchant || null,
 
-        // 头像（使用昵称第一个字）
+        //收运端--师傅信息
+        sfmerchant: (state) => state.userInfo?.driver || null,
+
+        // 商户头像（使用昵称第一个字）
         userAvatar: (state) => {
-            const nickName = state.userInfo?.nickName
+            const name = state.userInfo?.name
             // 如果有昵称，取第一个字；如果没有，显示默认头像文字
-            return nickName ? nickName.charAt(0) : '商'
+            return name ? name.charAt(0) : '商'
+        },
+
+        //收运端--师傅头像
+        userSFAvatar: (state) => {
+            const name = state.userInfo?.nickName
+            // 如果有昵称，取第一个字；如果没有，显示默认头像文字
+            return name ? name.charAt(0) : '收'
         },
 
         // 是否已认证（merchant不为null且status为1表示已认证）
@@ -70,24 +80,42 @@ export const useUserStore = defineStore('user', {
         setUserInfo(userInfo) {
             this.userInfo = userInfo
             this.isLoggedIn = true
-            console.log('完整userInfo对象:', JSON.stringify(userInfo, null, 2))
+            console.log('完整userInfo对象1:', JSON.stringify(userInfo, null, 2))
         },
 
         // 从服务器获取用户信息
         async fetchUserInfo() {
             try {
                 const res = await apiGetInfo()
-                if (res.code === 200) {
-                    this.setUserInfo(res.user)
-                    console.log('用户信息获取成功:', res.user)
-                    return res.user
+                console.log('fetchUserInfo收到响应:', res)
+
+                // 检查响应是否存在
+                if (!res) {
+                    console.log('响应为空，可能是401跳转情况')
+                    return null
+                }
+
+                // 处理响应结构：可能是 {code: 200, ...} 或 {data: {code: 401, ...}}
+                const responseData = res.data || res
+                const code = responseData.code
+
+                if (code === 200) {
+                    this.setUserInfo(res.user || responseData.user)
+                    console.log('用户信息获取成功:', res.user || responseData.user)
+                    return res.user || responseData.user
+                } else if (code === 401) {
+                    // 401错误已被request.js处理（跳转登录），这里不需要抛出异常
+                    console.log('用户未登录，已跳转到登录页')
+                    return null
                 } else {
-                    console.error('获取用户信息失败:', res.msg)
-                    throw new Error(res.msg || '获取用户信息失败')
+                    console.log('获取用户信息失败，code:', code, 'msg:', responseData.msg)
+                    // 不抛出异常，而是返回null
+                    return null
                 }
             } catch (error) {
-                console.error('获取用户信息异常:', error)
-                throw error
+                console.log('获取用户信息异常:', error.message || error)
+                // 不重新抛出异常，而是返回null
+                return null
             }
         },
 
@@ -106,15 +134,14 @@ export const useUserStore = defineStore('user', {
                 return this.userInfo
             }
 
-            try {
-                // 尝试获取用户信息（request.js会自动处理token验证）
-                await this.fetchUserInfo()
-                return this.userInfo
-            } catch (error) {
-                console.error('获取用户信息失败:', error)
-                // request.js会自动处理401跳转，这里不需要额外处理
-                throw error
+            // 尝试获取用户信息（request.js会自动处理token验证）
+            const result = await this.fetchUserInfo()
+            if (result === null) {
+                // 获取失败（可能是401、网络错误等），返回null而不抛出异常
+                console.log('用户信息获取失败，可能未登录或网络异常')
+                return null
             }
+            return this.userInfo
         },
 
         // 清除用户信息

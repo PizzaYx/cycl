@@ -119,8 +119,6 @@ import {
 
 import { useUserStore } from '@/stores/user.js'
 
-//下标
-const currentTab = ref(0);
 
 const userStore = useUserStore();
 

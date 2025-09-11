@@ -1,14 +1,659 @@
+<!-- 收运端首页 -->
 <template>
-	<!-- 收运端 -->
-	<view class="">
-		收运端主页
-	</view>
+    <view class="layout">
+        
+        <scroll-view scroll-y refresher-enabled :refresher-triggered="refreshing" @refresherrefresh="onRefresh"
+            class="scroll-view">
+            <view class="headImage">
+                <image src="/static/headTopBg.png" mode="aspectFill"></image>
+            </view>
+
+            <view class="header" @tap="getUserInfo">
+                <view class="avatar">
+                    <view class="avatar-text">{{ userStore.userSFAvatar }}</view>
+                </view>
+                <view class="info">
+                    <view class="name">{{ userStore.nickName || '未登录' }}</view>
+                    <view class="sub-name">{{ userStore.sfmerchant?.registrationNumber || '未设置车牌' }}</view>
+                    <view class="auth-tag">工作中</view>
+                </view>
+                <uni-icons type="right" size="30rpx"></uni-icons>
+            </view>
+
+
+            <!-- 数据统计 -->
+            <view class="statistics">
+                <view class="stat-item">
+                    <view class="number">{{ yyNum }}</view>
+                    <view class="label">已收运总量</view>
+                </view>
+                <view class="stat-item">
+                    <view class="number">{{ syNum }}</view>
+                    <view class="label">未收运</view>
+                </view>
+                <view class="stat-item">
+                    <view class="number">{{ dqNum }}</view>
+                    <view class="label">已收运</view>
+                </view>
+
+            </view>
+
+            <!-- 快捷操作 -->
+            <view class="section-title">快捷操作</view>
+            <view class="quick-actions">
+                <view v-for="(action, index) in quickActions" :key="action.id" class="action-item"
+                    @tap="handleQuickAction(action)">
+                    <image :src="action.icon" mode="aspectFill"></image>
+                    <text>{{ action.name }}</text>
+                </view>
+            </view>
+
+            <!-- 收运记录 -->
+            <view class="records-header">
+                <text class="title">收运明细</text>
+                <text class="more" @tap="goToSydAllList">更多 》</text>
+
+            </view>
+            <view class="records">
+                <view class="record-list">
+                    <view v-for="(item, index) in records" :key="index" class="record-item" key="item.id">
+                        <view class="record-main">
+                            <view class="shop-name">{{ item.merchantName }}</view>
+                            <view class="record-time">{{ item.status === 1 ? item.arrivalTime : item.appointmentTime }}
+                            </view>
+                        </view>
+                        <view class="record-right">
+                            <view class="status" :class="{
+                                'status-completed': item.status === 1,
+                                'status-pending': item.status === 0,
+                                'status-default': item.status === 2
+                            }">
+                                {{ getRecordStatusText(item.status) }}
+                            </view>
+                            <view class="weight">{{ item.status === 1 ? item.weight : item.estimateWeight }}kg</view>
+                        </view>
+                    </view>
+                    <view v-if="records.length === 0" class="no-records">暂无收运明细</view>
+                </view>
+            </view>
+        </scroll-view>
+    </view>
 </template>
 
 <script setup>
-	
+import { ref, onMounted } from 'vue'
+import { useUserStore } from '@/stores/user.js'
+import { apiGetDriverTodayStatistics } from '@/api/apis.js'
+
+// 使用用户 store
+const userStore = useUserStore()
+
+const yyNum = ref(0) // 已收运总量
+const syNum = ref(0) // 未收运
+const dqNum = ref(0) // 已收运
+
+// 下拉刷新状态
+const refreshing = ref(false)
+
+
+// 页面加载时确保用户信息存在
+onMounted(async () => {
+    try {
+        const userInfo = await userStore.ensureUserInfo()
+
+        if (userInfo === null) {
+            // 用户未登录，已跳转到登录页，不需要继续执行
+            console.log('用户未登录，已跳转到登录页')
+            return
+        }
+
+        getMerchantStatistics()
+
+    } catch (error) {
+        // 其他非401错误的处理
+        console.error('页面初始化失败:', error)
+    }
+})
+
+//获取商户首页数据统计
+const getMerchantStatistics = async () => {
+    const res = await apiGetDriverTodayStatistics({
+        driverId: userStore.sfmerchant?.id
+    })
+
+    if (res.code === 200) {
+        dqNum.value = res.data.confirmNum;
+        yyNum.value = res.data.weightNum;
+        syNum.value = res.data.notConfirmNum;
+    }
+}
+
+
+//获取收运端首页收运记录显示前5条
+const getMerchantSydList = async () => {
+    const res = await apiGetPlanAllPage({
+        pageNum: 1,
+        pageSize: 5,
+        merchantId: userStore.merchant?.id
+    })
+    if (res.code === 200) {
+        records.value = res.data.list;
+        //0 待确认 1 已完成 2无需收运
+    } else {
+        console.error('收运端首页收运明细失败', res.message)
+    }
+}
+
+const getUserInfo = () => {
+    // 检查用户认证状态并执行相应操作
+    
+        // 已认证，跳转到用户页面
+        uni.navigateTo({
+            url: '/pages/user/user'
+        })
+    
+}
+
+// 下拉刷新处理
+const onRefresh = async () => {
+    refreshing.value = true
+    try {
+        // 重新获取用户信息
+        await userStore.fetchUserInfo()
+
+    } catch (error) {
+        console.error('刷新失败:', error)
+        uni.showToast({
+            title: '刷新失败',
+            icon: 'none'
+        })
+    } finally {
+        refreshing.value = false
+    }
+}
+
+
+
+// 快捷操作配置
+const quickActions = ref([
+    {
+        id: 'appointment',
+        name: '今日收运',
+        icon: '/static/ssd/syleft.png',
+        url: '/pages/collection/sfDetails' // 今日详情
+    },
+    {
+        id: 'records',
+        name: '工单统计',
+        icon: '/static/ssd/sydright.png',
+        url: '' // 收运清单页面
+    },
+])
+
+// 统一的快捷操作跳转处理
+const handleQuickAction = (action) => {
+   
+
+    // 检查页面是否存在（可以根据实际情况调整）
+    if (action.url) {
+        uni.navigateTo({
+            url: action.url,
+            fail: (err) => {
+                console.error('页面跳转失败:', err)
+                uni.showToast({
+                    title: '页面暂未开放',
+                    icon: 'none'
+                })
+            }
+        })
+    } else {
+        uni.showToast({
+            title: '功能开发中',
+            icon: 'none'
+        })
+    }
+}
+
+
+
+
+const records = ref([]); // 收运明细列表
+
+// 获取收运记录状态文字
+const getRecordStatusText = (status) => {
+    switch (status) {
+        case 0:
+            return '待确认';
+        case 1:
+            return '已完成';
+        case 2:
+            return '无需收运';
+        default:
+            return '未知状态';
+    }
+};
+
+// 跳转到收运明细页面
+const goToSydAllList = () => {
+    // 检查用户认证状态
+    if (!checkUserAuthStatus()) {
+        // 未通过认证检查，不继续执行
+        return
+    }
+    uni.navigateTo({
+        url: '/pages/merchant/sydAllList'
+    })
+}
 </script>
 
 <style lang="scss" scoped>
-	       
+.layout {
+    position: relative;
+    min-height: 100vh;
+    background-color: $bg-theme-color;
+
+    .scroll-view {
+        height: 100vh;
+    }
+
+    .headImage {
+        position: absolute;
+        /* 绝对定位 */
+        top: 0;
+        left: 0;
+        z-index: 0;
+        /* 置于其他元素下方 */
+        width: 100%;
+        height: 442rpx;
+        overflow: hidden;
+
+        /* 防止内容溢出 */
+        image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    }
+
+    .header {
+        position: relative;
+        padding: 214rpx 30rpx 26rpx;
+        width: 100%;
+        display: flex;
+
+        .avatar {
+            width: 120rpx;
+            height: 120rpx;
+            margin-right: 24rpx;
+            background-color: rgba(7, 193, 96, 1);
+            border-radius: 60rpx;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .avatar-text {
+                font-size: 48rpx;
+                font-weight: 500;
+                color: #fff;
+            }
+
+            image {
+                width: 100%;
+                height: 100%;
+                border-radius: 60rpx;
+            }
+        }
+
+        .info {
+            flex: 1;
+            /* 占满剩余宽度 */
+            height: 120rpx;
+            /* 或 min-height: 120rpx; 与头像同高 */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+
+            .name {
+                font-weight: 600;
+                font-size: 32rpx;
+                color: black;
+                line-height: 32rpx;
+            }
+
+            .sub-name {
+                font-weight: 400;
+                font-size: 24rpx;
+                color: #131313;
+            }
+
+            .auth-tag {
+                width: 120rpx;
+                height: 40rpx;
+
+                font-size: 22rpx;
+                border-radius: 10px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                background-color: rgba(7, 193, 96, 1); // 绿色 
+                color: #fff;
+
+            }
+        }
+    }
+
+    .statistics {
+        position: relative;
+        height: 128rpx;
+        display: flex;
+        justify-content: space-between;
+        background-color: #fff;
+        border-radius: 20rpx;
+        margin: 0 30rpx 30rpx;
+        align-items: center;
+        padding: 0 28rpx;
+
+        .stat-item {
+            position: relative;
+            /* 关键：为伪元素提供定位上下文 */
+            height: 100%;
+            /* 关键：子项高度等于父容器高度 128rpx */
+            flex: 1;
+            /* 等宽（可选） */
+            display: flex;
+            /* 让内部内容垂直居中 */
+            flex-direction: column;
+            justify-content: center;
+            /* 垂直居中内容 */
+            text-align: center;
+            padding: 0 20rpx;
+
+            .number {
+                font-size: 32rpx;
+                font-weight: 500;
+                color: rgba(61, 61, 61, 1);
+                margin-bottom: 8rpx;
+            }
+
+            .label {
+                font-size: 24rpx;
+                color: rgba(61, 61, 61, 1);
+            }
+
+            &:not(:first-child)::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                top: 30rpx;
+                bottom: 30rpx;
+                width: 2rpx;
+                background: rgba(216, 216, 216, 1);
+                transform: scaleX(0.5);
+                transform-origin: left center;
+            }
+        }
+    }
+
+    .section-title {
+        padding: 10rpx 30rpx;
+        font-size: 28rpx;
+        font-weight: 400;
+        margin-bottom: 10rpx;
+    }
+
+    .quick-actions {
+        position: relative;
+
+        border-radius: 16rpx;
+        height: 168rpx;
+        padding: 18rpx 20rpx;
+        margin: 0 30rpx 30rpx 30rpx;
+        display: flex;
+        // justify-content: space-around;
+        align-items: center;
+        background-color: #fff;
+
+        .action-item {
+            flex: 1;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            gap: 16rpx;
+            width: 336rpx;
+            height: 120rpx;
+
+            image {
+                width: 96rpx;
+                height: 96rpx;
+                border-radius: 16rpx;
+            }
+
+            text {
+                font-size: 26rpx;
+                color: rgba(61, 61, 61, 1);
+                text-align: center;
+            }
+        }
+    }
+
+    .records-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10rpx 30rpx;
+        margin-bottom: 10rpx;
+
+        .title {
+            font-size: 28rpx;
+            font-weight: 400;
+            color: rgba(19, 19, 19, 1);
+        }
+
+        .more {
+            font-size: 24rpx;
+            font-weight: 400;
+            color: rgba(19, 19, 19, 0.50);
+            display: flex;
+            align-items: center;
+            gap: 4rpx;
+        }
+    }
+
+    .records {
+        position: relative;
+        z-index: 1;
+        background-color: $bg-theme-color;
+        border-radius: 16rpx;
+        margin: 0 30rpx 30rpx 30rpx;
+
+        .record-list {
+            .record-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                height: 138rpx;
+                margin-bottom: 22rpx;
+                background-color: #fff;
+                border-radius: 16rpx;
+                padding: 0 30rpx 0 30rpx;
+
+
+                .record-main {
+                    .shop-name {
+                        font-size: 26rpx;
+                        color: rgba(19, 19, 19, 1);
+                        margin-bottom: 8rpx;
+                    }
+
+                    .record-time {
+                        font-size: 24rpx;
+                        color: rgba(61, 61, 61, 0.50);
+                    }
+                }
+
+                .record-right {
+                    text-align: right;
+
+                    .weight {
+                        font-size: 32rpx;
+                        font-weight: 400;
+                        color: rgba(61, 61, 61, 1);
+                        margin-bottom: 8rpx;
+                    }
+
+                    .status {
+                        font-size: 24rpx;
+                        border-radius: 8rpx;
+                        width: 96rpx;
+                        height: 40rpx;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .status-completed {
+                        color: #07C160;
+                        background: rgba(7, 193, 96, 0.2);
+                        border-radius: 8rpx 8rpx 8rpx 8rpx;
+                    }
+
+                    .status-pending {
+                        color: #FFA100;
+                        background: rgba(255, 195, 0, 0.16);
+                        border-radius: 8rpx 8rpx 8rpx 8rpx;
+                    }
+
+                    .status-default {
+                        color: #666;
+                        background-color: rgba(102, 102, 102, 0.1);
+                    }
+                }
+            }
+
+            .no-records {
+                text-align: center;
+                color: #999;
+                padding: 40rpx 0;
+            }
+        }
+    }
+
+    // 认证弹窗样式
+    .auth-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+
+        .auth-modal-content {
+            position: relative;
+            width: 600rpx;
+            height: 700rpx;
+            border-radius: 24rpx;
+            overflow: hidden;
+
+            .auth-modal-bg {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 634rpx;
+                height: 608rpx;
+                z-index: 1;
+
+                image {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+            }
+
+            .auth-modal-body {
+                position: relative;
+                z-index: 2;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: start;
+
+                .auth-icon {
+                    width: 296rpx;
+                    height: 298rpx;
+                    margin: 25rpx 0;
+
+                    image {
+                        width: 100%;
+                        height: 100%;
+                        object-fit: contain;
+                    }
+                }
+
+                .auth-title {
+                    font-size: 34rpx;
+                    font-weight: 500;
+                    color: rgba(61, 61, 61, 1);
+                    margin-bottom: 25rpx;
+                    text-align: center;
+                }
+
+                .auth-desc {
+                    font-size: 28rpx;
+                    color: rgba(61, 61, 61, 0.50);
+                    text-align: center;
+                    margin-bottom: 35rpx;
+                }
+
+                .auth-button {
+                    width: 322rpx;
+                    height: 80rpx;
+                    background: linear-gradient(135deg, #07C160 0%, #05A64F 100%);
+                    border-radius: 40rpx;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #fff;
+                    font-size: 32rpx;
+                    box-shadow: 0 8rpx 20rpx rgba(7, 193, 96, 0.3);
+
+                    &:active {
+                        transform: scale(0.95);
+                        transition: transform 0.1s;
+                    }
+                }
+            }
+
+            .close-btn {
+                position: absolute;
+                bottom: 0rpx;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 60rpx;
+                height: 60rpx;
+                background-color: rgba(255, 255, 255, 0.9);
+                border-radius: 30rpx;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 3;
+
+                .close-icon {
+                    font-size: 40rpx;
+                    color: #999;
+                    line-height: 1;
+                }
+
+                &:active {
+                    background-color: rgba(255, 255, 255, 0.7);
+                }
+            }
+        }
+    }
+}
 </style>

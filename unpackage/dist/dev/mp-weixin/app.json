@@ -8,7 +8,9 @@
     "pages/merchant/sydAllList",
     "pages/merchant/sydStatistics",
     "pages/user/user",
-    "pages/merchant/sydReservation"
+    "pages/merchant/sydReservation",
+    "pages/collection/sfDetails",
+    "pages/collection/syReport"
   ],
   "window": {
     "navigationBarTextStyle": "black",
