@@ -56,42 +56,52 @@
             "path": "pages/user/user",
             "style": {
                 "navigationBarTitleText": "个人",
-				"navigationStyle": "custom"
+                "navigationStyle": "custom"
             }
         },
         {
-        	"path" : "pages/merchant/sydReservation",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "临时预约",
-				"navigationStyle": "custom"
-        	}
-        },
-        {
-        	"path" : "pages/collection/sfDetails",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "收运详情",
+            "path": "pages/merchant/sydReservation",
+            "style": {
+                "navigationBarTitleText": "临时预约",
                 "navigationStyle": "custom"
-        	}
+            }
         },
         {
-        	"path" : "pages/collection/syReport",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "收运上报",
-                 "navigationStyle": "custom"
-        	}
+            "path": "pages/collection/sfDetails",
+            "style": {
+                "navigationBarTitleText": "收运详情",
+                "navigationStyle": "custom"
+            }
         },
         {
-        	"path" : "pages/collection/sfsyRecord",
+            "path": "pages/collection/syReport",
+            "style": {
+                "navigationBarTitleText": "收运上报",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/collection/sfsyRecord",
+            "style": {
+                "navigationBarTitleText": "收运记录",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/collection/syAllMap",
+            "style": {
+                "navigationBarTitleText": "收运地图详情",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+        	"path" : "pages/collection/syCheckDetail",
         	"style" : 
         	{
-        		"navigationBarTitleText" : "收运记录",
+        		"navigationBarTitleText" : "收运详细",
 				"navigationStyle": "custom"
         	}
         }
-        
     ],
     "globalStyle": {
         "navigationBarTextStyle": "black",

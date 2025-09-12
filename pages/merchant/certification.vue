@@ -139,6 +139,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { apiPostMerchantCheck, apiGetMerchantCheck } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
+import { uploadUrl, createUploadHeaders } from '@/utils/config.js'
 
 //返回上一页
 const back = () => {
@@ -404,14 +405,7 @@ const formRules = {
 }
 
 // 文件上传配置
-const uploadUrl = 'http://192.168.0.118:8089/api/merchantapi/webupload'
-const uploadHeaders = computed(() => {
-    const accessToken = uni.getStorageSync('access_token')
-    return {
-        'authorization': accessToken ? `Bearer ${accessToken}` : ''
-    }
-})
-
+const uploadHeaders = createUploadHeaders()
 
 // 提交状态
 const submitting = ref(false)
@@ -1140,4 +1134,10 @@ const submitAuth = async () => {
         font-size: 34rpx !important;
     }
 }
+
 </style>
+
+
+
+
+

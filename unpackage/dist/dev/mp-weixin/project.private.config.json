@@ -3,11 +3,39 @@
     "miniprogram": {
       "list": [
         {
-          "name": "pages/collection/syReport",
-          "pathName": "pages/collection/syReport",
+          "name": "收运端记录",
+          "pathName": "pages/collection/sfsyRecord",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "pages/merchant/sydAllList",
+          "pathName": "pages/merchant/sydAllList",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/collection/syCheckDetail",
+          "pathName": "pages/collection/syCheckDetail",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/collection/syAllMap",
+          "pathName": "pages/collection/syAllMap",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/collection/syReport",
+          "pathName": "pages/collection/syReport",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "pages/collection/sfDetails",

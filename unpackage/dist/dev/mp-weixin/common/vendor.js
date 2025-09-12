@@ -7389,9 +7389,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "192.168.0.104,127.0.0.1";
+  const hosts = "127.0.0.1,192.168.0.133";
   const port = "8090";
-  const id = "mp-weixin_ntTuM3";
+  const id = "mp-weixin__z4gNP";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9108,6 +9108,11 @@ const Pinia = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.definePropert
 const createLifeCycleHook = (lifecycle, flag = 0) => (hook, target = getCurrentInstance()) => {
   !isInSSRComponentSetup && injectHook(lifecycle, hook, target);
 };
+const onShow = /* @__PURE__ */ createLifeCycleHook(
+  ON_SHOW,
+  1 | 2
+  /* HookFlags.PAGE */
+);
 const onLoad = /* @__PURE__ */ createLifeCycleHook(
   ON_LOAD,
   2
@@ -9208,6 +9213,20 @@ const pages = [
     path: "pages/collection/sfsyRecord",
     style: {
       navigationBarTitleText: "收运记录",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/collection/syAllMap",
+    style: {
+      navigationBarTitleText: "收运地图详情",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/collection/syCheckDetail",
+    style: {
+      navigationBarTitleText: "收运详细",
       navigationStyle: "custom"
     }
   }
@@ -12082,11 +12101,13 @@ exports.f = f$1;
 exports.index = index;
 exports.initVueI18n = initVueI18n;
 exports.n = n$1;
+exports.nextTick$1 = nextTick$1;
 exports.o = o$1;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
 exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
+exports.onShow = onShow;
 exports.p = p$1;
 exports.r = r$1;
 exports.reactive = reactive;

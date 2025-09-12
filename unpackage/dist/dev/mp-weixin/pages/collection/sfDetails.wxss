@@ -24,9 +24,10 @@
 /* 透明度 */
 /* 文章场景相关 */
 .container.data-v-b624ea25 {
-  padding: 30rpx;
   background-color: #f7f7f7;
-  height: 100vh;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 0 30rpx 30rpx;
 }
 .container .header-progress-container.data-v-b624ea25 {
   background: #FFFFFF;
@@ -225,13 +226,44 @@
 }
 .container .task-list.data-v-b624ea25 {
   margin-top: 20rpx;
+  position: relative;
+  /* 移除左右内边距，因为任务项本身已经有30rpx的padding */
+  /* 移除整体时间轴线，改用分段方式 */
 }
 .container .task-list .task-item.data-v-b624ea25 {
   background: #FFFFFF;
   border-radius: 16rpx;
   padding: 30rpx;
   margin-bottom: 0;
-  /* 移除任务项之间的间隔 */
+  /* 移除任务项之间的间隔，让图标可以连线 */
+  position: relative;
+  z-index: 1;
+  /* 为除了第一个item添加上半段线条（从item顶部到uni-icons顶部） */
+  /* 为除了最后一个item添加下半段线条（从uni-icons底部到item底部） */
+}
+.container .task-list .task-item.data-v-b624ea25:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: 49rpx;
+  /* uni-icons图标中心位置 */
+  top: 0;
+  width: 2rpx;
+  height: 35rpx;
+  /* 从item顶部到uni-icons顶部 */
+  background-color: #d8d8d8;
+  z-index: 1;
+}
+.container .task-list .task-item.data-v-b624ea25:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 49rpx;
+  /* uni-icons图标中心位置 */
+  bottom: 0;
+  width: 2rpx;
+  height: 382rpx;
+  /* 从uni-icons底部到item底部 */
+  background-color: #d8d8d8;
+  z-index: 1;
 }
 .container .task-list .task-item .task-header.data-v-b624ea25 {
   display: flex;
@@ -242,12 +274,15 @@
 .container .task-list .task-item .task-header .time-info.data-v-b624ea25 {
   display: flex;
   align-items: center;
-  gap: 10rpx;
+  gap: 25rpx;
+  /* 确保icon与时间文本之间有25rpx间距 */
+  position: relative;
+  z-index: 10;
+  /* 设置高层级，确保图标在时间线之上 */
 }
 .container .task-list .task-item .task-header .time-info .date.data-v-b624ea25 {
   font-size: 14px;
   color: #666666;
-  margin: 0 22rpx 0 55rpx;
 }
 .container .task-list .task-item .task-header .status.data-v-b624ea25 {
   font-size: 12px;
@@ -308,24 +343,34 @@
   margin-top: 30rpx;
   display: flex;
   justify-content: flex-end;
-  gap: 20rpx;
+  gap: 15rpx;
+  flex-wrap: wrap;
 }
 .container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25,
 .container .task-list .task-item .task-footer .view-btn.data-v-b624ea25,
 .container .task-list .task-item .task-footer .report-btn.data-v-b624ea25,
 .container .task-list .task-item .task-footer .collect-btn.data-v-b624ea25 {
-  width: 144rpx;
+  width: 120rpx;
   height: 48rpx;
   color: #07C160;
   border-radius: 100rpx;
   border: 2rpx solid #07C160;
-  font-size: 26rpx;
+  font-size: 24rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .container .task-list .task-item .task-footer .collect-btn.data-v-b624ea25 {
   background-color: #07C160;
+  color: white;
+}
+.container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25 {
+  border: 1rpx solid #c4c4c4;
+  color: #3d3d3d;
+}
+.container .task-list .task-item .task-footer .report-btn.data-v-b624ea25 {
+  background-color: #FFA500;
+  border-color: #FFA500;
   color: white;
 }
 .container .headImage.data-v-b624ea25 {
@@ -339,4 +384,13 @@
   width: 100%;
   height: auto;
   display: block;
+}
+
+/* 确保页面背景色始终正确显示 */
+page.data-v-b624ea25 {
+  background-color: #F5F5F5;
+  height: 100%;
+}
+body.data-v-b624ea25 {
+  background-color: #F5F5F5;
 }

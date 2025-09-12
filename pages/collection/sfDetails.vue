@@ -9,7 +9,8 @@
                     <view class="info-item">
                         <uni-text class="label">司机名称：</uni-text>
                         <uni-text class="value">{{ name }}</uni-text>
-                        <uni-button size="mini" type="primary" class="contact-btn">查看线路</uni-button>
+                        <uni-button size="mini" type="primary" class="contact-btn"
+                            @tap="contactLine()">查看线路</uni-button>
                     </view>
                     <view class="info-item">
                         <uni-text class="label">车牌号：</uni-text>
@@ -63,21 +64,25 @@
                 <uni-text class="weight-title">重量：</uni-text>
                 <input class="weight-input" type="number" v-model="weightInput" placeholder="0" />
                 <uni-text class="weight-unit">kg</uni-text>
-                <uni-button size="mini" type="primary" class="tj-btn">提交重量</uni-button>
+                <uni-button size="mini" type="primary" class="tj-btn" @tap="handleSubmitWeight()">提交重量</uni-button>
 
             </view>
         </view>
         <view class="task-list">
-            <view class="task-item" v-for="task in taskList" :key="task.id">
+            <view class="task-item" v-for="(task, index) in taskList" :key="task.id">
                 <view class="task-header">
                     <view class="time-info">
+                        <uni-icons type="circle-filled"
+                            :color="index === 0 ? 'rgba(7, 193, 96, 1)' : 'rgba(61, 61, 61, 0.50)'" size="20">
+                        </uni-icons>
                         <uni-text class="date">{{ task.appointmentTime }}</uni-text>
                     </view>
+                    <!-- 状态类名对应：0: 进行中, 1: 已完成, 2: 无需收运 -->
                     <uni-text class="status" :class="{
-                            'processing': task.status === 0, 
-                            'completed': task.status === 1, 
-                            'cancelled': task.status === 2
-                        }">
+                        'processing': task.status === 0,
+                        'completed': task.status === 1,
+                        'cancelled': task.status === 2
+                    }">
                         {{ getStatusText(task.status) }}
                     </uni-text>
                 </view>
@@ -103,19 +108,20 @@
                 </view>
                 <view class="task-footer">
                     <template v-if="task.status === 0">
-                        <!-- 进行中状态 -->
+                        <!-- 进行中状态：显示4个按钮 -->
                         <uni-button size="mini" class="cancel-btn" @tap="cancelTask(task)">取消</uni-button>
                         <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
-                    </template>
-                    <template v-else-if="task.status === 1">
-                        <!-- 已完成状态 -->
                         <uni-button size="mini" type="primary" class="report-btn"
                             @tap="reportTask(task)">收运上报</uni-button>
                         <uni-button size="mini" type="primary" class="collect-btn"
-                            @tap="collectTask(task)">收运</uni-button>
+                            @tap="collectTask(task)">收运完成</uni-button>
+                    </template>
+                    <template v-else-if="task.status === 1">
+                        <!-- 已完成状态：只显示查看按钮 -->
+                        <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
                     </template>
                     <template v-else-if="task.status === 2">
-                        <!-- 已取消状态 -->
+                        <!-- 无需收运状态：只显示查看按钮 -->
                         <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
                     </template>
                 </view>
@@ -129,8 +135,9 @@
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
 import { useUserStore } from '@/stores/user.js'
-import { apiGetDriverInfo, apiGetDriverTodayPlan } from '@/api/apis.js'
+import { apiGetDriverInfo, apiGetDriverTodayPlan, apiGetnoNeedCollect, apiGetdriverConfirmPlan, apiAddCarWeight } from '@/api/apis.js'
 
 // 获取当前日期并格式化为 YYYY-MM-DD 格式
 const getCurrentDate = () => {
@@ -150,21 +157,23 @@ const registrationNumber = ref('') // 车牌号
 const name = ref('') // 司机名称
 const currentDate = getCurrentDate() // 当前日期
 const weightInput = ref('') // 重量输入框的值
+const allCarId = ref(0)//车辆Id
+const allRecordNo = ref('')//运单号
+
 const taskList = ref([]) // 任务列表
 
 // 计算进度百分比
 const progressPercentage = computed(() => {
     if (confirmNum.value === 0 && weightNum.value === 0) return 0;
-    console.log('confirmNum:', confirmNum.value, 'weightNum:', weightNum.value);
-    return Math.round((confirmNum.value / weightNum.value) * 100);
+    return Math.round((confirmNum.value / (confirmNum.value + notConfirmNum.value)) * 100);
 });
 
 // 获取状态文本
 const getStatusText = (status) => {
     switch (status) {
         case 0: return '进行中';
-        case 1: return '待完成';
-        case 2: return '已完成';
+        case 1: return '已完成';
+        case 2: return '无需收运';
         default: return '未知状态';
     }
 };
@@ -184,97 +193,263 @@ onMounted(async () => {
         // 其他非401错误的处理
         console.error('页面初始化失败:', error)
     }
+    
 })
+
+// 页面显示时刷新数据
+onShow(async () => {
+    console.log('页面显示时刷新数据')
+    getapiGetDriverInfo();
+    getapiGetDriverTodayPlan();
+})
+
 
 //获取今日统计信息
 const getapiGetDriverInfo = async () => {
-    const res = await apiGetDriverInfo({
-        driverId: userStore.sfmerchant?.id
-    })
+    try {
+        const res = await apiGetDriverInfo({
+            // driverId: userStore.sfmerchant?.id, 
+            driverId: 3,
+        })
 
-    if (res.code === 200) {
-        //confirmNum.value = res.data.confirmNum;
-        confirmNum.value = 20;
-        notConfirmNum.value = res.data.notConfirmNum;
-        // weightNum.value = res.data.weightNum;
-        weightNum.value = 100;
-        bucketNum.value = res.data.bucketNum;
-        registrationNumber.value = res.data.registrationNumber;
-        name.value = res.data.name;
+        if (res.code === 200) {
+            confirmNum.value = res.data.confirmNum;
+            notConfirmNum.value = res.data.notConfirmNum;
+            weightNum.value = res.data.weightNum;
+
+            bucketNum.value = res.data.bucketNum;
+            registrationNumber.value = res.data.registrationNumber;
+            name.value = res.data.name;
+            allCarId.value = res.data.carId;
+            allRecordNo.value = res.data.crecordNo;
+        } else {
+            console.error('获取司机信息失败:', res.message || '未知错误');
+        }
+    } catch (error) {
+        console.error('获取司机信息异常:', error);
     }
 }
 
 //司机今日收运管理列表
 const getapiGetDriverTodayPlan = async () => {
-    
-   const res = taskList.value = [
-        {
-            id: 1,
-            appointmentTime: "2025-09-11 09:45:09",
-            merchantName: "杨洵测试",
-            estimateWeight: 4,
-            estimateBucketNum: 2,
-            address: "成都市锦江区春熙路123号",
-            status: 0 // 进行中
-        },
-        {
-            id: 2,
-            appointmentTime: "2025-09-11 10:30:00",
-            merchantName: "蜀大侠火锅",
-            estimateWeight: 6.5,
-            estimateBucketNum: 3,
-            address: "成都市锦江区IFS国际金融中心",
-            status: 1 // 待完成
-        },
-        {
-            id: 3,
-            appointmentTime: "2025-09-11 14:15:00",
-            merchantName: "小龙坎老火锅",
-            estimateWeight: 5.2,
-            estimateBucketNum: 2,
-            address: "成都市锦江区太古里",
-            status: 2 // 已完成
+    try {
+        const res = await apiGetDriverTodayPlan({
+            // driverId: userStore.sfmerchant?.id,
+            driverId: 3,
+            page: 1,
+        })
+        // status  0进行中  1已完成  2无需收运
+        if (res.code === 200) {
+            taskList.value = res.data;
+        } else {
+            console.error('获取今日收运计划失败:', res.message || '未知错误');
         }
-    ];
-    return res
-
-    // const res = await apiGetDriverTodayPlan({
-    //     driverId: userStore.sfmerchant?.id,
-    //     page: 1,
-    // })
-
-    // if (res.code === 200) {
-    //     taskList.value = res.data.records;
-    // } else {
-       
-    // }
+    } catch (error) {
+        console.error('获取今日收运计划异常:', error);
+    }
 }
+
+
 
 // 取消任务
 const cancelTask = (task) => {
     console.log('取消任务:', task.id);
-    // 这里添加取消任务的逻辑
+    uni.showModal({
+        title: '确认取消',
+        content: '是否确认取消当前任务？',
+        success: async (res) => {
+            if (res.confirm) {
+                await apiGetnoNeedCollect({
+                    id: task.id,
+                    // driverId: userStore.sfmerchant?.id,
+                    driverId: 3,
+                }).then((res) => {
+                    if (res.code === 200) {
+                        uni.showToast({
+                            title: res.message || '操作成功',
+                            icon: 'success'
+                        });
+                        // 刷新任务列表
+                        getapiGetDriverTodayPlan();
+                    } else {
+                        uni.showToast({
+                            title: res.message || '操作失败',
+                            icon: 'error'
+                        });
+                    }
+
+                })
+            }
+        }
+    })
 };
 
 // 查看任务
 const viewTask = (task) => {
-    console.log('查看任务:', task.id);
+  
     // 这里添加查看任务的逻辑
+    uni.navigateTo({
+        url: `/pages/collection/syCheckDetail?planId=${task.id}&driverId=${task.driverId}`
+    });
 };
 
 // 收运上报
 const reportTask = (task) => {
-    console.log('收运上报:', task.id);
-
+    console.log('收运上报:', task);
+    
     uni.navigateTo({
-       url: '/pages/collection/syReport'
-  });
+        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}`
+    });
+};
+
+
+
+const contactLine = () => {
+    console.log('查看线路');
+
+    const mapData = {
+        taskList: taskList.value,
+        driverName: name.value,
+        registrationNumber: registrationNumber.value,
+        bucketNum: bucketNum.value,
+        currentDate: currentDate
+    };
+
+    // 尝试使用 EventChannel，失败则使用存储方式
+    uni.navigateTo({
+        url: '/pages/collection/syAllMap',
+        events: {
+            // 可以接收目标页面回传的数据
+            acceptDataFromMap: (data) => {
+                console.log('地图页面回传数据:', data);
+            }
+        },
+        success: (res) => {
+            // 无论如何都使用存储方式，确保数据传递的可靠性
+            console.log('使用存储方式发送数据');
+            uni.setStorageSync('mapData', mapData);
+
+            // 同时尝试EventChannel（如果支持的话）
+            try {
+                if (res.eventChannel && res.eventChannel.emit) {
+                    res.eventChannel.emit('sendMapData', mapData);
+                    console.log('同时使用EventChannel发送数据');
+                }
+            } catch (error) {
+                console.log('EventChannel发送失败，但存储方式已保证数据传递');
+            }
+        },
+        fail: () => {
+            // 跳转失败时也使用存储方式
+            console.log('页面跳转失败，使用存储方式');
+            uni.setStorageSync('mapData', mapData);
+        }
+    });
 };
 
 // 收运
 const collectTask = (task) => {
     console.log('收运:', task.id);
-    // 这里添加收运的逻辑
+    //先判断task.weight是否大于0 he task.bucketNum是否大于0
+    if (task.weight > 0 && task.bucketNum > 0) {
+        //确认收运完成
+        uni.showModal({
+            title: '确认收运完成',
+            content: '是否确认收运完成？',
+            success: async (res) => {
+                if (res.confirm) {
+                    await apiGetdriverConfirmPlan({
+                        id: task.id,
+                        // driverId: userStore.sfmerchant?.id,
+                        driverId: 3,
+                    }).then((res) => {
+                        if (res.code === 200) {
+                            uni.showToast({
+                                title: res.message || '操作成功',
+                                icon: 'success'
+                            });
+                            // 刷新任务列表
+                            getapiGetDriverTodayPlan();
+                        } else {
+                            uni.showToast({
+                                title: res.message || '操作失败',
+                                icon: 'error'
+                            });
+                        }
+                    })
+                }
+            }
+        })
+        
+    }
+    else {
+        uni.showToast({
+            title: '请先进行 收运上报 操作',
+            icon: 'none'
+        });
+        return;
+    }
+};
+// 提交重量
+const handleSubmitWeight = async () => {
+    // 验证提交重量是否输入 是否大于等于0，成功提示是否提交过磅重量 是就调取接口apiGetCarWeight
+    if (!weightInput.value) {
+        uni.showToast({
+            title: '请输入重量',
+            icon: 'none'
+        });
+        return;
+    }
+    
+    const weight = parseFloat(weightInput.value);
+    if (isNaN(weight) || weight < 0) {
+        uni.showToast({
+            title: '请输入有效的重量(大于等于0)',
+            icon: 'none'
+        });
+        return;
+    }
+    
+    uni.showModal({
+        title: '确认提交',
+        content: `是否确认提交过磅重量 ${weight}kg？`,
+        success: async (res) => {
+            if (res.confirm) {
+                try {
+                    const result = await apiAddCarWeight({
+                        carId: allCarId.value,
+                        recordNo: allRecordNo.value,
+                        weight: weight,
+                        registrationNumber:registrationNumber.value,
+                        // driverId: userStore.sfmerchant?.id || 3
+                        driverId: 3
+                    });
+                    
+                    if (result.code === 200) {
+                        uni.showToast({
+                            title: '提交成功',
+                            icon: 'success'
+                        });
+                        // 清空输入框
+                        weightInput.value = '';
+                        // 刷新统计数据
+                        getapiGetDriverInfo();
+                    } else {
+                        uni.showToast({
+                            title: result.message || '提交失败',
+                            icon: 'none'
+                        });
+                    }
+                } catch (error) {
+                    uni.showToast({
+                        title: '提交失败',
+                        icon: 'none'
+                    });
+                    console.error('提交重量失败:', error);
+                }
+            }
+        }
+    });
 };
 
 // 返回上一页
@@ -285,12 +460,15 @@ const back = () => {
 // 组件逻辑
 </script>
 
+
+
 <style scoped lang="scss">
 .container {
-    padding: 30rpx;
     background-color: $bg-theme-color;
-    height: 100vh;
-    
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: 0 30rpx 30rpx;
+
     .header-progress-container {
         background: #FFFFFF;
         border-radius: 16rpx;
@@ -345,7 +523,7 @@ const back = () => {
             }
         }
     }
-    
+
     .divider {
         height: 2rpx;
         background-color: #f0f0f0;
@@ -357,12 +535,12 @@ const back = () => {
         border-radius: 0;
         padding: 0;
         margin-bottom: 0;
-        
+
 
         .progress-title {
             font-size: 34rpx;
             color: rgba(61, 61, 61, 1);
-           
+
             margin-bottom: 30rpx;
         }
 
@@ -390,7 +568,7 @@ const back = () => {
                     align-items: center;
                     justify-content: center;
                     flex-direction: column;
-                    
+
                     .percentage {
                         font-size: 48rpx;
                         color: #07C160;
@@ -421,7 +599,7 @@ const back = () => {
                     justify-content: center;
                     align-items: center;
                     position: relative;
-                    
+
                     image {
                         width: 100%;
                         height: 100%;
@@ -430,7 +608,7 @@ const back = () => {
                         left: 0;
                         z-index: 0;
                     }
-                    
+
                     .value {
                         font-size: 32rpx;
                         font-weight: 500;
@@ -474,11 +652,12 @@ const back = () => {
             display: block;
             margin-bottom: 20rpx;
         }
-        
+
         .weight-content {
             display: flex;
             align-items: center;
-            image{
+
+            image {
                 width: 80rpx;
                 height: 80rpx;
                 margin-right: 40rpx;
@@ -524,12 +703,47 @@ const back = () => {
 
     .task-list {
         margin-top: 20rpx;
+        position: relative;
+        /* 移除左右内边距，因为任务项本身已经有30rpx的padding */
+
+        /* 移除整体时间轴线，改用分段方式 */
 
         .task-item {
             background: #FFFFFF;
             border-radius: 16rpx;
             padding: 30rpx;
-            margin-bottom: 0; /* 移除任务项之间的间隔 */
+            margin-bottom: 0;
+            /* 移除任务项之间的间隔，让图标可以连线 */
+            position: relative;
+            z-index: 1;
+
+            /* 为除了第一个item添加上半段线条（从item顶部到uni-icons顶部） */
+            &:not(:first-child)::before {
+                content: '';
+                position: absolute;
+                left: 49rpx;
+                /* uni-icons图标中心位置 */
+                top: 0;
+                width: 2rpx;
+                height: 35rpx;
+                /* 从item顶部到uni-icons顶部 */
+                background-color: rgba(216, 216, 216, 1);
+                z-index: 1;
+            }
+
+            /* 为除了最后一个item添加下半段线条（从uni-icons底部到item底部） */
+            &:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                left: 49rpx;
+                /* uni-icons图标中心位置 */
+                bottom: 0;
+                width: 2rpx;
+                height: 382rpx;
+                /* 从uni-icons底部到item底部 */
+                background-color: rgba(216, 216, 216, 1);
+                z-index: 1;
+            }
 
             .task-header {
                 display: flex;
@@ -540,12 +754,16 @@ const back = () => {
                 .time-info {
                     display: flex;
                     align-items: center;
-                    gap: 10rpx;
+                    gap: 25rpx;
+                    /* 确保icon与时间文本之间有25rpx间距 */
+                    position: relative;
+                    z-index: 10;
+                    /* 设置高层级，确保图标在时间线之上 */
+
 
                     .date {
                         font-size: 14px;
                         color: #666666;
-                        margin: 0 22rpx 0 55rpx;
                     }
                 }
 
@@ -587,7 +805,7 @@ const back = () => {
                 display: flex;
                 flex-direction: column;
                 gap: 20rpx;
-              
+
                 .merchant-info,
                 .weight-info,
                 .bin-info,
@@ -612,19 +830,19 @@ const back = () => {
                 margin-top: 30rpx;
                 display: flex;
                 justify-content: flex-end;
-                gap: 20rpx;
+                gap: 15rpx;
+                flex-wrap: wrap; // 允许换行以适应4个按钮
 
                 .cancel-btn,
                 .view-btn,
                 .report-btn,
                 .collect-btn {
-                    width: 144rpx;
+                    width: 120rpx; // 减小按钮宽度以适应4个按钮
                     height: 48rpx;
                     color: #07C160;
                     border-radius: 100rpx;
-                  
                     border: 2rpx solid #07C160;
-                    font-size: 26rpx;
+                    font-size: 24rpx; // 稍微减小字体
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -634,22 +852,43 @@ const back = () => {
                     background-color: #07C160;
                     color: white;
                 }
+
+                .cancel-btn {
+                    border: 1rpx solid rgba(196, 196, 196, 1);
+                    color: rgba(61, 61, 61, 1);
+                }
+
+                .report-btn {
+                    background-color: #FFA500;
+                    border-color: #FFA500;
+                    color: white;
+                }
             }
         }
     }
-    
+
     .headImage {
         position: fixed;
         bottom: 0;
         left: 0;
         width: 100%;
         z-index: -1;
-        
+
         image {
             width: 100%;
             height: auto;
             display: block;
         }
     }
+}
+
+/* 确保页面背景色始终正确显示 */
+page {
+    background-color: #F5F5F5;
+    height: 100%;
+}
+
+body {
+    background-color: #F5F5F5;
 }
 </style>

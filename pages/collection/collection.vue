@@ -238,7 +238,7 @@ const goToSydAllList = () => {
   
    
     uni.navigateTo({
-        url: '/pages/merchant/sydAllList'
+        url: '/pages/collection/sfsyRecord'
     })
 }
 </script>

@@ -1,0 +1,137 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.container.data-v-9af8408b {
+  background-color: #f7f7f7;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+.container .map-container.data-v-9af8408b {
+  height: 1000rpx;
+  position: relative;
+}
+.container .map-container .navigation-map.data-v-9af8408b {
+  width: 100%;
+  height: 100%;
+}
+.container .map-container .location-status.data-v-9af8408b {
+  position: absolute;
+  top: 30rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 50rpx;
+  padding: 20rpx 30rpx;
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.15);
+  z-index: 999;
+  border: 2rpx solid #07C160;
+}
+.container .map-container .location-status .status-text.data-v-9af8408b {
+  color: #07C160;
+  font-size: 28rpx;
+  font-weight: 500;
+}
+.container .bottom-section.data-v-9af8408b {
+  padding: 30rpx;
+  background-color: #f7f7f7;
+}
+.container .bottom-section .driver-info-card.data-v-9af8408b {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+}
+.container .bottom-section .driver-info-card .info-item.data-v-9af8408b {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+.container .bottom-section .driver-info-card .info-item .avatar.data-v-9af8408b {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background-color: #07C160;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.container .bottom-section .driver-info-card .info-item .avatar .avatar-text.data-v-9af8408b {
+  color: white;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+.container .bottom-section .driver-info-card .info-item .name-info.data-v-9af8408b {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+.container .bottom-section .driver-info-card .info-item .name-info .label.data-v-9af8408b {
+  color: rgba(61, 61, 61, 0.5);
+  font-size: 28rpx;
+}
+.container .bottom-section .driver-info-card .info-item .name-info .value.data-v-9af8408b {
+  color: #3d3d3d;
+  font-size: 14px;
+  font-weight: 500;
+}
+.container .bottom-section .driver-info-card .divider.data-v-9af8408b {
+  height: 2rpx;
+  background-color: #f0f0f0;
+  margin: 20rpx 0;
+}
+.container .bottom-section .driver-info-card .driver-details.data-v-9af8408b {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+.container .bottom-section .driver-info-card .driver-details .detail-item.data-v-9af8408b {
+  display: flex;
+  align-items: center;
+}
+.container .bottom-section .driver-info-card .driver-details .detail-item .label.data-v-9af8408b {
+  color: rgba(61, 61, 61, 0.5);
+  font-size: 28rpx;
+  min-width: 180rpx;
+}
+.container .bottom-section .driver-info-card .driver-details .detail-item .value.data-v-9af8408b {
+  color: #3d3d3d;
+  font-size: 14px;
+}
+
+/* 确保页面背景色始终正确显示 */
+page.data-v-9af8408b {
+  background-color: #F5F5F5;
+  height: 100%;
+}
+body.data-v-9af8408b {
+  background-color: #F5F5F5;
+}

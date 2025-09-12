@@ -68,7 +68,54 @@ function apiGetDriverInfo(data = {}) {
     data
   });
 }
+function apiGetDriverTodayPlan(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverTodayPlan",
+    data
+  });
+}
+function apiGetnoNeedCollect(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/noNeedCollect",
+    data
+  });
+}
+function apiGetdriverConfirmPlan(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/driverConfirmPlan",
+    data
+  });
+}
+function apiPostreportWeight(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/reportWeight",
+    data,
+    method: "POST"
+  });
+}
+function apiGetDriverPlanById(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverPlanById",
+    data
+  });
+}
+function apiAddCarWeight(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/addCarWeight",
+    data
+  });
+}
+function apiGetDriverPlanPage(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverPlanPage",
+    data
+  });
+}
+exports.apiAddCarWeight = apiAddCarWeight;
 exports.apiGetDriverInfo = apiGetDriverInfo;
+exports.apiGetDriverPlanById = apiGetDriverPlanById;
+exports.apiGetDriverPlanPage = apiGetDriverPlanPage;
+exports.apiGetDriverTodayPlan = apiGetDriverTodayPlan;
 exports.apiGetDriverTodayStatistics = apiGetDriverTodayStatistics;
 exports.apiGetInfo = apiGetInfo;
 exports.apiGetMerchantCheck = apiGetMerchantCheck;
@@ -76,7 +123,10 @@ exports.apiGetMerchantStatistics = apiGetMerchantStatistics;
 exports.apiGetPlanAllPage = apiGetPlanAllPage;
 exports.apiGetPlanPage = apiGetPlanPage;
 exports.apiGetconfirmPlanById = apiGetconfirmPlanById;
+exports.apiGetdriverConfirmPlan = apiGetdriverConfirmPlan;
+exports.apiGetnoNeedCollect = apiGetnoNeedCollect;
 exports.apiPostLogin = apiPostLogin;
 exports.apiPostMerchantCheck = apiPostMerchantCheck;
 exports.apiPostaddPlanTemporary = apiPostaddPlanTemporary;
+exports.apiPostreportWeight = apiPostreportWeight;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/api/apis.js.map

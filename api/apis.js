@@ -121,3 +121,51 @@ export function apiGetDriverTodayPlan(data = {}) {
     })
 }
 
+///api/driver/noNeedCollect 无需收运
+export function apiGetnoNeedCollect(data = {}) {
+    return request({
+        url: "/api/driver/noNeedCollect",
+        data
+    })
+}
+
+///api/driver/driverConfirmPlan 司机完成收运
+export function apiGetdriverConfirmPlan(data = {}) {
+    return request({
+        url: "/api/driver/driverConfirmPlan",
+        data
+    })
+}
+
+//api/driver/reportWeight 收运上报每个接口
+export function apiPostreportWeight(data = {}) {
+    return request({
+      url: '/api/driver/reportWeight',
+      data,
+      method: 'POST',
+    })
+}
+
+///api/driver/getDriverPlanById 查看详情
+export function apiGetDriverPlanById(data = {}) {
+    return request({
+        url: "/api/driver/getDriverPlanById",
+        data
+    })
+}
+
+////api/driver/addCarWeight 添加当天车辆过磅重量
+export function apiAddCarWeight(data = {}) {
+  return request({
+    url: '/api/driver/addCarWeight',
+    data,
+  })
+}
+
+///api/driver/getDriverPlanPage 获取收运记录
+export function apiGetDriverPlanPage(data = {}) {
+  return request({
+    url: '/api/driver/getDriverPlanPage',
+    data,
+  })
+}

@@ -111,7 +111,7 @@ const _sfc_main = {
     };
     const goToSydAllList = () => {
       common_vendor.index.navigateTo({
-        url: "/pages/merchant/sydAllList"
+        url: "/pages/collection/sfsyRecord"
       });
     };
     return (_ctx, _cache) => {

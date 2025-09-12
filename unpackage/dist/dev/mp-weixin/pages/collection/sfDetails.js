@@ -25,7 +25,7 @@ const _sfc_main = {
       const day = String(date.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
     };
-    const userStore = stores_user.useUserStore();
+    stores_user.useUserStore();
     const weightNum = common_vendor.ref(0);
     const notConfirmNum = common_vendor.ref(0);
     const confirmNum = common_vendor.ref(0);
@@ -34,21 +34,22 @@ const _sfc_main = {
     const name = common_vendor.ref("");
     const currentDate = getCurrentDate();
     const weightInput = common_vendor.ref("");
+    const allCarId = common_vendor.ref(0);
+    const allRecordNo = common_vendor.ref("");
     const taskList = common_vendor.ref([]);
     const progressPercentage = common_vendor.computed(() => {
       if (confirmNum.value === 0 && weightNum.value === 0)
         return 0;
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:158", "confirmNum:", confirmNum.value, "weightNum:", weightNum.value);
-      return Math.round(confirmNum.value / weightNum.value * 100);
+      return Math.round(confirmNum.value / (confirmNum.value + notConfirmNum.value) * 100);
     });
     const getStatusText = (status) => {
       switch (status) {
         case 0:
           return "进行中";
         case 1:
-          return "待完成";
-        case 2:
           return "已完成";
+        case 2:
+          return "无需收运";
         default:
           return "未知状态";
       }
@@ -58,72 +59,217 @@ const _sfc_main = {
         getapiGetDriverInfo();
         getapiGetDriverTodayPlan();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:185", "页面初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:194", "页面初始化失败:", error);
       }
     });
+    common_vendor.onShow(async () => {
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:201", "页面显示时刷新数据");
+      getapiGetDriverInfo();
+      getapiGetDriverTodayPlan();
+    });
     const getapiGetDriverInfo = async () => {
-      var _a;
-      const res = await api_apis.apiGetDriverInfo({
-        driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
-      });
-      if (res.code === 200) {
-        confirmNum.value = 20;
-        notConfirmNum.value = res.data.notConfirmNum;
-        weightNum.value = 100;
-        bucketNum.value = res.data.bucketNum;
-        registrationNumber.value = res.data.registrationNumber;
-        name.value = res.data.name;
+      try {
+        const res = await api_apis.apiGetDriverInfo({
+          // driverId: userStore.sfmerchant?.id, 
+          driverId: 3
+        });
+        if (res.code === 200) {
+          confirmNum.value = res.data.confirmNum;
+          notConfirmNum.value = res.data.notConfirmNum;
+          weightNum.value = res.data.weightNum;
+          bucketNum.value = res.data.bucketNum;
+          registrationNumber.value = res.data.registrationNumber;
+          name.value = res.data.name;
+          allCarId.value = res.data.carId;
+          allRecordNo.value = res.data.crecordNo;
+        } else {
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:226", "获取司机信息失败:", res.message || "未知错误");
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:229", "获取司机信息异常:", error);
       }
     };
     const getapiGetDriverTodayPlan = async () => {
-      const res = taskList.value = [
-        {
-          id: 1,
-          appointmentTime: "2025-09-11 09:45:09",
-          merchantName: "杨洵测试",
-          estimateWeight: 4,
-          estimateBucketNum: 2,
-          address: "成都市锦江区春熙路123号",
-          status: 0
-          // 进行中
-        },
-        {
-          id: 2,
-          appointmentTime: "2025-09-11 10:30:00",
-          merchantName: "蜀大侠火锅",
-          estimateWeight: 6.5,
-          estimateBucketNum: 3,
-          address: "成都市锦江区IFS国际金融中心",
-          status: 1
-          // 待完成
-        },
-        {
-          id: 3,
-          appointmentTime: "2025-09-11 14:15:00",
-          merchantName: "小龙坎老火锅",
-          estimateWeight: 5.2,
-          estimateBucketNum: 2,
-          address: "成都市锦江区太古里",
-          status: 2
-          // 已完成
+      try {
+        const res = await api_apis.apiGetDriverTodayPlan({
+          // driverId: userStore.sfmerchant?.id,
+          driverId: 3,
+          page: 1
+        });
+        if (res.code === 200) {
+          taskList.value = res.data;
+        } else {
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:245", "获取今日收运计划失败:", res.message || "未知错误");
         }
-      ];
-      return res;
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:248", "获取今日收运计划异常:", error);
+      }
     };
     const cancelTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:255", "取消任务:", task.id);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:256", "取消任务:", task.id);
+      common_vendor.index.showModal({
+        title: "确认取消",
+        content: "是否确认取消当前任务？",
+        success: async (res) => {
+          if (res.confirm) {
+            await api_apis.apiGetnoNeedCollect({
+              id: task.id,
+              // driverId: userStore.sfmerchant?.id,
+              driverId: 3
+            }).then((res2) => {
+              if (res2.code === 200) {
+                common_vendor.index.showToast({
+                  title: res2.message || "操作成功",
+                  icon: "success"
+                });
+                getapiGetDriverTodayPlan();
+              } else {
+                common_vendor.index.showToast({
+                  title: res2.message || "操作失败",
+                  icon: "error"
+                });
+              }
+            });
+          }
+        }
+      });
     };
     const viewTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:261", "查看任务:", task.id);
+      common_vendor.index.navigateTo({
+        url: `/pages/collection/syCheckDetail?planId=${task.id}&driverId=${task.driverId}`
+      });
     };
     const reportTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:267", "收运上报:", task.id);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:298", "收运上报:", task);
       common_vendor.index.navigateTo({
-        url: "/pages/collection/syReport"
+        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}`
+      });
+    };
+    const contactLine = () => {
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:308", "查看线路");
+      const mapData = {
+        taskList: taskList.value,
+        driverName: name.value,
+        registrationNumber: registrationNumber.value,
+        bucketNum: bucketNum.value,
+        currentDate
+      };
+      common_vendor.index.navigateTo({
+        url: "/pages/collection/syAllMap",
+        events: {
+          // 可以接收目标页面回传的数据
+          acceptDataFromMap: (data) => {
+            common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:324", "地图页面回传数据:", data);
+          }
+        },
+        success: (res) => {
+          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:329", "使用存储方式发送数据");
+          common_vendor.index.setStorageSync("mapData", mapData);
+          try {
+            if (res.eventChannel && res.eventChannel.emit) {
+              res.eventChannel.emit("sendMapData", mapData);
+              common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:336", "同时使用EventChannel发送数据");
+            }
+          } catch (error) {
+            common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:339", "EventChannel发送失败，但存储方式已保证数据传递");
+          }
+        },
+        fail: () => {
+          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:344", "页面跳转失败，使用存储方式");
+          common_vendor.index.setStorageSync("mapData", mapData);
+        }
       });
     };
     const collectTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:276", "收运:", task.id);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:352", "收运:", task.id);
+      if (task.weight > 0 && task.bucketNum > 0) {
+        common_vendor.index.showModal({
+          title: "确认收运完成",
+          content: "是否确认收运完成？",
+          success: async (res) => {
+            if (res.confirm) {
+              await api_apis.apiGetdriverConfirmPlan({
+                id: task.id,
+                // driverId: userStore.sfmerchant?.id,
+                driverId: 3
+              }).then((res2) => {
+                if (res2.code === 200) {
+                  common_vendor.index.showToast({
+                    title: res2.message || "操作成功",
+                    icon: "success"
+                  });
+                  getapiGetDriverTodayPlan();
+                } else {
+                  common_vendor.index.showToast({
+                    title: res2.message || "操作失败",
+                    icon: "error"
+                  });
+                }
+              });
+            }
+          }
+        });
+      } else {
+        common_vendor.index.showToast({
+          title: "请先进行 收运上报 操作",
+          icon: "none"
+        });
+        return;
+      }
+    };
+    const handleSubmitWeight = async () => {
+      if (!weightInput.value) {
+        common_vendor.index.showToast({
+          title: "请输入重量",
+          icon: "none"
+        });
+        return;
+      }
+      const weight = parseFloat(weightInput.value);
+      if (isNaN(weight) || weight < 0) {
+        common_vendor.index.showToast({
+          title: "请输入有效的重量(大于等于0)",
+          icon: "none"
+        });
+        return;
+      }
+      common_vendor.index.showModal({
+        title: "确认提交",
+        content: `是否确认提交过磅重量 ${weight}kg？`,
+        success: async (res) => {
+          if (res.confirm) {
+            try {
+              const result = await api_apis.apiAddCarWeight({
+                carId: allCarId.value,
+                recordNo: allRecordNo.value,
+                weight,
+                registrationNumber: registrationNumber.value,
+                // driverId: userStore.sfmerchant?.id || 3
+                driverId: 3
+              });
+              if (result.code === 200) {
+                common_vendor.index.showToast({
+                  title: "提交成功",
+                  icon: "success"
+                });
+                weightInput.value = "";
+                getapiGetDriverInfo();
+              } else {
+                common_vendor.index.showToast({
+                  title: result.message || "提交失败",
+                  icon: "none"
+                });
+              }
+            } catch (error) {
+              common_vendor.index.showToast({
+                title: "提交失败",
+                icon: "none"
+              });
+              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:448", "提交重量失败:", error);
+            }
+          }
+        }
+      });
     };
     const back = () => {
       common_vendor.index.navigateBack();
@@ -141,95 +287,109 @@ const _sfc_main = {
           title: "收运详情"
         }),
         c: common_vendor.t(name.value),
-        d: common_vendor.p({
+        d: common_vendor.o(($event) => contactLine()),
+        e: common_vendor.p({
           size: "mini",
           type: "primary"
         }),
-        e: common_vendor.t(registrationNumber.value),
-        f: common_vendor.t(common_vendor.unref(currentDate)),
-        g: common_vendor.t(bucketNum.value),
-        h: common_vendor.t(progressPercentage.value),
-        i: `conic-gradient(#07C160 ${progressPercentage.value}%, rgba(216, 216, 216, 0.5) ${progressPercentage.value}% 100%)`,
-        j: common_assets._imports_0,
-        k: common_vendor.t(confirmNum.value),
-        l: common_assets._imports_1$2,
-        m: common_vendor.t(notConfirmNum.value),
-        n: common_assets._imports_2$1,
-        o: common_vendor.t(weightNum.value),
-        p: common_assets._imports_3,
-        q: weightInput.value,
-        r: common_vendor.o(($event) => weightInput.value = $event.detail.value),
-        s: common_vendor.p({
+        f: common_vendor.t(registrationNumber.value),
+        g: common_vendor.t(common_vendor.unref(currentDate)),
+        h: common_vendor.t(bucketNum.value),
+        i: common_vendor.t(progressPercentage.value),
+        j: `conic-gradient(#07C160 ${progressPercentage.value}%, rgba(216, 216, 216, 0.5) ${progressPercentage.value}% 100%)`,
+        k: common_assets._imports_0,
+        l: common_vendor.t(confirmNum.value),
+        m: common_assets._imports_1$2,
+        n: common_vendor.t(notConfirmNum.value),
+        o: common_assets._imports_2$1,
+        p: common_vendor.t(weightNum.value),
+        q: common_assets._imports_3,
+        r: weightInput.value,
+        s: common_vendor.o(($event) => weightInput.value = $event.detail.value),
+        t: common_vendor.o(($event) => handleSubmitWeight()),
+        v: common_vendor.p({
           size: "mini",
           type: "primary"
         }),
-        t: common_vendor.f(taskList.value, (task, k0, i0) => {
+        w: common_vendor.f(taskList.value, (task, index, i0) => {
           return common_vendor.e({
-            a: common_vendor.t(task.appointmentTime),
-            b: "b624ea25-22-" + i0,
-            c: common_vendor.t(getStatusText(task.status)),
-            d: task.status === 0 ? 1 : "",
-            e: task.status === 1 ? 1 : "",
-            f: task.status === 2 ? 1 : "",
-            g: "b624ea25-23-" + i0,
-            h: "b624ea25-24-" + i0,
-            i: common_vendor.t(task.merchantName),
+            a: "b624ea25-22-" + i0,
+            b: common_vendor.p({
+              type: "circle-filled",
+              color: index === 0 ? "rgba(7, 193, 96, 1)" : "rgba(61, 61, 61, 0.50)",
+              size: "20"
+            }),
+            c: common_vendor.t(task.appointmentTime),
+            d: "b624ea25-23-" + i0,
+            e: common_vendor.t(getStatusText(task.status)),
+            f: task.status === 0 ? 1 : "",
+            g: task.status === 1 ? 1 : "",
+            h: task.status === 2 ? 1 : "",
+            i: "b624ea25-24-" + i0,
             j: "b624ea25-25-" + i0,
-            k: "b624ea25-26-" + i0,
-            l: common_vendor.t(task.estimateWeight),
+            k: common_vendor.t(task.merchantName),
+            l: "b624ea25-26-" + i0,
             m: "b624ea25-27-" + i0,
-            n: "b624ea25-28-" + i0,
-            o: common_vendor.t(task.estimateBucketNum || 0),
+            n: common_vendor.t(task.estimateWeight),
+            o: "b624ea25-28-" + i0,
             p: "b624ea25-29-" + i0,
-            q: "b624ea25-30-" + i0,
-            r: common_vendor.t(task.address),
+            q: common_vendor.t(task.estimateBucketNum || 0),
+            r: "b624ea25-30-" + i0,
             s: "b624ea25-31-" + i0,
-            t: "b624ea25-32-" + i0,
-            v: task.status === 0
+            t: common_vendor.t(task.address),
+            v: "b624ea25-32-" + i0,
+            w: "b624ea25-33-" + i0,
+            x: task.status === 0
           }, task.status === 0 ? {
-            w: common_vendor.o(($event) => cancelTask(task), task.id),
-            x: "b624ea25-33-" + i0,
-            y: common_vendor.p({
+            y: common_vendor.o(($event) => cancelTask(task), task.id),
+            z: "b624ea25-34-" + i0,
+            A: common_vendor.p({
               size: "mini"
             }),
-            z: common_vendor.o(($event) => viewTask(task), task.id),
-            A: "b624ea25-34-" + i0,
-            B: common_vendor.p({
+            B: common_vendor.o(($event) => viewTask(task), task.id),
+            C: "b624ea25-35-" + i0,
+            D: common_vendor.p({
+              size: "mini",
+              type: "primary"
+            }),
+            E: common_vendor.o(($event) => reportTask(task), task.id),
+            F: "b624ea25-36-" + i0,
+            G: common_vendor.p({
+              size: "mini",
+              type: "primary"
+            }),
+            H: common_vendor.o(($event) => collectTask(task), task.id),
+            I: "b624ea25-37-" + i0,
+            J: common_vendor.p({
               size: "mini",
               type: "primary"
             })
           } : task.status === 1 ? {
-            D: common_vendor.o(($event) => reportTask(task), task.id),
-            E: "b624ea25-35-" + i0,
-            F: common_vendor.p({
-              size: "mini",
-              type: "primary"
-            }),
-            G: common_vendor.o(($event) => collectTask(task), task.id),
-            H: "b624ea25-36-" + i0,
-            I: common_vendor.p({
+            L: common_vendor.o(($event) => viewTask(task), task.id),
+            M: "b624ea25-38-" + i0,
+            N: common_vendor.p({
               size: "mini",
               type: "primary"
             })
           } : task.status === 2 ? {
-            K: common_vendor.o(($event) => viewTask(task), task.id),
-            L: "b624ea25-37-" + i0,
-            M: common_vendor.p({
+            P: common_vendor.o(($event) => viewTask(task), task.id),
+            Q: "b624ea25-39-" + i0,
+            R: common_vendor.p({
               size: "mini",
               type: "primary"
             })
           } : {}, {
-            C: task.status === 1,
-            J: task.status === 2,
-            N: task.id
+            K: task.status === 1,
+            O: task.status === 2,
+            S: task.id
           });
         }),
-        v: common_vendor.p({
+        x: common_vendor.p({
           type: "location",
           size: "16",
           color: "#00B578"
         }),
-        w: common_assets._imports_4
+        y: common_assets._imports_4
       };
     };
   }

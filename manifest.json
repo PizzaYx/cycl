@@ -37,7 +37,10 @@
                     "<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>",
                     "<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
                     "<uses-feature android:name=\"android.hardware.camera\"/>",
-                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
+                    "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_BACKGROUND_LOCATION\"/>"
                 ]
             },
             /* ios打包配置 */
@@ -56,11 +59,12 @@
         },
         "usingComponents": true,
         "requiredPrivateInfos": [
+            "getLocation",
             "chooseLocation"
         ],
         "permission": {
             "scope.userLocation": {
-                "desc": "您的位置信息将用于选择商户地址"
+                "desc": "您的位置信息将用于收运路线导航和地图定位"
             }
         }
     },

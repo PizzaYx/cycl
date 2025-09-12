@@ -350,7 +350,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .container {
-    height: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     background-color: $bg-theme-color;
@@ -564,3 +564,4 @@ onMounted(() => {
     }
 }
 </style>
+
