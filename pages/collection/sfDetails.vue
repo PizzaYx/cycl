@@ -40,7 +40,7 @@
                     <view class="progress-stats">
                         <view class="stat-item">
                             <image src="/static/ssd/greenbg.png" mode="aspectFill"></image>
-                            <uni-text class="value green">{{ confirmNum }}</uni-text>
+                            <uni-text class="value green">{{ confirmNum ?? 0 }}</uni-text>
                             <uni-text class="label">已收运</uni-text>
                         </view>
                         <view class="stat-item">
@@ -193,7 +193,7 @@ onMounted(async () => {
         // 其他非401错误的处理
         console.error('页面初始化失败:', error)
     }
-    
+
 })
 
 // 页面显示时刷新数据
@@ -208,16 +208,18 @@ onShow(async () => {
 const getapiGetDriverInfo = async () => {
     try {
         const res = await apiGetDriverInfo({
-            // driverId: userStore.sfmerchant?.id, 
-            driverId: 3,
+            driverId: userStore.sfmerchant?.id || 5, 
+          
         })
 
         if (res.code === 200) {
-            confirmNum.value = res.data.confirmNum;
-            notConfirmNum.value = res.data.notConfirmNum;
-            weightNum.value = res.data.weightNum;
+            if (res.data === null)
+                return;
+            confirmNum.value = res.data.confirmNum ?? 0;
+            notConfirmNum.value = res.data.notConfirmNum ?? 0;
+            weightNum.value = res.data.weightNum ?? 0;
 
-            bucketNum.value = res.data.bucketNum;
+            bucketNum.value = res.data.bucketNum ?? 0;
             registrationNumber.value = res.data.registrationNumber;
             name.value = res.data.name;
             allCarId.value = res.data.carId;
@@ -234,8 +236,7 @@ const getapiGetDriverInfo = async () => {
 const getapiGetDriverTodayPlan = async () => {
     try {
         const res = await apiGetDriverTodayPlan({
-            // driverId: userStore.sfmerchant?.id,
-            driverId: 3,
+            driverId: userStore.sfmerchant?.id || 5,
             page: 1,
         })
         // status  0进行中  1已完成  2无需收运
@@ -261,8 +262,7 @@ const cancelTask = (task) => {
             if (res.confirm) {
                 await apiGetnoNeedCollect({
                     id: task.id,
-                    // driverId: userStore.sfmerchant?.id,
-                    driverId: 3,
+                    driverId: userStore.sfmerchant?.id || 5,
                 }).then((res) => {
                     if (res.code === 200) {
                         uni.showToast({
@@ -286,7 +286,7 @@ const cancelTask = (task) => {
 
 // 查看任务
 const viewTask = (task) => {
-  
+
     // 这里添加查看任务的逻辑
     uni.navigateTo({
         url: `/pages/collection/syCheckDetail?planId=${task.id}&driverId=${task.driverId}`
@@ -296,7 +296,7 @@ const viewTask = (task) => {
 // 收运上报
 const reportTask = (task) => {
     console.log('收运上报:', task);
-    
+
     uni.navigateTo({
         url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}`
     });
@@ -327,7 +327,7 @@ const contactLine = () => {
         success: (res) => {
             // 无论如何都使用存储方式，确保数据传递的可靠性
             console.log('使用存储方式发送数据');
-            uni.setStorageSync('mapData', mapData);
+            
 
             // 同时尝试EventChannel（如果支持的话）
             try {
@@ -342,7 +342,7 @@ const contactLine = () => {
         fail: () => {
             // 跳转失败时也使用存储方式
             console.log('页面跳转失败，使用存储方式');
-            uni.setStorageSync('mapData', mapData);
+           
         }
     });
 };
@@ -360,8 +360,7 @@ const collectTask = (task) => {
                 if (res.confirm) {
                     await apiGetdriverConfirmPlan({
                         id: task.id,
-                        // driverId: userStore.sfmerchant?.id,
-                        driverId: 3,
+                        driverId: userStore.sfmerchant?.id || 5,
                     }).then((res) => {
                         if (res.code === 200) {
                             uni.showToast({
@@ -380,7 +379,7 @@ const collectTask = (task) => {
                 }
             }
         })
-        
+
     }
     else {
         uni.showToast({
@@ -400,7 +399,7 @@ const handleSubmitWeight = async () => {
         });
         return;
     }
-    
+
     const weight = parseFloat(weightInput.value);
     if (isNaN(weight) || weight < 0) {
         uni.showToast({
@@ -409,7 +408,7 @@ const handleSubmitWeight = async () => {
         });
         return;
     }
-    
+
     uni.showModal({
         title: '确认提交',
         content: `是否确认提交过磅重量 ${weight}kg？`,
@@ -420,11 +419,10 @@ const handleSubmitWeight = async () => {
                         carId: allCarId.value,
                         recordNo: allRecordNo.value,
                         weight: weight,
-                        registrationNumber:registrationNumber.value,
-                        // driverId: userStore.sfmerchant?.id || 3
-                        driverId: 3
+                        registrationNumber: registrationNumber.value,
+                        driverId: userStore.sfmerchant?.id || 5
                     });
-                    
+
                     if (result.code === 200) {
                         uni.showToast({
                             title: '提交成功',

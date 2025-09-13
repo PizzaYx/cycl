@@ -25,7 +25,7 @@ const _sfc_main = {
       const day = String(date.getDate()).padStart(2, "0");
       return `${year}-${month}-${day}`;
     };
-    stores_user.useUserStore();
+    const userStore = stores_user.useUserStore();
     const weightNum = common_vendor.ref(0);
     const notConfirmNum = common_vendor.ref(0);
     const confirmNum = common_vendor.ref(0);
@@ -68,54 +68,56 @@ const _sfc_main = {
       getapiGetDriverTodayPlan();
     });
     const getapiGetDriverInfo = async () => {
+      var _a;
       try {
         const res = await api_apis.apiGetDriverInfo({
-          // driverId: userStore.sfmerchant?.id, 
-          driverId: 3
+          driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
         });
         if (res.code === 200) {
-          confirmNum.value = res.data.confirmNum;
-          notConfirmNum.value = res.data.notConfirmNum;
-          weightNum.value = res.data.weightNum;
-          bucketNum.value = res.data.bucketNum;
+          if (res.data === null)
+            return;
+          confirmNum.value = res.data.confirmNum ?? 0;
+          notConfirmNum.value = res.data.notConfirmNum ?? 0;
+          weightNum.value = res.data.weightNum ?? 0;
+          bucketNum.value = res.data.bucketNum ?? 0;
           registrationNumber.value = res.data.registrationNumber;
           name.value = res.data.name;
           allCarId.value = res.data.carId;
           allRecordNo.value = res.data.crecordNo;
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:226", "获取司机信息失败:", res.message || "未知错误");
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:228", "获取司机信息失败:", res.message || "未知错误");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:229", "获取司机信息异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:231", "获取司机信息异常:", error);
       }
     };
     const getapiGetDriverTodayPlan = async () => {
+      var _a;
       try {
         const res = await api_apis.apiGetDriverTodayPlan({
-          // driverId: userStore.sfmerchant?.id,
-          driverId: 3,
+          driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5,
           page: 1
         });
         if (res.code === 200) {
           taskList.value = res.data;
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:245", "获取今日收运计划失败:", res.message || "未知错误");
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:246", "获取今日收运计划失败:", res.message || "未知错误");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:248", "获取今日收运计划异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:249", "获取今日收运计划异常:", error);
       }
     };
     const cancelTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:256", "取消任务:", task.id);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:257", "取消任务:", task.id);
       common_vendor.index.showModal({
         title: "确认取消",
         content: "是否确认取消当前任务？",
         success: async (res) => {
+          var _a;
           if (res.confirm) {
             await api_apis.apiGetnoNeedCollect({
               id: task.id,
-              // driverId: userStore.sfmerchant?.id,
-              driverId: 3
+              driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
             }).then((res2) => {
               if (res2.code === 200) {
                 common_vendor.index.showToast({
@@ -164,7 +166,6 @@ const _sfc_main = {
         },
         success: (res) => {
           common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:329", "使用存储方式发送数据");
-          common_vendor.index.setStorageSync("mapData", mapData);
           try {
             if (res.eventChannel && res.eventChannel.emit) {
               res.eventChannel.emit("sendMapData", mapData);
@@ -176,7 +177,6 @@ const _sfc_main = {
         },
         fail: () => {
           common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:344", "页面跳转失败，使用存储方式");
-          common_vendor.index.setStorageSync("mapData", mapData);
         }
       });
     };
@@ -187,11 +187,11 @@ const _sfc_main = {
           title: "确认收运完成",
           content: "是否确认收运完成？",
           success: async (res) => {
+            var _a;
             if (res.confirm) {
               await api_apis.apiGetdriverConfirmPlan({
                 id: task.id,
-                // driverId: userStore.sfmerchant?.id,
-                driverId: 3
+                driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
               }).then((res2) => {
                 if (res2.code === 200) {
                   common_vendor.index.showToast({
@@ -237,6 +237,7 @@ const _sfc_main = {
         title: "确认提交",
         content: `是否确认提交过磅重量 ${weight}kg？`,
         success: async (res) => {
+          var _a;
           if (res.confirm) {
             try {
               const result = await api_apis.apiAddCarWeight({
@@ -244,8 +245,7 @@ const _sfc_main = {
                 recordNo: allRecordNo.value,
                 weight,
                 registrationNumber: registrationNumber.value,
-                // driverId: userStore.sfmerchant?.id || 3
-                driverId: 3
+                driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
               });
               if (result.code === 200) {
                 common_vendor.index.showToast({
@@ -265,7 +265,7 @@ const _sfc_main = {
                 title: "提交失败",
                 icon: "none"
               });
-              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:448", "提交重量失败:", error);
+              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:446", "提交重量失败:", error);
             }
           }
         }
@@ -298,7 +298,7 @@ const _sfc_main = {
         i: common_vendor.t(progressPercentage.value),
         j: `conic-gradient(#07C160 ${progressPercentage.value}%, rgba(216, 216, 216, 0.5) ${progressPercentage.value}% 100%)`,
         k: common_assets._imports_0,
-        l: common_vendor.t(confirmNum.value),
+        l: common_vendor.t(confirmNum.value ?? 0),
         m: common_assets._imports_1$2,
         n: common_vendor.t(notConfirmNum.value),
         o: common_assets._imports_2$1,

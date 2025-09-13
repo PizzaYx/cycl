@@ -1,29 +1,16 @@
-<!-- 收运统计-->
+<!-- 收运端统计-->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="商户收运统计"
+        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运端统计"
             @clickLeft="back" />
 
         <view class="menu">
-
-            <view class="filter-container">
-                <!-- 状态选择器 - 改回底部弹出 -->
-                <view class="filter-item" @click="showStatusPicker">
-                    <text>状态</text>
-                    <uni-icons type="bottom" size="12" color="#666"></uni-icons>
-                </view>
-
-
-                <!-- 时间范围选择器 - 还原正常样式 -->
-                <view class="filter-item">
-                    <uni-datetime-picker ref="datetimePicker" type="datetimerange" v-model="selectedTimeRange"
-                        rangeSeparator="至" start="2020-01-01 00:00:00" :end="getCurrentDateTime()"
-                        @change="onTimeChange" :border="false" class="filter-select time-select">
-                        <template v-slot:default>
-                            <text>时间</text>
-                        </template>
-                    </uni-datetime-picker>
-                    <uni-icons type="bottom" size="12" color="#666"></uni-icons>
+            <view class="search-container">
+                <view class="search-box">
+                    <uni-icons type="search" size="24" color="#999" class="search-icon"></uni-icons>
+                    <input class="search-input" placeholder="搜索店铺/商铺关键词" v-model="searchKeyword" @confirm="onSearch" />
+                    <uni-icons v-if="searchKeyword" type="clear" size="20" color="#999" class="clear-icon"
+                        @click="clearSearch"></uni-icons>
                 </view>
             </view>
         </view>
@@ -47,7 +34,7 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text :class="['status-tag', getStatusClass(item.status)]">
+                                <text class="status-tag" :class="getStatusClass(item.status)">
                                     {{ getStatusText(item.status) }}
                                 </text>
                             </view>
@@ -73,22 +60,16 @@
                             <view class="info-item">
                                 <text class="label">预估桶数:</text>
                                 <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                }}</text>
+                                    }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>
                                 <text class="value">{{ item.bucketNum ? (item.bucketNum + '个') : '暂无' }} </text>
                             </view>
-                            <!-- <view class="info-item">
+                            <view class="info-item">
                                 <text class="label">地址:</text>
                                 <text class="value">{{ item.address ?? '暂无' }} </text>
-                            </view> -->
-                        </view>
-                        <view class="order-footer">
-                           
-                            <uni-button size="mini" class="btn-confirm">
-                               查看详情
-                            </uni-button>
+                            </view>
                         </view>
                     </view>
 
@@ -115,7 +96,6 @@
 <script setup>
 import {
     ref,
-    computed,
     onMounted
 } from 'vue';
 import {
@@ -124,7 +104,7 @@ import {
 } from '@dcloudio/uni-app';
 
 import {
-    apiGetPlanStatisticsPage, apiGetPlanStatistics
+    apiGetDriverPlanStatisticsPage, apiGetDriverPlanStatistics
 } from '@/api/apis.js';
 
 import { useUserStore } from '@/stores/user.js'
@@ -133,24 +113,34 @@ import { useUserStore } from '@/stores/user.js'
 const userStore = useUserStore();
 
 // 分别定义统计数据
-const bucketCount = ref(0);
-const totalWeight = ref(0);
-
+const merchantCount = ref(0); // 商家数量
+const totalWeight = ref(0);// 总重量
+const syount = ref(0);//已收运
+const nosyount = ref(0);///未收运
 // 统计配置（固定不变）
 const statisticsConfig = [
     {
-        image: '/static/shd/tjleft.png',
-        number: bucketCount,
-        title: '垃圾桶数'
+        image: '/static/ssd/sytj2.png',
+        number: merchantCount,
+        title: '商家数量'
     },
     {
         image: '/static/shd/tjright.png',
         number: totalWeight,
         title: '总重量'
+    },
+    {
+        image: '/static/ssd/sytj1.png',
+        number: syount,
+        title: '已收运'
+    },
+    {
+        image: '/static/shd/tjleft.png',
+        number: nosyount,
+        title: '未收运'
     }
 ];
 
-// 获取状态样式类名
 // 获取状态样式类名
 const getStatusClass = (status) => {
     switch (status) {
@@ -165,7 +155,7 @@ const getStatusText = (status) => {
     switch (status) {
         case 0:
         case '0':
-            return '待收运';
+            return '进行中';
         case 1:
         case '1':
             return '已完成';
@@ -177,42 +167,10 @@ const getStatusText = (status) => {
     }
 };
 
-//搜索统计数据
-const getToStatistics = async () => {
-    const params = {
-        merchantId: userStore.merchant?.id || 448,
-    };
-
-    // 添加筛选条件
-    if (selectedStatus.value !== null) {
-        params.status = selectedStatus.value;
-    }
-
-    if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
-        params.startTime = selectedTimeRange.value[0];
-        params.endTime = selectedTimeRange.value[1];
-    }
-    // 添加搜索关键词
-    const res = await apiGetPlanStatistics(params);
-
-    if (res.code === 200) {
-        bucketCount.value = res.data.bucketNum ?? 0;
-        totalWeight.value = res.data.weight ?? 0;
-
-    }
-};
-
 
 // 筛选相关状态
-const selectedStatus = ref(null); // 选中的状态
-const selectedTimeRange = ref([]); // 选中的时间范围
+const searchKeyword = ref(''); // 搜索关键词
 
-// 状态选项配置 (0 待收运 1 已完成 2 无需收运)
-const statusOptions = ref([
-    { value: 0, text: '待收运' },
-    { value: 1, text: '已完成' },
-    { value: 2, text: '无需收运' }
-]);
 
 // 返回上一页方法
 const back = () => {
@@ -226,6 +184,22 @@ const loadingStatus = ref('more'); // more-加载前/loading-加载中/nomore-�
 // 数据列表
 const allOrderList = ref([]);
 
+//搜索统计数据
+const getToStatistics = async () => {
+    // 添加搜索关键词
+    const res = await apiGetDriverPlanStatistics({
+        title: searchKeyword.value ?? '',
+        driverId: userStore.driverId?.id || 5
+    });
+
+    if (res.code === 200) {
+        merchantCount.value = res.data.merchantNum ?? 0;
+        totalWeight.value = res.data.weightNum ?? 0;
+        syount.value = res.data.confirmNum ?? 0;
+        nosyount.value = res.data.notConfirmNum ?? 0;
+    }
+};
+
 //后获取数据
 const getNetwork = async () => {
     try {
@@ -237,20 +211,16 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            merchantId: userStore.merchant?.id || 448,
+            driverId: userStore.driverId?.id || 5
         };
 
-        // 添加筛选条件
-        if (selectedStatus.value !== null) {
-            params.status = selectedStatus.value;
+
+        // 添加搜索关键词
+        if (searchKeyword.value) {
+            params.title = searchKeyword.value;
         }
 
-        if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
-            params.startTime = selectedTimeRange.value[0];
-            params.endTime = selectedTimeRange.value[1];
-        }
-
-        const res = await apiGetPlanStatisticsPage(params);
+        const res = await apiGetDriverPlanStatisticsPage(params);
 
 
         // 处理下拉刷新
@@ -311,57 +281,31 @@ onReachBottom(() => {
 onPullDownRefresh(() => {
     allOrderList.value = [];
     pageNum.value = 1; // 重置页码为1
+
     getNetwork();
-    getToStatistics();
 })
 
-// 引用选择器组件
-const datetimePicker = ref(null);
 
-// 筛选相关方法
-const showStatusPicker = () => {
-    uni.showActionSheet({
-        itemList: statusOptions.value.map(item => item.text),
-        success: (res) => {
-            const selectedOption = statusOptions.value[res.tapIndex];
-            onStatusChange(selectedOption.value);
-        }
-    });
-};
-
-const onStatusChange = (value) => {
-    selectedStatus.value = value;
-    // 重置页面并重新加载数据
+// 搜索方法
+const onSearch = () => {
+    getToStatistics();
     resetPageAndReload();
 };
 
-
-const onTimeChange = (value) => {
-    selectedTimeRange.value = value;
-    // 重置页面并重新加载数据
+// 清空搜索关键词
+const clearSearch = () => {
+    searchKeyword.value = '';
     resetPageAndReload();
 };
-
 
 const resetPageAndReload = () => {
+    console.log('重置页码和重新加载数据');
     allOrderList.value = [];
     pageNum.value = 1;
     getNetwork();
     getToStatistics();
 };
 
-
-// 获取当前日期时间（包含时分秒）
-const getCurrentDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hour = String(now.getHours()).padStart(2, '0');
-    const minute = String(now.getMinutes()).padStart(2, '0');
-    const second = String(now.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
-};
 
 
 // 组件挂载时初始化数据
@@ -383,109 +327,68 @@ onMounted(() => {
         position: relative;
         margin-top: 2rpx;
         background-color: #ffffff;
-        padding: 0 30rpx;
+        padding: 20rpx 30rpx;
+        /* 调整padding以适应搜索框 */
 
-        .filter-container {
-            display: flex;
-            align-items: center; // 垂直居中
-            justify-content: space-around; // 水平平分空间
-            height: 88rpx;
-
-            .filter-item {
+        .search-container {
+            .search-box {
                 display: flex;
                 align-items: center;
-                gap: 10rpx; // 文字和箭头紧挨着
-                cursor: pointer;
-                // 增加点击范围
-                padding: 20rpx 30rpx;
-                min-height: 60rpx;
+                background-color: #f5f5f5;
+                border-radius: 45rpx;
+                height: 64rpx;
+                padding: 0 20rpx;
 
-                text {
+                .search-icon {
+                    margin-right: 10rpx;
+                    width: 48rpx;
+                    height: 48rpx;
+                }
+
+                .search-input {
+                    flex: 1;
                     font-size: 28rpx;
-                    color: #333;
+                    background-color: transparent;
+                    border: none;
+                    outline: none;
+                }
+
+                .clear-icon {
+                    margin-left: 10rpx;
                 }
             }
-
-            .filter-select {
-
-                // 自定义 uni-datetime-picker 样式 - 彻底移除所有背景
-                :deep(.uni-datetime-picker) {
-                    // 移除组件本身的所有样式
-                    background: transparent !important;
-                    border: none !important;
-
-                    .uni-datetime-picker--btn {
-                        border: none !important;
-                        background: transparent !important;
-                        background-color: transparent !important;
-                        padding: 0 !important;
-                        box-shadow: none !important;
-                        outline: none !important;
-
-                        // 强制移除所有可能的背景状态
-                        &:before,
-                        &:after {
-                            display: none !important;
-                        }
-
-                        &:active,
-                        &:focus,
-                        &:hover,
-                        &:visited,
-                        &:target {
-                            background: transparent !important;
-                            background-color: transparent !important;
-                            box-shadow: none !important;
-                            outline: none !important;
-                        }
-
-                        .uni-datetime-picker-text {
-                            font-size: 26rpx !important;
-                            color: #333 !important;
-                            background: transparent !important;
-                        }
-                    }
-
-                    // 移除可能存在的其他子元素背景
-                    view,
-                    text,
-                    input {
-                        background: transparent !important;
-                        background-color: transparent !important;
-                    }
-                }
-            }
-
-
         }
     }
 
     .tjxx {
         display: flex;
-        justify-content: space-between;
-        height: 132rpx;
-
+        flex-wrap: wrap;
         margin: 30rpx;
         gap: 20rpx;
 
         .tj-item {
-            flex: 1;
+            width: calc(50% - 10rpx);
             display: flex;
             align-items: center;
-            justify-content: space-around;
             background: #fff;
             border-radius: 20rpx;
+            padding: 20rpx;
 
             image {
                 width: 88rpx;
                 height: 88rpx;
+                margin-right: 20rpx;
             }
 
             .ljts {
+                display: flex;
+                flex-direction: column;
+
                 .number {
                     font-size: 30rpx;
                     font-weight: bold;
                     color: #3D3D3D;
+                    margin-bottom: 10rpx;
                 }
 
                 .title {
@@ -501,6 +404,7 @@ onMounted(() => {
 
         .content {
             height: 100%;
+          
         }
 
         .order-list {
@@ -511,6 +415,8 @@ onMounted(() => {
                 padding: 30rpx;
                 background-color: #fff;
                 border-radius: 12rpx;
+                height: 462rpx;
+                box-sizing: border-box;
 
                 .order-header {
                     margin-bottom: 20rpx;
@@ -522,8 +428,7 @@ onMounted(() => {
                         margin-bottom: 16rpx;
 
                         .shop-name {
-                            font-size: 28rpx;
-                            font-weight: 400;
+                            font-size: 26rpx;
                             color: rgba(61, 61, 61, 1);
                         }
 
@@ -604,9 +509,8 @@ onMounted(() => {
                     }
 
                     .btn-confirm {
-                        color: rgba(7, 193, 96, 1);
-                        // background-color: rgba(7, 193, 96, 1);
-                        border:1rpx solid rgba(7, 193, 96, 1);
+                        color: rgba(255, 255, 255, 1);
+                        background-color: rgba(7, 193, 96, 1);
                         font-size: 26rpx;
                         width: 144rpx;
                         height: 48rpx;
@@ -631,7 +535,7 @@ onMounted(() => {
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        min-height: calc(100vh - 200rpx); // 确保占满剩余屏幕高度
+        min-height: calc(100vh - 600rpx); // 确保占满剩余屏幕高度
         padding: 120rpx 60rpx;
         text-align: center;
         background-color: #ffffff;

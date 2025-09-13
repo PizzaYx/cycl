@@ -95,6 +95,39 @@ export function apiGetconfirmPlanById(data = {}) {
     })
 }
 
+//商户收运端统计 /api/merchantapi/getPlanStatistics
+export function apiGetPlanStatistics(data = {}) {
+    return request({
+        url: "/api/merchantapi/getPlanStatistics",
+        data
+    })
+}
+
+///api/merchantapi/getPlanStatisticsPage
+export function apiGetPlanStatisticsPage(data = {}) {
+    return request({
+        url: "/api/merchantapi/getPlanStatisticsPage",
+        data
+    })
+}
+
+//临时预约取消/api/merchantapi/delPlanTemporary
+export function apiGetcancelPlanById(data = {}) {
+    return request({
+      url: '/api/merchantapi/delPlanTemporary',
+      data,
+    })
+}
+
+///getMerchantNotConfirmNum  商户收运清单进行中数量
+export function apiGetMerchantNotConfirmNum(data = {}) {
+    return request({
+        url: "/api/merchantapi/getMerchantNotConfirmNum",
+        data
+    })
+}
+
+
 //------------------------收运端 司机------------------------------//
 
 ///api/driver/getDriverTodayStatistics
@@ -120,6 +153,7 @@ export function apiGetDriverTodayPlan(data = {}) {
         data
     })
 }
+
 
 ///api/driver/noNeedCollect 无需收运
 export function apiGetnoNeedCollect(data = {}) {
@@ -166,6 +200,30 @@ export function apiAddCarWeight(data = {}) {
 export function apiGetDriverPlanPage(data = {}) {
   return request({
     url: '/api/driver/getDriverPlanPage',
+    data,
+  })
+}
+
+////api/driver/getDriverPlanStatisticsPage 收运统计列表搜索
+export function apiGetDriverPlanStatisticsPage(data = {}) {
+  return request({
+    url: '/api/driver/getDriverPlanStatisticsPage',
+    data,
+  })
+}
+
+////api/driver/getDriverPlanStatistics 收运统计统计搜索
+export function apiGetDriverPlanStatistics(data = {}) {
+  return request({
+    url: '/api/driver/getDriverPlanStatistics',
+    data,
+  })
+}
+
+///api/driver/getDriverNotConfirmNum司机收运纪录待处理数量
+export function apiGetDriverNotConfirmNum(data = {}) {
+  return request({
+    url: '/api/driver/getDriverNotConfirmNum',
     data,
   })
 }

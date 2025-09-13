@@ -101,6 +101,14 @@
         		"navigationBarTitleText" : "收运详细",
 				"navigationStyle": "custom"
         	}
+        },
+        {
+        	"path" : "pages/collection/syStatistics",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "收运统计",
+				"navigationStyle": "custom"
+        	}
         }
     ],
     "globalStyle": {

@@ -3,11 +3,46 @@
     "miniprogram": {
       "list": [
         {
-          "name": "收运端记录",
-          "pathName": "pages/collection/sfsyRecord",
+          "name": "商户端首页",
+          "pathName": "pages/merchant/merchant",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "登录",
+          "pathName": "pages/index/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "收运端首页",
+          "pathName": "pages/collection/collection",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "商户端收运统计",
+          "pathName": "pages/merchant/sydStatistics",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "收运端统计",
+          "pathName": "pages/collection/syStatistics",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "收运端记录",
+          "pathName": "pages/collection/sfsyRecord",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "pages/merchant/sydAllList",
@@ -45,29 +80,8 @@
           "scene": null
         },
         {
-          "name": "pages/collection/collection",
-          "pathName": "pages/collection/collection",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
           "name": "pages/merchant/sydChecklist",
           "pathName": "pages/merchant/sydChecklist",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/merchant/sydAllList",
-          "pathName": "pages/merchant/sydAllList",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/index/index",
-          "pathName": "pages/index/index",
           "query": "",
           "launchMode": "default",
           "scene": null
@@ -82,13 +96,6 @@
         {
           "name": "pages/merchant/sydReservation",
           "pathName": "pages/merchant/sydReservation",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/merchant/merchant",
-          "pathName": "pages/merchant/merchant",
           "query": "",
           "launchMode": "default",
           "scene": null

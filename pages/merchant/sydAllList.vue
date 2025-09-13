@@ -1,4 +1,4 @@
-<!-- 收运记录-->
+<!-- 收运总记录-->
 <template>
     <view class="container">
         <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运记录"
@@ -124,9 +124,9 @@ const selectedTimeRange = ref([]); // 选中的时间范围
 
 // 状态选项配置 (0 待确认 1 已完成 2 无需收运)
 const statusOptions = ref([
-    { value: '0', text: '待确认' },
-    { value: '1', text: '已完成' },
-    { value: '2', text: '无需收运' }
+    { value: 0, text: '待确认' },
+    { value: 1, text: '已完成' },
+    { value: 2, text: '无需收运' }
 ]);
 
 // 状态转换函数
@@ -186,7 +186,7 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            merchantId: 448,
+            merchantId: userStore.merchant?.id ?? 448,
         };
 
         // 添加筛选条件

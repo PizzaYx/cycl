@@ -9,11 +9,11 @@
                     :class="{ active: currentTab === index }" @click="handleTabClick(index)">
                     {{ tab.value }}
                     <!-- 为预约中tab添加uni-badge -->
-                    <uni-badge v-if="tab.value === '预约中' && bookingBadgeText !== '0' && bookingBadgeText !== ''"
+                    <!-- <uni-badge v-if="tab.value === '预约中' && bookingBadgeText !== '0' && bookingBadgeText !== ''"
                         class="uni-badge" type="error" :text="bookingBadgeText" :is-dot="false" absolute="rightTop"
-                        :offset="[-5, -12]"></uni-badge>
+                        :offset="[-5, -12]"></uni-badge> -->
                     <!-- 为进行中tab添加uni-badge -->
-                    <uni-badge v-if="tab.value === '进行中' && processingBadgeText !== '0' && processingBadgeText !== ''"
+                    <uni-badge v-if="tab.value === '进行中' && processingBadgeText !== 0"
                         class="uni-badge" type="error" :text="processingBadgeText" :is-dot="false" absolute="rightTop"
                         :offset="[-5, -12]"></uni-badge>
                     <view class="tab-line" v-if="currentTab === index"></view>
@@ -51,7 +51,7 @@
                             </view>
                             <view class="info-item">
                                 <text class="label">收运总量：</text>
-                                <text class="value">{{ item.weight ?? '暂无' }}</text>
+                                <text class="value">{{ item.weight ?? '暂无' }}kg</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">车辆信息：</text>
@@ -65,7 +65,7 @@
                         <view class="order-footer">
                             <!-- currentTab == 0: 显示取消和查看详情按钮 -->
                             <template v-if="currentTab == 0">
-                                <uni-button size="mini" type="default" class="btn-cancel" @tap="handleCancel(item)">
+                                <uni-button v-if="item.status != 1" size="mini" type="default" class="btn-cancel" @tap="handleCancel(item)" >
                                     取消
                                 </uni-button>
                                 <uni-button size="mini" type="primary" class="btn-confirm"
@@ -124,7 +124,7 @@ import {
 } from '@dcloudio/uni-app';
 
 import {
-    apiGetPlanPage, apiGetconfirmPlanById
+    apiGetPlanPage, apiGetconfirmPlanById, apiGetcancelPlanById, apiGetMerchantNotConfirmNum
 } from '@/api/apis.js';
 
 import { useUserStore } from '@/stores/user.js'
@@ -162,7 +162,7 @@ const getStatusText = (status) => {
                 return '审核通过';
             case 2:
             case '2':
-                return '审核不通过';
+                return '未通过';
             default:
                 return '未知状态';
         }
@@ -192,8 +192,43 @@ const getStatusClass = (status) => {
 
 // 按钮点击事件处理函数
 const handleCancel = (item) => {
-    console.log('取消按钮被点击', item);
+    console.log('取消按钮被点击111', item);
+    uni.showModal({
+        title: '提示',
+        content: '确定要取消此预约吗？',
+        success: async (res) => {
+            console.log('用户点击了确定按钮', res);
+            if (res.confirm) {
 
+
+                const resdata = await apiGetcancelPlanById({
+                    merchantId: userStore.merchant?.id || 448,
+                    id: item.id
+                });
+
+                if (resdata.code === 200) {
+                    uni.showToast({
+                        title: '取消成功',
+                        icon: 'success',
+                        duration: 2000
+                    });
+                    getNetwork();
+                }
+                else {
+                    uni.showToast({
+                        title: '取消失败',
+                        icon: 'error',
+                        duration: 2000
+                    });
+                }
+
+
+            } else if (res.cancel) {
+                // 取消取消订单
+                console.log('取消取消预约');
+            }
+        },
+    });
 };
 
 const handleViewDetails = (item) => {
@@ -204,7 +239,7 @@ const handleViewDetails = (item) => {
 
 const handleConfirmTransport = async (item) => {
     console.log('确认收运按钮被点击', item);
-    if (item.merchantConfirm == null) {
+    if (item.arrivalTime == null) {
         uni.showToast({
             title: '请等待师傅确认收运完成!',
             icon: 'none',
@@ -253,8 +288,18 @@ const handleConfirmTransport = async (item) => {
 };
 
 // 添加badgeText的ref变量
-const bookingBadgeText = ref('0');
-const processingBadgeText = ref('0');
+const processingBadgeText = ref(0);
+
+const getMerchantNotConfirmNum = async () => {
+    const res = await apiGetMerchantNotConfirmNum({
+        merchantId: userStore.merchant?.id || 448
+    });
+    if (res.code === 200) {
+        processingBadgeText.value = res.data ?? 0;
+    }
+};
+
+
 
 // 添加页码和加载状态变量
 const pageNum = ref(1);
@@ -274,8 +319,7 @@ const getNetwork = async () => {
 
         const res = await apiGetPlanPage({
             pageNum: pageNum.value,
-            merchantId: 448,
-            // merchantId: userStore.merchant?.id,
+            merchantId: userStore.merchant?.id ?? 448,
             status: tabs[currentTab.value].key // 使用tabs中的key值
         });
 
@@ -339,12 +383,14 @@ onPullDownRefresh(() => {
     allOrderList.value = [];
     pageNum.value = 1; // 重置页码为1
     getNetwork();
+    getMerchantNotConfirmNum();
 })
 
 // 组件挂载时初始化数据
 onMounted(() => {
     pageNum.value = 1;
     getNetwork();
+    getMerchantNotConfirmNum();
 });
 </script>
 
@@ -564,4 +610,3 @@ onMounted(() => {
     }
 }
 </style>
-

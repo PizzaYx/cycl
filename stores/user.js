@@ -80,7 +80,6 @@ export const useUserStore = defineStore('user', {
         setUserInfo(userInfo) {
             this.userInfo = userInfo
             this.isLoggedIn = true
-            console.log('完整userInfo对象1:', JSON.stringify(userInfo, null, 2))
         },
 
         // 从服务器获取用户信息

@@ -1,7 +1,7 @@
 <!-- 收运端首页 -->
 <template>
     <view class="layout">
-        
+
         <scroll-view scroll-y refresher-enabled :refresher-triggered="refreshing" @refresherrefresh="onRefresh"
             class="scroll-view">
             <view class="headImage">
@@ -24,7 +24,7 @@
             <!-- 数据统计 -->
             <view class="statistics">
                 <view class="stat-item">
-                    <view class="number">{{ yyNum }}</view>
+                    <view class="number">{{ yyNum }}kg</view>
                     <view class="label">已收运总量</view>
                 </view>
                 <view class="stat-item">
@@ -55,25 +55,66 @@
 
             </view>
             <view class="records">
-                <view class="record-list">
-                    <view v-for="(item, index) in records" :key="index" class="record-item" key="item.id">
-                        <view class="record-main">
-                            <view class="shop-name">{{ item.merchantName }}</view>
-                            <view class="record-time">{{ item.status === 1 ? item.arrivalTime : item.appointmentTime }}
+                <view class="order-list" v-if="allOrderList.length > 0">
+                    <view class="order-item" v-for="(item, index) in allOrderList" :key="index">
+                        <view class="order-header">
+                            <view class="shop-info">
+                                <text class="shop-name">{{ item.merchantName }}</text>
+                                <text class="status-tag" :class="getStatusClass(item.status)">
+                                    {{ getStatusText(item.status) }}
+                                </text>
                             </view>
                         </view>
-                        <view class="record-right">
-                            <view class="status" :class="{
-                                'status-completed': item.status === 1,
-                                'status-pending': item.status === 0,
-                                'status-default': item.status === 2
-                            }">
-                                {{ getRecordStatusText(item.status) }}
+                        <view class="order-content">
+                            <view class="info-item">
+                                <text class="label">预估时间:</text>
+                                <text class="value">{{ item.appointmentTime ?? '暂无' }}</text>
                             </view>
-                            <view class="weight">{{ item.status === 1 ? item.weight : item.estimateWeight }}kg</view>
+                            <view class="info-item">
+                                <text class="label">收运时间:</text>
+                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
+                            </view>
+                            <view class="info-item">
+                                <text class="label">预估重量:</text>
+                                <text class="value">{{ (item.estimateWeight + 'kg') ?? '暂无' }}</text>
+                            </view>
+                            <view class="info-item">
+                                <text class="label">收运重量:</text>
+                                <text class="value">{{ item.weight ? (item.weight + 'kg') : '暂无' }}</text>
+                            </view>
+                            <view class="info-item">
+                                <text class="label">预估桶数:</text>
+                                <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
+                                    }}</text>
+                            </view>
+                            <view class="info-item">
+                                <text class="label">收运桶数:</text>
+                                <text class="value">{{ item.bucketNum ? (item.bucketNum + '个') : '暂无' }} </text>
+                            </view>
+                            <view class="info-item">
+                                <text class="label">地址:</text>
+                                <text class="value">{{ item.address ?? '暂无' }} </text>
+                            </view>
+
+                        </view>
+                        <view class="order-footer">
+                            <template v-if="item.status == 0 || item.status == '0'">
+                                <uni-button size="mini" type="default" class="btn-cancel" @tap="handleCancel(item)">
+                                    取消
+                                </uni-button>
+                                <uni-button size="mini" type="primary" class="btn-confirm"
+                                    @tap="handleConfirmTransport(item)">
+                                    收运
+                                </uni-button>
+                            </template>
+                            <template v-else>
+                                <uni-button size="mini" type="default" class="btn-confirm"
+                                    @tap="handleViewDetails(item)">
+                                    查看详情
+                                </uni-button>
+                            </template>
                         </view>
                     </view>
-                    <view v-if="records.length === 0" class="no-records">暂无收运明细</view>
                 </view>
             </view>
         </scroll-view>
@@ -83,7 +124,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
-import { apiGetDriverTodayStatistics } from '@/api/apis.js'
+import { apiGetDriverTodayStatistics, apiGetDriverPlanPage, apiGetdriverConfirmPlan, apiGetnoNeedCollect } from '@/api/apis.js'
 
 // 使用用户 store
 const userStore = useUserStore()
@@ -92,9 +133,10 @@ const yyNum = ref(0) // 已收运总量
 const syNum = ref(0) // 未收运
 const dqNum = ref(0) // 已收运
 
+const allOrderList = ref([]); // 收运明细列表
+
 // 下拉刷新状态
 const refreshing = ref(false)
-
 
 // 页面加载时确保用户信息存在
 onMounted(async () => {
@@ -108,7 +150,7 @@ onMounted(async () => {
         }
 
         getMerchantStatistics()
-
+        getMerchantSydList()
     } catch (error) {
         // 其他非401错误的处理
         console.error('页面初始化失败:', error)
@@ -128,17 +170,43 @@ const getMerchantStatistics = async () => {
     }
 }
 
+// 状态转换函数
+const getStatusText = (status) => {
+    switch (status) {
+        case 0:
+        case '0':
+            return '进行中';
+        case 1:
+        case '1':
+            return '已完成';
+        case 2:
+        case '2':
+            return '无法收运';
+        default:
+            return '无法收运';
+    }
+};
+
+// 获取状态样式类名
+const getStatusClass = (status) => {
+    switch (status) {
+        case 0: return 'processing';
+        case 1: return 'completed';
+        case 2: return 'cancelled';
+    }
+};
+
 
 //获取收运端首页收运记录显示前5条
 const getMerchantSydList = async () => {
-    const res = await apiGetPlanAllPage({
+    const res = await apiGetDriverPlanPage({
         pageNum: 1,
         pageSize: 5,
-        merchantId: userStore.merchant?.id
+        driverId: userStore.merchant?.id || 5,
     })
     if (res.code === 200) {
-        records.value = res.data.list;
-        //0 待确认 1 已完成 2无需收运
+        allOrderList.value = res.data.list;
+        
     } else {
         console.error('收运端首页收运明细失败', res.message)
     }
@@ -146,12 +214,136 @@ const getMerchantSydList = async () => {
 
 const getUserInfo = () => {
     // 检查用户认证状态并执行相应操作
-    
-        // 已认证，跳转到用户页面
-        uni.navigateTo({
-            url: '/pages/user/user'
+    // 已认证，跳转到用户页面
+    uni.navigateTo({
+        url: '/pages/user/user'
+    })
+
+}
+
+
+// 按钮点击事件处理函数
+const handleCancel = (item) => {
+    console.log('取消任务:', item);
+    uni.showModal({
+        title: '确认取消',
+        content: '是否确认取消当前任务？',
+        success: async (res) => {
+            if (res.confirm) {
+                await apiGetnoNeedCollect({
+                    id: item.id,
+                    driverId: userStore.merchant?.id || 5
+                }).then((res) => {
+                    if (res.code === 200) {
+                        uni.showToast({
+                            title: res.message || '操作成功',
+                            icon: 'success'
+                        });
+                        // 刷新任务列表
+                        clearSearch();
+                    } else {
+                        uni.showToast({
+                            title: res.message || '操作失败',
+                            icon: 'error'
+                        });
+                    }
+
+                })
+            }
+        }
+    })
+
+};
+
+const handleViewDetails = (item) => {
+    console.log('查看详情按钮被点击', item);
+    // 这里添加查看任务的逻辑
+    uni.navigateTo({
+        url: `/pages/collection/syCheckDetail?planId=${item.id}&driverId=${item.driverId}`
+    });
+
+};
+
+const handleConfirmTransport = async (task) => {
+    console.log('收运:', task.id);
+    //先判断task.weight是否大于0 he task.bucketNum是否大于0
+    if (task.weight > 0 && task.bucketNum > 0) {
+        //确认收运完成
+        uni.showModal({
+            title: '确认收运完成',
+            content: '是否确认收运完成？',
+            success: async (res) => {
+                if (res.confirm) {
+                    await apiGetdriverConfirmPlan({
+                        id: task.id,
+                        driverId: userStore.sfmerchant?.id || 5,
+                    }).then((res) => {
+                        if (res.code === 200) {
+                            uni.showToast({
+                                title: res.message || '操作成功',
+                                icon: 'success'
+                            });
+                            // 刷新任务列表
+                            clearSearch();
+                        } else {
+                            uni.showToast({
+                                title: res.message || '操作失败',
+                                icon: 'error'
+                            });
+                        }
+                    })
+                }
+            }
         })
-    
+
+    }
+    else {
+        uni.showToast({
+            title: '请先进行 收运上报 操作',
+            icon: 'none'
+        });
+        return;
+    }
+};
+
+
+// 快捷操作配置
+const quickActions = ref([
+    {
+        id: 'appointment',
+        name: '今日收运',
+        icon: '/static/ssd/syleft.png',
+        url: '/pages/collection/sfDetails' // 今日详情
+    },
+    {
+        id: 'records',
+        name: '工单统计',
+        icon: '/static/ssd/sydright.png',
+        url: '/pages/collection/syStatistics' // 统计页面
+    },
+])
+
+// 统一的快捷操作跳转处理
+const handleQuickAction = (action) => {
+    console
+    // 检查页面是否存在（可以根据实际情况调整）
+    if (action.url) {
+        uni.navigateTo({
+            url: action.url,
+            fail: (err) => {
+                console.error('页面跳转失败:', err)
+                uni.showToast({
+                    title: '页面暂未开放',
+                    icon: 'none'
+                })
+            }
+        })
+    } else {
+        uni.showToast({
+            title: '功能开发中',
+            icon: 'none'
+        })
+    }
 }
 
 // 下拉刷新处理
@@ -174,69 +366,11 @@ const onRefresh = async () => {
 
 
 
-// 快捷操作配置
-const quickActions = ref([
-    {
-        id: 'appointment',
-        name: '今日收运',
-        icon: '/static/ssd/syleft.png',
-        url: '/pages/collection/sfDetails' // 今日详情
-    },
-    {
-        id: 'records',
-        name: '工单统计',
-        icon: '/static/ssd/sydright.png',
-        url: '' // 收运清单页面
-    },
-])
-
-// 统一的快捷操作跳转处理
-const handleQuickAction = (action) => {
-   
-
-    // 检查页面是否存在（可以根据实际情况调整）
-    if (action.url) {
-        uni.navigateTo({
-            url: action.url,
-            fail: (err) => {
-                console.error('页面跳转失败:', err)
-                uni.showToast({
-                    title: '页面暂未开放',
-                    icon: 'none'
-                })
-            }
-        })
-    } else {
-        uni.showToast({
-            title: '功能开发中',
-            icon: 'none'
-        })
-    }
-}
 
 
-
-
-const records = ref([]); // 收运明细列表
-
-// 获取收运记录状态文字
-const getRecordStatusText = (status) => {
-    switch (status) {
-        case 0:
-            return '待确认';
-        case 1:
-            return '已完成';
-        case 2:
-            return '无需收运';
-        default:
-            return '未知状态';
-    }
-};
 
 // 跳转到收运明细页面
 const goToSydAllList = () => {
-  
-   
     uni.navigateTo({
         url: '/pages/collection/sfsyRecord'
     })
@@ -412,7 +546,7 @@ const goToSydAllList = () => {
             align-items: center;
             justify-content: center;
             border-radius: 20rpx;
-         
+
             width: 336rpx;
             height: 120rpx;
             background-color: #fff;
@@ -461,76 +595,118 @@ const goToSydAllList = () => {
         z-index: 1;
         background-color: $bg-theme-color;
         border-radius: 16rpx;
-        margin: 0 30rpx 30rpx 30rpx;
+        margin: 0 0 30rpx;
 
-        .record-list {
-            .record-item {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                height: 138rpx;
-                margin-bottom: 22rpx;
-                background-color: #fff;
-                border-radius: 16rpx;
-                padding: 0 30rpx 0 30rpx;
+        .order-list {
+            padding: 0 30rpx; // 左右30rpx
 
+            .order-item {
+                margin-bottom: 20rpx;
+                padding: 30rpx;
+                background-color: #ffffff;
+                border-radius: 12rpx;
 
-                .record-main {
-                    .shop-name {
-                        font-size: 26rpx;
-                        color: rgba(19, 19, 19, 1);
-                        margin-bottom: 8rpx;
-                    }
+                .order-header {
+                    margin-bottom: 20rpx;
 
-                    .record-time {
-                        font-size: 24rpx;
-                        color: rgba(61, 61, 61, 0.50);
-                    }
-                }
-
-                .record-right {
-                    text-align: right;
-
-                    .weight {
-                        font-size: 32rpx;
-                        font-weight: 400;
-                        color: rgba(61, 61, 61, 1);
-                        margin-bottom: 8rpx;
-                    }
-
-                    .status {
-                        font-size: 24rpx;
-                        border-radius: 8rpx;
-                        width: 96rpx;
-                        height: 40rpx;
+                    .shop-info {
                         display: flex;
                         align-items: center;
-                        justify-content: center;
-                    }
+                        justify-content: space-between;
+                        margin-bottom: 16rpx;
 
-                    .status-completed {
-                        color: #07C160;
-                        background: rgba(7, 193, 96, 0.2);
-                        border-radius: 8rpx 8rpx 8rpx 8rpx;
-                    }
+                        .shop-name {
+                            font-size: 28rpx;
+                            font-weight: 400;
+                            color: rgba(61, 61, 61, 1);
+                        }
 
-                    .status-pending {
-                        color: #FFA100;
-                        background: rgba(255, 195, 0, 0.16);
-                        border-radius: 8rpx 8rpx 8rpx 8rpx;
-                    }
+                        .status-tag {
+                            font-size: 12px;
+                            width: 100rpx;
+                            height: 40rpx;
+                            border-radius: 8rpx;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
 
-                    .status-default {
-                        color: #666;
-                        background-color: rgba(102, 102, 102, 0.1);
+                            &.processing {
+                                color: rgba(0, 170, 255, 1);
+                                background: rgba(0, 170, 255, 0.10);
+                            }
+
+                            &.completed {
+                                color: rgba(255, 161, 0, 1);
+                                background: rgba(255, 161, 0, 0.10);
+                            }
+
+                            &.cancelled {
+                                color: rgba(61, 61, 61, 0.50);
+                                background: rgba(153, 153, 153, 0.1);
+                            }
+                        }
                     }
                 }
-            }
 
-            .no-records {
-                text-align: center;
-                color: #999;
-                padding: 40rpx 0;
+                .order-content {
+                    padding: 20rpx 0;
+                    border-top: 1px solid #f0f0f0;
+                    border-bottom: 1px solid #f0f0f0;
+
+                    .info-item {
+                        display: flex;
+                        margin-bottom: 16rpx;
+
+                        &:last-child {
+                            margin-bottom: 0;
+                        }
+
+                        .label {
+                            font-size: 26rpx;
+                            color: rgba(61, 61, 61, 0.50);
+                        }
+
+                        .value {
+                            margin-left: 30rpx;
+                            font-size: 26rpx;
+                            color: rgba(61, 61, 61, 1);
+                        }
+                    }
+                }
+
+                .order-footer {
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-top: 20rpx;
+
+                    .btn-cancel {
+                        margin-right: 20rpx;
+                        color: rgba(61, 61, 61, 1);
+                        background-color: #fff;
+                        border: 1px solid rgba(196, 196, 196, 1);
+                        font-size: 26rpx;
+                        width: 144rpx;
+                        height: 48rpx;
+                        border-radius: 20rpx;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        box-sizing: border-box; // 使用border-box盒模型
+                    }
+
+                    .btn-confirm {
+                        color: rgba(255, 255, 255, 1);
+                        background-color: rgba(7, 193, 96, 1);
+                        font-size: 26rpx;
+                        width: 144rpx;
+                        height: 48rpx;
+                        border-radius: 20rpx;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        box-sizing: border-box; // 使用border-box盒模型
+                    }
+                }
             }
         }
     }

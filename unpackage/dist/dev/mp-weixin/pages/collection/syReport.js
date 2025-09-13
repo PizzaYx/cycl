@@ -229,7 +229,7 @@ const _sfc_main = {
           ["status-bar"]: true,
           ["left-icon"]: "left",
           color: "#000",
-          title: "收运记录"
+          title: "收运上报"
         }),
         c: common_vendor.t(ljNum.value),
         d: common_vendor.o(handleScan),

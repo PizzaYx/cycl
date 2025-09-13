@@ -16,6 +16,7 @@ if (!Math) {
   "./pages/collection/sfsyRecord.js";
   "./pages/collection/syAllMap.js";
   "./pages/collection/syCheckDetail.js";
+  "./pages/collection/syStatistics.js";
 }
 const _sfc_main = {
   onLaunch: function() {

@@ -7,7 +7,7 @@
 
         <!-- 用户信息 -->
         <view class="user-info">
-            <view class="name">{{ driverName }}</view>
+            <view class="name">{{ pageData.driverName }}</view>
             <view class="status-tag" :class="statusClass">{{ statusText }}</view>
         </view>
         <!-- 内容区域 -->
@@ -15,29 +15,9 @@
 
             <!-- 基础信息列表 -->
             <view class="info-list">
-                <view class="info-item">
-                    <text class="label">收运时间</text>
-                    <text class="value">{{ time }}</text>
-                </view>
-                <view class="info-item">
-                    <text class="label">商家名称</text>
-                    <text class="value">{{ merchantName }}</text>
-                </view>
-                <view class="info-item">
-                    <text class="label">{{ status === 1 ? '收运重量' : '预估重量' }}</text>
-                    <text class="value">{{ weight }}KG</text>
-                </view>
-                <view class="info-item">
-                    <text class="label">{{ status === 1 ? '收运桶数' : '预估桶数' }}</text>
-                    <text class="value">{{ bucketNum }}桶</text>
-                </view>
-                <view class="info-item">
-                    <text class="label">收运地址</text>
-                    <text class="value">{{ address }}</text>
-                </view>
-                <view class="info-item">
-                    <text class="label">车牌号</text>
-                    <text class="value">{{ registrationNumber }}</text>
+                <view class="info-item" v-for="(item, index) in infoList" :key="index">
+                    <text class="label">{{ item.label }}</text>
+                    <text class="value">{{ item.value }}</text>
                 </view>
             </view>
 
@@ -45,8 +25,8 @@
             <view class="photo-section">
                 <text class="photo-title">厨余垃圾照片</text>
                 <view class="photo-list">
-                    <image v-for="(item, index) in img" :key="index" class="photo-item"
-                        :src="item" mode="aspectFill" @click="previewImage(index)" />
+                    <image v-for="(item, index) in pageData.img" :key="index" class="photo-item" :src="item"
+                        mode="aspectFill" @click="previewImage(index)" />
                 </view>
             </view>
         </view>
@@ -57,24 +37,29 @@
 import { onMounted, ref, computed } from 'vue';
 import { apiGetDriverPlanById } from '@/api/apis.js'
 import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
-// 新增接收页面参数的变量
+
+// 页面参数
 const planId = ref(''); // 车辆ID
 const driverId = ref(''); // 司机ID
 
-//页面显示参数
-const driverName = ref(''); //司机名称
-const status = ref();//状态 0 进行中 1.已完成 2.无法收运 
-const merchantName = ref('');//商家名称
-const weight = ref(0.0);//重量  状态1接收weight     其他状态接收   estimateWeight
-const bucketNum = ref(0);//桶数 状态1接收bucketNum 其他状态接收estimateBucketNum
-const address = ref('');//地址 
-const registrationNumber = ref(''); //车牌号
-const img = ref([]);//照片 ,分隔的图片
-const time = ref(''); // 收运时间
+// 页面数据
+const pageData = ref({
+    // driverName: '', //司机名称
+    // status: null, //状态 0 进行中 1.已完成 2.无法收运 
+    // merchantName: '', //商家名称
+
+    // weight: 0.0, //重量
+    // bucketNum: 0, //桶数
+    // address: '', //地址 
+    // registrationNumber: '', //车牌号
+    // img: [], //照片数组
+    // time: '', // 收运时间
+    // estimateTime: '' // 预估时间
+});
 
 // 根据状态显示对应的文字
 const statusText = computed(() => {
-    switch(status.value) {
+    switch (pageData.value.status) {
         case 0: return '进行中';
         case 1: return '已完成';
         case 2: return '无法收运';
@@ -83,7 +68,7 @@ const statusText = computed(() => {
 });
 
 const statusClass = computed(() => {
-    switch(status.value) {
+    switch (pageData.value.status) {
         case 0: return 'processing';
         case 1: return 'completed';
         case 2: return 'cancelled';
@@ -91,10 +76,56 @@ const statusClass = computed(() => {
     }
 });
 
+// 信息列表配置
+const infoList = computed(() => [
+    {
+        label: '商家名称',
+        value: pageData.value.merchantName
+    },
+    {
+        label: '预估时间',
+        value: pageData.value.estimateTime
+    },
+    {
+        label: '收运时间',
+        value: pageData.value.arrivalTime ?? '', 
+    },
+    {
+        label: '预估重量',
+        value: pageData.value.estimateWeight + 'kg' ?? '暂无'
+ 
+    },
+    {
+        label: '收运重量',
+        value: pageData.value.registrationNumber
+    },
+    {
+        label: '预估桶数',
+        value: pageData.value.estimateBucketNum ?? 0
+    },
+    {
+        label: '收运桶数',
+        value: pageData.value.estimateBucketNum ?? 0
+    },
+    {
+        label: '收运地址',
+        value: pageData.value.address ?? '',
+    },
+    {
+        label: '车牌号',
+        value: pageData.value.registrationNumber ?? '',
+    },
+ 
+    
+
+   
+
+]);
+
 onLoad((options) => {
     if (options.planId) planId.value = options.planId;
     if (options.driverId) driverId.value = options.driverId;
-    
+
     console.log('接收到的参数:', options);
 });
 
@@ -104,7 +135,9 @@ onMounted(() => {
     getSyCheckDetail()
 })
 
-//获取商户首页数据统计
+
+
+//获取收运记录详情
 const getSyCheckDetail = async () => {
     const res = await apiGetDriverPlanById({
         driverId: driverId.value,
@@ -112,36 +145,22 @@ const getSyCheckDetail = async () => {
     })
 
     if (res.code === 200) {
-        // 设置司机名称
-        driverName.value = res.data.driverName || '';
-        // 设置状态
-        status.value = res.data.status;
-        // 设置商家名称
-        merchantName.value = res.data.merchantName || '';
-        // 根据状态设置重量和桶数
-        if (res.data.status === 1) {
-            // 状态1使用实际重量和桶数
-            weight.value = res.data.weight || 0.0;
-            bucketNum.value = res.data.bucketNum || 0;
-        } else {
-            // 其他状态使用预估重量和桶数
-            weight.value = res.data.estimateWeight || 0.0;
-            bucketNum.value = res.data.estimateBucketNum || 0;
-        }
-        // 设置地址
-        address.value = res.data.address || '';
-        // 设置车牌号
-        registrationNumber.value = res.data.registrationNumber || '';
-        // 设置照片
-        img.value = res.data.img ? res.data.img.split(',') : [];
-        // 根据状态获取不同的时间字段
-        if (res.data.status === 1) {
-            // 状态1使用实际收运时间(arrivalTime)
-            time.value = res.data.arrivalTime || '';
-        } else {
-            // 其他状态使用预约时间(appointmentTime)
-            time.value = res.data.appointmentTime || '';
-        }
+        const data = res.data;
+
+        // 统一更新pageData
+        pageData.value = {
+            driverName: data.driverName || '',
+            status: data.status,
+            merchantName: data.merchantName || '',
+            estimateWeight: data.estimateWeight || 0.0,
+            weight: data.weight || 0.0,
+            estimateBucketNum: data.estimateBucketNum || 0,
+            bucketNum: data.bucketNum || 0,
+            registrationNumber: data.registrationNumber || '',
+            img: data.img ? data.img.split(',') : [],
+            appointmentTime : data.appointmentTime || '',
+            arrivalTime: data.arrivalTime || '',
+        };
     }
 }
 // 返回上一页
@@ -152,7 +171,7 @@ const back = () => {
 // 照片预览功能
 const previewImage = (index) => {
     uni.previewImage({
-        urls: img.value,
+        urls: pageData.value.img,
         current: index
     })
 }
@@ -176,13 +195,13 @@ const previewImage = (index) => {
     box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
     margin-top: 20rpx;
     border-radius: 16rpx;
-    
+
     .name {
         font-size: 16px;
         font-weight: bold;
         color: #333333;
     }
-    
+
     .status-tag {
         font-size: 12px;
         width: 100rpx;

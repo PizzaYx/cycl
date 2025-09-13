@@ -308,7 +308,7 @@ const submitAuth = async () => {
     try {
         // 准备提交数据 - 只包含API需要的字段
         const submitData = {
-            merchantId: userStore.merchant?.id, // 用户ID
+            merchantId: userStore.merchant?.id ?? 448, // 用户ID
             name: formData.merchantName,              // 商户名称
             address: formData.address,                // 地址
             contactTruename: formData.contactPerson,  // 联系人姓名

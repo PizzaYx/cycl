@@ -162,7 +162,7 @@ const _sfc_main = {
       submitting.value = true;
       try {
         const submitData = {
-          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+          merchantId: ((_a = userStore.merchant) == null ? void 0 : _a.id) ?? 448,
           // 用户ID
           name: formData.merchantName,
           // 商户名称

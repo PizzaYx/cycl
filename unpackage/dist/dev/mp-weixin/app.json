@@ -13,7 +13,8 @@
     "pages/collection/syReport",
     "pages/collection/sfsyRecord",
     "pages/collection/syAllMap",
-    "pages/collection/syCheckDetail"
+    "pages/collection/syCheckDetail",
+    "pages/collection/syStatistics"
   ],
   "window": {
     "navigationBarTextStyle": "black",

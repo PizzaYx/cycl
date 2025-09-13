@@ -4,18 +4,23 @@
         <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运记录"
             @clickLeft="back" />
         <view class="menu">
+            <view class="search-container">
+                <view class="search-box">
+                    <uni-icons type="search" size="24" color="#999" class="search-icon"></uni-icons>
+                    <input class="search-input" placeholder="搜索店铺/商铺关键词" v-model="searchKeyword" @confirm="onSearch" />
+                    <uni-icons v-if="searchKeyword" type="clear" size="20" color="#999" class="clear-icon"
+                        @click="clearSearch"></uni-icons>
+                </view>
+            </view>
             <view class="tab-bar">
                 <view v-for="(tab, index) in tabs" :key="index" class="tab-item"
                     :class="{ active: currentTab === index }" @click="handleTabClick(index)">
                     {{ tab.value }}
                     <!-- 为预约中tab添加uni-badge -->
-                    <uni-badge v-if="tab.value === '预约中' && bookingBadgeText !== '0' && bookingBadgeText !== ''"
+                    <uni-badge v-if="tab.value === '待处理' && bookingBadgeText !== 0 "
                         class="uni-badge" type="error" :text="bookingBadgeText" :is-dot="false" absolute="rightTop"
                         :offset="[-5, -12]"></uni-badge>
-                    <!-- 为进行中tab添加uni-badge -->
-                    <uni-badge v-if="tab.value === '进行中' && processingBadgeText !== '0' && processingBadgeText !== ''"
-                        class="uni-badge" type="error" :text="processingBadgeText" :is-dot="false" absolute="rightTop"
-                        :offset="[-5, -12]"></uni-badge>
+                    
                     <view class="tab-line" v-if="currentTab === index"></view>
                 </view>
             </view>
@@ -29,7 +34,7 @@
                     <view class="order-item" v-for="(item, index) in allOrderList" :key="index">
                         <view class="order-header">
                             <view class="shop-info">
-                                <text class="shop-name">{{ item.merchantName }}</text>
+                                <text class="shop-name">{{ item.merchantName}}</text>
                                 <text class="status-tag" :class="getStatusClass(item.status)">
                                     {{ getStatusText(item.status) }}
                                 </text>
@@ -37,41 +42,49 @@
                         </view>
                         <view class="order-content">
                             <view class="info-item">
-                                <text class="label">预估收运：</text>
-                                <text class="value">{{ item.estimateWeight }} 桶</text>
+                                <text class="label">预估时间:</text>
+                                <text class="value">{{ item.appointmentTime ??'暂无' }}</text>
                             </view>
                             <view class="info-item">
-                                <text class="label">今日收运：</text>
-                                <text class="value">{{ item.estimateBucketNum ?? 0 }} 桶</text>
+                                <text class="label">收运时间:</text>
+                                <text class="value">{{ item.arrivalTime ??'暂无'}}</text>
                             </view>
                             <view class="info-item">
-                                <text class="label">预估总量：</text>
-                                <text class="value">{{ item.estimateWeight ?? 0 }} kg</text>
+                                <text class="label">预估重量:</text>
+                                <text class="value">{{ (item.estimateWeight +'kg') ??'暂无' }}</text>
                             </view>
                             <view class="info-item">
-                                <text class="label">收运总量：</text>
-                                <text class="value">{{ item.weight ?? '暂无' }}</text>
+                                <text class="label">收运重量:</text>
+                                <text class="value">{{ item.weight ? (item.weight + 'kg') :'暂无' }}</text>
                             </view>
                             <view class="info-item">
-                                <text class="label">车辆信息：</text>
-                                <text class="value">{{ item.registrationNumber ?? '暂无' }}</text>
+                                <text class="label">预估桶数:</text>
+                                <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
+                                    }}</text>
                             </view>
                             <view class="info-item">
-                                <text class="label">收运时间：</text>
-                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
+                                <text class="label">收运桶数:</text>
+                                <text class="value">{{ item.bucketNum ? (item.bucketNum + '个') : '暂无' }} </text>
                             </view>
+                            <view class="info-item">
+                                <text class="label">地址:</text>
+                                <text class="value">{{ item.address ?? '暂无' }} </text>
+                            </view>
+
                         </view>
                         <view class="order-footer">
                             <template v-if="item.status == 0 || item.status == '0'">
                                 <uni-button size="mini" type="default" class="btn-cancel" @tap="handleCancel(item)">
                                     取消
                                 </uni-button>
-                                <uni-button size="mini" type="primary" class="btn-confirm" @tap="handleConfirmTransport(item)">
+                                <uni-button size="mini" type="primary" class="btn-confirm"
+                                    @tap="handleConfirmTransport(item)">
                                     收运
                                 </uni-button>
                             </template>
                             <template v-else>
-                                <uni-button size="mini" type="default" class="btn-confirm" @tap="handleViewDetails(item)">
+                                <uni-button size="mini" type="default" class="btn-confirm"
+                                    @tap="handleViewDetails(item)">
                                     查看详情
                                 </uni-button>
                             </template>
@@ -110,7 +123,7 @@ import {
 } from '@dcloudio/uni-app';
 
 import {
-    apiGetDriverPlanPage, apiGetconfirmPlanById
+    apiGetDriverPlanPage, apiGetnoNeedCollect, apiGetdriverConfirmPlan, apiGetDriverNotConfirmNum
 } from '@/api/apis.js';
 
 import { useUserStore } from '@/stores/user.js'
@@ -122,6 +135,9 @@ const currentTab = ref(0);
 
 // 当前选中tab的status值（转换为整数）
 const currentStatusKey = computed(() => parseInt(tabs[currentTab.value].key));
+
+// 筛选相关状态
+const searchKeyword = ref(''); // 搜索关键词
 
 const userStore = useUserStore();
 
@@ -166,69 +182,100 @@ const getStatusClass = (status) => {
 
 // 按钮点击事件处理函数
 const handleCancel = (item) => {
-    console.log('取消按钮被点击', item);
+    console.log('取消任务:', item);
+    uni.showModal({
+        title: '确认取消',
+        content: '是否确认取消当前任务？',
+        success: async (res) => {
+            if (res.confirm) {
+                await apiGetnoNeedCollect({
+                    id: item.id,
+                    driverId: userStore.merchant?.id || 5
+                }).then((res) => {
+                    if (res.code === 200) {
+                        uni.showToast({
+                            title: res.message || '操作成功',
+                            icon: 'success'
+                        });
+                        // 刷新任务列表
+                        clearSearch();
+                    } else {
+                        uni.showToast({
+                            title: res.message || '操作失败',
+                            icon: 'error'
+                        });
+                    }
+
+                })
+            }
+        }
+    })
 
 };
 
 const handleViewDetails = (item) => {
     console.log('查看详情按钮被点击', item);
-
+    // 这里添加查看任务的逻辑
+    uni.navigateTo({
+        url: `/pages/collection/syCheckDetail?planId=${item.id}&driverId=${item.driverId}`
+    });
 
 };
 
-const handleConfirmTransport = async (item) => {
-    console.log('确认收运按钮被点击', item);
-    if (item.merchantConfirm == null) {
-        uni.showToast({
-            title: '请等待师傅确认收运完成!',
-            icon: 'none',
-            dduration: 2500
-        });
-        return;
+const handleConfirmTransport = async (task) => {
+    console.log('收运:', task.id);
+    //先判断task.weight是否大于0 he task.bucketNum是否大于0
+    if (task.weight > 0 && task.bucketNum > 0) {
+        //确认收运完成
+        uni.showModal({
+            title: '确认收运完成',
+            content: '是否确认收运完成？',
+            success: async (res) => {
+                if (res.confirm) {
+                    await apiGetdriverConfirmPlan({
+                        id: task.id,
+                        driverId: userStore.sfmerchant?.id || 5,
+                    }).then((res) => {
+                        if (res.code === 200) {
+                            uni.showToast({
+                                title: res.message || '操作成功',
+                                icon: 'success'
+                            });
+                            // 刷新任务列表
+                            clearSearch();
+                        } else {
+                            uni.showToast({
+                                title: res.message || '操作失败',
+                                icon: 'error'
+                            });
+                        }
+                    })
+                }
+            }
+        })
+
     }
-    try {
-        uni.showLoading({
-            title: '确认中...'
-        });
-
-        const params = {
-            merchantId: userStore.merchant?.id,
-            id: item.id
-        };
-
-        const res = await apiGetconfirmPlanById(params);
-
-        uni.hideLoading();
-
-        if (res.code === 200 || res.success) {
-            uni.showToast({
-                title: '确认收运成功',
-                icon: 'success'
-            });
-
-            // 刷新当前页面数据，保持在当前标签页
-            allOrderList.value = [];
-            pageNum.value = 1;
-            getNetwork();
-        } else {
-            uni.showToast({
-                title: res.message || '确认收运失败',
-                icon: 'none'
-            });
-        }
-    } catch (error) {
-        console.error('确认收运失败:', error);
-        uni.hideLoading();
+    else {
         uni.showToast({
-            title: '网络错误，请重试',
+            title: '请先进行 收运上报 操作',
             icon: 'none'
         });
+        return;
     }
 };
 
 // 添加badgeText的ref变量
-const bookingBadgeText = ref('0');
-const processingBadgeText = ref('0');
+const bookingBadgeText = ref(0);
+
+const getDriverNotConfirmNum = async () => {
+    const res = await apiGetDriverNotConfirmNum({
+        driverId: userStore.merchant?.id || 5
+    });
+    if (res.code === 200) {
+        bookingBadgeText.value = res.data ?? 0;
+    }
+};
+
 
 // 添加页码和加载状态变量
 const pageNum = ref(1);
@@ -245,13 +292,19 @@ const getNetwork = async () => {
             loadingStatus.value = 'loading';
         }
 
-
-        const res = await apiGetDriverPlanPage({
+        // 构建请求参数
+        const params = {
             pageNum: pageNum.value,
-            // driverId: userStore.sfmerchant?.id,
-            driverId: 3,
-            status: currentStatusKey.value // 使用当前选中tab对应的整数类型status
-        });
+            driverId: userStore.merchant?.id || 5,
+            status: currentStatusKey.value // 使用当前选中tab对应的整数类型
+        };
+
+        // 添加搜索关键词
+        if (searchKeyword.value) {
+            params.title = searchKeyword.value;
+        }
+
+        const res = await apiGetDriverPlanPage(params);
 
 
         // 处理下拉刷新
@@ -293,6 +346,28 @@ const getNetwork = async () => {
     }
 };
 
+// 搜索方法
+const onSearch = () => {
+    
+    resetPageAndReload();
+};
+
+
+
+// 清空搜索关键词
+const clearSearch = () => {
+    searchKeyword.value = '';
+    resetPageAndReload();
+};
+
+const resetPageAndReload = () => {
+    console.log('重置页码和重新加载数据');
+    allOrderList.value = [];
+    pageNum.value = 1;
+    getNetwork();
+   
+};
+
 
 // 上拉加载更多方法
 const onLoadMore = () => {
@@ -313,225 +388,258 @@ onPullDownRefresh(() => {
     allOrderList.value = [];
     pageNum.value = 1; // 重置页码为1
     getNetwork();
+    getDriverNotConfirmNum()
 })
 
 // 组件挂载时初始化数据
 onMounted(() => {
     pageNum.value = 1;
     getNetwork();
+    getDriverNotConfirmNum()
 });
 </script>
 
 <style lang="scss" scoped>
-.container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background-color: $bg-theme-color;
+    .container {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: $bg-theme-color;
 
-    .menu {
-        position: relative;
-        margin-top: 2rpx;
-        background-color: #ffffff;
-        height: 88rpx;
+        .menu {
+            position: relative;
+            margin-top: 2rpx;
+            background-color: #ffffff;
+            padding: 20rpx 30rpx;
 
-        .tab-bar {
-            display: flex;
-            height: 100%;
+            .search-container {
+                .search-box {
+                    display: flex;
+                    align-items: center;
+                    background-color: #f5f5f5;
+                    border-radius: 45rpx;
+                    height: 64rpx;
+                    padding: 0 20rpx;
 
-            .tab-item {
-                flex: 1;
-                height: 100%;
+                    .search-icon {
+                        margin-right: 10rpx;
+                        width: 48rpx;
+                        height: 48rpx;
+                    }
+
+                    .search-input {
+                        flex: 1;
+                        font-size: 28rpx;
+                        background-color: transparent;
+                        border: none;
+                        outline: none;
+                    }
+
+                    .clear-icon {
+                        margin-left: 10rpx;
+                    }
+                }
+            }
+
+            .tab-bar {
                 display: flex;
+                height: 68rpx;
+                margin-top: 20rpx;
+
+                .tab-item {
+                    flex: 1;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 28rpx;
+                    color: rgba(61, 61, 61, 1);
+                    position: relative;
+
+                    &.active {
+                        color: rgba(7, 193, 96, 1);
+                        font-weight: 500;
+                    }
+
+                    .tab-line {
+                        position: absolute;
+                        bottom: -20rpx;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 56rpx;
+                        height: 4rpx;
+                        background-color: rgba(7, 193, 96, 1);
+                        border-radius: 2rpx;
+                    }
+                }
+            }
+        }
+
+        .content-wrapper {
+            flex: 1;
+            margin-top: 30rpx;
+
+            .content {
+                height: 100%;
+
+            }
+
+            .order-list {
+                padding: 0 30rpx; // 左右30rpx
+
+                .order-item {
+                    margin-bottom: 20rpx;
+                    padding: 30rpx;
+                    background-color: #ffffff;
+                    border-radius: 12rpx;
+
+                    .order-header {
+                        margin-bottom: 20rpx;
+
+                        .shop-info {
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            margin-bottom: 16rpx;
+
+                            .shop-name {
+                                font-size: 28rpx;
+                                font-weight: 400;
+                                color: rgba(61, 61, 61, 1);
+                            }
+
+                            .status-tag {
+                                font-size: 12px;
+                                width: 100rpx;
+                                height: 40rpx;
+                                border-radius: 8rpx;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+
+                                &.processing {
+                                    color: rgba(0, 170, 255, 1);
+                                    background: rgba(0, 170, 255, 0.10);
+                                }
+
+                                &.completed {
+                                    color: rgba(255, 161, 0, 1);
+                                    background: rgba(255, 161, 0, 0.10);
+                                }
+
+                                &.cancelled {
+                                    color: rgba(61, 61, 61, 0.50);
+                                    background: rgba(153, 153, 153, 0.1);
+                                }
+                            }
+                        }
+                    }
+
+                    .order-content {
+                        padding: 20rpx 0;
+                        border-top: 1px solid #f0f0f0;
+                        border-bottom: 1px solid #f0f0f0;
+
+                        .info-item {
+                            display: flex;
+                            margin-bottom: 16rpx;
+
+                            &:last-child {
+                                margin-bottom: 0;
+                            }
+
+                            .label {
+                                font-size: 26rpx;
+                                color: rgba(61, 61, 61, 0.50);
+                            }
+
+                            .value {
+                                margin-left: 30rpx;
+                                font-size: 26rpx;
+                                color: rgba(61, 61, 61, 1);
+                            }
+                        }
+                    }
+
+                    .order-footer {
+                        display: flex;
+                        justify-content: flex-end;
+                        margin-top: 20rpx;
+
+                        .btn-cancel {
+                            margin-right: 20rpx;
+                            color: rgba(61, 61, 61, 1);
+                            background-color: #fff;
+                            border: 1px solid rgba(196, 196, 196, 1);
+                            font-size: 26rpx;
+                            width: 144rpx;
+                            height: 48rpx;
+                            border-radius: 20rpx;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            box-sizing: border-box; // 使用border-box盒模型
+                        }
+
+                        .btn-confirm {
+                            color: rgba(255, 255, 255, 1);
+                            background-color: rgba(7, 193, 96, 1);
+                            font-size: 26rpx;
+                            width: 144rpx;
+                            height: 48rpx;
+                            border-radius: 20rpx;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            box-sizing: border-box; // 使用border-box盒模型
+                        }
+                    }
+                }
+            }
+
+            .loadMore {
+                padding-bottom: calc(env(safe-area-inset-bottom) + 50);
+            }
+
+            // 暂无数据状态
+            .empty-state {
+                display: flex;
+                flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                font-size: 28rpx;
-                color: rgba(61, 61, 61, 1);
-                position: relative;
+                min-height: calc(100vh - 200rpx); // 确保占满剩余屏幕高度
+                padding: 120rpx 60rpx;
+                text-align: center;
+                background-color: #ffffff;
 
-                &.active {
-                    color: rgba(7, 193, 96, 1);
+                .empty-icon {
+                    font-size: 120rpx;
+                    margin-bottom: 30rpx;
+                    opacity: 0.3;
+                }
+
+                .empty-text {
+                    font-size: 32rpx;
+                    color: rgba(61, 61, 61, 0.6);
+                    margin-bottom: 16rpx;
                     font-weight: 500;
                 }
 
-                .tab-line {
-                    position: absolute;
-                    bottom: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 56rpx;
-                    height: 4rpx;
-                    background-color: rgba(7, 193, 96, 1);
-                    border-radius: 2rpx;
+                .empty-desc {
+                    font-size: 26rpx;
+                    color: rgba(61, 61, 61, 0.4);
+                    line-height: 1.5;
                 }
+            }
+
+            // 自定义导航栏字体大小为34rpx
+            :deep(.uni-navbar__content-title) {
+                font-size: 34rpx !important;
+            }
+
+            :deep(.uni-nav-bar-text) {
+                font-size: 34rpx !important;
             }
         }
     }
-
-    .content-wrapper {
-        flex: 1;
-        margin-top: 30rpx;
-
-        .content {
-            height: 100%;
-
-        }
-
-        .order-list {
-            padding: 0 30rpx; // 左右30rpx
-
-            .order-item {
-                margin-bottom: 20rpx;
-                padding: 30rpx;
-                background-color: #ffffff;
-                border-radius: 12rpx;
-
-                .order-header {
-                    margin-bottom: 20rpx;
-
-                    .shop-info {
-                        display: flex;
-                        align-items: center;
-                        justify-content: space-between;
-                        margin-bottom: 16rpx;
-
-                        .shop-name {
-                            font-size: 28rpx;
-                            font-weight: 400;
-                            color: rgba(61, 61, 61, 1);
-                        }
-
-                        .status-tag {
-                            font-size: 12px;
-                            width: 100rpx;
-                            height: 40rpx;
-                            border-radius: 8rpx;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-
-                            &.processing {
-                                color: rgba(0, 170, 255, 1);
-                                background: rgba(0, 170, 255, 0.10);
-                            }
-
-                            &.completed {
-                                color: rgba(255, 161, 0, 1);
-                                background: rgba(255, 161, 0, 0.10);
-                            }
-
-                            &.cancelled {
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
-                            }
-                        }
-                    }
-                }
-
-                .order-content {
-                    padding: 20rpx 0;
-                    border-top: 1px solid #f0f0f0;
-                    border-bottom: 1px solid #f0f0f0;
-
-                    .info-item {
-                        display: flex;
-                        margin-bottom: 16rpx;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-
-                        .label {
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 0.50);
-                        }
-
-                        .value {
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 1);
-                        }
-                    }
-                }
-
-                .order-footer {
-                    display: flex;
-                    justify-content: flex-end;
-                    margin-top: 20rpx;
-
-                    .btn-cancel {
-                        margin-right: 20rpx;
-                        color: rgba(61, 61, 61, 1);
-                        background-color: #fff;
-                        border: 1px solid rgba(196, 196, 196, 1);
-                        font-size: 26rpx;
-                        width: 144rpx;
-                        height: 48rpx;
-                        border-radius: 20rpx;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        box-sizing: border-box; // 使用border-box盒模型
-                    }
-
-                    .btn-confirm {
-                        color: rgba(255, 255, 255, 1);
-                        background-color: rgba(7, 193, 96, 1);
-                        font-size: 26rpx;
-                        width: 144rpx;
-                        height: 48rpx;
-                        border-radius: 20rpx;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        box-sizing: border-box; // 使用border-box盒模型
-                    }
-                }
-            }
-        }
-
-        .loadMore {
-            padding-bottom: calc(env(safe-area-inset-bottom) + 50);
-        }
-
-        // 暂无数据状态
-        .empty-state {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: calc(100vh - 200rpx); // 确保占满剩余屏幕高度
-            padding: 120rpx 60rpx;
-            text-align: center;
-            background-color: #ffffff;
-
-            .empty-icon {
-                font-size: 120rpx;
-                margin-bottom: 30rpx;
-                opacity: 0.3;
-            }
-
-            .empty-text {
-                font-size: 32rpx;
-                color: rgba(61, 61, 61, 0.6);
-                margin-bottom: 16rpx;
-                font-weight: 500;
-            }
-
-            .empty-desc {
-                font-size: 26rpx;
-                color: rgba(61, 61, 61, 0.4);
-                line-height: 1.5;
-            }
-        }
-
-        // 自定义导航栏字体大小为34rpx
-        :deep(.uni-navbar__content-title) {
-            font-size: 34rpx !important;
-        }
-
-        :deep(.uni-nav-bar-text) {
-            font-size: 34rpx !important;
-        }
-    }
-}
 </style>

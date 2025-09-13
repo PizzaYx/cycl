@@ -212,63 +212,103 @@
   z-index: 1;
   background-color: #f7f7f7;
   border-radius: 16rpx;
-  margin: 0 30rpx 30rpx 30rpx;
+  margin: 0 0 30rpx;
 }
-.layout .records .record-list .record-item.data-v-cd17183b {
+.layout .records .order-list.data-v-cd17183b {
+  padding: 0 30rpx;
+}
+.layout .records .order-list .order-item.data-v-cd17183b {
+  margin-bottom: 20rpx;
+  padding: 30rpx;
+  background-color: #ffffff;
+  border-radius: 12rpx;
+}
+.layout .records .order-list .order-item .order-header.data-v-cd17183b {
+  margin-bottom: 20rpx;
+}
+.layout .records .order-list .order-item .order-header .shop-info.data-v-cd17183b {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: 138rpx;
-  margin-bottom: 22rpx;
-  background-color: #fff;
-  border-radius: 16rpx;
-  padding: 0 30rpx 0 30rpx;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
 }
-.layout .records .record-list .record-item .record-main .shop-name.data-v-cd17183b {
-  font-size: 26rpx;
-  color: #131313;
-  margin-bottom: 8rpx;
-}
-.layout .records .record-list .record-item .record-main .record-time.data-v-cd17183b {
-  font-size: 24rpx;
-  color: rgba(61, 61, 61, 0.5);
-}
-.layout .records .record-list .record-item .record-right.data-v-cd17183b {
-  text-align: right;
-}
-.layout .records .record-list .record-item .record-right .weight.data-v-cd17183b {
-  font-size: 32rpx;
+.layout .records .order-list .order-item .order-header .shop-info .shop-name.data-v-cd17183b {
+  font-size: 28rpx;
   font-weight: 400;
   color: #3d3d3d;
-  margin-bottom: 8rpx;
 }
-.layout .records .record-list .record-item .record-right .status.data-v-cd17183b {
-  font-size: 24rpx;
-  border-radius: 8rpx;
-  width: 96rpx;
+.layout .records .order-list .order-item .order-header .shop-info .status-tag.data-v-cd17183b {
+  font-size: 12px;
+  width: 100rpx;
   height: 40rpx;
+  border-radius: 8rpx;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.layout .records .record-list .record-item .record-right .status-completed.data-v-cd17183b {
-  color: #07C160;
-  background: rgba(7, 193, 96, 0.2);
-  border-radius: 8rpx 8rpx 8rpx 8rpx;
+.layout .records .order-list .order-item .order-header .shop-info .status-tag.processing.data-v-cd17183b {
+  color: #00aaff;
+  background: rgba(0, 170, 255, 0.1);
 }
-.layout .records .record-list .record-item .record-right .status-pending.data-v-cd17183b {
-  color: #FFA100;
-  background: rgba(255, 195, 0, 0.16);
-  border-radius: 8rpx 8rpx 8rpx 8rpx;
+.layout .records .order-list .order-item .order-header .shop-info .status-tag.completed.data-v-cd17183b {
+  color: #ffa100;
+  background: rgba(255, 161, 0, 0.1);
 }
-.layout .records .record-list .record-item .record-right .status-default.data-v-cd17183b {
-  color: #666;
-  background-color: rgba(102, 102, 102, 0.1);
+.layout .records .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-cd17183b {
+  color: rgba(61, 61, 61, 0.5);
+  background: rgba(153, 153, 153, 0.1);
 }
-.layout .records .record-list .no-records.data-v-cd17183b {
-  text-align: center;
-  color: #999;
-  padding: 40rpx 0;
+.layout .records .order-list .order-item .order-content.data-v-cd17183b {
+  padding: 20rpx 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.layout .records .order-list .order-item .order-content .info-item.data-v-cd17183b {
+  display: flex;
+  margin-bottom: 16rpx;
+}
+.layout .records .order-list .order-item .order-content .info-item.data-v-cd17183b:last-child {
+  margin-bottom: 0;
+}
+.layout .records .order-list .order-item .order-content .info-item .label.data-v-cd17183b {
+  font-size: 26rpx;
+  color: rgba(61, 61, 61, 0.5);
+}
+.layout .records .order-list .order-item .order-content .info-item .value.data-v-cd17183b {
+  margin-left: 30rpx;
+  font-size: 26rpx;
+  color: #3d3d3d;
+}
+.layout .records .order-list .order-item .order-footer.data-v-cd17183b {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20rpx;
+}
+.layout .records .order-list .order-item .order-footer .btn-cancel.data-v-cd17183b {
+  margin-right: 20rpx;
+  color: #3d3d3d;
+  background-color: #fff;
+  border: 1px solid #c4c4c4;
+  font-size: 26rpx;
+  width: 144rpx;
+  height: 48rpx;
+  border-radius: 20rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+.layout .records .order-list .order-item .order-footer .btn-confirm.data-v-cd17183b {
+  color: white;
+  background-color: #07c160;
+  font-size: 26rpx;
+  width: 144rpx;
+  height: 48rpx;
+  border-radius: 20rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
 }
 .layout .auth-modal.data-v-cd17183b {
   position: fixed;

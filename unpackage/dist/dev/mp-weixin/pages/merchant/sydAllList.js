@@ -20,13 +20,13 @@ if (!Math) {
 const _sfc_main = {
   __name: "sydAllList",
   setup(__props) {
-    stores_user.useUserStore();
+    const userStore = stores_user.useUserStore();
     const selectedStatus = common_vendor.ref("");
     const selectedTimeRange = common_vendor.ref([]);
     const statusOptions = common_vendor.ref([
-      { value: "0", text: "待确认" },
-      { value: "1", text: "已完成" },
-      { value: "2", text: "无需收运" }
+      { value: 0, text: "待确认" },
+      { value: 1, text: "已完成" },
+      { value: 2, text: "无需收运" }
     ]);
     const getStatusText = (status) => {
       common_vendor.index.__f__("log", "at pages/merchant/sydAllList.vue:134", 123);
@@ -66,13 +66,14 @@ const _sfc_main = {
     const loadingStatus = common_vendor.ref("more");
     const allOrderList = common_vendor.ref([]);
     const getNetwork = async () => {
+      var _a;
       try {
         if (pageNum.value > 1) {
           loadingStatus.value = "loading";
         }
         const params = {
           pageNum: pageNum.value,
-          merchantId: 448
+          merchantId: ((_a = userStore.merchant) == null ? void 0 : _a.id) ?? 448
         };
         if (selectedStatus.value !== "") {
           params.status = selectedStatus.value;

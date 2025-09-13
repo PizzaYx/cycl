@@ -1,7 +1,7 @@
-<!-- 收运记录 -->
+<!-- 收运上报 -->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运记录"
+        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运上报"
             @clickLeft="back" />
         <!-- 添加商店信息和扫码区域 -->
         <view class="store-info">

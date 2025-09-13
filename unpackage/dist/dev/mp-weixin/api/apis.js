@@ -56,6 +56,30 @@ function apiGetconfirmPlanById(data = {}) {
     data
   });
 }
+function apiGetPlanStatistics(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/getPlanStatistics",
+    data
+  });
+}
+function apiGetPlanStatisticsPage(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/getPlanStatisticsPage",
+    data
+  });
+}
+function apiGetcancelPlanById(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/delPlanTemporary",
+    data
+  });
+}
+function apiGetMerchantNotConfirmNum(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/getMerchantNotConfirmNum",
+    data
+  });
+}
 function apiGetDriverTodayStatistics(data = {}) {
   return utils_request.request({
     url: "/api/driver/getDriverTodayStatistics",
@@ -111,17 +135,42 @@ function apiGetDriverPlanPage(data = {}) {
     data
   });
 }
+function apiGetDriverPlanStatisticsPage(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverPlanStatisticsPage",
+    data
+  });
+}
+function apiGetDriverPlanStatistics(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverPlanStatistics",
+    data
+  });
+}
+function apiGetDriverNotConfirmNum(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getDriverNotConfirmNum",
+    data
+  });
+}
 exports.apiAddCarWeight = apiAddCarWeight;
 exports.apiGetDriverInfo = apiGetDriverInfo;
+exports.apiGetDriverNotConfirmNum = apiGetDriverNotConfirmNum;
 exports.apiGetDriverPlanById = apiGetDriverPlanById;
 exports.apiGetDriverPlanPage = apiGetDriverPlanPage;
+exports.apiGetDriverPlanStatistics = apiGetDriverPlanStatistics;
+exports.apiGetDriverPlanStatisticsPage = apiGetDriverPlanStatisticsPage;
 exports.apiGetDriverTodayPlan = apiGetDriverTodayPlan;
 exports.apiGetDriverTodayStatistics = apiGetDriverTodayStatistics;
 exports.apiGetInfo = apiGetInfo;
 exports.apiGetMerchantCheck = apiGetMerchantCheck;
+exports.apiGetMerchantNotConfirmNum = apiGetMerchantNotConfirmNum;
 exports.apiGetMerchantStatistics = apiGetMerchantStatistics;
 exports.apiGetPlanAllPage = apiGetPlanAllPage;
 exports.apiGetPlanPage = apiGetPlanPage;
+exports.apiGetPlanStatistics = apiGetPlanStatistics;
+exports.apiGetPlanStatisticsPage = apiGetPlanStatisticsPage;
+exports.apiGetcancelPlanById = apiGetcancelPlanById;
 exports.apiGetconfirmPlanById = apiGetconfirmPlanById;
 exports.apiGetdriverConfirmPlan = apiGetdriverConfirmPlan;
 exports.apiGetnoNeedCollect = apiGetnoNeedCollect;

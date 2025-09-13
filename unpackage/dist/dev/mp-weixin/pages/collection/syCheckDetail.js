@@ -14,17 +14,20 @@ const _sfc_main = {
   setup(__props) {
     const planId = common_vendor.ref("");
     const driverId = common_vendor.ref("");
-    const driverName = common_vendor.ref("");
-    const status = common_vendor.ref();
-    const merchantName = common_vendor.ref("");
-    const weight = common_vendor.ref(0);
-    const bucketNum = common_vendor.ref(0);
-    const address = common_vendor.ref("");
-    const registrationNumber = common_vendor.ref("");
-    const img = common_vendor.ref([]);
-    const time = common_vendor.ref("");
+    const pageData = common_vendor.ref({
+      // driverName: '', //司机名称
+      // status: null, //状态 0 进行中 1.已完成 2.无法收运 
+      // merchantName: '', //商家名称
+      // weight: 0.0, //重量
+      // bucketNum: 0, //桶数
+      // address: '', //地址 
+      // registrationNumber: '', //车牌号
+      // img: [], //照片数组
+      // time: '', // 收运时间
+      // estimateTime: '' // 预估时间
+    });
     const statusText = common_vendor.computed(() => {
-      switch (status.value) {
+      switch (pageData.value.status) {
         case 0:
           return "进行中";
         case 1:
@@ -36,7 +39,7 @@ const _sfc_main = {
       }
     });
     const statusClass = common_vendor.computed(() => {
-      switch (status.value) {
+      switch (pageData.value.status) {
         case 0:
           return "processing";
         case 1:
@@ -47,12 +50,50 @@ const _sfc_main = {
           return "";
       }
     });
+    const infoList = common_vendor.computed(() => [
+      {
+        label: "商家名称",
+        value: pageData.value.merchantName
+      },
+      {
+        label: "预估时间",
+        value: pageData.value.estimateTime
+      },
+      {
+        label: "收运时间",
+        value: pageData.value.arrivalTime ?? ""
+      },
+      {
+        label: "预估重量",
+        value: pageData.value.estimateWeight + "kg"
+      },
+      {
+        label: "收运重量",
+        value: pageData.value.registrationNumber
+      },
+      {
+        label: "预估桶数",
+        value: pageData.value.estimateBucketNum ?? 0
+      },
+      {
+        label: "收运桶数",
+        value: pageData.value.estimateBucketNum ?? 0
+      },
+      {
+        label: "收运地址",
+        value: pageData.value.address ?? ""
+      },
+      {
+        label: "车牌号",
+        value: pageData.value.registrationNumber ?? ""
+      }
+    ]);
     common_vendor.onLoad((options) => {
       if (options.planId)
         planId.value = options.planId;
       if (options.driverId)
         driverId.value = options.driverId;
-      common_vendor.index.__f__("log", "at pages/collection/syCheckDetail.vue:98", "接收到的参数:", options);
+      common_vendor.index.__f__("log", "at pages/collection/syCheckDetail.vue:129", "接收到的参数:", options);
     });
     common_vendor.onMounted(() => {
       getSyCheckDetail();
@@ -63,24 +104,20 @@ const _sfc_main = {
         id: planId.value
       });
       if (res.code === 200) {
-        driverName.value = res.data.driverName || "";
-        status.value = res.data.status;
-        merchantName.value = res.data.merchantName || "";
-        if (res.data.status === 1) {
-          weight.value = res.data.weight || 0;
-          bucketNum.value = res.data.bucketNum || 0;
-        } else {
-          weight.value = res.data.estimateWeight || 0;
-          bucketNum.value = res.data.estimateBucketNum || 0;
-        }
-        address.value = res.data.address || "";
-        registrationNumber.value = res.data.registrationNumber || "";
-        img.value = res.data.img ? res.data.img.split(",") : [];
-        if (res.data.status === 1) {
-          time.value = res.data.arrivalTime || "";
-        } else {
-          time.value = res.data.appointmentTime || "";
-        }
+        const data = res.data;
+        pageData.value = {
+          driverName: data.driverName || "",
+          status: data.status,
+          merchantName: data.merchantName || "",
+          estimateWeight: data.estimateWeight || 0,
+          weight: data.weight || 0,
+          estimateBucketNum: data.estimateBucketNum || 0,
+          bucketNum: data.bucketNum || 0,
+          registrationNumber: data.registrationNumber || "",
+          img: data.img ? data.img.split(",") : [],
+          appointmentTime: data.appointmentTime || "",
+          arrivalTime: data.arrivalTime || ""
+        };
       }
     };
     const back = () => {
@@ -88,7 +125,7 @@ const _sfc_main = {
     };
     const previewImage = (index) => {
       common_vendor.index.previewImage({
-        urls: img.value,
+        urls: pageData.value.img,
         current: index
       });
     };
@@ -104,18 +141,17 @@ const _sfc_main = {
           color: "#000",
           title: "收运记录"
         }),
-        c: common_vendor.t(driverName.value),
+        c: common_vendor.t(pageData.value.driverName),
         d: common_vendor.t(statusText.value),
         e: common_vendor.n(statusClass.value),
-        f: common_vendor.t(time.value),
-        g: common_vendor.t(merchantName.value),
-        h: common_vendor.t(status.value === 1 ? "收运重量" : "预估重量"),
-        i: common_vendor.t(weight.value),
-        j: common_vendor.t(status.value === 1 ? "收运桶数" : "预估桶数"),
-        k: common_vendor.t(bucketNum.value),
-        l: common_vendor.t(address.value),
-        m: common_vendor.t(registrationNumber.value),
-        n: common_vendor.f(img.value, (item, index, i0) => {
+        f: common_vendor.f(infoList.value, (item, index, i0) => {
+          return {
+            a: common_vendor.t(item.label),
+            b: common_vendor.t(item.value),
+            c: index
+          };
+        }),
+        g: common_vendor.f(pageData.value.img, (item, index, i0) => {
           return {
             a: index,
             b: item,
