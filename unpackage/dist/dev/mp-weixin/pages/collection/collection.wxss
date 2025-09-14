@@ -238,25 +238,26 @@
   color: #3d3d3d;
 }
 .layout .records .order-list .order-item .order-header .shop-info .status-tag.data-v-cd17183b {
-  font-size: 12px;
-  width: 100rpx;
+  font-size: 24rpx;
+  width: 120rpx;
   height: 40rpx;
   border-radius: 8rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
 .layout .records .order-list .order-item .order-header .shop-info .status-tag.processing.data-v-cd17183b {
   color: #00aaff;
   background: rgba(0, 170, 255, 0.1);
 }
 .layout .records .order-list .order-item .order-header .shop-info .status-tag.completed.data-v-cd17183b {
-  color: #ffa100;
-  background: rgba(255, 161, 0, 0.1);
-}
-.layout .records .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-cd17183b {
   color: rgba(61, 61, 61, 0.5);
   background: rgba(153, 153, 153, 0.1);
+}
+.layout .records .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-cd17183b {
+  color: #ffa100;
+  background: rgba(255, 161, 0, 0.1);
 }
 .layout .records .order-list .order-item .order-content.data-v-cd17183b {
   padding: 20rpx 0;

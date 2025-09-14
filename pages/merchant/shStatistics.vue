@@ -73,7 +73,7 @@
                             <view class="info-item">
                                 <text class="label">预估桶数:</text>
                                 <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                }}</text>
+                                    }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>
@@ -85,9 +85,9 @@
                             </view> -->
                         </view>
                         <view class="order-footer">
-                           
+
                             <uni-button size="mini" class="btn-confirm">
-                               查看详情
+                                查看详情
                             </uni-button>
                         </view>
                     </view>
@@ -528,27 +528,33 @@ onMounted(() => {
                         }
 
                         .status-tag {
-                            font-size: 12px;
-                            width: 100rpx;
+                            font-size: 24rpx;
+                            width: 120rpx;
                             height: 40rpx;
                             border-radius: 8rpx;
                             display: flex;
                             align-items: center;
                             justify-content: center;
+                            text-align: center;
+
 
                             &.processing {
+                                //进行中 待完成
                                 color: rgba(0, 170, 255, 1);
                                 background: rgba(0, 170, 255, 0.10);
                             }
 
                             &.completed {
-                                color: rgba(255, 161, 0, 1);
-                                background: rgba(255, 161, 0, 0.10);
+                                //已完成
+                                color: rgba(61, 61, 61, 0.50);
+                                background: rgba(153, 153, 153, 0.1);
                             }
 
                             &.cancelled {
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
+                                //无法收运
+                                color: rgba(255, 161, 0, 1);
+                                background: rgba(255, 161, 0, 0.10);
+
                             }
                         }
                     }
@@ -606,7 +612,7 @@ onMounted(() => {
                     .btn-confirm {
                         color: rgba(7, 193, 96, 1);
                         // background-color: rgba(7, 193, 96, 1);
-                        border:1rpx solid rgba(7, 193, 96, 1);
+                        border: 1rpx solid rgba(7, 193, 96, 1);
                         font-size: 26rpx;
                         width: 144rpx;
                         height: 48rpx;

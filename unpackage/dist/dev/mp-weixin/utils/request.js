@@ -1,10 +1,10 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const BASE_URL = "http://192.168.0.118:8089";
+const BASE_URL = "http://192.168.0.118:8080";
 let refreshingPromise = null;
 common_vendor.index.addInterceptor("request", {
   invoke(args) {
-    if (!args.url.startsWith("http")) {
+    if (args.url != null && !args.url.startsWith("http")) {
       args.url = BASE_URL + args.url;
     }
     const accessToken = common_vendor.index.getStorageSync("access_token");

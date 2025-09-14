@@ -1,5 +1,5 @@
 // utils/request.js
-const BASE_URL = 'http://192.168.0.118:8089'
+const BASE_URL = 'http://192.168.0.118:8080'
 
 // 存储刷新token的Promise，避免并发请求时重复刷新
 let refreshingPromise = null
@@ -8,7 +8,7 @@ let refreshingPromise = null
 uni.addInterceptor('request', {
     invoke(args) {
         // 添加基础URL
-        if (!args.url.startsWith('http')) {
+        if (args.url!=null && !args.url.startsWith('http')) {
             args.url = BASE_URL + args.url
         }
 

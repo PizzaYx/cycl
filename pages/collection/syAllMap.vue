@@ -55,9 +55,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
-
+import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
 const userStore = useUserStore()
 
 // 地图相关数据
@@ -83,6 +83,9 @@ const currentLocation = ref({
     longitude: 0,
     accuracy: 0
 })
+
+// 添加一个标志位，表示数据是否已接收
+const isDataReceived = ref(false)
 
 // 计算总预估重量
 const totalEstimateWeight = computed(() => {
@@ -167,7 +170,8 @@ const startUniAppLocation = () => {
 
             console.log('地图中心点已更新为:', lat, lng)
 
-            nextTick(() => {
+            // 直接执行，不使用nextTick
+            setTimeout(() => {
                 // 添加当前位置标记
                 addCurrentLocationMarker(lat, lng)
 
@@ -183,7 +187,7 @@ const startUniAppLocation = () => {
                     title: '定位成功，路线规划完成',
                     icon: 'success'
                 })
-            })
+            }, 100)
         },
         fail: (error) => {
             console.error('定位失败:', error)
@@ -240,7 +244,8 @@ const useDefaultLocation = () => {
 
     console.log('地图中心点已更新为默认位置:', defaultLat, defaultLng)
 
-    nextTick(() => {
+    // 直接执行，不使用nextTick
+    setTimeout(() => {
         // 添加默认位置标记
         addCurrentLocationMarker(defaultLat, defaultLng)
 
@@ -254,7 +259,7 @@ const useDefaultLocation = () => {
             title: '使用默认位置，路线规划完成',
             icon: 'none'
         })
-    })
+    }, 100)
 }
 
 // 添加当前位置标记
@@ -348,34 +353,43 @@ const planRoute = () => {
     console.log('路线规划完成')
 }
 
+// onLoad: 简单直接的接收参数方式
+onLoad(() => {
+    console.log('页面加载，接收参数')
 
-// 页面加载时接收数据
+    // 直接从存储获取数据，简单可靠
+    const mapData = uni.getStorageSync('mapData')
+    if (mapData) {
+        console.log('获取地图数据:', mapData)
+        setMapData(mapData)
+        isDataReceived.value = true
+        // 清理存储数据
+        uni.removeStorageSync('mapData')
+    } else {
+        console.log('暂无数据，等待传递')
+    }
+})
+
+// onMounted: 专门负责初始化地图 - 修复nextTick问题
 onMounted(() => {
-    console.log('页面DOM已挂载')
+    console.log('DOM已挂载完成，等待数据后初始化地图')
 
-    // 兼容性处理：尝试使用 EventChannel，失败则使用存储方式
-    try {
-        const eventChannel = uni.getOpenerEventChannel && uni.getOpenerEventChannel()
-        if (eventChannel) {
-            // 使用 EventChannel 接收数据
-            eventChannel.on('sendMapData', (data) => {
-                console.log('通过EventChannel接收到地图数据:', data)
-                setMapData(data)
-            })
+    // 等待数据接收完成后再初始化地图
+    const waitForDataAndInitMap = () => {
+        if (isDataReceived.value) {
+            console.log('数据已接收，开始初始化地图')
+            // 🔥 修复：直接使用setTimeout，不用nextTick
+            setTimeout(() => {
+                useUniAppLocation()
+            }, 500) // 减少延迟时间
         } else {
-            throw new Error('EventChannel not supported')
-        }
-    } catch (error) {
-        console.log('EventChannel不支持，使用存储方式:', error.message)
-        // 降级方案：从存储中获取数据
-        const mapData = uni.getStorageSync('mapData')
-        if (mapData) {
-            console.log('从存储获取地图数据:', mapData)
-            setMapData(mapData)
-            // 清理存储数据
-            uni.removeStorageSync('mapData')
+            // 数据还没接收完成，继续等待
+            setTimeout(waitForDataAndInitMap, 100)
         }
     }
+
+    // 开始等待数据
+    waitForDataAndInitMap()
 })
 
 // 设置地图数据的通用方法
@@ -386,14 +400,7 @@ const setMapData = (data) => {
     bucketNum.value = data.bucketNum || 0
     currentDate.value = data.currentDate || ''
 
-    console.log('数据设置完成，开始定位和路线规划')
-
-    // 数据接收完成后开始定位和路线规划
-    nextTick(() => {
-        setTimeout(() => {
-            useUniAppLocation()
-        }, 1000) // 1秒延迟，确保地图完全渲染和页面稳定
-    })
+    console.log('数据设置完成')
 }
 
 // 返回上一页
@@ -489,7 +496,7 @@ const back = () => {
 
                     .value {
                         color: rgba(61, 61, 61, 1);
-                        font-size: 14px;
+                        font-size: 28rpx;
                         font-weight: 500;
                     }
                 }
@@ -518,7 +525,7 @@ const back = () => {
 
                     .value {
                         color: rgba(61, 61, 61, 1);
-                        font-size: 14px;
+                        font-size: 28rpx;
                     }
                 }
             }
@@ -527,11 +534,6 @@ const back = () => {
     }
 }
 
-/* 确保页面背景色始终正确显示 */
-page {
-    background-color: #F5F5F5;
-    height: 100%;
-}
 
 body {
     background-color: #F5F5F5;

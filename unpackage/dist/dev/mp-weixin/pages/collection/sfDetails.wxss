@@ -208,7 +208,7 @@
   text-align: center;
 }
 .container .weight-section .weight-content .weight-unit.data-v-b624ea25 {
-  font-size: 14px;
+  font-size: 28rpx;
   color: #999999;
   margin-left: 10rpx;
 }
@@ -281,11 +281,11 @@
   /* 设置高层级，确保图标在时间线之上 */
 }
 .container .task-list .task-item .task-header .time-info .date.data-v-b624ea25 {
-  font-size: 14px;
+  font-size: 28rpx;
   color: #666666;
 }
 .container .task-list .task-item .task-header .status.data-v-b624ea25 {
-  font-size: 12px;
+  font-size: 24rpx;
   width: 100rpx;
   height: 40rpx;
   border-radius: 8rpx;

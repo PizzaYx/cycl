@@ -13,9 +13,8 @@
                         class="uni-badge" type="error" :text="bookingBadgeText" :is-dot="false" absolute="rightTop"
                         :offset="[-5, -12]"></uni-badge> -->
                     <!-- 为进行中tab添加uni-badge -->
-                    <uni-badge v-if="tab.value === '进行中' && processingBadgeText !== 0"
-                        class="uni-badge" type="error" :text="processingBadgeText" :is-dot="false" absolute="rightTop"
-                        :offset="[-5, -12]"></uni-badge>
+                    <uni-badge v-if="tab.value === '进行中' && processingBadgeText !== 0" class="uni-badge" type="error"
+                        :text="processingBadgeText" :is-dot="false" absolute="rightTop" :offset="[-5, -12]"></uni-badge>
                     <view class="tab-line" v-if="currentTab === index"></view>
                 </view>
             </view>
@@ -30,7 +29,7 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text v-if="currentTab == 0" :class="['status-tag', getStatusClass(item.status)]">
+                                <text class="status-tag" :class="getStatusClass(item.status)">
                                     {{ getStatusText(item.status) }}
                                 </text>
                             </view>
@@ -65,7 +64,8 @@
                         <view class="order-footer">
                             <!-- currentTab == 0: 显示取消和查看详情按钮 -->
                             <template v-if="currentTab == 0">
-                                <uni-button v-if="item.status != 1" size="mini" type="default" class="btn-cancel" @tap="handleCancel(item)" >
+                                <uni-button v-if="item.status == 0" size="mini" type="default" class="btn-cancel"
+                                    @tap="handleCancel(item)">
                                     取消
                                 </uni-button>
                                 <uni-button size="mini" type="primary" class="btn-confirm"
@@ -150,44 +150,47 @@ function handleTabClick(index) {
 }
 
 // 状态转换函数
+
 const getStatusText = (status) => {
     if (currentTab.value == 0) {
         // 审核状态
         switch (status) {
-            case 0:
-            case '0':
-                return '待审核';
-            case 1:
-            case '1':
-                return '审核通过';
-            case 2:
-            case '2':
-                return '未通过';
-            default:
-                return '未知状态';
+            case 0: return '待审核';
+            case 1: return '审核通过';
+            case 2: return '未通过';
+            default: return '';
         }
     }
-    return '';
+    else {
+        switch (status) {
+            case 0: return '进行中';
+            case 1: return '已完成';
+            case 2: return '无法收运';
+            default: return '';
+        }
+
+    }
+  
 };
 
 // 获取状态样式类名
 const getStatusClass = (status) => {
     if (currentTab.value == 0) {
         switch (status) {
-            case 0:
-            case '0':
-                return 'booking'; // 待审核 - 蓝色
-            case 1:
-            case '1':
-                return 'processing'; // 审核通过 - 绿色
-            case 2:
-            case '2':
-                return 'completed'; // 审核不通过 - 灰色
-            default:
-                return 'completed';
+            case 0: return 'booking'; // 待审核 
+            case 1: return 'passed'; // 审核通过 
+            case 2: return 'notpassed'; // 审核不通过 
+            default: return '';
         }
     }
-    return '';
+    else { 
+        switch (status) {
+            case 0: return 'processing';
+            case 1: return 'completed';
+            case 2: return 'cancelled';
+            default: return '';
+        }
+    } 
 };
 
 // 按钮点击事件处理函数
@@ -213,6 +216,7 @@ const handleCancel = (item) => {
                         duration: 2000
                     });
                     getNetwork();
+                    getMerchantNotConfirmNum();
                 }
                 else {
                     uni.showToast({
@@ -234,6 +238,16 @@ const handleCancel = (item) => {
 const handleViewDetails = (item) => {
     console.log('查看详情按钮被点击', item);
 
+    if (currentTab.value == 0) {
+        uni.navigateTo({
+            url: `/pages/merchant/shyyDetail?id=${item.id}&merchantId =${item.merchantId}`
+        });
+    }
+    else { 
+        uni.navigateTo({
+            url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+        });
+    }
 
 };
 
@@ -476,7 +490,7 @@ onMounted(() => {
                         .status-tag {
                             border-radius: 8rpx;
                             font-size: 24rpx;
-                            width: 100rpx;
+                            width: 120rpx;
                             height: 40rpx;
                             display: flex;
                             justify-content: center;
@@ -484,17 +498,36 @@ onMounted(() => {
 
                             &.booking {
                                 color: rgba(255, 161, 0, 1);
-                                background-color: rgba(255, 161, 0, 0.10);
+                                background: rgba(255, 161, 0, 0.10);
+                            }
+
+                            &.passed {
+                                color: rgba(7, 193, 96, 1);
+                                background: rgba(7, 193, 96, 0.10);
+                            }
+
+                            &.notpassed {
+                                color: rgba(221, 57, 47, 1);
+                                background: rgba(221, 57, 47, 0.10);
                             }
 
                             &.processing {
-                                color: rgba(7, 193, 96, 1);
-                                background-color: rgba(7, 193, 96, 0.10);
+                                //进行中 待完成
+                                color: rgba(0, 170, 255, 1);
+                                background: rgba(0, 170, 255, 0.10);
                             }
 
                             &.completed {
+                                //已完成
                                 color: rgba(61, 61, 61, 0.50);
-                                background-color: rgba(61, 61, 61, 0.10);
+                                background: rgba(153, 153, 153, 0.1);
+                            }
+
+                            &.cancelled {
+                                //无法收运
+                                color: rgba(255, 161, 0, 1);
+                                background: rgba(255, 161, 0, 0.10);
+
                             }
                         }
                     }

@@ -156,32 +156,14 @@ const _sfc_main = {
         bucketNum: bucketNum.value,
         currentDate
       };
+      common_vendor.index.setStorageSync("mapData", mapData);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:320", "数据已存储，跳转页面");
       common_vendor.index.navigateTo({
-        url: "/pages/collection/syAllMap",
-        events: {
-          // 可以接收目标页面回传的数据
-          acceptDataFromMap: (data) => {
-            common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:324", "地图页面回传数据:", data);
-          }
-        },
-        success: (res) => {
-          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:329", "使用存储方式发送数据");
-          try {
-            if (res.eventChannel && res.eventChannel.emit) {
-              res.eventChannel.emit("sendMapData", mapData);
-              common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:336", "同时使用EventChannel发送数据");
-            }
-          } catch (error) {
-            common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:339", "EventChannel发送失败，但存储方式已保证数据传递");
-          }
-        },
-        fail: () => {
-          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:344", "页面跳转失败，使用存储方式");
-        }
+        url: "/pages/collection/syAllMap"
       });
     };
     const collectTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:352", "收运:", task.id);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:329", "收运:", task.id);
       if (task.weight > 0 && task.bucketNum > 0) {
         common_vendor.index.showModal({
           title: "确认收运完成",
@@ -265,7 +247,7 @@ const _sfc_main = {
                 title: "提交失败",
                 icon: "none"
               });
-              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:446", "提交重量失败:", error);
+              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:423", "提交重量失败:", error);
             }
           }
         }

@@ -7391,7 +7391,7 @@ function isConsoleWritable() {
 function initRuntimeSocketService() {
   const hosts = "127.0.0.1,192.168.0.133";
   const port = "8090";
-  const id = "mp-weixin__z4gNP";
+  const id = "mp-weixin_7joeOM";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9151,14 +9151,14 @@ const pages = [
     }
   },
   {
-    path: "pages/merchant/certification",
+    path: "pages/merchant/shCertification",
     style: {
       navigationBarTitleText: "商户认证",
       navigationStyle: "custom"
     }
   },
   {
-    path: "pages/merchant/sydChecklist",
+    path: "pages/merchant/shChecklist",
     style: {
       navigationBarTitleText: "收运清单",
       enablePullDownRefresh: true,
@@ -9166,7 +9166,7 @@ const pages = [
     }
   },
   {
-    path: "pages/merchant/sydAllList",
+    path: "pages/merchant/shAllList",
     style: {
       navigationBarTitleText: "收运记录",
       enablePullDownRefresh: true,
@@ -9174,7 +9174,7 @@ const pages = [
     }
   },
   {
-    path: "pages/merchant/sydStatistics",
+    path: "pages/merchant/shStatistics",
     style: {
       navigationBarTitleText: "收运统计",
       enablePullDownRefresh: true,
@@ -9189,7 +9189,7 @@ const pages = [
     }
   },
   {
-    path: "pages/merchant/sydReservation",
+    path: "pages/merchant/shReservation",
     style: {
       navigationBarTitleText: "临时预约",
       navigationStyle: "custom"
@@ -9227,6 +9227,27 @@ const pages = [
     path: "pages/collection/syCheckDetail",
     style: {
       navigationBarTitleText: "收运详细",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/collection/syStatistics",
+    style: {
+      navigationBarTitleText: "收运统计",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/merchant/shyyDetail",
+    style: {
+      navigationBarTitleText: "商户预约详情",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/merchant/shsyDetail",
+    style: {
+      navigationBarTitleText: "商户收运详细",
       navigationStyle: "custom"
     }
   }
@@ -12101,7 +12122,6 @@ exports.f = f$1;
 exports.index = index;
 exports.initVueI18n = initVueI18n;
 exports.n = n$1;
-exports.nextTick$1 = nextTick$1;
 exports.o = o$1;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;

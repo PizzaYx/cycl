@@ -80,6 +80,18 @@ function apiGetMerchantNotConfirmNum(data = {}) {
     data
   });
 }
+function apiGetPlanTemporaryById(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/getPlanTemporaryById",
+    data
+  });
+}
+function apiGetPlanById(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/getPlanById",
+    data
+  });
+}
 function apiGetDriverTodayStatistics(data = {}) {
   return utils_request.request({
     url: "/api/driver/getDriverTodayStatistics",
@@ -167,9 +179,11 @@ exports.apiGetMerchantCheck = apiGetMerchantCheck;
 exports.apiGetMerchantNotConfirmNum = apiGetMerchantNotConfirmNum;
 exports.apiGetMerchantStatistics = apiGetMerchantStatistics;
 exports.apiGetPlanAllPage = apiGetPlanAllPage;
+exports.apiGetPlanById = apiGetPlanById;
 exports.apiGetPlanPage = apiGetPlanPage;
 exports.apiGetPlanStatistics = apiGetPlanStatistics;
 exports.apiGetPlanStatisticsPage = apiGetPlanStatisticsPage;
+exports.apiGetPlanTemporaryById = apiGetPlanTemporaryById;
 exports.apiGetcancelPlanById = apiGetcancelPlanById;
 exports.apiGetconfirmPlanById = apiGetconfirmPlanById;
 exports.apiGetdriverConfirmPlan = apiGetdriverConfirmPlan;

@@ -18,7 +18,7 @@ if (!Math) {
   (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_uni_datetime_picker + _easycom_uni_load_more)();
 }
 const _sfc_main = {
-  __name: "sydStatistics",
+  __name: "shStatistics",
   setup(__props) {
     const userStore = stores_user.useUserStore();
     const bucketCount = common_vendor.ref(0);
@@ -121,7 +121,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/sydStatistics.vue:274", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:274", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -206,7 +206,7 @@ const _sfc_main = {
           color: "#666"
         }),
         d: common_vendor.o(showStatusPicker),
-        e: common_vendor.sr(datetimePicker, "2e2a962a-2", {
+        e: common_vendor.sr(datetimePicker, "5f21cbbb-2", {
           "k": "datetimePicker"
         }),
         f: common_vendor.o(onTimeChange),
@@ -245,7 +245,7 @@ const _sfc_main = {
             g: common_vendor.t(item.weight ? item.weight + "kg" : "暂无"),
             h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + "个" : "暂无"),
             i: common_vendor.t(item.bucketNum ? item.bucketNum + "个" : "暂无"),
-            j: "2e2a962a-4-" + i0,
+            j: "5f21cbbb-4-" + i0,
             k: index
           };
         }),
@@ -266,6 +266,6 @@ const _sfc_main = {
     };
   }
 };
-const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-2e2a962a"]]);
+const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-5f21cbbb"]]);
 wx.createPage(MiniProgramPage);
-//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/merchant/sydStatistics.js.map
+//# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/merchant/shStatistics.js.map

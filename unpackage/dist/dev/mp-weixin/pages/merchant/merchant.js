@@ -111,7 +111,7 @@ const _sfc_main = {
     const handleAuth = () => {
       showAuthModal.value = false;
       common_vendor.index.navigateTo({
-        url: "/pages/merchant/certification"
+        url: "/pages/merchant/shCertification"
       });
     };
     const quickActions = common_vendor.ref([
@@ -119,28 +119,28 @@ const _sfc_main = {
         id: "appointment",
         name: "临时预约",
         icon: "/static/shd/lsyy.png",
-        url: "/pages/merchant/sydReservation"
+        url: "/pages/merchant/shReservation"
         // 临时预约页面
       },
       {
         id: "records",
         name: "收运清单",
         icon: "/static/shd/syjl.png",
-        url: "/pages/merchant/sydChecklist"
+        url: "/pages/merchant/shChecklist"
         // 收运清单页面
       },
       {
         id: "statistics",
         name: "数据统计",
         icon: "/static/shd/sjtj.png",
-        url: "/pages/merchant/sydStatistics"
+        url: "/pages/merchant/shStatistics"
         // 数据统计页面
       },
       {
         id: "certification",
         name: "商户认证",
         icon: "/static/shd/shrz.png",
-        url: "/pages/merchant/certification"
+        url: "/pages/merchant/shCertification"
         // 商户认证页面
       }
     ]);

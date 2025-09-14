@@ -446,7 +446,7 @@ onMounted(() => {
                         .status-tag {
                             border-radius: 8rpx;
                             font-size: 24rpx;
-                            width: 100rpx;
+                            width: 120rpx;
                             height: 40rpx;
                             display: flex;
                             justify-content: center;

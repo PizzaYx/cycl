@@ -17,10 +17,9 @@
                     :class="{ active: currentTab === index }" @click="handleTabClick(index)">
                     {{ tab.value }}
                     <!-- 为预约中tab添加uni-badge -->
-                    <uni-badge v-if="tab.value === '待处理' && bookingBadgeText !== 0 "
-                        class="uni-badge" type="error" :text="bookingBadgeText" :is-dot="false" absolute="rightTop"
-                        :offset="[-5, -12]"></uni-badge>
-                    
+                    <uni-badge v-if="tab.value === '待处理' && bookingBadgeText !== 0" class="uni-badge" type="error"
+                        :text="bookingBadgeText" :is-dot="false" absolute="rightTop" :offset="[-5, -12]"></uni-badge>
+
                     <view class="tab-line" v-if="currentTab === index"></view>
                 </view>
             </view>
@@ -34,7 +33,7 @@
                     <view class="order-item" v-for="(item, index) in allOrderList" :key="index">
                         <view class="order-header">
                             <view class="shop-info">
-                                <text class="shop-name">{{ item.merchantName}}</text>
+                                <text class="shop-name">{{ item.merchantName }}</text>
                                 <text class="status-tag" :class="getStatusClass(item.status)">
                                     {{ getStatusText(item.status) }}
                                 </text>
@@ -43,24 +42,24 @@
                         <view class="order-content">
                             <view class="info-item">
                                 <text class="label">预估时间:</text>
-                                <text class="value">{{ item.appointmentTime ??'暂无' }}</text>
+                                <text class="value">{{ item.appointmentTime ?? '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运时间:</text>
-                                <text class="value">{{ item.arrivalTime ??'暂无'}}</text>
+                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">预估重量:</text>
-                                <text class="value">{{ (item.estimateWeight +'kg') ??'暂无' }}</text>
+                                <text class="value">{{ (item.estimateWeight + 'kg') ?? '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运重量:</text>
-                                <text class="value">{{ item.weight ? (item.weight + 'kg') :'暂无' }}</text>
+                                <text class="value">{{ item.weight ? (item.weight + 'kg') : '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">预估桶数:</text>
                                 <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                    }}</text>
+                                }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>
@@ -348,7 +347,7 @@ const getNetwork = async () => {
 
 // 搜索方法
 const onSearch = () => {
-    
+
     resetPageAndReload();
 };
 
@@ -365,7 +364,7 @@ const resetPageAndReload = () => {
     allOrderList.value = [];
     pageNum.value = 1;
     getNetwork();
-   
+
 };
 
 
@@ -400,246 +399,252 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-    .container {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        background-color: $bg-theme-color;
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: $bg-theme-color;
 
-        .menu {
-            position: relative;
-            margin-top: 2rpx;
-            background-color: #ffffff;
-            padding: 20rpx 30rpx;
+    .menu {
+        position: relative;
+        margin-top: 2rpx;
+        background-color: #ffffff;
+        padding: 20rpx 30rpx;
 
-            .search-container {
-                .search-box {
-                    display: flex;
-                    align-items: center;
-                    background-color: #f5f5f5;
-                    border-radius: 45rpx;
-                    height: 64rpx;
-                    padding: 0 20rpx;
-
-                    .search-icon {
-                        margin-right: 10rpx;
-                        width: 48rpx;
-                        height: 48rpx;
-                    }
-
-                    .search-input {
-                        flex: 1;
-                        font-size: 28rpx;
-                        background-color: transparent;
-                        border: none;
-                        outline: none;
-                    }
-
-                    .clear-icon {
-                        margin-left: 10rpx;
-                    }
-                }
-            }
-
-            .tab-bar {
+        .search-container {
+            .search-box {
                 display: flex;
-                height: 68rpx;
-                margin-top: 20rpx;
+                align-items: center;
+                background-color: #f5f5f5;
+                border-radius: 45rpx;
+                height: 64rpx;
+                padding: 0 20rpx;
 
-                .tab-item {
+                .search-icon {
+                    margin-right: 10rpx;
+                    width: 48rpx;
+                    height: 48rpx;
+                }
+
+                .search-input {
                     flex: 1;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
                     font-size: 28rpx;
-                    color: rgba(61, 61, 61, 1);
-                    position: relative;
+                    background-color: transparent;
+                    border: none;
+                    outline: none;
+                }
 
-                    &.active {
-                        color: rgba(7, 193, 96, 1);
-                        font-weight: 500;
-                    }
-
-                    .tab-line {
-                        position: absolute;
-                        bottom: -20rpx;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        width: 56rpx;
-                        height: 4rpx;
-                        background-color: rgba(7, 193, 96, 1);
-                        border-radius: 2rpx;
-                    }
+                .clear-icon {
+                    margin-left: 10rpx;
                 }
             }
         }
 
-        .content-wrapper {
-            flex: 1;
-            margin-top: 30rpx;
+        .tab-bar {
+            display: flex;
+            height: 68rpx;
+            margin-top: 20rpx;
 
-            .content {
+            .tab-item {
+                flex: 1;
                 height: 100%;
-
-            }
-
-            .order-list {
-                padding: 0 30rpx; // 左右30rpx
-
-                .order-item {
-                    margin-bottom: 20rpx;
-                    padding: 30rpx;
-                    background-color: #ffffff;
-                    border-radius: 12rpx;
-
-                    .order-header {
-                        margin-bottom: 20rpx;
-
-                        .shop-info {
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                            margin-bottom: 16rpx;
-
-                            .shop-name {
-                                font-size: 28rpx;
-                                font-weight: 400;
-                                color: rgba(61, 61, 61, 1);
-                            }
-
-                            .status-tag {
-                                font-size: 12px;
-                                width: 100rpx;
-                                height: 40rpx;
-                                border-radius: 8rpx;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-
-                                &.processing {
-                                    color: rgba(0, 170, 255, 1);
-                                    background: rgba(0, 170, 255, 0.10);
-                                }
-
-                                &.completed {
-                                    color: rgba(255, 161, 0, 1);
-                                    background: rgba(255, 161, 0, 0.10);
-                                }
-
-                                &.cancelled {
-                                    color: rgba(61, 61, 61, 0.50);
-                                    background: rgba(153, 153, 153, 0.1);
-                                }
-                            }
-                        }
-                    }
-
-                    .order-content {
-                        padding: 20rpx 0;
-                        border-top: 1px solid #f0f0f0;
-                        border-bottom: 1px solid #f0f0f0;
-
-                        .info-item {
-                            display: flex;
-                            margin-bottom: 16rpx;
-
-                            &:last-child {
-                                margin-bottom: 0;
-                            }
-
-                            .label {
-                                font-size: 26rpx;
-                                color: rgba(61, 61, 61, 0.50);
-                            }
-
-                            .value {
-                                margin-left: 30rpx;
-                                font-size: 26rpx;
-                                color: rgba(61, 61, 61, 1);
-                            }
-                        }
-                    }
-
-                    .order-footer {
-                        display: flex;
-                        justify-content: flex-end;
-                        margin-top: 20rpx;
-
-                        .btn-cancel {
-                            margin-right: 20rpx;
-                            color: rgba(61, 61, 61, 1);
-                            background-color: #fff;
-                            border: 1px solid rgba(196, 196, 196, 1);
-                            font-size: 26rpx;
-                            width: 144rpx;
-                            height: 48rpx;
-                            border-radius: 20rpx;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            box-sizing: border-box; // 使用border-box盒模型
-                        }
-
-                        .btn-confirm {
-                            color: rgba(255, 255, 255, 1);
-                            background-color: rgba(7, 193, 96, 1);
-                            font-size: 26rpx;
-                            width: 144rpx;
-                            height: 48rpx;
-                            border-radius: 20rpx;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            box-sizing: border-box; // 使用border-box盒模型
-                        }
-                    }
-                }
-            }
-
-            .loadMore {
-                padding-bottom: calc(env(safe-area-inset-bottom) + 50);
-            }
-
-            // 暂无数据状态
-            .empty-state {
                 display: flex;
-                flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                min-height: calc(100vh - 200rpx); // 确保占满剩余屏幕高度
-                padding: 120rpx 60rpx;
-                text-align: center;
-                background-color: #ffffff;
+                font-size: 28rpx;
+                color: rgba(61, 61, 61, 1);
+                position: relative;
 
-                .empty-icon {
-                    font-size: 120rpx;
-                    margin-bottom: 30rpx;
-                    opacity: 0.3;
-                }
-
-                .empty-text {
-                    font-size: 32rpx;
-                    color: rgba(61, 61, 61, 0.6);
-                    margin-bottom: 16rpx;
+                &.active {
+                    color: rgba(7, 193, 96, 1);
                     font-weight: 500;
                 }
 
-                .empty-desc {
-                    font-size: 26rpx;
-                    color: rgba(61, 61, 61, 0.4);
-                    line-height: 1.5;
+                .tab-line {
+                    position: absolute;
+                    bottom: -20rpx;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 56rpx;
+                    height: 4rpx;
+                    background-color: rgba(7, 193, 96, 1);
+                    border-radius: 2rpx;
                 }
-            }
-
-            // 自定义导航栏字体大小为34rpx
-            :deep(.uni-navbar__content-title) {
-                font-size: 34rpx !important;
-            }
-
-            :deep(.uni-nav-bar-text) {
-                font-size: 34rpx !important;
             }
         }
     }
+
+    .content-wrapper {
+        flex: 1;
+        margin-top: 30rpx;
+
+        .content {
+            height: 100%;
+
+        }
+
+        .order-list {
+            padding: 0 30rpx; // 左右30rpx
+
+            .order-item {
+                margin-bottom: 20rpx;
+                padding: 30rpx;
+                background-color: #ffffff;
+                border-radius: 12rpx;
+
+                .order-header {
+                    margin-bottom: 20rpx;
+
+                    .shop-info {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        margin-bottom: 16rpx;
+
+                        .shop-name {
+                            font-size: 28rpx;
+                            font-weight: 400;
+                            color: rgba(61, 61, 61, 1);
+                        }
+
+                        .status-tag {
+                            font-size: 24rpx;
+                            width: 120rpx;
+                            height: 40rpx;
+                            border-radius: 8rpx;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            text-align: center;
+
+
+                            &.processing {
+                                //进行中 待完成
+                                color: rgba(0, 170, 255, 1);
+                                background: rgba(0, 170, 255, 0.10);
+                            }
+
+                            &.completed {
+                                //已完成
+                                color: rgba(61, 61, 61, 0.50);
+                                background: rgba(153, 153, 153, 0.1);
+                            }
+
+                            &.cancelled {
+                                //无法收运
+                                color: rgba(255, 161, 0, 1);
+                                background: rgba(255, 161, 0, 0.10);
+
+                            }
+                        }
+                    }
+                }
+
+                .order-content {
+                    padding: 20rpx 0;
+                    border-top: 1px solid #f0f0f0;
+                    border-bottom: 1px solid #f0f0f0;
+
+                    .info-item {
+                        display: flex;
+                        margin-bottom: 16rpx;
+
+                        &:last-child {
+                            margin-bottom: 0;
+                        }
+
+                        .label {
+                            font-size: 26rpx;
+                            color: rgba(61, 61, 61, 0.50);
+                        }
+
+                        .value {
+                            margin-left: 30rpx;
+                            font-size: 26rpx;
+                            color: rgba(61, 61, 61, 1);
+                        }
+                    }
+                }
+
+                .order-footer {
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-top: 20rpx;
+
+                    .btn-cancel {
+                        margin-right: 20rpx;
+                        color: rgba(61, 61, 61, 1);
+                        background-color: #fff;
+                        border: 1px solid rgba(196, 196, 196, 1);
+                        font-size: 26rpx;
+                        width: 144rpx;
+                        height: 48rpx;
+                        border-radius: 20rpx;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        box-sizing: border-box; // 使用border-box盒模型
+                    }
+
+                    .btn-confirm {
+                        color: rgba(255, 255, 255, 1);
+                        background-color: rgba(7, 193, 96, 1);
+                        font-size: 26rpx;
+                        width: 144rpx;
+                        height: 48rpx;
+                        border-radius: 20rpx;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        box-sizing: border-box; // 使用border-box盒模型
+                    }
+                }
+            }
+        }
+
+        .loadMore {
+            padding-bottom: calc(env(safe-area-inset-bottom) + 50);
+        }
+
+        // 暂无数据状态
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 200rpx); // 确保占满剩余屏幕高度
+            padding: 120rpx 60rpx;
+            text-align: center;
+            background-color: #ffffff;
+
+            .empty-icon {
+                font-size: 120rpx;
+                margin-bottom: 30rpx;
+                opacity: 0.3;
+            }
+
+            .empty-text {
+                font-size: 32rpx;
+                color: rgba(61, 61, 61, 0.6);
+                margin-bottom: 16rpx;
+                font-weight: 500;
+            }
+
+            .empty-desc {
+                font-size: 26rpx;
+                color: rgba(61, 61, 61, 0.4);
+                line-height: 1.5;
+            }
+        }
+
+        // 自定义导航栏字体大小为34rpx
+        :deep(.uni-navbar__content-title) {
+            font-size: 34rpx !important;
+        }
+
+        :deep(.uni-nav-bar-text) {
+            font-size: 34rpx !important;
+        }
+    }
+}
 </style>

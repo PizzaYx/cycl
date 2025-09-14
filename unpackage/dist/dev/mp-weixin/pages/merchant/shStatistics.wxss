@@ -23,25 +23,25 @@
 /* 垂直间距 */
 /* 透明度 */
 /* 文章场景相关 */
-.container.data-v-2e2a962a {
+.container.data-v-5f21cbbb {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: #f7f7f7;
 }
-.container .menu.data-v-2e2a962a {
+.container .menu.data-v-5f21cbbb {
   position: relative;
   margin-top: 2rpx;
   background-color: #ffffff;
   padding: 0 30rpx;
 }
-.container .menu .filter-container.data-v-2e2a962a {
+.container .menu .filter-container.data-v-5f21cbbb {
   display: flex;
   align-items: center;
   justify-content: space-around;
   height: 88rpx;
 }
-.container .menu .filter-container .filter-item.data-v-2e2a962a {
+.container .menu .filter-container .filter-item.data-v-5f21cbbb {
   display: flex;
   align-items: center;
   gap: 10rpx;
@@ -49,15 +49,15 @@
   padding: 20rpx 30rpx;
   min-height: 60rpx;
 }
-.container .menu .filter-container .filter-item text.data-v-2e2a962a {
+.container .menu .filter-container .filter-item text.data-v-5f21cbbb {
   font-size: 28rpx;
   color: #333;
 }
-.container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker {
+.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker {
   background: transparent !important;
   border: none !important;
 }
-.container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn {
+.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn {
   border: none !important;
   background: transparent !important;
   background-color: transparent !important;
@@ -65,34 +65,34 @@
   box-shadow: none !important;
   outline: none !important;
 }
-.container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn:before, .container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn:after {
+.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:before, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:after {
   display: none !important;
 }
-.container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn:active, .container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn:focus, .container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn:hover, .container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn:visited, .container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn:target {
+.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:active, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:focus, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:hover, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:visited, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:target {
   background: transparent !important;
   background-color: transparent !important;
   box-shadow: none !important;
   outline: none !important;
 }
-.container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker .uni-datetime-picker--btn .uni-datetime-picker-text {
+.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn .uni-datetime-picker-text {
   font-size: 26rpx !important;
   color: #333 !important;
   background: transparent !important;
 }
-.container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker view,
-.container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker text,
-.container .menu .filter-container .filter-select.data-v-2e2a962a .uni-datetime-picker input {
+.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker view,
+.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker text,
+.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker input {
   background: transparent !important;
   background-color: transparent !important;
 }
-.container .tjxx.data-v-2e2a962a {
+.container .tjxx.data-v-5f21cbbb {
   display: flex;
   justify-content: space-between;
   height: 132rpx;
   margin: 30rpx;
   gap: 20rpx;
 }
-.container .tjxx .tj-item.data-v-2e2a962a {
+.container .tjxx .tj-item.data-v-5f21cbbb {
   flex: 1;
   display: flex;
   align-items: center;
@@ -100,96 +100,97 @@
   background: #fff;
   border-radius: 20rpx;
 }
-.container .tjxx .tj-item image.data-v-2e2a962a {
+.container .tjxx .tj-item image.data-v-5f21cbbb {
   width: 88rpx;
   height: 88rpx;
 }
-.container .tjxx .tj-item .ljts .number.data-v-2e2a962a {
+.container .tjxx .tj-item .ljts .number.data-v-5f21cbbb {
   font-size: 30rpx;
   font-weight: bold;
   color: #3D3D3D;
 }
-.container .tjxx .tj-item .ljts .title.data-v-2e2a962a {
+.container .tjxx .tj-item .ljts .title.data-v-5f21cbbb {
   font-size: 24rpx;
   color: #3D3D3D;
 }
-.container .content-wrapper.data-v-2e2a962a {
+.container .content-wrapper.data-v-5f21cbbb {
   flex: 1;
 }
-.container .content-wrapper .content.data-v-2e2a962a {
+.container .content-wrapper .content.data-v-5f21cbbb {
   height: 100%;
 }
-.container .content-wrapper .order-list.data-v-2e2a962a {
+.container .content-wrapper .order-list.data-v-5f21cbbb {
   padding: 0 30rpx;
 }
-.container .content-wrapper .order-list .order-item.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item.data-v-5f21cbbb {
   margin-bottom: 30rpx;
   padding: 30rpx;
   background-color: #fff;
   border-radius: 12rpx;
 }
-.container .content-wrapper .order-list .order-item .order-header.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-header.data-v-5f21cbbb {
   margin-bottom: 20rpx;
 }
-.container .content-wrapper .order-list .order-item .order-header .shop-info.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-header .shop-info.data-v-5f21cbbb {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16rpx;
 }
-.container .content-wrapper .order-list .order-item .order-header .shop-info .shop-name.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-header .shop-info .shop-name.data-v-5f21cbbb {
   font-size: 28rpx;
   font-weight: 400;
   color: #3d3d3d;
 }
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.data-v-2e2a962a {
-  font-size: 12px;
-  width: 100rpx;
+.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.data-v-5f21cbbb {
+  font-size: 24rpx;
+  width: 120rpx;
   height: 40rpx;
   border-radius: 8rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  text-align: center;
 }
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.processing.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.processing.data-v-5f21cbbb {
   color: #00aaff;
   background: rgba(0, 170, 255, 0.1);
 }
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.completed.data-v-2e2a962a {
-  color: #ffa100;
-  background: rgba(255, 161, 0, 0.1);
-}
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.completed.data-v-5f21cbbb {
   color: rgba(61, 61, 61, 0.5);
   background: rgba(153, 153, 153, 0.1);
 }
-.container .content-wrapper .order-list .order-item .order-content.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-5f21cbbb {
+  color: #ffa100;
+  background: rgba(255, 161, 0, 0.1);
+}
+.container .content-wrapper .order-list .order-item .order-content.data-v-5f21cbbb {
   padding: 20rpx 0;
   border-top: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
 }
-.container .content-wrapper .order-list .order-item .order-content .info-item.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-content .info-item.data-v-5f21cbbb {
   display: flex;
   margin-bottom: 16rpx;
 }
-.container .content-wrapper .order-list .order-item .order-content .info-item.data-v-2e2a962a:last-child {
+.container .content-wrapper .order-list .order-item .order-content .info-item.data-v-5f21cbbb:last-child {
   margin-bottom: 0;
 }
-.container .content-wrapper .order-list .order-item .order-content .info-item .label.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-content .info-item .label.data-v-5f21cbbb {
   font-size: 26rpx;
   color: rgba(61, 61, 61, 0.5);
 }
-.container .content-wrapper .order-list .order-item .order-content .info-item .value.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-content .info-item .value.data-v-5f21cbbb {
   margin-left: 30rpx;
   font-size: 26rpx;
   color: #3d3d3d;
 }
-.container .content-wrapper .order-list .order-item .order-footer.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-footer.data-v-5f21cbbb {
   display: flex;
   justify-content: flex-end;
   margin-top: 20rpx;
 }
-.container .content-wrapper .order-list .order-item .order-footer .btn-cancel.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-footer .btn-cancel.data-v-5f21cbbb {
   margin-right: 20rpx;
   color: #3d3d3d;
   background-color: #fff;
@@ -203,7 +204,7 @@
   align-items: center;
   box-sizing: border-box;
 }
-.container .content-wrapper .order-list .order-item .order-footer .btn-confirm.data-v-2e2a962a {
+.container .content-wrapper .order-list .order-item .order-footer .btn-confirm.data-v-5f21cbbb {
   color: #07c160;
   border: 1rpx solid #07c160;
   font-size: 26rpx;
@@ -215,10 +216,10 @@
   align-items: center;
   box-sizing: border-box;
 }
-.container .loadMore.data-v-2e2a962a {
+.container .loadMore.data-v-5f21cbbb {
   padding-bottom: calc(env(safe-area-inset-bottom) + 50);
 }
-.container .empty-state.data-v-2e2a962a {
+.container .empty-state.data-v-5f21cbbb {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -228,25 +229,25 @@
   text-align: center;
   background-color: #ffffff;
 }
-.container .empty-state .empty-icon.data-v-2e2a962a {
+.container .empty-state .empty-icon.data-v-5f21cbbb {
   font-size: 120rpx;
   margin-bottom: 30rpx;
   opacity: 0.3;
 }
-.container .empty-state .empty-text.data-v-2e2a962a {
+.container .empty-state .empty-text.data-v-5f21cbbb {
   font-size: 32rpx;
   color: rgba(61, 61, 61, 0.6);
   margin-bottom: 16rpx;
   font-weight: 500;
 }
-.container .empty-state .empty-desc.data-v-2e2a962a {
+.container .empty-state .empty-desc.data-v-5f21cbbb {
   font-size: 26rpx;
   color: rgba(61, 61, 61, 0.4);
   line-height: 1.5;
 }
-.container.data-v-2e2a962a .uni-navbar__content-title {
+.container.data-v-5f21cbbb .uni-navbar__content-title {
   font-size: 34rpx !important;
 }
-.container.data-v-2e2a962a .uni-nav-bar-text {
+.container.data-v-5f21cbbb .uni-nav-bar-text {
   font-size: 34rpx !important;
 }

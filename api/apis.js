@@ -127,6 +127,22 @@ export function apiGetMerchantNotConfirmNum(data = {}) {
     })
 }
 
+////api/merchantapi/getPlanTemporaryById 商户提交临时预约收运单
+export function apiGetPlanTemporaryById(data = {}) {
+    return request({
+        url: "/api/merchantapi/getPlanTemporaryById",
+        data
+    })
+}
+
+///api/merchantapi/getPlanById 商户收运记录详情
+export function apiGetPlanById(data = {}) {
+    return request({
+        url: "/api/merchantapi/getPlanById",
+        data
+    })
+}
+
 
 //------------------------收运端 司机------------------------------//
 

@@ -253,7 +253,7 @@ const handleAuth = () => {
     showAuthModal.value = false
 
     uni.navigateTo({
-        url: '/pages/merchant/certification'
+        url: '/pages/merchant/shCertification'
     })
 }
 
@@ -263,25 +263,25 @@ const quickActions = ref([
         id: 'appointment',
         name: '临时预约',
         icon: '/static/shd/lsyy.png',
-        url: '/pages/merchant/sydReservation' // 临时预约页面
+        url: '/pages/merchant/shReservation' // 临时预约页面
     },
     {
         id: 'records',
         name: '收运清单',
         icon: '/static/shd/syjl.png',
-        url: '/pages/merchant/sydChecklist' // 收运清单页面
+        url: '/pages/merchant/shChecklist' // 收运清单页面
     },
     {
         id: 'statistics',
         name: '数据统计',
         icon: '/static/shd/sjtj.png',
-        url: '/pages/merchant/sydStatistics' // 数据统计页面
+        url: '/pages/merchant/shStatistics' // 数据统计页面
     },
     {
         id: 'certification',
         name: '商户认证',
         icon: '/static/shd/shrz.png',
-        url: '/pages/merchant/certification' // 商户认证页面
+        url: '/pages/merchant/shCertification' // 商户认证页面
     }
 ])
 

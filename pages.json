@@ -22,14 +22,14 @@
             }
         },
         {
-            "path": "pages/merchant/certification",
+            "path": "pages/merchant/shCertification",
             "style": {
                 "navigationBarTitleText": "商户认证",
                 "navigationStyle": "custom"
             }
         },
         {
-            "path": "pages/merchant/sydChecklist",
+            "path": "pages/merchant/shChecklist",
             "style": {
                 "navigationBarTitleText": "收运清单",
                 "enablePullDownRefresh": true,
@@ -37,7 +37,7 @@
             }
         },
         {
-            "path": "pages/merchant/sydAllList",
+            "path": "pages/merchant/shAllList",
             "style": {
                 "navigationBarTitleText": "收运记录",
                 "enablePullDownRefresh": true,
@@ -45,7 +45,7 @@
             }
         },
         {
-            "path": "pages/merchant/sydStatistics",
+            "path": "pages/merchant/shStatistics",
             "style": {
                 "navigationBarTitleText": "收运统计",
                 "enablePullDownRefresh": true,
@@ -60,7 +60,7 @@
             }
         },
         {
-            "path": "pages/merchant/sydReservation",
+            "path": "pages/merchant/shReservation",
             "style": {
                 "navigationBarTitleText": "临时预约",
                 "navigationStyle": "custom"
@@ -108,6 +108,22 @@
         	{
         		"navigationBarTitleText" : "收运统计",
 				"navigationStyle": "custom"
+        	}
+        },
+        {
+        	"path" : "pages/merchant/shyyDetail",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "商户预约详情",
+                "navigationStyle": "custom"
+        	}
+        },
+        {
+        	"path" : "pages/merchant/shsyDetail",
+        	"style" : 
+        	{
+        		"navigationBarTitleText" : "商户收运详细",
+                "navigationStyle": "custom"
         	}
         }
     ],

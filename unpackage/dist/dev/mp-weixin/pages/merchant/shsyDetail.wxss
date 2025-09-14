@@ -1,0 +1,123 @@
+/**
+ * 这里是uni-app内置的常用样式变量
+ *
+ * uni-app 官方扩展插件及插件市场（https://ext.dcloud.net.cn）上很多三方插件均使用了这些样式变量
+ * 如果你是插件开发者，建议你使用scss预处理，并在插件代码中直接使用这些变量（无需 import 这个文件），方便用户通过搭积木的方式开发整体风格一致的App
+ *
+ */
+/**
+ * 如果你是App开发者（插件使用者），你可以通过修改这些变量来定制自己的插件主题，实现自定义主题功能
+ *
+ * 如果你的项目同样使用了scss预处理，你也可以直接在你的 scss 代码中使用如下变量，同时无需 import 这个文件
+ */
+/* 颜色变量 */
+/* 行为相关颜色 */
+/* 文字基本颜色 */
+/* 背景颜色 */
+/* 边框颜色 */
+/* 尺寸变量 */
+/* 文字尺寸 */
+/* 图片尺寸 */
+/* Border Radius */
+/* 水平间距 */
+/* 垂直间距 */
+/* 透明度 */
+/* 文章场景相关 */
+.container.data-v-af7fb76b {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f7f7f7;
+  padding: 0 30rpx;
+}
+.user-info.data-v-af7fb76b {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 30rpx;
+  background-color: #ffffff;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  margin-top: 20rpx;
+  border-radius: 16rpx;
+}
+.user-info .name.data-v-af7fb76b {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333333;
+}
+.user-info .status-tag.data-v-af7fb76b {
+  font-size: 24rpx;
+  width: 120rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.user-info .status-tag.processing.data-v-af7fb76b {
+  color: #00aaff;
+  background: rgba(0, 170, 255, 0.1);
+}
+.user-info .status-tag.completed.data-v-af7fb76b {
+  color: rgba(61, 61, 61, 0.5);
+  background: rgba(153, 153, 153, 0.1);
+}
+.user-info .status-tag.cancelled.data-v-af7fb76b {
+  color: #ffa100;
+  background: rgba(255, 161, 0, 0.1);
+}
+.content.data-v-af7fb76b {
+  padding: 32rpx 0;
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 16rpx;
+  margin-top: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+.content .info-list.data-v-af7fb76b {
+  padding: 0 30rpx;
+}
+.content .info-list .info-item.data-v-af7fb76b {
+  display: flex;
+  margin-bottom: 32rpx;
+  padding-bottom: 32rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.content .info-list .info-item.data-v-af7fb76b:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.content .info-list .info-item .label.data-v-af7fb76b {
+  width: 140rpx;
+  font-size: 14px;
+  color: #999999;
+  flex-shrink: 0;
+}
+.content .info-list .info-item .value.data-v-af7fb76b {
+  margin-left: 30rpx;
+  flex: 1;
+  font-size: 14px;
+  color: #333333;
+}
+.content .photo-section.data-v-af7fb76b {
+  margin-top: 48rpx;
+  padding: 0 30rpx;
+}
+.content .photo-section .photo-title.data-v-af7fb76b {
+  font-size: 14px;
+  color: #999999;
+  margin-bottom: 24rpx;
+  display: block;
+}
+.content .photo-section .photo-list.data-v-af7fb76b {
+  display: flex;
+  gap: 20rpx;
+}
+.content .photo-section .photo-list .photo-item.data-v-af7fb76b {
+  width: 186rpx;
+  height: 186rpx;
+  border-radius: 8rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}

@@ -100,7 +100,7 @@
 }
 .container .bottom-section .driver-info-card .info-item .name-info .value.data-v-9af8408b {
   color: #3d3d3d;
-  font-size: 14px;
+  font-size: 28rpx;
   font-weight: 500;
 }
 .container .bottom-section .driver-info-card .divider.data-v-9af8408b {
@@ -124,13 +124,7 @@
 }
 .container .bottom-section .driver-info-card .driver-details .detail-item .value.data-v-9af8408b {
   color: #3d3d3d;
-  font-size: 14px;
-}
-
-/* 确保页面背景色始终正确显示 */
-page.data-v-9af8408b {
-  background-color: #F5F5F5;
-  height: 100%;
+  font-size: 28rpx;
 }
 body.data-v-9af8408b {
   background-color: #F5F5F5;

@@ -208,8 +208,8 @@ onShow(async () => {
 const getapiGetDriverInfo = async () => {
     try {
         const res = await apiGetDriverInfo({
-            driverId: userStore.sfmerchant?.id || 5, 
-          
+            driverId: userStore.sfmerchant?.id || 5,
+
         })
 
         if (res.code === 200) {
@@ -315,35 +315,12 @@ const contactLine = () => {
         currentDate: currentDate
     };
 
-    // 尝试使用 EventChannel，失败则使用存储方式
-    uni.navigateTo({
-        url: '/pages/collection/syAllMap',
-        events: {
-            // 可以接收目标页面回传的数据
-            acceptDataFromMap: (data) => {
-                console.log('地图页面回传数据:', data);
-            }
-        },
-        success: (res) => {
-            // 无论如何都使用存储方式，确保数据传递的可靠性
-            console.log('使用存储方式发送数据');
-            
+    // 简单直接：先存储数据再跳转
+    uni.setStorageSync('mapData', mapData);
+    console.log('数据已存储，跳转页面');
 
-            // 同时尝试EventChannel（如果支持的话）
-            try {
-                if (res.eventChannel && res.eventChannel.emit) {
-                    res.eventChannel.emit('sendMapData', mapData);
-                    console.log('同时使用EventChannel发送数据');
-                }
-            } catch (error) {
-                console.log('EventChannel发送失败，但存储方式已保证数据传递');
-            }
-        },
-        fail: () => {
-            // 跳转失败时也使用存储方式
-            console.log('页面跳转失败，使用存储方式');
-           
-        }
+    uni.navigateTo({
+        url: '/pages/collection/syAllMap'
     });
 };
 
@@ -677,7 +654,7 @@ const back = () => {
             }
 
             .weight-unit {
-                font-size: 14px;
+                font-size: 28rpx;
                 color: #999999;
                 margin-left: 10rpx;
             }
@@ -760,13 +737,13 @@ const back = () => {
 
 
                     .date {
-                        font-size: 14px;
+                        font-size: 28rpx;
                         color: #666666;
                     }
                 }
 
                 .status {
-                    font-size: 12px;
+                    font-size: 24rpx;
                     width: 100rpx;
                     height: 40rpx;
                     border-radius: 8rpx;

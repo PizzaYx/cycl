@@ -52,40 +52,40 @@ const _sfc_main = {
     });
     const infoList = common_vendor.computed(() => [
       {
-        label: "商家名称",
+        label: "商家名称:",
         value: pageData.value.merchantName
       },
       {
-        label: "预估时间",
-        value: pageData.value.estimateTime
+        label: "预估时间:",
+        value: pageData.value.appointmentTime ?? "暂无"
       },
       {
-        label: "收运时间",
-        value: pageData.value.arrivalTime ?? ""
+        label: "收运时间:",
+        value: pageData.value.arrivalTime ?? "暂无"
       },
       {
-        label: "预估重量",
+        label: "预估重量:",
         value: pageData.value.estimateWeight + "kg"
       },
       {
-        label: "收运重量",
-        value: pageData.value.registrationNumber
+        label: "收运重量:",
+        value: pageData.value.weight + "kg"
       },
       {
-        label: "预估桶数",
-        value: pageData.value.estimateBucketNum ?? 0
+        label: "预估桶数:",
+        value: pageData.value.estimateBucketNum + "个"
       },
       {
-        label: "收运桶数",
-        value: pageData.value.estimateBucketNum ?? 0
+        label: "收运桶数:",
+        value: pageData.value.estimateBucketNum + "个"
       },
       {
-        label: "收运地址",
-        value: pageData.value.address ?? ""
+        label: "收运地址:",
+        value: pageData.value.address ?? "暂无"
       },
       {
-        label: "车牌号",
-        value: pageData.value.registrationNumber ?? ""
+        label: "车牌号:",
+        value: pageData.value.registrationNumber ?? "暂无"
       }
     ]);
     common_vendor.onLoad((options) => {
@@ -93,7 +93,7 @@ const _sfc_main = {
         planId.value = options.planId;
       if (options.driverId)
         driverId.value = options.driverId;
-      common_vendor.index.__f__("log", "at pages/collection/syCheckDetail.vue:129", "接收到的参数:", options);
+      common_vendor.index.__f__("log", "at pages/collection/syCheckDetail.vue:130", "接收到的参数:", options);
     });
     common_vendor.onMounted(() => {
       getSyCheckDetail();
@@ -106,17 +106,18 @@ const _sfc_main = {
       if (res.code === 200) {
         const data = res.data;
         pageData.value = {
-          driverName: data.driverName || "",
+          driverName: data.driverName,
           status: data.status,
-          merchantName: data.merchantName || "",
+          merchantName: data.merchantName,
           estimateWeight: data.estimateWeight || 0,
           weight: data.weight || 0,
           estimateBucketNum: data.estimateBucketNum || 0,
           bucketNum: data.bucketNum || 0,
-          registrationNumber: data.registrationNumber || "",
+          registrationNumber: data.registrationNumber,
           img: data.img ? data.img.split(",") : [],
-          appointmentTime: data.appointmentTime || "",
-          arrivalTime: data.arrivalTime || ""
+          appointmentTime: data.appointmentTime,
+          arrivalTime: data.arrivalTime,
+          address: data.address
         };
       }
     };
@@ -139,7 +140,7 @@ const _sfc_main = {
           ["status-bar"]: true,
           ["left-icon"]: "left",
           color: "#000",
-          title: "收运记录"
+          title: "收运记录详细"
         }),
         c: common_vendor.t(pageData.value.driverName),
         d: common_vendor.t(statusText.value),

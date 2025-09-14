@@ -5,18 +5,20 @@ if (!Math) {
   "./pages/index/index.js";
   "./pages/merchant/merchant.js";
   "./pages/collection/collection.js";
-  "./pages/merchant/certification.js";
-  "./pages/merchant/sydChecklist.js";
-  "./pages/merchant/sydAllList.js";
-  "./pages/merchant/sydStatistics.js";
+  "./pages/merchant/shCertification.js";
+  "./pages/merchant/shChecklist.js";
+  "./pages/merchant/shAllList.js";
+  "./pages/merchant/shStatistics.js";
   "./pages/user/user.js";
-  "./pages/merchant/sydReservation.js";
+  "./pages/merchant/shReservation.js";
   "./pages/collection/sfDetails.js";
   "./pages/collection/syReport.js";
   "./pages/collection/sfsyRecord.js";
   "./pages/collection/syAllMap.js";
   "./pages/collection/syCheckDetail.js";
   "./pages/collection/syStatistics.js";
+  "./pages/merchant/shyyDetail.js";
+  "./pages/merchant/shsyDetail.js";
 }
 const _sfc_main = {
   onLaunch: function() {
