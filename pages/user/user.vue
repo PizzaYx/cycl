@@ -7,7 +7,8 @@
                 <view class="avatar-container" @tap="handleAvatarClick">
                     <image v-if="avatarUrl" class="avatar" :src="avatarUrl" mode="aspectFill" />
                     <view v-else class="avatar avatar-default">
-                        <text class="avatar-text">{{ userStore.userAvatar }}</text>
+                        <text class="avatar-text">{{ userStore.userType == 1 ? userStore.userAvatar :
+                            userStore.userSFAvatar }}</text>
                     </view>
                     <view class="avatar-edit-overlay">
                         <uni-icons type="camera-filled" size="32rpx" color="#fff"></uni-icons>
@@ -34,11 +35,11 @@
                     <text class="value">{{ userStore.userTypeText }}</text>
                 </view>
 
-               
+
             </view>
         </view>
 
-       
+
 
         <view class="footer">
             <button class="save-btn" @tap="handleSave">保存</button>

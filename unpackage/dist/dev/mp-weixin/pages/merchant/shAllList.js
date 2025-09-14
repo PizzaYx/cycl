@@ -65,6 +65,12 @@ const _sfc_main = {
     const pageNum = common_vendor.ref(1);
     const loadingStatus = common_vendor.ref("more");
     const allOrderList = common_vendor.ref([]);
+    const handleViewDetails = (item) => {
+      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:180", "查看详情按钮被点击", item);
+      common_vendor.index.navigateTo({
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+      });
+    };
     const getNetwork = async () => {
       var _a;
       try {
@@ -95,7 +101,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shAllList.vue:223", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shAllList.vue:231", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -210,13 +216,14 @@ const _sfc_main = {
             i: common_vendor.t(item.arrivalTime ?? "暂无"),
             j: item.status != 0
           }, item.status != 0 ? {
-            k: "31e4eb43-4-" + i0,
-            l: common_vendor.p({
+            k: common_vendor.o(($event) => handleViewDetails(item), index),
+            l: "31e4eb43-4-" + i0,
+            m: common_vendor.p({
               size: "mini",
               type: "default"
             })
           } : {}, {
-            m: index
+            n: index
           });
         }),
         l: common_vendor.p({

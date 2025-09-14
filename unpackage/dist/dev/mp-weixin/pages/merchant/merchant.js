@@ -211,7 +211,7 @@ const _sfc_main = {
         return;
       }
       common_vendor.index.navigateTo({
-        url: "/pages/merchant/sydAllList"
+        url: "/pages/merchant/shAllList"
       });
     };
     return (_ctx, _cache) => {

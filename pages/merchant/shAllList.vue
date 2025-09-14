@@ -70,7 +70,7 @@
                             </view>
                         </view>
                         <view class="order-footer">
-                            <uni-button v-if="item.status != 0" size="mini" type="default" class="btn-confirm">
+                            <uni-button v-if="item.status != 0" size="mini" type="default" class="btn-confirm" @tap="handleViewDetails(item)">
                                 查看详情
                             </uni-button>
                         </view>
@@ -174,6 +174,14 @@ const loadingStatus = ref('more'); // more-加载前/loading-加载中/nomore-�
 
 // 数据列表
 const allOrderList = ref([]);
+
+
+const handleViewDetails = (item) => {
+    console.log('查看详情按钮被点击', item);
+    uni.navigateTo({
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+    });
+};
 
 //后获取数据
 const getNetwork = async () => {

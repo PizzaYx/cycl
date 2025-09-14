@@ -25,7 +25,7 @@
                 <input class="account" placeholder="请输入账号" type="text" placeholder-class="input-placeholder"
                     v-model="formData.account" />
                 <view class="zh mm">密码</view>
-                <input class="account password" placeholder="请输入密码" type="safe-password"
+                <input class="account password" placeholder="请输入密码" type="text"
                     placeholder-class="input-placeholder" v-model="formData.password" />
                 <!-- <text class="forgot-password" @click="handleForgotPassword" v-if="activeTab === 0">忘记密码？</text> -->
             </view>

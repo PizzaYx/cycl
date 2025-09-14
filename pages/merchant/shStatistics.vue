@@ -73,7 +73,7 @@
                             <view class="info-item">
                                 <text class="label">预估桶数:</text>
                                 <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                    }}</text>
+                                }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>
@@ -86,7 +86,7 @@
                         </view>
                         <view class="order-footer">
 
-                            <uni-button size="mini" class="btn-confirm">
+                            <uni-button size="mini" class="btn-confirm" @tap="handleViewDetails(item)">
                                 查看详情
                             </uni-button>
                         </view>
@@ -158,6 +158,14 @@ const getStatusClass = (status) => {
         case 1: return 'completed';
         case 2: return 'cancelled';
     }
+};
+
+
+const handleViewDetails = (item) => {
+    console.log('查看详情按钮被点击', item);
+    uni.navigateTo({
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+    });
 };
 
 // 状态转换函数

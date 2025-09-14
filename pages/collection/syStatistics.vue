@@ -364,15 +364,16 @@ onMounted(() => {
         display: flex;
         flex-wrap: wrap;
         margin: 30rpx;
-        gap: 20rpx;
+        justify-content: space-between;
 
         .tj-item {
-            width: calc(50% - 10rpx);
+            width: 48%;
             display: flex;
             align-items: center;
             background: #fff;
             border-radius: 20rpx;
             padding: 20rpx;
+            margin-bottom: 20rpx;
 
             image {
                 width: 88rpx;

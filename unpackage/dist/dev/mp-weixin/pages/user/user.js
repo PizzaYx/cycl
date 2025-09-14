@@ -50,7 +50,7 @@ const _sfc_main = {
       }, avatarUrl.value ? {
         d: avatarUrl.value
       } : {
-        e: common_vendor.t(common_vendor.unref(userStore).userAvatar)
+        e: common_vendor.t(common_vendor.unref(userStore).userType == 1 ? common_vendor.unref(userStore).userAvatar : common_vendor.unref(userStore).userSFAvatar)
       }, {
         f: common_vendor.p({
           type: "camera-filled",

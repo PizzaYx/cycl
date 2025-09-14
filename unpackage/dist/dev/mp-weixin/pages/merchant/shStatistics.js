@@ -45,6 +45,12 @@ const _sfc_main = {
           return "cancelled";
       }
     };
+    const handleViewDetails = (item) => {
+      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:165", "查看详情按钮被点击", item);
+      common_vendor.index.navigateTo({
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+      });
+    };
     const getStatusText = (status) => {
       switch (status) {
         case 0:
@@ -121,7 +127,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:274", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:282", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -245,8 +251,9 @@ const _sfc_main = {
             g: common_vendor.t(item.weight ? item.weight + "kg" : "暂无"),
             h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + "个" : "暂无"),
             i: common_vendor.t(item.bucketNum ? item.bucketNum + "个" : "暂无"),
-            j: "5f21cbbb-4-" + i0,
-            k: index
+            j: common_vendor.o(($event) => handleViewDetails(item), index),
+            k: "5f21cbbb-4-" + i0,
+            l: index
           };
         }),
         m: common_vendor.p({
