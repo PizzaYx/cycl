@@ -34,17 +34,11 @@
                     <text class="value">{{ userStore.userTypeText }}</text>
                 </view>
 
-                <view class="info-item">
-                    <text class="label">认证状态</text>
-                    <text class="value" :class="getStatusClass()">{{ userStore.merchantStatusText }}</text>
-                </view>
+               
             </view>
         </view>
 
-        <!-- 文件选择器 -->
-        <uni-file-picker v-show="false" ref="filePicker" file-mediatype="image" mode="grid" :limit="1"
-            @select="onFileSelect" @success="onUploadSuccess" @fail="onUploadFail">
-        </uni-file-picker>
+       
 
         <view class="footer">
             <button class="save-btn" @tap="handleSave">保存</button>

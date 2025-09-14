@@ -1,0 +1,1 @@
+{"version":3,"file":"agreement.js","sources":["pages/user/agreement/agreement.vue?type=page"],"sourcesContent":["import MiniProgramPage from '/Users/yx/Documents/Vue3Projects/cycl/pages/user/agreement/agreement.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;AACA,GAAG,WAAW,eAAe;"}

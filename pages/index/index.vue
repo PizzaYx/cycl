@@ -27,7 +27,7 @@
                 <view class="zh mm">密码</view>
                 <input class="account password" placeholder="请输入密码" type="safe-password"
                     placeholder-class="input-placeholder" v-model="formData.password" />
-                <text class="forgot-password" @click="handleForgotPassword" v-if="activeTab === 0">忘记密码？</text>
+                <!-- <text class="forgot-password" @click="handleForgotPassword" v-if="activeTab === 0">忘记密码？</text> -->
             </view>
             <view class="loginBtn">
                 <button type="button" @click="handleLogin">登录</button>
@@ -79,7 +79,18 @@ const toggleAgreement = () => {
 const openAgreement = (type) => {
     // 这里可以添加跳转到协议页面的逻辑
     console.log('打开协议:', type)
-    // 例如使用 uni.navigateTo 跳转到协议页面
+    if (type === 'user') {
+        uni.navigateTo({
+            url: '/pages/user/agreement'
+        })
+
+    }
+    else {
+        uni.navigateTo({
+            url: '/pages/user/privacyPolicy'
+        })
+    }
+
 }
 
 // 表单数据
@@ -90,12 +101,9 @@ const formData = reactive({
 
 //注册处理
 const handleRegister = () => {
-    uni.showToast({
-        title: '注册功能待实现',
-        icon: 'none',
+    uni.navigateTo({
+        url: '/pages/user/register',
     })
-    // 这里可以添加跳转到注册页面的逻辑
-    // 例如: uni.navigateTo({ url: '/pages/register/register' })
 }
 // 忘记密码处理
 const handleForgotPassword = () => {
@@ -112,7 +120,7 @@ const handleLogin = () => {
     // 表单验证
     if (!formData.account) {
         uni.showToast({
-            title: '请输入手机号码',
+            title: '请输入账号',
             icon: 'none',
         })
         return
@@ -182,7 +190,7 @@ const loginRequest = async () => {
                     url: activeTab.value ? '/pages/collection/collection' :
                         '/pages/merchant/merchant',
                 })
-            }, 1000)
+            }, 300)
         } else {
             uni.showToast({
                 title: res.msg || '登录失败',

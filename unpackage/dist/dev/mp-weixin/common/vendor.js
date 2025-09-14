@@ -9250,6 +9250,27 @@ const pages = [
       navigationBarTitleText: "商户收运详细",
       navigationStyle: "custom"
     }
+  },
+  {
+    path: "pages/user/agreement",
+    style: {
+      navigationBarTitleText: "用户协议",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/user/privacyPolicy",
+    style: {
+      navigationBarTitleText: "隐私协议",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/user/register",
+    style: {
+      navigationBarTitleText: "注册",
+      navigationStyle: "custom"
+    }
   }
 ];
 const globalStyle = {

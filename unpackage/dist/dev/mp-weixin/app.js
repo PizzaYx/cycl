@@ -19,6 +19,9 @@ if (!Math) {
   "./pages/collection/syStatistics.js";
   "./pages/merchant/shyyDetail.js";
   "./pages/merchant/shsyDetail.js";
+  "./pages/user/agreement.js";
+  "./pages/user/privacyPolicy.js";
+  "./pages/user/register.js";
 }
 const _sfc_main = {
   onLaunch: function() {

@@ -22,27 +22,29 @@ const _sfc_main = {
     };
     const openAgreement = (type) => {
       common_vendor.index.__f__("log", "at pages/index/index.vue:81", "打开协议:", type);
+      if (type === "user") {
+        common_vendor.index.navigateTo({
+          url: "/pages/user/agreement"
+        });
+      } else {
+        common_vendor.index.navigateTo({
+          url: "/pages/user/privacyPolicy"
+        });
+      }
     };
     const formData = common_vendor.reactive({
       account: "",
       password: ""
     });
     const handleRegister = () => {
-      common_vendor.index.showToast({
-        title: "注册功能待实现",
-        icon: "none"
-      });
-    };
-    const handleForgotPassword = () => {
-      common_vendor.index.showToast({
-        title: "忘记密码功能待实现",
-        icon: "none"
+      common_vendor.index.navigateTo({
+        url: "/pages/user/register"
       });
     };
     const handleLogin = () => {
       if (!formData.account) {
         common_vendor.index.showToast({
-          title: "请输入手机号码",
+          title: "请输入账号",
           icon: "none"
         });
         return;
@@ -82,7 +84,7 @@ const _sfc_main = {
             common_vendor.index.navigateTo({
               url: activeTab.value ? "/pages/collection/collection" : "/pages/merchant/merchant"
             });
-          }, 1e3);
+          }, 300);
         } else {
           common_vendor.index.showToast({
             title: res.msg || "登录失败",
@@ -94,7 +96,7 @@ const _sfc_main = {
           title: "网络请求失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/index/index.vue:197", "登录请求失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:205", "登录请求失败:", err);
       } finally {
         common_vendor.index.hideLoading();
       }
@@ -103,7 +105,7 @@ const _sfc_main = {
       try {
         await userStore.fetchUserInfo();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:208", "获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:216", "获取用户信息失败:", error);
         common_vendor.index.showToast({
           title: "获取用户信息失败，请稍后重试",
           icon: "none",
@@ -127,23 +129,19 @@ const _sfc_main = {
         j: common_vendor.o(($event) => formData.account = $event.detail.value),
         k: formData.password,
         l: common_vendor.o(($event) => formData.password = $event.detail.value),
-        m: activeTab.value === 0
+        m: common_vendor.o(handleLogin),
+        n: activeTab.value === 0
       }, activeTab.value === 0 ? {
-        n: common_vendor.o(handleForgotPassword)
+        o: common_vendor.o(handleRegister)
       } : {}, {
-        o: common_vendor.o(handleLogin),
-        p: activeTab.value === 0
-      }, activeTab.value === 0 ? {
-        q: common_vendor.o(handleRegister)
-      } : {}, {
-        r: common_vendor.o(toggleAgreement),
-        s: common_vendor.p({
+        p: common_vendor.o(toggleAgreement),
+        q: common_vendor.p({
           type: agreed.value ? "circle-filled" : "circle",
           size: "22",
           color: agreed.value ? "rgba(7, 193, 96, 1)" : "rgba(19, 19, 19, 0.5)"
         }),
-        t: common_vendor.o(($event) => openAgreement("user")),
-        v: common_vendor.o(($event) => openAgreement("privacy"))
+        r: common_vendor.o(($event) => openAgreement("user")),
+        s: common_vendor.o(($event) => openAgreement("privacy"))
       });
     };
   }

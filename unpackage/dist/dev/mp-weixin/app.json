@@ -16,7 +16,10 @@
     "pages/collection/syCheckDetail",
     "pages/collection/syStatistics",
     "pages/merchant/shyyDetail",
-    "pages/merchant/shsyDetail"
+    "pages/merchant/shsyDetail",
+    "pages/user/agreement",
+    "pages/user/privacyPolicy",
+    "pages/user/register"
   ],
   "window": {
     "navigationBarTextStyle": "black",
