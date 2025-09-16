@@ -507,8 +507,9 @@ onMounted(() => {
                     }
 
                     .btn-confirm {
-                        color: rgba(255, 255, 255, 1);
-                        background-color: rgba(7, 193, 96, 1);
+                        color: rgba(7, 193, 96, 1);
+
+                        border: 1rpx solid rgba(7, 193, 96, 1);
                         font-size: 26rpx;
                         width: 144rpx;
                         height: 48rpx;

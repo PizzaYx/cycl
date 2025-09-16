@@ -82,7 +82,7 @@ const infoList = computed(() => [
     },
     {
         label: '其他说明:',
-        value: pageData.value.explain,
+        value: pageData.value.explain ?? '暂无',
     },
 
 ]);
@@ -118,7 +118,7 @@ const getSyCheckDetail = async () => {
 
     if (res.code === 200) {
         const data = res.data;
-    
+
         // 统一更新pageData
         pageData.value = {
             driverName: data.driverName ?? '',
@@ -127,13 +127,13 @@ const getSyCheckDetail = async () => {
             estimateWeight: data.estimateWeight ?? 0,
             weight: data.weight ?? 0,
             estimateBucketNum: data.estimateBucketNum ?? 0,
-            bucketNum: data.bucketNum   ?? 0,
+            bucketNum: data.bucketNum ?? 0,
             registrationNumber: data.registrationNumber ?? 0,
             img: data.img ? data.img.split(',') : [],
             appointmentTime: data.appointmentTime ?? 0,
             arrivalTime: data.arrivalTime,
-            address: data.address ??'',
-            explain: data.explain ??'',
+            address: data.address ?? '',
+            explain: data.explain ?? '暂无',
 
         };
         console.log('获取收运记录详情成功', pageData.value);

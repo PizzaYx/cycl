@@ -58,7 +58,7 @@ const _sfc_main = {
       },
       {
         label: "其他说明:",
-        value: pageData.value.explain
+        value: pageData.value.explain ?? "暂无"
       }
     ]);
     common_vendor.onLoad((options) => {
@@ -93,7 +93,7 @@ const _sfc_main = {
           appointmentTime: data.appointmentTime ?? 0,
           arrivalTime: data.arrivalTime,
           address: data.address ?? "",
-          explain: data.explain ?? ""
+          explain: data.explain ?? "暂无"
         };
         common_vendor.index.__f__("log", "at pages/merchant/shyyDetail.vue:139", "获取收运记录详情成功", pageData.value);
       }

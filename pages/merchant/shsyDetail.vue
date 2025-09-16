@@ -94,7 +94,7 @@ const infoList = computed(() => [
     },
     {
         label: '其他说明:',
-        value: pageData.value.explain,
+        value: pageData.value.explain ?? '暂无',
     },
 
 ]);

@@ -74,7 +74,7 @@ const _sfc_main = {
       },
       {
         label: "其他说明:",
-        value: pageData.value.explain
+        value: pageData.value.explain ?? "暂无"
       }
     ]);
     common_vendor.onLoad((options) => {
