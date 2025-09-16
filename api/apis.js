@@ -18,6 +18,16 @@ export function apiGetInfo() {
     })
 }
 
+
+////api/apiRegister 注册
+export function apiPostRegister(data = {}) {
+    return request({
+        url: "/api/apiRegister",
+        data,
+        method: "POST"
+    })
+}
+
 /// 首页 统计数api/merchantapi/getMerchantStatistics
 export function apiGetMerchantStatistics(data = {}) {
     return request({
@@ -114,8 +124,8 @@ export function apiGetPlanStatisticsPage(data = {}) {
 //临时预约取消/api/merchantapi/delPlanTemporary
 export function apiGetcancelPlanById(data = {}) {
     return request({
-      url: '/api/merchantapi/delPlanTemporary',
-      data,
+        url: '/api/merchantapi/delPlanTemporary',
+        data,
     })
 }
 
@@ -143,6 +153,13 @@ export function apiGetPlanById(data = {}) {
     })
 }
 
+///api/merchantapi/selectMerchantList 商户认证商户名称
+export function apiSelectMerchantList(data = {}) {
+    return request({
+        url: "/api/merchantapi/selectMerchantList",
+        data
+    })
+}
 
 //------------------------收运端 司机------------------------------//
 
@@ -190,9 +207,9 @@ export function apiGetdriverConfirmPlan(data = {}) {
 //api/driver/reportWeight 收运上报每个接口
 export function apiPostreportWeight(data = {}) {
     return request({
-      url: '/api/driver/reportWeight',
-      data,
-      method: 'POST',
+        url: '/api/driver/reportWeight',
+        data,
+        method: 'POST',
     })
 }
 
@@ -206,40 +223,40 @@ export function apiGetDriverPlanById(data = {}) {
 
 ////api/driver/addCarWeight 添加当天车辆过磅重量
 export function apiAddCarWeight(data = {}) {
-  return request({
-    url: '/api/driver/addCarWeight',
-    data,
-  })
+    return request({
+        url: '/api/driver/addCarWeight',
+        data,
+    })
 }
 
 ///api/driver/getDriverPlanPage 获取收运记录
 export function apiGetDriverPlanPage(data = {}) {
-  return request({
-    url: '/api/driver/getDriverPlanPage',
-    data,
-  })
+    return request({
+        url: '/api/driver/getDriverPlanPage',
+        data,
+    })
 }
 
 ////api/driver/getDriverPlanStatisticsPage 收运统计列表搜索
 export function apiGetDriverPlanStatisticsPage(data = {}) {
-  return request({
-    url: '/api/driver/getDriverPlanStatisticsPage',
-    data,
-  })
+    return request({
+        url: '/api/driver/getDriverPlanStatisticsPage',
+        data,
+    })
 }
 
 ////api/driver/getDriverPlanStatistics 收运统计统计搜索
 export function apiGetDriverPlanStatistics(data = {}) {
-  return request({
-    url: '/api/driver/getDriverPlanStatistics',
-    data,
-  })
+    return request({
+        url: '/api/driver/getDriverPlanStatistics',
+        data,
+    })
 }
 
 ///api/driver/getDriverNotConfirmNum司机收运纪录待处理数量
 export function apiGetDriverNotConfirmNum(data = {}) {
-  return request({
-    url: '/api/driver/getDriverNotConfirmNum',
-    data,
-  })
+    return request({
+        url: '/api/driver/getDriverNotConfirmNum',
+        data,
+    })
 }

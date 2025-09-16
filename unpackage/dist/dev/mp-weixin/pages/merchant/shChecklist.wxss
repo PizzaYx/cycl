@@ -143,6 +143,7 @@
   color: rgba(61, 61, 61, 0.5);
 }
 .container .content-wrapper .order-list .order-item .order-content .info-item .value.data-v-0412d1ef {
+  margin-left: 30rpx;
   font-size: 26rpx;
   color: #3d3d3d;
 }
@@ -166,8 +167,8 @@
   box-sizing: border-box;
 }
 .container .content-wrapper .order-list .order-item .order-footer .btn-confirm.data-v-0412d1ef {
-  color: white;
-  background-color: #07c160;
+  color: #07c160;
+  border: 1rpx solid #07c160;
   font-size: 26rpx;
   width: 144rpx;
   height: 48rpx;

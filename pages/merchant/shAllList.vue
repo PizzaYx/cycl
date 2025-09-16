@@ -14,17 +14,8 @@
                 </view>
 
 
-                <!-- 时间范围选择器 - 还原正常样式 -->
-                <view class="filter-item">
-                    <uni-datetime-picker ref="datetimePicker" type="datetimerange" v-model="selectedTimeRange"
-                        rangeSeparator="至" start="2020-01-01 00:00:00" :end="getCurrentDateTime()"
-                        @change="onTimeChange" :border="false" class="filter-select time-select">
-                        <template v-slot:default>
-                            <text>时间</text>
-                        </template>
-                    </uni-datetime-picker>
-                    <uni-icons type="bottom" size="12" color="#666"></uni-icons>
-                </view>
+                <!-- 时间范围选择器组件 -->
+                <TimeRangePicker v-model="selectedTimeRange" @change="onTimeChange" />
             </view>
         </view>
 
@@ -70,7 +61,8 @@
                             </view>
                         </view>
                         <view class="order-footer">
-                            <uni-button v-if="item.status != 0" size="mini" type="default" class="btn-confirm" @tap="handleViewDetails(item)">
+                            <uni-button v-if="item.status != 0" size="mini" type="default" class="btn-confirm"
+                                @tap="handleViewDetails(item)">
                                 查看详情
                             </uni-button>
                         </view>
@@ -112,6 +104,7 @@ import {
 } from '@/api/apis.js';
 
 import { useUserStore } from '@/stores/user.js'
+import TimeRangePicker from '@/components/TimeRangePicker/TimeRangePicker.vue'
 
 
 
@@ -198,7 +191,7 @@ const getNetwork = async () => {
         };
 
         // 添加筛选条件
-        if (selectedStatus.value !== '') {
+        if (selectedStatus.value !== null) {
             params.status = selectedStatus.value;
         }
 
@@ -276,11 +269,21 @@ const datetimePicker = ref(null);
 
 // 筛选相关方法
 const showStatusPicker = () => {
+    // 创建带颜色的选项列表
+    const itemList = statusOptions.value.map((item, index) => {
+        const isSelected = selectedStatus.value === item.value;
+        return isSelected ? `✓ ${item.text}` : item.text;
+    });
+
     uni.showActionSheet({
-        itemList: statusOptions.value.map(item => item.text),
+        itemList: itemList,
         success: (res) => {
             const selectedOption = statusOptions.value[res.tapIndex];
             onStatusChange(selectedOption.value);
+        },
+        fail: (err) => {
+            // 用户取消操作，重置状态为null
+            onStatusChange(null);
         }
     });
 };
@@ -349,9 +352,6 @@ onMounted(() => {
                 display: flex;
                 align-items: center;
                 gap: 10rpx; // 文字和箭头紧挨着
-                cursor: pointer;
-                // 增加点击范围
-                padding: 20rpx 30rpx;
                 min-height: 60rpx;
 
                 text {

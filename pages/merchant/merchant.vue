@@ -60,10 +60,12 @@
             </view>
             <view class="records">
                 <view class="record-list">
-                    <view v-for="(item, index) in records" :key="index" class="record-item" key="item.id">
+                    <view v-for="(item, index) in records" :key="item.id" class="record-item" 
+                        @tap="showDetail(item)">
                         <view class="record-main">
                             <view class="shop-name">{{ item.merchantName }}</view>
-                            <view class="record-time">{{ item.status === 1 ? item.arrivalTime : item.appointmentTime }}</view>
+                            <view class="record-time">{{ item.status === 1 ? item.arrivalTime : item.appointmentTime }}
+                            </view>
                         </view>
                         <view class="record-right">
                             <view class="status" :class="{
@@ -73,7 +75,7 @@
                             }">
                                 {{ getRecordStatusText(item.status) }}
                             </view>
-                            <view class="weight">{{ item.status === 1 ? item.weight : item.estimateWeight }}kg</view>
+                            <view class="weight">{{ item.status === 1 ? item.weight : item.estimateWeight }} kg</view>
                         </view>
                     </view>
                     <view v-if="records.length === 0" class="no-records">暂无收运记录</view>
@@ -107,6 +109,7 @@
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { apiGetMerchantStatistics, apiGetPlanAllPage } from '@/api/apis.js'
+import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
 
 // 使用用户 store
 const userStore = useUserStore()
@@ -131,15 +134,26 @@ onMounted(async () => {
             console.log('用户未登录，已跳转到登录页')
             return
         }
-
-
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
-        checkAndShowAuthModal()
+        checkUserAuthStatus()
     } catch (error) {
         // 其他非401错误的处理
         console.error('页面初始化失败:', error)
     }
 })
+
+onShow(() => { 
+    checkUserAuthStatus();
+})
+
+const showDetail = (item) => {
+    console.log('查看详情按钮被点击', item);
+    uni.navigateTo({
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+    });
+}
+
+
 
 //获取商户首页数据统计
 const getMerchantStatistics = async () => {
@@ -147,7 +161,6 @@ const getMerchantStatistics = async () => {
     const res = await apiGetMerchantStatistics({
         merchantId: userStore.merchant?.id
     })
-
     if (res.code === 200) {
         wcNum.value = res.data.accomplishNum;
         dqNum.value = res.data.notConfirmNum;
@@ -176,10 +189,14 @@ const getMerchantSydList = async () => {
  * 检查用户认证状态并显示相应提示
  * @returns {boolean} true表示已认证，false表示未认证或审核不通过
  */
-const checkUserAuthStatus = () => {
-    const merchantStatus = userStore.merchantStatus
+const checkUserAuthStatus = async() => {
+    const merchantStatus =  userStore.merchantStatus;
+
+    console.log('检查用户认证状态111：', merchantStatus)
     // 未认证或审核不通过，显示认证弹窗
     if (merchantStatus === null || merchantStatus === 2) {
+        await userStore.fetchUserInfo();
+        console.log('检查用户认证状态222：', merchantStatus)
         showAuthModal.value = true
         return false
     }
@@ -193,25 +210,32 @@ const checkUserAuthStatus = () => {
     }
     // 已认证
     else {
+        showAuthModal.value = false; 
+        getMerchantStatistics();
+        getMerchantSydList();
         return true
     }
 }
 
-/**
- * 检查认证状态并在需要时显示认证弹窗
- * 用于页面加载时检查
- */
-const checkAndShowAuthModal = () => {
-
-    const merchantStatus = userStore.merchantStatus
-    if (merchantStatus === null || merchantStatus === 2) {
-        showAuthModal.value = true
-    }
-    else {
-        getMerchantStatistics();
-        getMerchantSydList();
-    }
-}
+// /**
+//  * 检查认证状态并在需要时显示认证弹窗
+//  * 用于页面加载时检查
+//  */
+// const checkAndShowAuthModal = async() => {
+//     // 重新获取用户信息
+//     const merchantStatus = userStore.merchantStatus
+//     console.log('检查认证状态12312312：', merchantStatus)
+//     //未认证时候重新获取
+//     if (merchantStatus === null || merchantStatus === 2) {
+//         //重新获取用户信息
+//         await userStore.fetchUserInfo();
+//         showAuthModal.value = true
+//     }
+//     else {
+//         getMerchantStatistics();
+//         getMerchantSydList();
+//     }
+// }
 
 const getUserInfo = () => {
     // 检查用户认证状态并执行相应操作
@@ -231,13 +255,9 @@ const onRefresh = async () => {
         await userStore.fetchUserInfo()
        
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
-        checkAndShowAuthModal()
+        checkUserAuthStatus()
     } catch (error) {
         console.error('刷新失败:', error)
-        uni.showToast({
-            title: '刷新失败',
-            icon: 'none'
-        })
     } finally {
         refreshing.value = false
     }
@@ -287,7 +307,25 @@ const quickActions = ref([
 
 // 统一的快捷操作跳转处理
 const handleQuickAction = (action) => {
-    console.log('快捷操作点击:', action.name)
+    console.log('快捷操作点击:', action)
+
+    // 如果是商户认证操作，直接跳转无需检查认证状态
+    if (action.name === '商户认证') {
+        if (action.url) {
+            uni.navigateTo({
+                url: action.url,
+                fail: (err) => {
+                    console.error('页面跳转失败:', err)
+                    uni.showToast({
+                        title: '页面暂未开放',
+                        icon: 'none'
+                    })
+                }
+            })
+        }
+        return
+    }
+
     // 检查用户认证状态
     if (!checkUserAuthStatus()) {
         // 未通过认证检查，不继续执行

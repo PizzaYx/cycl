@@ -27,69 +27,55 @@
   background-color: #fff;
   min-height: 100vh;
 }
-.register-form.data-v-fd534bf9 {
-  padding: 30rpx;
-}
 .register-form .inputInfo.data-v-fd534bf9 {
   padding-top: 65rpx;
+  margin: 0 30rpx;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 40rpx;
 }
-.register-form .inputInfo .zh.data-v-fd534bf9 {
-  width: 608rpx;
+.register-form .inputInfo .input-group.data-v-fd534bf9 {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.register-form .inputInfo .input-group .zh.data-v-fd534bf9 {
   text-align: left;
-  font-size: 28rpx;
+  font-size: 30rpx;
+  font-weight: 500;
   color: #3d3d3d;
-  margin-bottom: 22rpx;
-  padding-left: 30rpx;
+  margin-bottom: 15rpx;
 }
-.register-form .inputInfo .zh.mm.data-v-fd534bf9 {
-  margin-top: 22rpx;
+.register-form .inputInfo .input-group .zh.mm.data-v-fd534bf9 {
+  margin-top: 0rpx;
 }
-.register-form .inputInfo .account.data-v-fd534bf9 {
-  width: 608rpx;
+.register-form .inputInfo .input-group .account.data-v-fd534bf9 {
   height: 80rpx;
-  background: #f4f4f4;
-  border-radius: 40rpx;
-  padding: 0 30rpx;
+  width: 690rpx;
   box-sizing: border-box;
   font-size: 28rpx;
   margin-bottom: 0rpx;
+  border: none;
+  border-bottom: 2rpx solid #e0e0e0;
+  background-color: transparent;
 }
-.register-form .inputInfo .account.data-v-fd534bf9:last-child {
+.register-form .inputInfo .input-group .account.data-v-fd534bf9:last-child {
   margin-bottom: 0;
 }
-.register-form .inputInfo .account.password.data-v-fd534bf9 {
+.register-form .inputInfo .input-group .account.password.data-v-fd534bf9 {
   margin-bottom: 0;
-}
-.register-form .inputInfo .forgot-password.data-v-fd534bf9 {
-  width: 608rpx;
-  text-align: right;
-  font-size: 24rpx;
-  color: rgba(61, 61, 61, 0.3);
-  margin-top: 10rpx;
-  padding-right: 30rpx;
-}
-.register-form .inputInfo .input-placeholder.data-v-fd534bf9 {
-  font-weight: 400;
-  font-size: 24rpx;
-  color: rgba(61, 61, 61, 0.3);
-  line-height: 24rpx;
-  text-align: left;
-  font-style: normal;
-  text-transform: none;
 }
 .register-form .register-button.data-v-fd534bf9 {
   padding-top: 30rpx;
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 50rpx;
+  margin-top: 70rpx;
 }
 .register-form .register-button .register-btn.data-v-fd534bf9 {
-  width: 608rpx;
+  width: 690rpx;
   height: 80rpx;
   background: rgba(7, 193, 96, 0.1);
   border-radius: 40rpx;

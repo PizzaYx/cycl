@@ -12,6 +12,13 @@ function apiGetInfo() {
     url: "/api/getInfo"
   });
 }
+function apiPostRegister(data = {}) {
+  return utils_request.request({
+    url: "/api/apiRegister",
+    data,
+    method: "POST"
+  });
+}
 function apiGetMerchantStatistics(data = {}) {
   return utils_request.request({
     url: "/api/merchantapi/getMerchantStatistics",
@@ -89,6 +96,12 @@ function apiGetPlanTemporaryById(data = {}) {
 function apiGetPlanById(data = {}) {
   return utils_request.request({
     url: "/api/merchantapi/getPlanById",
+    data
+  });
+}
+function apiSelectMerchantList(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/selectMerchantList",
     data
   });
 }
@@ -190,6 +203,8 @@ exports.apiGetdriverConfirmPlan = apiGetdriverConfirmPlan;
 exports.apiGetnoNeedCollect = apiGetnoNeedCollect;
 exports.apiPostLogin = apiPostLogin;
 exports.apiPostMerchantCheck = apiPostMerchantCheck;
+exports.apiPostRegister = apiPostRegister;
 exports.apiPostaddPlanTemporary = apiPostaddPlanTemporary;
 exports.apiPostreportWeight = apiPostreportWeight;
+exports.apiSelectMerchantList = apiSelectMerchantList;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/api/apis.js.map

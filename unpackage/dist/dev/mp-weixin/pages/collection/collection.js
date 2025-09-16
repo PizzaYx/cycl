@@ -71,11 +71,10 @@ const _sfc_main = {
       }
     };
     const getMerchantSydList = async () => {
-      var _a;
       const res = await api_apis.apiGetDriverPlanPage({
         pageNum: 1,
         pageSize: 5,
-        driverId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 5
+        driverId: userStore.driverId || 5
       });
       if (res.code === 200) {
         allOrderList.value = res.data.list;

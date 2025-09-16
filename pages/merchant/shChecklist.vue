@@ -38,19 +38,19 @@
                         <view class="order-content">
                             <view class="info-item">
                                 <text class="label">预估收运：</text>
-                                <text class="value">{{ item.estimateWeight }} 桶</text>
+                                <text class="value">{{ item.estimateBucketNum }} 桶</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">今日收运：</text>
-                                <text class="value">{{ item.estimateBucketNum ?? 0 }} 桶</text>
+                                <text class="value">{{ item.bucketNum ? item.bucketNum + ' 桶' : '暂无' }} </text>
                             </view>
                             <view class="info-item">
-                                <text class="label">预估总量：</text>
+                                <text class="label">预估重量：</text>
                                 <text class="value">{{ item.estimateWeight ?? 0 }} kg</text>
                             </view>
                             <view class="info-item">
-                                <text class="label">收运总量：</text>
-                                <text class="value">{{ item.weight ?? '暂无' }}kg</text>
+                                <text class="label">收运重量：</text>
+                                <text class="value">{{ item.weight ? item.weight + ' kg' : '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">车辆信息：</text>
@@ -170,7 +170,7 @@ const getStatusText = (status) => {
         }
 
     }
-  
+
 };
 
 // 获取状态样式类名
@@ -183,14 +183,14 @@ const getStatusClass = (status) => {
             default: return '';
         }
     }
-    else { 
+    else {
         switch (status) {
             case 0: return 'processing';
             case 1: return 'completed';
             case 2: return 'cancelled';
             default: return '';
         }
-    } 
+    }
 };
 
 // 按钮点击事件处理函数
@@ -243,7 +243,7 @@ const handleViewDetails = (item) => {
             url: `/pages/merchant/shyyDetail?id=${item.id}&merchantId =${item.merchantId}`
         });
     }
-    else { 
+    else {
         uni.navigateTo({
             url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
         });
@@ -273,8 +273,7 @@ const handleConfirmTransport = async (item) => {
 
         const res = await apiGetconfirmPlanById(params);
 
-        uni.hideLoading();
-
+    
         if (res.code === 200 || res.success) {
             uni.showToast({
                 title: '确认收运成功',
@@ -284,6 +283,7 @@ const handleConfirmTransport = async (item) => {
             // 刷新当前页面数据，保持在当前标签页
             allOrderList.value = [];
             pageNum.value = 1;
+            getMerchantNotConfirmNum();
             getNetwork();
         } else {
             uni.showToast({
@@ -293,7 +293,6 @@ const handleConfirmTransport = async (item) => {
         }
     } catch (error) {
         console.error('确认收运失败:', error);
-        uni.hideLoading();
         uni.showToast({
             title: '网络错误，请重试',
             icon: 'none'
@@ -554,6 +553,7 @@ onMounted(() => {
                         }
 
                         .value {
+                            margin-left: 30rpx;
                             font-size: 26rpx;
                             color: rgba(61, 61, 61, 1);
                         }
@@ -582,8 +582,9 @@ onMounted(() => {
                     }
 
                     .btn-confirm {
-                        color: rgba(255, 255, 255, 1);
-                        background-color: rgba(7, 193, 96, 1);
+                        color: rgba(7, 193, 96, 1);
+                        // background-color: rgba(7, 193, 96, 1);
+                        border: 1rpx solid rgba(7, 193, 96, 1);
                         font-size: 26rpx;
                         width: 144rpx;
                         height: 48rpx;

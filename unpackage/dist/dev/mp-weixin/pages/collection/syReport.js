@@ -69,13 +69,15 @@ const _sfc_main = {
             binCount: "",
             weight: "",
             images: [],
-            isConfirmed: false
+            isConfirmed: false,
             // 添加确认状态
+            bucketCode: res.result
+            // 添加桶编码
           });
           ljNum.value++;
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:147", "扫码失败", err);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:148", "扫码失败", err);
           records.value.push({
             binCount: "",
             weight: "",
@@ -170,7 +172,7 @@ const _sfc_main = {
     };
     const confirmReport = async (index) => {
       const record = records.value[index];
-      const bucketCode = "BC" + (/* @__PURE__ */ new Date()).getTime();
+      const bucketCode = record.bucketCode || "BC" + (/* @__PURE__ */ new Date()).getTime();
       const reportData = {
         bucketCode,
         // 桶编码
@@ -216,7 +218,7 @@ const _sfc_main = {
           title: "上报异常",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:315", "上报异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:316", "上报异常:", error);
       }
     };
     return (_ctx, _cache) => {

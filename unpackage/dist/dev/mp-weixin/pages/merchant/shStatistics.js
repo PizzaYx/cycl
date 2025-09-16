@@ -5,18 +5,17 @@ const stores_user = require("../../stores/user.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
   const _component_uni_button = common_vendor.resolveComponent("uni-button");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _easycom_uni_datetime_picker2 + _component_uni_button + _easycom_uni_load_more2)();
+  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _component_uni_button + _easycom_uni_load_more2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_uni_datetime_picker + _easycom_uni_load_more)();
+  (_easycom_uni_nav_bar + _easycom_uni_icons + TimeRangePicker + _easycom_uni_load_more)();
 }
+const TimeRangePicker = () => "../../components/TimeRangePicker/TimeRangePicker.js";
 const _sfc_main = {
   __name: "shStatistics",
   setup(__props) {
@@ -46,7 +45,7 @@ const _sfc_main = {
       }
     };
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:165", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:158", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
       });
@@ -74,7 +73,7 @@ const _sfc_main = {
       if (selectedStatus.value !== null) {
         params.status = selectedStatus.value;
       }
-      if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
+      if (selectedTimeRange.value && selectedTimeRange.value.length === 2 && selectedTimeRange.value[0] && selectedTimeRange.value[1]) {
         params.startTime = selectedTimeRange.value[0];
         params.endTime = selectedTimeRange.value[1];
       }
@@ -110,7 +109,7 @@ const _sfc_main = {
         if (selectedStatus.value !== null) {
           params.status = selectedStatus.value;
         }
-        if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
+        if (selectedTimeRange.value && selectedTimeRange.value.length === 2 && selectedTimeRange.value[0] && selectedTimeRange.value[1]) {
           params.startTime = selectedTimeRange.value[0];
           params.endTime = selectedTimeRange.value[1];
         }
@@ -127,7 +126,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:282", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:275", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -155,13 +154,19 @@ const _sfc_main = {
       getNetwork();
       getToStatistics();
     });
-    const datetimePicker = common_vendor.ref(null);
     const showStatusPicker = () => {
+      const itemList = statusOptions.value.map((item, index) => {
+        const isSelected = selectedStatus.value === item.value;
+        return isSelected ? `✓ ${item.text}` : item.text;
+      });
       common_vendor.index.showActionSheet({
-        itemList: statusOptions.value.map((item) => item.text),
+        itemList,
         success: (res) => {
           const selectedOption = statusOptions.value[res.tapIndex];
           onStatusChange(selectedOption.value);
+        },
+        fail: (err) => {
+          onStatusChange(null);
         }
       });
     };
@@ -170,6 +175,7 @@ const _sfc_main = {
       resetPageAndReload();
     };
     const onTimeChange = (value) => {
+      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:348", "时间变化:", value);
       selectedTimeRange.value = value;
       resetPageAndReload();
     };
@@ -178,16 +184,6 @@ const _sfc_main = {
       pageNum.value = 1;
       getNetwork();
       getToStatistics();
-    };
-    const getCurrentDateTime = () => {
-      const now = /* @__PURE__ */ new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const hour = String(now.getHours()).padStart(2, "0");
-      const minute = String(now.getMinutes()).padStart(2, "0");
-      const second = String(now.getSeconds()).padStart(2, "0");
-      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     };
     common_vendor.onMounted(() => {
       pageNum.value = 1;
@@ -212,25 +208,12 @@ const _sfc_main = {
           color: "#666"
         }),
         d: common_vendor.o(showStatusPicker),
-        e: common_vendor.sr(datetimePicker, "5f21cbbb-2", {
-          "k": "datetimePicker"
-        }),
-        f: common_vendor.o(onTimeChange),
-        g: common_vendor.o(($event) => selectedTimeRange.value = $event),
-        h: common_vendor.p({
-          type: "datetimerange",
-          rangeSeparator: "至",
-          start: "2020-01-01 00:00:00",
-          end: getCurrentDateTime(),
-          border: false,
+        e: common_vendor.o(onTimeChange),
+        f: common_vendor.o(($event) => selectedTimeRange.value = $event),
+        g: common_vendor.p({
           modelValue: selectedTimeRange.value
         }),
-        i: common_vendor.p({
-          type: "bottom",
-          size: "12",
-          color: "#666"
-        }),
-        j: common_vendor.f(statisticsConfig, (item, index, i0) => {
+        h: common_vendor.f(statisticsConfig, (item, index, i0) => {
           return {
             a: item.image,
             b: common_vendor.t(item.number),
@@ -238,28 +221,28 @@ const _sfc_main = {
             d: index
           };
         }),
-        k: allOrderList.value.length > 0
+        i: allOrderList.value.length > 0
       }, allOrderList.value.length > 0 ? {
-        l: common_vendor.f(allOrderList.value, (item, index, i0) => {
+        j: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.merchantName),
             b: common_vendor.t(getStatusText(item.status)),
             c: common_vendor.n(getStatusClass(item.status)),
             d: common_vendor.t(item.appointmentTime ?? "暂无"),
             e: common_vendor.t(item.arrivalTime ?? "暂无"),
-            f: common_vendor.t(item.estimateWeight + "kg"),
-            g: common_vendor.t(item.weight ? item.weight + "kg" : "暂无"),
-            h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + "个" : "暂无"),
-            i: common_vendor.t(item.bucketNum ? item.bucketNum + "个" : "暂无"),
+            f: common_vendor.t(item.estimateWeight + " kg"),
+            g: common_vendor.t(item.weight ? item.weight + " kg" : "暂无"),
+            h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + " 个" : "暂无"),
+            i: common_vendor.t(item.bucketNum ? item.bucketNum + " 个" : "暂无"),
             j: common_vendor.o(($event) => handleViewDetails(item), index),
-            k: "5f21cbbb-4-" + i0,
+            k: "5f21cbbb-3-" + i0,
             l: index
           };
         }),
-        m: common_vendor.p({
+        k: common_vendor.p({
           size: "mini"
         }),
-        n: common_vendor.p({
+        l: common_vendor.p({
           status: loadingStatus.value,
           ["content-text"]: {
             contentdown: "上拉显示更多",
@@ -268,7 +251,7 @@ const _sfc_main = {
           }
         })
       } : loadingStatus.value !== "loading" ? {} : {}, {
-        o: loadingStatus.value !== "loading"
+        m: loadingStatus.value !== "loading"
       });
     };
   }

@@ -25,8 +25,13 @@
                 <input class="account" placeholder="请输入账号" type="text" placeholder-class="input-placeholder"
                     v-model="formData.account" />
                 <view class="zh mm">密码</view>
-                <input class="account password" placeholder="请输入密码" type="text"
-                    placeholder-class="input-placeholder" v-model="formData.password" />
+                <view class="password-input-container">
+                    <input class="account password" placeholder="请输入密码" :password="!passwordVisible" type="text"
+                        placeholder-class="input-placeholder" v-model="formData.password" />
+                    <uni-icons :type="passwordVisible ? 'eye' : 'eye-filled'" size="20" color="rgba(61, 61, 61, 0.5)"
+                        class="password-toggle" @tap="togglePasswordVisibility">
+                    </uni-icons>
+                </view>
                 <!-- <text class="forgot-password" @click="handleForgotPassword" v-if="activeTab === 0">忘记密码？</text> -->
             </view>
             <view class="loginBtn">
@@ -83,7 +88,6 @@ const openAgreement = (type) => {
         uni.navigateTo({
             url: '/pages/user/agreement'
         })
-
     }
     else {
         uni.navigateTo({
@@ -98,6 +102,14 @@ const formData = reactive({
     account: '',
     password: '',
 })
+
+// 控制密码是否可见
+const passwordVisible = ref(false)
+
+// 切换密码可见性
+const togglePasswordVisibility = () => {
+    passwordVisible.value = !passwordVisible.value
+}
 
 //注册处理
 const handleRegister = () => {
@@ -178,7 +190,7 @@ const loginRequest = async () => {
         if (res.code === 200) {
             // 先获取用户信息
             await fetchUserInfo()
-
+        
             uni.showToast({
                 title: '登录成功',
                 icon: 'success',
@@ -190,21 +202,23 @@ const loginRequest = async () => {
                     url: activeTab.value ? '/pages/collection/collection' :
                         '/pages/merchant/merchant',
                 })
-            }, 300)
+            }, 100)
         } else {
+         
             uni.showToast({
                 title: res.msg || '登录失败',
                 icon: 'none',
             })
         }
     } catch (err) {
+       
         uni.showToast({
             title: '网络请求失败',
             icon: 'none',
         })
         console.error('登录请求失败:', err)
     } finally {
-        uni.hideLoading()
+       
     }
 }
 
@@ -222,6 +236,7 @@ const fetchUserInfo = async () => {
         })
     }
 }
+
 </script>
 
 <style lang="scss" scoped>
@@ -354,6 +369,22 @@ const fetchUserInfo = async () => {
 
                 &.password {
                     margin-bottom: 0;
+                    padding-right: 70rpx; // 为眼睛图标留出空间，避免点击冲突
+                }
+            }
+
+            .password-input-container {
+                position: relative;
+                width: 608rpx;
+
+                .password-toggle {
+                    position: absolute;
+                    right: 25rpx;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    z-index: 10;
+                    padding: 10rpx; // 增加点击区域
+                    cursor: pointer;
                 }
             }
 
@@ -425,7 +456,7 @@ const fetchUserInfo = async () => {
 
     .footer {
         flex-shrink: 0;
-        padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+        padding-bottom: calc(50rpx + env(safe-area-inset-bottom));
         display: flex;
         align-items: center;
         justify-content: center;

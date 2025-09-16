@@ -55,9 +55,14 @@
                 <!-- 使用uni-forms表单组件 -->
                 <uni-forms ref="formRef" :modelValue="formData" :rules="formRules" label-position="top">
                     <uni-forms-item label="商户名称" name="merchantName" required>
-                        <uni-easyinput v-model="formData.merchantName" placeholder="请输入商户名称" :clearable="false"
-                            :disabled="isReadOnly">
-                        </uni-easyinput>
+                        <view class="merchant-name-input">
+                            <uni-easyinput v-model="formData.merchantName" placeholder="请输入商户名称" :clearable="false"
+                                :disabled="isReadOnly" class="merchant-input" />
+                            <button v-if="showMerchantSelector" class="select-btn" @click="showMerchantList"
+                                :disabled="isReadOnly">
+                                选择
+                            </button>
+                        </view>
                     </uni-forms-item>
 
                     <uni-forms-item label="商户地址" name="address" required>
@@ -79,7 +84,7 @@
                                 <view v-if="formData.latitude && formData.longitude" class="location-info">
                                     <text class="location-name">{{ formData.locationName || '已选择位置' }}</text>
                                     <text class="location-coords">经度: {{ formData.longitude }}, 纬度: {{ formData.latitude
-                                    }}</text>
+                                        }}</text>
                                 </view>
                                 <text class="location-placeholder" v-else>点击选择商户位置</text>
                                 <uni-icons type="location" size="20" color="#999"></uni-icons>
@@ -131,13 +136,34 @@
             </view>
         </view>
 
+        <!-- 商户选择弹窗 -->
+        <view v-if="showMerchantPopup" class="merchant-popup-mask" @click="closeMerchantList">
+            <view class="merchant-popup" @click.stop>
+                <view class="popup-header">
+                    <text class="popup-title">选择商户</text>
+                    <text class="popup-close" @click="closeMerchantList">关闭</text>
+                </view>
+                <view class="search-box">
+                    <uni-easyinput v-model="searchKeyword" placeholder="搜索商户名称" :clearable="true" />
+                </view>
+                <scroll-view class="merchant-list" scroll-y>
+                    <view v-for="merchant in filteredMerchantList" :key="merchant.id" class="merchant-item"
+                        @click="selectMerchant(merchant)">
+                        <text class="merchant-name">{{ merchant.name }}</text>
+                    </view>
+                    <view v-if="filteredMerchantList.length === 0" class="empty-merchant">
+                        <text>暂无匹配的商户</text>
+                    </view>
+                </scroll-view>
+            </view>
+        </view>
 
     </view>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { apiPostMerchantCheck, apiGetMerchantCheck } from '@/api/apis.js'
+import { apiPostMerchantCheck, apiGetMerchantCheck, apiSelectMerchantList } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
 import { uploadUrl, createUploadHeaders } from '@/utils/config.js'
 
@@ -190,6 +216,11 @@ const isReadOnly = computed(() => {
     return authStatus.value === 'pending' || authStatus.value === 'approved'
 })
 
+// 是否显示商户选择器（只有需要认证的状态才显示）
+const showMerchantSelector = computed(() => {
+    return authStatus.value === 'none' || authStatus.value === 'rejected'
+})
+
 // 表单数据
 const formData = reactive({
     merchantName: '',
@@ -215,6 +246,9 @@ const appCodeOptions = [
     { value: 6, text: '永商' },
     { value: 7, text: '花源' }
 ]
+
+//商户名称选择
+const merchantNameOptions = ref([])
 
 // 表单引用
 const formRef = ref()
@@ -410,11 +444,34 @@ const uploadHeaders = createUploadHeaders()
 // 提交状态
 const submitting = ref(false)
 
+// 商户选择相关
+const merchantList = ref([]) // 商户列表
+const searchKeyword = ref('') // 搜索关键词
+const showMerchantPopup = ref(false) // 弹窗显示状态
+
+// 过滤后的商户列表 - 简单模糊搜索
+const filteredMerchantList = computed(() => {
+    if (!searchKeyword.value) {
+        return merchantList.value
+    }
+
+    const keyword = searchKeyword.value.toLowerCase().trim()
+    if (!keyword) {
+        return merchantList.value
+    }
+
+    return merchantList.value.filter(merchant => {
+        return merchant.name.toLowerCase().includes(keyword)
+    })
+})
+
 // 页面加载完成
 onMounted(() => {
     console.log('商户认证页面加载完成')
     // 这里可以调用接口获取认证状态
     loadAuthStatus()
+    // 加载商户列表
+    loadMerchantList()
 })
 
 // 加载认证状态
@@ -483,6 +540,60 @@ const fillFormData = (data) => {
     }
 
     console.log('数据回显完成:', formData)
+}
+
+// 加载商户列表
+const loadMerchantList = async () => {
+    try {
+        console.log('开始加载商户列表...')
+        const result = await apiSelectMerchantList()
+        console.log('获取商户列表API返回:', result)
+
+        if (result.code === 200 && result.data) {
+            // 只提取name字段，保持原有的id作为key
+            merchantList.value = result.data.map((item, index) => ({
+                id: item.id || index, // 使用返回的id或索引作为key
+                name: item.name
+            }))
+            console.log('商户列表加载成功，数量:', merchantList.value.length)
+        } else {
+            console.log('获取商户列表失败')
+            merchantList.value = []
+        }
+    } catch (error) {
+        console.error('加载商户列表失败:', error)
+        merchantList.value = []
+    }
+}
+
+// 显示商户选择列表
+const showMerchantList = () => {
+    console.log('点击选择按钮')
+    console.log('merchantList.value:', merchantList.value)
+
+    if (merchantList.value.length === 0) {
+        uni.showToast({
+            title: '商户列表为空',
+            icon: 'none'
+        })
+        return
+    }
+
+    showMerchantPopup.value = true
+}
+
+// 关闭商户选择列表
+const closeMerchantList = () => {
+    showMerchantPopup.value = false
+    // 清空搜索关键词
+    searchKeyword.value = ''
+}
+
+// 选择商户
+const selectMerchant = (merchant) => {
+    console.log('选择商户:', merchant)
+    formData.merchantName = merchant.name
+    closeMerchantList()
 }
 
 
@@ -688,7 +799,7 @@ const submitAuth = async () => {
     min-height: 100vh;
     background: $bg-theme-color;
     padding: 0 30rpx 30rpx;
-  
+
 
     // 步骤条样式
     .step-container {
@@ -1016,6 +1127,39 @@ const submitAuth = async () => {
                 }
             }
 
+            // 商户名称输入框样式
+            .merchant-name-input {
+                display: flex;
+                align-items: center;
+                gap: 10rpx;
+
+                .merchant-input {
+                    flex: 1;
+                }
+
+                .select-btn {
+                    width: 120rpx;
+                    height: 60rpx;
+                    background: #007aff;
+                    color: white;
+                    border: none;
+                    border-radius: 8rpx;
+                    font-size: 24rpx;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    &:disabled {
+                        background: #ccc;
+                        color: #999;
+                    }
+
+                    &:active:not(:disabled) {
+                        background: #0056b3;
+                    }
+                }
+            }
+
             // 只读状态样式
             &.readonly {
                 :deep(.uni-easyinput) {
@@ -1135,9 +1279,89 @@ const submitAuth = async () => {
     }
 }
 
+// 商户选择弹窗样式
+.merchant-popup-mask {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+}
+
+.merchant-popup {
+    background: white;
+    border-radius: 20rpx 20rpx 0 0;
+    height: 60vh;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 30rpx;
+        border-bottom: 1rpx solid #e5e5e5;
+        flex-shrink: 0; // 防止压缩
+        height: 88rpx; // 固定头部高度
+
+        .popup-title {
+            font-size: 32rpx;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .popup-close {
+            font-size: 28rpx;
+            color: #007aff;
+            padding: 10rpx;
+        }
+    }
+
+    .search-box {
+        padding: 20rpx 30rpx;
+        border-bottom: 1rpx solid #e5e5e5;
+        flex-shrink: 0; // 防止压缩
+        height: 100rpx; // 固定搜索框高度
+        display: flex;
+        align-items: center;
+    }
+
+    .merchant-list {
+        flex: 1;
+        height: calc(80vh - 188rpx); // 减去头部(88rpx)和搜索框(100rpx)的高度
+        overflow-y: auto;
+
+        .merchant-item {
+            padding: 30rpx;
+            border-bottom: 1rpx solid #f0f0f0;
+            display: flex;
+            align-items: center;
+
+            &:active {
+                background-color: #f5f5f5;
+            }
+
+            .merchant-name {
+                font-size: 28rpx;
+                color: #333;
+            }
+        }
+
+        .empty-merchant {
+            padding: 60rpx 30rpx;
+            text-align: center;
+
+            text {
+                font-size: 26rpx;
+                color: #999;
+            }
+        }
+    }
+}
 </style>
-
-
-
-
-

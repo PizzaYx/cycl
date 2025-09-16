@@ -3,11 +3,32 @@
     "miniprogram": {
       "list": [
         {
-          "name": "商户清单记录",
-          "pathName": "pages/merchant/shChecklist",
+          "name": "商户端收运统计",
+          "pathName": "pages/merchant/shStatistics",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "注册",
+          "pathName": "pages/user/register",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "今日收运",
+          "pathName": "pages/collection/sfDetails",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "商户清单记录",
+          "pathName": "pages/merchant/shChecklist",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "收运端详情",
@@ -38,13 +59,6 @@
           "scene": null
         },
         {
-          "name": "商户端收运统计",
-          "pathName": "pages/merchant/sydStatistics",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
           "name": "收运端统计",
           "pathName": "pages/collection/syStatistics",
           "query": "",
@@ -54,55 +68,6 @@
         {
           "name": "收运端记录",
           "pathName": "pages/collection/sfsyRecord",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/merchant/sydAllList",
-          "pathName": "pages/merchant/sydAllList",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/collection/syAllMap",
-          "pathName": "pages/collection/syAllMap",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/collection/syReport",
-          "pathName": "pages/collection/syReport",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/collection/sfDetails",
-          "pathName": "pages/collection/sfDetails",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/user/user",
-          "pathName": "pages/user/user",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/merchant/sydReservation",
-          "pathName": "pages/merchant/sydReservation",
-          "query": "",
-          "launchMode": "default",
-          "scene": null
-        },
-        {
-          "name": "pages/user/user",
-          "pathName": "pages/user/user",
           "query": "",
           "launchMode": "default",
           "scene": null

@@ -1,3 +1,4 @@
+
 <template>
     <view class="container">
         <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运地图详情"
@@ -55,9 +56,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
+import { TIANDITU_CONFIG } from '@/utils/config.js' // 导入天地图配置
+import gcoord from 'gcoord' // 导入坐标转换库
 const userStore = useUserStore()
 
 // 地图相关数据
@@ -293,8 +296,8 @@ const addTaskMarkers = () => {
         // 实际项目中应该调用地理编码API或者任务数据中包含经纬度信息
         const marker = {
             id: index + 1, // 使用数字ID，从1开始（0已被当前位置使用）
-            latitude: currentLocation.value.latitude + (index * 0.01), // 基于当前位置的示例坐标偏移
-            longitude: currentLocation.value.longitude + (index * 0.01),
+            latitude: currentLocation.value.latitude + ((index + 1) * 0.01), // 基于当前位置的示例坐标偏移，+1确保不与起点重复
+            longitude: currentLocation.value.longitude + ((index + 1) * 0.01),
             title: task.merchantName,
             iconPath: '/static/ssd/positioning.png',
             width: 25,
@@ -314,44 +317,287 @@ const addTaskMarkers = () => {
     })
 }
 
-// 绘制路线
-const drawRoute = () => {
-    if (mapMarkers.value.length < 2) {
-        console.log('标记数量不足，无法绘制路线')
+
+// 使用天地图API进行路线规划
+const planRoute = async () => {
+
+
+    if (mapMarkers.value.length < 1) {
+        console.log('标记数量不足，无法进行路线规划')
         return
     }
 
-    // 构建路线点（从当前位置到各个任务点）
-    const points = mapMarkers.value.map(marker => ({
-        latitude: marker.latitude,
-        longitude: marker.longitude
-    }))
+    try {
+        // 起点：当前位置（第一个标记点，ID为0）
+        const startPoint = mapMarkers.value.find(marker => marker.id === 0)
+        if (!startPoint) {
+            console.error('找不到起点（当前位置）')
+            return
+        }
 
-    // 创建路线
+        // 任务点：除了起点之外的所有点
+        const taskPoints = mapMarkers.value.filter(marker => marker.id !== 0)
+
+        if (taskPoints.length === 0) {
+            console.log('没有任务点，无法规划路线')
+            return
+        }
+
+        console.log('开始路线规划 - 任务点数量:', taskPoints.length)
+
+        // 将GCJ02坐标转换为WGS84坐标（天地图使用WGS84）
+        const startWgs84Coord = gcoord.transform([startPoint.longitude, startPoint.latitude], gcoord.GCJ02, gcoord.WGS84)
+
+        let midWgs84Coords = []
+        let endWgs84Coord = null
+
+        if (taskPoints.length === 1) {
+            // 只有1个任务点：直接作为终点
+            endWgs84Coord = gcoord.transform([taskPoints[0].longitude, taskPoints[0].latitude], gcoord.GCJ02, gcoord.WGS84)
+        } else {
+            // 多个任务点：最后一个作为终点，其他作为途经点
+            const endPoint = taskPoints[taskPoints.length - 1]
+            const midPoints = taskPoints.slice(0, -1)
+
+            endWgs84Coord = gcoord.transform([endPoint.longitude, endPoint.latitude], gcoord.GCJ02, gcoord.WGS84)
+            midWgs84Coords = midPoints.map(point =>
+                gcoord.transform([point.longitude, point.latitude], gcoord.GCJ02, gcoord.WGS84)
+            )
+
+            console.log('途经点数量:', midPoints.length)
+        }
+
+        // 显示路线规划信息
+        const routeInfo = taskPoints.length === 1 ?
+            `规划直达路线：起点 → ${taskPoints[0].title}` :
+            `规划多点路线：起点 → ${taskPoints.slice(0, -1).map(p => p.title).join(' → ')} → ${taskPoints[taskPoints.length - 1].title}`
+
+        console.log(routeInfo)
+        uni.showLoading({
+            title: '正在规划路线...'
+        })
+
+        // 调用天地图路径规划API
+        const routeData = await callTiandituRouteAPI(startWgs84Coord, endWgs84Coord, midWgs84Coords)
+
+        if (routeData && typeof routeData === 'string' && routeData.includes('<result')) {
+            // 天地图返回XML格式，需要解析
+            parseRouteXML(routeData)
+        } else {
+            console.log('天地图API返回数据格式异常')
+        }
+    } catch (error) {
+        if (typeof error === 'string' && error.includes('<result')) {
+            // API返回了XML数据，但被当作错误处理
+            parseRouteXML(error)
+        } else {
+            console.error('路线规划失败:', error.message || error)
+            uni.showToast({
+                title: '路线规划失败',
+                icon: 'none'
+            })
+        }
+    } finally {
+        // 确保关闭加载提示
+        uni.hideLoading()
+    }
+}
+
+// 使用配置文件中的天地图API配置
+const { API_KEY: TIANDITU_API_KEY, TIMEOUT } = TIANDITU_CONFIG
+
+// 坐标验证工具
+const coordinateValidator = {
+    // 检查坐标是否在合理范围内
+    isValidCoordinate: (lng, lat) => {
+        return lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90
+    }
+}
+
+// 天地图Web API请求函数
+const requestTiandituApi = (endpoint, params) => {
+    return new Promise((resolve, reject) => {
+        const baseUrl = `https://api.tianditu.gov.cn/${endpoint}`
+
+        // 手动构建查询参数字符串（兼容小程序环境）
+        const queryPairs = []
+        Object.keys(params).forEach(key => {
+            queryPairs.push(`${key}=${encodeURIComponent(params[key])}`)
+        })
+        queryPairs.push(`tk=${TIANDITU_API_KEY}`)
+
+        const fullUrl = `${baseUrl}?${queryPairs.join('&')}`
+
+        uni.request({
+            url: fullUrl,
+            method: 'GET',
+            timeout: TIMEOUT,
+            success: (res) => {
+                // 小程序环境中，statusCode可能为undefined，但data有值就认为成功
+                if (res.data && typeof res.data === 'string' && res.data.includes('<result')) {
+                    resolve(res.data)
+                } else if (res.statusCode === 200) {
+                    resolve(res.data)
+                } else {
+                    reject(res)
+                }
+            },
+            fail: (error) => {
+                console.error('天地图API请求失败:', error)
+                reject(error)
+            }
+        })
+    })
+}
+
+// 调用天地图路径规划API
+const callTiandituRouteAPI = async (startWgs84Coord, endWgs84Coord, midWgs84Coords = []) => {
+
+    // 构建天地图路线规划请求参数（使用WGS84坐标）
+    const routeParams = {
+        orig: `${startWgs84Coord[0]},${startWgs84Coord[1]}`, // 起点经纬度
+        dest: `${endWgs84Coord[0]},${endWgs84Coord[1]}`,     // 终点经纬度
+        style: '0' // 0: 最快路线, 1: 最短路线, 2: 避开高速, 3: 步行
+    }
+
+    // 如果有途经点，添加mid参数
+    if (midWgs84Coords && midWgs84Coords.length > 0) {
+        // 途经点格式：116.35506,39.92277;116.35506,39.92277
+        const midPointsStr = midWgs84Coords.map(coord =>
+            `${coord[0]},${coord[1]}`
+        ).join(';')
+        routeParams.mid = midPointsStr
+    }
+
+    const params = {
+        postStr: JSON.stringify(routeParams),
+        type: 'search'
+    }
+
+
+    // 调用天地图路线规划API
+    const result = await requestTiandituApi('drive', params)
+
+    return result
+}
+
+// 解析天地图返回的XML数据
+const parseRouteXML = (xmlData) => {
+
+    try {
+        // 提取关键信息：距离、时间、路线坐标
+
+        // 提取距离信息
+        const distanceMatch = xmlData.match(/<distance>([^<]+)<\/distance>/)
+        let distance = '未知'
+        if (distanceMatch) {
+            const distanceValue = parseFloat(distanceMatch[1])
+            distance = (distanceValue / 1000).toFixed(1) + 'km'
+        }
+
+        // 提取时间信息
+        const durationMatch = xmlData.match(/<duration>([^<]+)<\/duration>/)
+        let duration = '未知'
+        if (durationMatch) {
+            const durationValue = parseInt(durationMatch[1])
+            duration = Math.ceil(durationValue / 60) + '分钟'
+        }
+
+        // 提取路线坐标
+        const routeLatLonMatch = xmlData.match(/<routelatlon>([^<]+)<\/routelatlon>/)
+        if (routeLatLonMatch) {
+            const routeCoords = routeLatLonMatch[1]
+
+            // 解析坐标字符串，格式：116.35506,39.92277;116.35506,39.92277
+            const coordinates = routeCoords.split(';').map(coord => {
+                const [lng, lat] = coord.split(',').map(Number)
+
+                // 检查坐标有效性
+                if (!coordinateValidator.isValidCoordinate(lng, lat)) {
+                    console.warn('无效坐标:', coord)
+                    return null
+                }
+
+                // 天地图返回的是WGS84坐标，需要转换为GCJ02坐标（地图组件使用）
+                const gcj02Coord = gcoord.transform([lng, lat], gcoord.WGS84, gcoord.GCJ02)
+                const gcj02Lng = gcj02Coord[0]
+                const gcj02Lat = gcj02Coord[1]
+
+                return { latitude: gcj02Lat, longitude: gcj02Lng }
+            }).filter(coord => coord !== null) // 过滤掉无效坐标
+
+            if (coordinates.length > 0) {
+                // 绘制路线
+                drawRouteFromCoordinates(coordinates)
+
+                // 计算途经点信息
+                const taskPoints = mapMarkers.value.filter(marker => marker.id !== 0)
+                const routeType = taskPoints.length === 1 ? '直达路线' : `途经${taskPoints.length - 1}个点的路线`
+
+                uni.showToast({
+                    title: `${routeType}规划成功\n距离:${distance} 时间:${duration}`,
+                    icon: 'success',
+                    duration: 3000
+                })
+
+            } else {
+                throw new Error('坐标数组为空')
+            }
+        } else {
+
+            throw new Error('未找到路线坐标信息')
+        }
+
+    } catch (error) {
+        console.error('解析XML数据失败:', error)
+    }
+}
+
+// 根据坐标数组绘制路线
+const drawRouteFromCoordinates = (coordinates) => {
+    if (!coordinates || coordinates.length === 0) {
+        console.log('坐标数组为空，无法绘制路线')
+        return
+    }
+
+    // 确保坐标格式正确
+    const validCoordinates = coordinates.filter(coord => {
+        const isValid = typeof coord.latitude === 'number' &&
+            typeof coord.longitude === 'number' &&
+            !isNaN(coord.latitude) &&
+            !isNaN(coord.longitude)
+
+        if (!isValid) {
+            console.warn('无效坐标:', coord)
+        }
+
+        return isValid
+    })
+
+    if (validCoordinates.length === 0) {
+        console.error('没有有效的坐标点')
+        return
+    }
+
     const polyline = {
-        points: points,
+        points: validCoordinates,
         color: '#07c160',
         width: 4,
-        arrowLine: true
+        arrowLine: true,
+        borderColor: '#ffffff',
+        borderWidth: 2
     }
 
-    mapPolyline.value = [polyline]
-    console.log('路线已绘制:', mapPolyline.value)
+    // 先清空现有路线
+    mapPolyline.value = []
+
+    // 强制触发响应式更新
+    nextTick(() => {
+        mapPolyline.value = [polyline]
+        console.log('路线已绘制，坐标点数:', validCoordinates.length)
+    })
 }
 
-// 简化的路线规划（不使用天地图API）
-const planRoute = () => {
-    console.log('开始路线规划...')
-
-    if (mapMarkers.value.length < 2) {
-        console.log('标记数量不足，无法绘制路线')
-        return
-    }
-
-    // 直接绘制简单路线，连接所有标记点
-    drawRoute()
-    console.log('路线规划完成')
-}
 
 // onLoad: 简单直接的接收参数方式
 onLoad(() => {
@@ -372,12 +618,12 @@ onLoad(() => {
 
 // onMounted: 专门负责初始化地图 - 修复nextTick问题
 onMounted(() => {
-    console.log('DOM已挂载完成，等待数据后初始化地图')
+
 
     // 等待数据接收完成后再初始化地图
     const waitForDataAndInitMap = () => {
         if (isDataReceived.value) {
-            console.log('数据已接收，开始初始化地图')
+
             // 🔥 修复：直接使用setTimeout，不用nextTick
             setTimeout(() => {
                 useUniAppLocation()
@@ -400,7 +646,6 @@ const setMapData = (data) => {
     bucketNum.value = data.bucketNum || 0
     currentDate.value = data.currentDate || ''
 
-    console.log('数据设置完成')
 }
 
 // 返回上一页

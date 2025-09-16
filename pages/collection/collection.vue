@@ -85,7 +85,7 @@
                             <view class="info-item">
                                 <text class="label">预估桶数:</text>
                                 <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                }}</text>
+                                    }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>
@@ -202,7 +202,7 @@ const getMerchantSydList = async () => {
     const res = await apiGetDriverPlanPage({
         pageNum: 1,
         pageSize: 5,
-        driverId: userStore.merchant?.id || 5,
+        driverId: userStore.driverId || 5,
     })
     if (res.code === 200) {
         allOrderList.value = res.data.list;

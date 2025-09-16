@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const api_apis = require("../../api/apis.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   _easycom_uni_nav_bar2();
@@ -12,17 +13,36 @@ const _sfc_main = {
   __name: "register",
   setup(__props) {
     const formData = common_vendor.ref({
-      account: "",
+      username: "",
+      nickname: "",
       password: "",
       confirmPassword: ""
     });
     const back = () => {
       common_vendor.index.navigateBack();
     };
+    const validatePhone = (phone) => {
+      const phoneRegex = /^1[3-9]\d{9}$/;
+      return phoneRegex.test(phone);
+    };
     const handleRegister = () => {
-      if (!formData.value.account) {
+      if (!formData.value.username) {
         common_vendor.index.showToast({
           title: "请输入账号",
+          icon: "none"
+        });
+        return;
+      }
+      if (!validatePhone(formData.value.username)) {
+        common_vendor.index.showToast({
+          title: "请输入正确的手机号",
+          icon: "none"
+        });
+        return;
+      }
+      if (!formData.value.nickname) {
+        common_vendor.index.showToast({
+          title: "请输入昵称",
           icon: "none"
         });
         return;
@@ -34,6 +54,13 @@ const _sfc_main = {
         });
         return;
       }
+      if (formData.value.password.length < 6) {
+        common_vendor.index.showToast({
+          title: "密码至少需要6位",
+          icon: "none"
+        });
+        return;
+      }
       if (formData.value.password !== formData.value.confirmPassword) {
         common_vendor.index.showToast({
           title: "两次输入的密码不一致",
@@ -41,13 +68,27 @@ const _sfc_main = {
         });
         return;
       }
-      common_vendor.index.showToast({
-        title: "注册成功",
-        icon: "success"
+      common_vendor.index.showLoading({
+        title: "注册中...",
+        mask: true
       });
-      setTimeout(() => {
-        common_vendor.index.navigateBack();
-      }, 1500);
+      common_vendor.index.__f__("log", "at pages/user/register.vue:125", "注册参数", formData.value);
+      api_apis.apiPostRegister(formData.value).then((res) => {
+        if (res.code === 200) {
+          common_vendor.index.showToast({
+            title: "注册成功",
+            icon: "success"
+          });
+          common_vendor.index.navigateBack();
+        } else {
+          common_vendor.index.showToast({
+            title: res.msg || "注册失败",
+            icon: "none"
+          });
+        }
+      }).catch((err) => {
+        common_vendor.index.__f__("error", "at pages/user/register.vue:145", "注册失败:", err);
+      });
     };
     return (_ctx, _cache) => {
       return {
@@ -61,13 +102,15 @@ const _sfc_main = {
           color: "#000",
           title: "注册"
         }),
-        c: formData.value.account,
-        d: common_vendor.o(($event) => formData.value.account = $event.detail.value),
-        e: formData.value.password,
-        f: common_vendor.o(($event) => formData.value.password = $event.detail.value),
-        g: formData.value.confirmPassword,
-        h: common_vendor.o(($event) => formData.value.confirmPassword = $event.detail.value),
-        i: common_vendor.o(handleRegister)
+        c: formData.value.username,
+        d: common_vendor.o(($event) => formData.value.username = $event.detail.value),
+        e: formData.value.nickname,
+        f: common_vendor.o(($event) => formData.value.nickname = $event.detail.value),
+        g: formData.value.password,
+        h: common_vendor.o(($event) => formData.value.password = $event.detail.value),
+        i: formData.value.confirmPassword,
+        j: common_vendor.o(($event) => formData.value.confirmPassword = $event.detail.value),
+        k: common_vendor.o(handleRegister)
       };
     };
   }

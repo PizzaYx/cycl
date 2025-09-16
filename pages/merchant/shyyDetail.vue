@@ -69,12 +69,12 @@ const infoList = computed(() => [
     },
     {
         label: '预估重量:',
-        value: pageData.value.estimateWeight + 'kg' ?? '暂无'
+        value: pageData.value.estimateWeight + ' kg' ?? '暂无'
 
     },
     {
         label: '预估桶数:',
-        value: pageData.value.estimateBucketNum + '个' ?? '暂无'
+        value: pageData.value.estimateBucketNum + ' 个' ?? '暂无'
     },
     {
         label: '收运地址:',
@@ -96,9 +96,6 @@ onLoad((options) => {
         merchantId.value = options['merchantId '];
     }
 
-    console.log('接收到的参数:', options);
-    console.log('解析后的参数:', { merchantId: merchantId.value, id: id.value });
-
     // 在参数赋值后立即调用API
     getSyCheckDetail();
 });
@@ -112,7 +109,7 @@ onMounted(() => {
 
 //获取收运记录详情
 const getSyCheckDetail = async () => {
-    console.log('获取收运记录详情', merchantId.value, id.value);
+
     const res = await apiGetPlanTemporaryById({
         merchantId: merchantId.value,
         id: id.value,
@@ -121,24 +118,25 @@ const getSyCheckDetail = async () => {
 
     if (res.code === 200) {
         const data = res.data;
-
+    
         // 统一更新pageData
         pageData.value = {
-            driverName: data.driverName,
+            driverName: data.driverName ?? '',
             status: data.status,
-            merchantName: data.merchantName,
-            estimateWeight: data.estimateWeight ?? '暂无',
-            weight: data.weight ?? '暂无',
-            estimateBucketNum: data.estimateBucketNum ?? '暂无',
-            bucketNum: data.bucketNum ?? '暂无',
-            registrationNumber: data.registrationNumber,
+            merchantName: data.merchantName ?? '',
+            estimateWeight: data.estimateWeight ?? 0,
+            weight: data.weight ?? 0,
+            estimateBucketNum: data.estimateBucketNum ?? 0,
+            bucketNum: data.bucketNum   ?? 0,
+            registrationNumber: data.registrationNumber ?? 0,
             img: data.img ? data.img.split(',') : [],
-            appointmentTime: data.appointmentTime,
+            appointmentTime: data.appointmentTime ?? 0,
             arrivalTime: data.arrivalTime,
-            address: data.address,
-            explain: data.explain ?? '暂无',
+            address: data.address ??'',
+            explain: data.explain ??'',
 
         };
+        console.log('获取收运记录详情成功', pageData.value);
     }
 }
 // 返回上一页
@@ -185,19 +183,19 @@ const back = () => {
 
 
         &.booking {
-                color: rgba(255, 161, 0, 1);
-                background: rgba(255, 161, 0, 0.10);
-            }
-        
-            &.passed {
-                color: rgba(7, 193, 96, 1);
-                background: rgba(7, 193, 96, 0.10);
-            }
-        
-            &.notpassed {
-                color: rgba(221, 57, 47, 1);
-                background: rgba(221, 57, 47, 0.10);
-            }
+            color: rgba(255, 161, 0, 1);
+            background: rgba(255, 161, 0, 0.10);
+        }
+
+        &.passed {
+            color: rgba(7, 193, 96, 1);
+            background: rgba(7, 193, 96, 0.10);
+        }
+
+        &.notpassed {
+            color: rgba(221, 57, 47, 1);
+            background: rgba(221, 57, 47, 0.10);
+        }
     }
 }
 

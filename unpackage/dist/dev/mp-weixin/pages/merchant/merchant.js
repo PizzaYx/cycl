@@ -25,17 +25,26 @@ const _sfc_main = {
       try {
         const userInfo = await userStore.ensureUserInfo();
         if (userInfo === null) {
-          common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:131", "用户未登录，已跳转到登录页");
+          common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:134", "用户未登录，已跳转到登录页");
           return;
         }
-        checkAndShowAuthModal();
+        checkUserAuthStatus();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:140", "页面初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:141", "页面初始化失败:", error);
       }
     });
+    common_vendor.onShow(() => {
+      checkUserAuthStatus();
+    });
+    const showDetail = (item) => {
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:150", "查看详情按钮被点击", item);
+      common_vendor.index.navigateTo({
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+      });
+    };
     const getMerchantStatistics = async () => {
       var _a;
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:146", "获取商户首页数据统计");
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:160", "获取商户首页数据统计");
       const res = await api_apis.apiGetMerchantStatistics({
         merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
       });
@@ -56,12 +65,15 @@ const _sfc_main = {
       if (res.code === 200) {
         records.value = res.data.list;
       } else {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:171", "商户首页收运记录失败", res.message);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:184", "商户首页收运记录失败", res.message);
       }
     };
-    const checkUserAuthStatus = () => {
+    const checkUserAuthStatus = async () => {
       const merchantStatus = userStore.merchantStatus;
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:195", "检查用户认证状态111：", merchantStatus);
       if (merchantStatus === null || merchantStatus === 2) {
+        await userStore.fetchUserInfo();
+        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:199", "检查用户认证状态222：", merchantStatus);
         showAuthModal.value = true;
         return false;
       } else if (merchantStatus === 0) {
@@ -71,16 +83,10 @@ const _sfc_main = {
         });
         return false;
       } else {
-        return true;
-      }
-    };
-    const checkAndShowAuthModal = () => {
-      const merchantStatus = userStore.merchantStatus;
-      if (merchantStatus === null || merchantStatus === 2) {
-        showAuthModal.value = true;
-      } else {
+        showAuthModal.value = false;
         getMerchantStatistics();
         getMerchantSydList();
+        return true;
       }
     };
     const getUserInfo = () => {
@@ -94,13 +100,9 @@ const _sfc_main = {
       refreshing.value = true;
       try {
         await userStore.fetchUserInfo();
-        checkAndShowAuthModal();
+        checkUserAuthStatus();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:236", "刷新失败:", error);
-        common_vendor.index.showToast({
-          title: "刷新失败",
-          icon: "none"
-        });
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:260", "刷新失败:", error);
       } finally {
         refreshing.value = false;
       }
@@ -145,7 +147,22 @@ const _sfc_main = {
       }
     ]);
     const handleQuickAction = (action) => {
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:290", "快捷操作点击:", action.name);
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:310", "快捷操作点击:", action);
+      if (action.name === "商户认证") {
+        if (action.url) {
+          common_vendor.index.navigateTo({
+            url: action.url,
+            fail: (err) => {
+              common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:318", "页面跳转失败:", err);
+              common_vendor.index.showToast({
+                title: "页面暂未开放",
+                icon: "none"
+              });
+            }
+          });
+        }
+        return;
+      }
       if (!checkUserAuthStatus()) {
         return;
       }
@@ -153,7 +170,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:301", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:339", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"
@@ -249,7 +266,8 @@ const _sfc_main = {
             e: item.status === 0 ? 1 : "",
             f: item.status === 2 ? 1 : "",
             g: common_vendor.t(item.status === 1 ? item.weight : item.estimateWeight),
-            h: index
+            h: item.id,
+            i: common_vendor.o(($event) => showDetail(item), item.id)
           };
         }),
         p: records.value.length === 0

@@ -1,7 +1,7 @@
 <!-- 收运详情 -->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运详情"
+        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="今日收运详情"
             @clickLeft="back" />
         <view class="header-progress-container">
             <view class="header">

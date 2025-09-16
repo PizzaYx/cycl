@@ -21,7 +21,7 @@ const _sfc_main = {
       agreed.value = !agreed.value;
     };
     const openAgreement = (type) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:81", "打开协议:", type);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:86", "打开协议:", type);
       if (type === "user") {
         common_vendor.index.navigateTo({
           url: "/pages/user/agreement"
@@ -36,6 +36,10 @@ const _sfc_main = {
       account: "",
       password: ""
     });
+    const passwordVisible = common_vendor.ref(false);
+    const togglePasswordVisibility = () => {
+      passwordVisible.value = !passwordVisible.value;
+    };
     const handleRegister = () => {
       common_vendor.index.navigateTo({
         url: "/pages/user/register"
@@ -84,7 +88,7 @@ const _sfc_main = {
             common_vendor.index.navigateTo({
               url: activeTab.value ? "/pages/collection/collection" : "/pages/merchant/merchant"
             });
-          }, 300);
+          }, 100);
         } else {
           common_vendor.index.showToast({
             title: res.msg || "登录失败",
@@ -96,16 +100,15 @@ const _sfc_main = {
           title: "网络请求失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/index/index.vue:205", "登录请求失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:219", "登录请求失败:", err);
       } finally {
-        common_vendor.index.hideLoading();
       }
     };
     const fetchUserInfo = async () => {
       try {
         await userStore.fetchUserInfo();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:216", "获取用户信息失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:230", "获取用户信息失败:", error);
         common_vendor.index.showToast({
           title: "获取用户信息失败，请稍后重试",
           icon: "none",
@@ -127,21 +130,28 @@ const _sfc_main = {
         h: common_vendor.o(($event) => activeTab.value = 1),
         i: formData.account,
         j: common_vendor.o(($event) => formData.account = $event.detail.value),
-        k: formData.password,
-        l: common_vendor.o(($event) => formData.password = $event.detail.value),
-        m: common_vendor.o(handleLogin),
-        n: activeTab.value === 0
+        k: !passwordVisible.value,
+        l: formData.password,
+        m: common_vendor.o(($event) => formData.password = $event.detail.value),
+        n: common_vendor.o(togglePasswordVisibility),
+        o: common_vendor.p({
+          type: passwordVisible.value ? "eye" : "eye-filled",
+          size: "20",
+          color: "rgba(61, 61, 61, 0.5)"
+        }),
+        p: common_vendor.o(handleLogin),
+        q: activeTab.value === 0
       }, activeTab.value === 0 ? {
-        o: common_vendor.o(handleRegister)
+        r: common_vendor.o(handleRegister)
       } : {}, {
-        p: common_vendor.o(toggleAgreement),
-        q: common_vendor.p({
+        s: common_vendor.o(toggleAgreement),
+        t: common_vendor.p({
           type: agreed.value ? "circle-filled" : "circle",
           size: "22",
           color: agreed.value ? "rgba(7, 193, 96, 1)" : "rgba(19, 19, 19, 0.5)"
         }),
-        r: common_vendor.o(($event) => openAgreement("user")),
-        s: common_vendor.o(($event) => openAgreement("privacy"))
+        v: common_vendor.o(($event) => openAgreement("user")),
+        w: common_vendor.o(($event) => openAgreement("privacy"))
       });
     };
   }

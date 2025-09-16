@@ -45,8 +45,6 @@
   display: flex;
   align-items: center;
   gap: 10rpx;
-  cursor: pointer;
-  padding: 20rpx 30rpx;
   min-height: 60rpx;
 }
 .container .menu .filter-container .filter-item text.data-v-31e4eb43 {

@@ -146,7 +146,6 @@ const _sfc_main = {
           id: item.id
         };
         const res = await api_apis.apiGetconfirmPlanById(params);
-        common_vendor.index.hideLoading();
         if (res.code === 200 || res.success) {
           common_vendor.index.showToast({
             title: "确认收运成功",
@@ -154,6 +153,7 @@ const _sfc_main = {
           });
           allOrderList.value = [];
           pageNum.value = 1;
+          getMerchantNotConfirmNum();
           getNetwork();
         } else {
           common_vendor.index.showToast({
@@ -163,7 +163,6 @@ const _sfc_main = {
         }
       } catch (error) {
         common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:295", "确认收运失败:", error);
-        common_vendor.index.hideLoading();
         common_vendor.index.showToast({
           title: "网络错误，请重试",
           icon: "none"
@@ -207,7 +206,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:359", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:358", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -280,10 +279,10 @@ const _sfc_main = {
             a: common_vendor.t(item.merchantName),
             b: common_vendor.t(getStatusText(item.status)),
             c: common_vendor.n(getStatusClass(item.status)),
-            d: common_vendor.t(item.estimateWeight),
-            e: common_vendor.t(item.estimateBucketNum ?? 0),
+            d: common_vendor.t(item.estimateBucketNum),
+            e: common_vendor.t(item.bucketNum ? item.bucketNum + " 桶" : "暂无"),
             f: common_vendor.t(item.estimateWeight ?? 0),
-            g: common_vendor.t(item.weight ?? "暂无"),
+            g: common_vendor.t(item.weight ? item.weight + " kg" : "暂无"),
             h: common_vendor.t(item.registrationNumber ?? "暂无"),
             i: common_vendor.t(item.arrivalTime ?? "暂无")
           }, currentTab.value == 0 ? common_vendor.e({

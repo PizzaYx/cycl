@@ -5,18 +5,17 @@ const stores_user = require("../../stores/user.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _easycom_uni_datetime_picker2 = common_vendor.resolveComponent("uni-datetime-picker");
   const _component_uni_button = common_vendor.resolveComponent("uni-button");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _easycom_uni_datetime_picker2 + _component_uni_button + _easycom_uni_load_more2)();
+  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _component_uni_button + _easycom_uni_load_more2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
-const _easycom_uni_datetime_picker = () => "../../uni_modules/uni-datetime-picker/components/uni-datetime-picker/uni-datetime-picker.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_uni_datetime_picker + _easycom_uni_load_more)();
+  (_easycom_uni_nav_bar + _easycom_uni_icons + TimeRangePicker + _easycom_uni_load_more)();
 }
+const TimeRangePicker = () => "../../components/TimeRangePicker/TimeRangePicker.js";
 const _sfc_main = {
   __name: "shAllList",
   setup(__props) {
@@ -29,7 +28,7 @@ const _sfc_main = {
       { value: 2, text: "无需收运" }
     ]);
     const getStatusText = (status) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:134", 123);
+      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:127", 123);
       switch (status) {
         case 0:
         case "0":
@@ -66,7 +65,7 @@ const _sfc_main = {
     const loadingStatus = common_vendor.ref("more");
     const allOrderList = common_vendor.ref([]);
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:180", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:173", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
       });
@@ -81,7 +80,7 @@ const _sfc_main = {
           pageNum: pageNum.value,
           merchantId: ((_a = userStore.merchant) == null ? void 0 : _a.id) ?? 448
         };
-        if (selectedStatus.value !== "") {
+        if (selectedStatus.value !== null) {
           params.status = selectedStatus.value;
         }
         if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
@@ -101,7 +100,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shAllList.vue:231", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shAllList.vue:224", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -128,13 +127,20 @@ const _sfc_main = {
       pageNum.value = 1;
       getNetwork();
     });
-    const datetimePicker = common_vendor.ref(null);
+    common_vendor.ref(null);
     const showStatusPicker = () => {
+      const itemList = statusOptions.value.map((item, index) => {
+        const isSelected = selectedStatus.value === item.value;
+        return isSelected ? `✓ ${item.text}` : item.text;
+      });
       common_vendor.index.showActionSheet({
-        itemList: statusOptions.value.map((item) => item.text),
+        itemList,
         success: (res) => {
           const selectedOption = statusOptions.value[res.tapIndex];
           onStatusChange(selectedOption.value);
+        },
+        fail: (err) => {
+          onStatusChange(null);
         }
       });
     };
@@ -150,16 +156,6 @@ const _sfc_main = {
       allOrderList.value = [];
       pageNum.value = 1;
       getNetwork();
-    };
-    const getCurrentDateTime = () => {
-      const now = /* @__PURE__ */ new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, "0");
-      const day = String(now.getDate()).padStart(2, "0");
-      const hour = String(now.getHours()).padStart(2, "0");
-      const minute = String(now.getMinutes()).padStart(2, "0");
-      const second = String(now.getSeconds()).padStart(2, "0");
-      return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
     };
     common_vendor.onMounted(() => {
       pageNum.value = 1;
@@ -183,27 +179,14 @@ const _sfc_main = {
           color: "#666"
         }),
         d: common_vendor.o(showStatusPicker),
-        e: common_vendor.sr(datetimePicker, "31e4eb43-2", {
-          "k": "datetimePicker"
-        }),
-        f: common_vendor.o(onTimeChange),
-        g: common_vendor.o(($event) => selectedTimeRange.value = $event),
-        h: common_vendor.p({
-          type: "datetimerange",
-          rangeSeparator: "至",
-          start: "2020-01-01 00:00:00",
-          end: getCurrentDateTime(),
-          border: false,
+        e: common_vendor.o(onTimeChange),
+        f: common_vendor.o(($event) => selectedTimeRange.value = $event),
+        g: common_vendor.p({
           modelValue: selectedTimeRange.value
         }),
-        i: common_vendor.p({
-          type: "bottom",
-          size: "12",
-          color: "#666"
-        }),
-        j: allOrderList.value.length > 0
+        h: allOrderList.value.length > 0
       }, allOrderList.value.length > 0 ? {
-        k: common_vendor.f(allOrderList.value, (item, index, i0) => {
+        i: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.merchantName),
             b: common_vendor.t(getStatusText(item.status)),
@@ -217,7 +200,7 @@ const _sfc_main = {
             j: item.status != 0
           }, item.status != 0 ? {
             k: common_vendor.o(($event) => handleViewDetails(item), index),
-            l: "31e4eb43-4-" + i0,
+            l: "31e4eb43-3-" + i0,
             m: common_vendor.p({
               size: "mini",
               type: "default"
@@ -226,7 +209,7 @@ const _sfc_main = {
             n: index
           });
         }),
-        l: common_vendor.p({
+        j: common_vendor.p({
           status: loadingStatus.value,
           ["content-text"]: {
             contentdown: "上拉显示更多",
@@ -235,7 +218,7 @@ const _sfc_main = {
           }
         })
       } : loadingStatus.value !== "loading" ? {} : {}, {
-        m: loadingStatus.value !== "loading"
+        k: loadingStatus.value !== "loading"
       });
     };
   }

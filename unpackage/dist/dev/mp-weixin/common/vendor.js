@@ -25,7 +25,7 @@ const remove = (arr, el) => {
 };
 const hasOwnProperty$2 = Object.prototype.hasOwnProperty;
 const hasOwn$1 = (val, key) => hasOwnProperty$2.call(val, key);
-const isArray = Array.isArray;
+const isArray$1 = Array.isArray;
 const isMap = (val) => toTypeString(val) === "[object Map]";
 const isSet = (val) => toTypeString(val) === "[object Set]";
 const isFunction = (val) => typeof val === "function";
@@ -89,7 +89,7 @@ const looseToNumber = (val) => {
   return isNaN(n2) ? val : n2;
 };
 function normalizeStyle(value) {
-  if (isArray(value)) {
+  if (isArray$1(value)) {
     const res = {};
     for (let i2 = 0; i2 < value.length; i2++) {
       const item = value[i2];
@@ -122,7 +122,7 @@ function normalizeClass(value) {
   let res = "";
   if (isString(value)) {
     res = value;
-  } else if (isArray(value)) {
+  } else if (isArray$1(value)) {
     for (let i2 = 0; i2 < value.length; i2++) {
       const normalized = normalizeClass(value[i2]);
       if (normalized) {
@@ -139,7 +139,7 @@ function normalizeClass(value) {
   return res.trim();
 }
 const toDisplayString = (val) => {
-  return isString(val) ? val : val == null ? "" : isArray(val) || isObject$1(val) && (val.toString === objectToString || !isFunction(val.toString)) ? JSON.stringify(val, replacer, 2) : String(val);
+  return isString(val) ? val : val == null ? "" : isArray$1(val) || isObject$1(val) && (val.toString === objectToString || !isFunction(val.toString)) ? JSON.stringify(val, replacer, 2) : String(val);
 };
 const replacer = (_key, val) => {
   if (val && val.__v_isRef) {
@@ -160,7 +160,7 @@ const replacer = (_key, val) => {
     };
   } else if (isSymbol(val)) {
     return stringifySymbol(val);
-  } else if (isObject$1(val) && !isArray(val) && !isPlainObject$1(val)) {
+  } else if (isObject$1(val) && !isArray$1(val) && !isPlainObject$1(val)) {
     return String(val);
   }
   return val;
@@ -982,7 +982,7 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
   let deps = [];
   if (type === "clear") {
     deps = [...depsMap.values()];
-  } else if (key === "length" && isArray(target)) {
+  } else if (key === "length" && isArray$1(target)) {
     const newLength = Number(newValue);
     depsMap.forEach((dep, key2) => {
       if (key2 === "length" || !isSymbol(key2) && key2 >= newLength) {
@@ -995,7 +995,7 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
     }
     switch (type) {
       case "add":
-        if (!isArray(target)) {
+        if (!isArray$1(target)) {
           deps.push(depsMap.get(ITERATE_KEY));
           if (isMap(target)) {
             deps.push(depsMap.get(MAP_KEY_ITERATE_KEY));
@@ -1005,7 +1005,7 @@ function trigger(target, type, key, newValue, oldValue, oldTarget) {
         }
         break;
       case "delete":
-        if (!isArray(target)) {
+        if (!isArray$1(target)) {
           deps.push(depsMap.get(ITERATE_KEY));
           if (isMap(target)) {
             deps.push(depsMap.get(MAP_KEY_ITERATE_KEY));
@@ -1101,7 +1101,7 @@ class BaseReactiveHandler {
       }
       return;
     }
-    const targetIsArray = isArray(target);
+    const targetIsArray = isArray$1(target);
     if (!isReadonly2) {
       if (targetIsArray && hasOwn$1(arrayInstrumentations, key)) {
         return Reflect.get(arrayInstrumentations, key, receiver);
@@ -1141,7 +1141,7 @@ class MutableReactiveHandler extends BaseReactiveHandler {
         oldValue = toRaw(oldValue);
         value = toRaw(value);
       }
-      if (!isArray(target) && isRef(oldValue) && !isRef(value)) {
+      if (!isArray$1(target) && isRef(oldValue) && !isRef(value)) {
         if (isOldValueReadonly) {
           return false;
         } else {
@@ -1150,7 +1150,7 @@ class MutableReactiveHandler extends BaseReactiveHandler {
         }
       }
     }
-    const hadKey = isArray(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn$1(target, key);
+    const hadKey = isArray$1(target) && isIntegerKey(key) ? Number(key) < target.length : hasOwn$1(target, key);
     const result = Reflect.set(target, key, value, receiver);
     if (target === toRaw(receiver)) {
       if (!hadKey) {
@@ -1181,7 +1181,7 @@ class MutableReactiveHandler extends BaseReactiveHandler {
     track(
       target,
       "iterate",
-      isArray(target) ? "length" : ITERATE_KEY
+      isArray$1(target) ? "length" : ITERATE_KEY
     );
     return Reflect.ownKeys(target);
   }
@@ -1763,7 +1763,7 @@ function toRefs(object) {
   if (!isProxy(object)) {
     warn$2(`toRefs() expects a reactive object but received a plain one.`);
   }
-  const ret = isArray(object) ? new Array(object.length) : {};
+  const ret = isArray$1(object) ? new Array(object.length) : {};
   for (const key in object) {
     ret[key] = propertyToRef(object, key);
   }
@@ -2078,7 +2078,7 @@ function invalidateJob(job) {
   }
 }
 function queuePostFlushCb(cb) {
-  if (!isArray(cb)) {
+  if (!isArray$1(cb)) {
     if (!activePostFlushCbs || !activePostFlushCbs.includes(
       cb,
       cb.allowRecurse ? postFlushIndex + 1 : postFlushIndex
@@ -2414,7 +2414,7 @@ function normalizeEmitsOptions(comp, appContext, asMixin = false) {
     }
     return null;
   }
-  if (isArray(raw)) {
+  if (isArray$1(raw)) {
     raw.forEach((key) => normalized[key] = null);
   } else {
     extend(normalized, raw);
@@ -2546,7 +2546,7 @@ function doWatch(source, cb, {
   } else if (isReactive(source)) {
     getter = () => reactiveGetter(source);
     forceTrigger = true;
-  } else if (isArray(source)) {
+  } else if (isArray$1(source)) {
     isMultiSource = true;
     forceTrigger = source.some((s2) => isReactive(s2) || isShallow(s2));
     getter = () => source.map((s2) => {
@@ -2696,7 +2696,7 @@ function traverse(value, depth, currentDepth = 0, seen) {
   seen.add(value);
   if (isRef(value)) {
     traverse(value.value, depth, currentDepth, seen);
-  } else if (isArray(value)) {
+  } else if (isArray$1(value)) {
     for (let i2 = 0; i2 < value.length; i2++) {
       traverse(value[i2], depth, currentDepth, seen);
     }
@@ -3209,7 +3209,7 @@ function exposeSetupStateOnRenderContext(instance) {
   });
 }
 function normalizePropsOrEmits(props) {
-  return isArray(props) ? props.reduce(
+  return isArray$1(props) ? props.reduce(
     (normalized, p2) => (normalized[p2] = null, normalized),
     {}
   ) : props;
@@ -3386,7 +3386,7 @@ function applyOptions$1(instance) {
     }
   }
   function registerLifecycleHook(register, hook) {
-    if (isArray(hook)) {
+    if (isArray$1(hook)) {
       hook.forEach((_hook) => register(_hook.bind(publicThis)));
     } else if (hook) {
       register(hook.bind(publicThis));
@@ -3404,7 +3404,7 @@ function applyOptions$1(instance) {
   registerLifecycleHook(onBeforeUnmount, beforeUnmount);
   registerLifecycleHook(onUnmounted, unmounted);
   registerLifecycleHook(onServerPrefetch, serverPrefetch);
-  if (isArray(expose)) {
+  if (isArray$1(expose)) {
     if (expose.length) {
       const exposed = instance.exposed || (instance.exposed = {});
       expose.forEach((key) => {
@@ -3432,7 +3432,7 @@ function applyOptions$1(instance) {
   }
 }
 function resolveInjections(injectOptions, ctx, checkDuplicateProperties = NOOP) {
-  if (isArray(injectOptions)) {
+  if (isArray$1(injectOptions)) {
     injectOptions = normalizeInject(injectOptions);
   }
   for (const key in injectOptions) {
@@ -3468,7 +3468,7 @@ function resolveInjections(injectOptions, ctx, checkDuplicateProperties = NOOP) 
 }
 function callHook$1(hook, instance, type) {
   callWithAsyncErrorHandling(
-    isArray(hook) ? hook.map((h2) => h2.bind(instance.proxy)) : hook.bind(instance.proxy),
+    isArray$1(hook) ? hook.map((h2) => h2.bind(instance.proxy)) : hook.bind(instance.proxy),
     instance,
     type
   );
@@ -3485,7 +3485,7 @@ function createWatcher(raw, ctx, publicThis, key) {
   } else if (isFunction(raw)) {
     watch(getter, raw.bind(publicThis));
   } else if (isObject$1(raw)) {
-    if (isArray(raw)) {
+    if (isArray$1(raw)) {
       raw.forEach((r2) => createWatcher(r2, ctx, publicThis, key));
     } else {
       const handler = isFunction(raw.handler) ? raw.handler.bind(publicThis) : ctx[raw.handler];
@@ -3600,7 +3600,7 @@ function mergeInject(to, from) {
   return mergeObjectOptions(normalizeInject(to), normalizeInject(from));
 }
 function normalizeInject(raw) {
-  if (isArray(raw)) {
+  if (isArray$1(raw)) {
     const res = {};
     for (let i2 = 0; i2 < raw.length; i2++) {
       res[raw[i2]] = raw[i2];
@@ -3617,7 +3617,7 @@ function mergeObjectOptions(to, from) {
 }
 function mergeEmitsOrPropsOptions(to, from) {
   if (to) {
-    if (isArray(to) && isArray(from)) {
+    if (isArray$1(to) && isArray$1(from)) {
       return [.../* @__PURE__ */ new Set([...to, ...from])];
     }
     return extend(
@@ -3872,7 +3872,7 @@ function normalizePropsOptions(comp, appContext, asMixin = false) {
     }
     return EMPTY_ARR;
   }
-  if (isArray(raw)) {
+  if (isArray$1(raw)) {
     for (let i2 = 0; i2 < raw.length; i2++) {
       if (!isString(raw[i2])) {
         warn$1(`props must be strings when using array syntax.`, raw[i2]);
@@ -3890,7 +3890,7 @@ function normalizePropsOptions(comp, appContext, asMixin = false) {
       const normalizedKey = camelize(key);
       if (validatePropName(normalizedKey)) {
         const opt = raw[key];
-        const prop = normalized[normalizedKey] = isArray(opt) || isFunction(opt) ? { type: opt } : extend({}, opt);
+        const prop = normalized[normalizedKey] = isArray$1(opt) || isFunction(opt) ? { type: opt } : extend({}, opt);
         if (prop) {
           const booleanIndex = getTypeIndex(Boolean, prop.type);
           const stringIndex = getTypeIndex(String, prop.type);
@@ -3939,7 +3939,7 @@ function isSameType(a2, b2) {
   return getType$1(a2) === getType$1(b2);
 }
 function getTypeIndex(type, expectedTypes) {
-  if (isArray(expectedTypes)) {
+  if (isArray$1(expectedTypes)) {
     return expectedTypes.findIndex((t2) => isSameType(t2, type));
   } else if (isFunction(expectedTypes)) {
     return isSameType(expectedTypes, type) ? 0 : -1;
@@ -3973,7 +3973,7 @@ function validateProp$1(name, value, prop, props, isAbsent) {
   }
   if (type != null && type !== true && !skipCheck) {
     let isValid = false;
-    const types = isArray(type) ? type : [type];
+    const types = isArray$1(type) ? type : [type];
     const expectedTypes = [];
     for (let i2 = 0; i2 < types.length && !isValid; i2++) {
       const { valid, expectedType } = assertType$1(value, types[i2]);
@@ -4004,7 +4004,7 @@ function assertType$1(value, type) {
   } else if (expectedType === "Object") {
     valid = isObject$1(value);
   } else if (expectedType === "Array") {
-    valid = isArray(value);
+    valid = isArray$1(value);
   } else if (expectedType === "null") {
     valid = value === null;
   } else {
@@ -4395,7 +4395,7 @@ function createSetupContext(instance) {
       if (exposed != null) {
         let exposedType = typeof exposed;
         if (exposedType === "object") {
-          if (isArray(exposed)) {
+          if (isArray$1(exposed)) {
             exposedType = "array";
           } else if (isRef(exposed)) {
             exposedType = "ref";
@@ -4646,7 +4646,7 @@ function clone(src, seen) {
     if (typeof copy !== "undefined") {
       return copy;
     }
-    if (isArray(src)) {
+    if (isArray$1(src)) {
       const len = src.length;
       copy = new Array(len);
       seen.set(src, copy);
@@ -4785,7 +4785,7 @@ function setRef$1(instance, isUnmount = false) {
   if ($templateUniElementRefs && $templateUniElementRefs.length) {
     nextTick(instance, () => {
       $templateUniElementRefs.forEach((templateRef) => {
-        if (isArray(templateRef.v)) {
+        if (isArray$1(templateRef.v)) {
           templateRef.v.forEach((v2) => {
             setTemplateRef(templateRef, v2, setupState);
           });
@@ -4831,7 +4831,7 @@ function setTemplateRef({ r: r2, f: f2 }, refValue, setupState) {
         if (!_isRef) {
           return;
         }
-        if (!isArray(r2.value)) {
+        if (!isArray$1(r2.value)) {
           r2.value = [];
         }
         const existing = r2.value;
@@ -5210,7 +5210,7 @@ function initHooks$1(options, instance, publicThis) {
   Object.keys(options).forEach((name) => {
     if (isUniLifecycleHook(name, options[name], false)) {
       const hooks = options[name];
-      if (isArray(hooks)) {
+      if (isArray$1(hooks)) {
         hooks.forEach((hook) => injectLifecycleHook(name, hook, publicThis, instance));
       } else {
         injectLifecycleHook(name, hooks, publicThis, instance);
@@ -5441,7 +5441,7 @@ function createInvoker(initialValue, instance) {
       setTimeout(invoke);
     } else {
       const res = invoke();
-      if (e2.type === "input" && (isArray(res) || isPromise(res))) {
+      if (e2.type === "input" && (isArray$1(res) || isPromise(res))) {
         return;
       }
       return res;
@@ -5486,7 +5486,7 @@ function patchMPEvent(event, instance) {
   }
 }
 function patchStopImmediatePropagation(e2, value) {
-  if (isArray(value)) {
+  if (isArray$1(value)) {
     const originalStop = e2.stopImmediatePropagation;
     e2.stopImmediatePropagation = () => {
       originalStop && originalStop.call(e2);
@@ -5499,7 +5499,7 @@ function patchStopImmediatePropagation(e2, value) {
 }
 function vFor(source, renderItem) {
   let ret;
-  if (isArray(source) || isString(source)) {
+  if (isArray$1(source) || isString(source)) {
     ret = new Array(source.length);
     for (let i2 = 0, l2 = source.length; i2 < l2; i2++) {
       ret[i2] = renderItem(source[i2], i2, i2);
@@ -5603,7 +5603,7 @@ function validateProtocols(name, args, protocol, onFail) {
   if (!protocol) {
     return;
   }
-  if (!isArray(protocol)) {
+  if (!isArray$1(protocol)) {
     return validateProtocol(name, args[0] || /* @__PURE__ */ Object.create(null), protocol, onFail);
   }
   const len = protocol.length;
@@ -5630,7 +5630,7 @@ function validateProp(name, value, prop, isAbsent) {
   }
   if (type != null) {
     let isValid = false;
-    const types = isArray(type) ? type : [type];
+    const types = isArray$1(type) ? type : [type];
     const expectedTypes = [];
     for (let i2 = 0; i2 < types.length && !isValid; i2++) {
       const { valid, expectedType } = assertType(value, types[i2]);
@@ -5658,7 +5658,7 @@ function assertType(value, type) {
   } else if (expectedType === "Object") {
     valid = isObject$1(value);
   } else if (expectedType === "Array") {
-    valid = isArray(value);
+    valid = isArray$1(value);
   } else {
     {
       valid = value instanceof type;
@@ -5820,7 +5820,7 @@ function queue(hooks, data, params) {
 function wrapperOptions(interceptors2, options = {}) {
   [HOOK_SUCCESS, HOOK_FAIL, HOOK_COMPLETE].forEach((name) => {
     const hooks = interceptors2[name];
-    if (!isArray(hooks)) {
+    if (!isArray$1(hooks)) {
       return;
     }
     const oldCallback = options[name];
@@ -5834,11 +5834,11 @@ function wrapperOptions(interceptors2, options = {}) {
 }
 function wrapperReturnValue(method, returnValue) {
   const returnValueHooks = [];
-  if (isArray(globalInterceptors.returnValue)) {
+  if (isArray$1(globalInterceptors.returnValue)) {
     returnValueHooks.push(...globalInterceptors.returnValue);
   }
   const interceptor = scopedInterceptors[method];
-  if (interceptor && isArray(interceptor.returnValue)) {
+  if (interceptor && isArray$1(interceptor.returnValue)) {
     returnValueHooks.push(...interceptor.returnValue);
   }
   returnValueHooks.forEach((hook) => {
@@ -5866,7 +5866,7 @@ function getApiInterceptorHooks(method) {
 function invokeApi(method, api, options, params) {
   const interceptor = getApiInterceptorHooks(method);
   if (interceptor && Object.keys(interceptor).length) {
-    if (isArray(interceptor.invoke)) {
+    if (isArray$1(interceptor.invoke)) {
       const res = queue(interceptor.invoke, options);
       return res.then((options2) => {
         return api(wrapperOptions(getApiInterceptorHooks(method), options2), ...params);
@@ -6056,13 +6056,13 @@ function removeInterceptorHook(interceptors2, interceptor) {
   Object.keys(interceptor).forEach((name) => {
     const hooks = interceptors2[name];
     const hook = interceptor[name];
-    if (isArray(hooks) && isFunction(hook)) {
+    if (isArray$1(hooks) && isFunction(hook)) {
       remove(hooks, hook);
     }
   });
 }
 function mergeHook(parentVal, childVal) {
-  const res = childVal ? parentVal ? parentVal.concat(childVal) : isArray(childVal) ? childVal : [childVal] : parentVal;
+  const res = childVal ? parentVal ? parentVal.concat(childVal) : isArray$1(childVal) ? childVal : [childVal] : parentVal;
   return res ? dedupeHooks(res) : res;
 }
 function dedupeHooks(hooks) {
@@ -6158,7 +6158,7 @@ const $once = defineSyncApi(API_ONCE, (name, callback) => {
   return () => eventBus.off(name, callback);
 }, OnceProtocol);
 const $off = defineSyncApi(API_OFF, (name, callback) => {
-  if (!isArray(name))
+  if (!isArray$1(name))
     name = name ? [name] : [];
   name.forEach((n2) => {
     eventBus.off(n2, callback);
@@ -6584,7 +6584,7 @@ const previewImage = {
       return;
     }
     const urls = fromArgs.urls;
-    if (!isArray(urls)) {
+    if (!isArray$1(urls)) {
       return;
     }
     const len = urls.length;
@@ -7389,9 +7389,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "127.0.0.1,192.168.0.133";
+  const hosts = "127.0.0.1,192.168.0.184";
   const port = "8090";
-  const id = "mp-weixin_7joeOM";
+  const id = "mp-weixin_avfGrO";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -7507,7 +7507,7 @@ function initWorkletMethods(mpMethods, vueMethods) {
   }
 }
 function initWxsCallMethods(methods, wxsCallMethods) {
-  if (!isArray(wxsCallMethods)) {
+  if (!isArray$1(wxsCallMethods)) {
     return;
   }
   wxsCallMethods.forEach((callMethod) => {
@@ -7609,7 +7609,7 @@ function initBaseInstance(instance, options) {
     ctx._self = {};
   }
   instance.slots = {};
-  if (isArray(options.slots) && options.slots.length) {
+  if (isArray$1(options.slots) && options.slots.length) {
     options.slots.forEach((name) => {
       instance.slots[name] = true;
     });
@@ -7726,7 +7726,7 @@ const findMixinRuntimeHooks = /* @__PURE__ */ once(() => {
   const app = isFunction(getApp) && getApp({ allowDefault: true });
   if (app && app.$vm && app.$vm.$) {
     const mixins = app.$vm.$.appContext.mixins;
-    if (isArray(mixins)) {
+    if (isArray$1(mixins)) {
       const hooks = Object.keys(MINI_PROGRAM_PAGE_RUNTIME_HOOKS);
       mixins.forEach((mixin) => {
         hooks.forEach((hook) => {
@@ -7938,7 +7938,7 @@ function initProps(mpComponentOptions) {
 }
 const PROP_TYPES = [String, Number, Boolean, Object, Array, null];
 function parsePropType(type, defaultValue) {
-  if (isArray(type) && type.length === 1) {
+  if (isArray$1(type) && type.length === 1) {
     return type[0];
   }
   return type;
@@ -7948,7 +7948,7 @@ function normalizePropType(type, defaultValue) {
   return PROP_TYPES.indexOf(res) !== -1 ? res : null;
 }
 function initPageProps({ properties }, rawProps) {
-  if (isArray(rawProps)) {
+  if (isArray$1(rawProps)) {
     rawProps.forEach((key) => {
       properties[key] = {
         type: String,
@@ -7993,7 +7993,7 @@ function findPagePropsData(properties) {
 }
 function initFormField(vm) {
   const vueOptions = vm.$options;
-  if (isArray(vueOptions.behaviors) && vueOptions.behaviors.includes("uni://form-field")) {
+  if (isArray$1(vueOptions.behaviors) && vueOptions.behaviors.includes("uni://form-field")) {
     vm.$watch("modelValue", () => {
       vm.$scope && vm.$scope.setData({
         name: vm.name,
@@ -8069,11 +8069,11 @@ function initBehaviors(vueOptions) {
     vueOptions.props = vueProps = [];
   }
   const behaviors = [];
-  if (isArray(vueBehaviors)) {
+  if (isArray$1(vueBehaviors)) {
     vueBehaviors.forEach((behavior) => {
       behaviors.push(behavior.replace("uni://", "wx://"));
       if (behavior === "uni://form-field") {
-        if (isArray(vueProps)) {
+        if (isArray$1(vueProps)) {
           vueProps.push("name");
           vueProps.push("modelValue");
         } else {
@@ -8103,7 +8103,7 @@ function parseComponent(vueOptions, { parse: parse2, mocks: mocks2, isPage: isPa
     addGlobalClass: true,
     pureDataPattern: /^uP$/
   };
-  if (isArray(vueOptions.mixins)) {
+  if (isArray$1(vueOptions.mixins)) {
     vueOptions.mixins.forEach((item) => {
       if (isObject$1(item.options)) {
         extend(options, item.options);
@@ -9128,6 +9128,517 @@ const onPullDownRefresh = /* @__PURE__ */ createLifeCycleHook(
   2
   /* HookFlags.PAGE */
 );
+/**
+ * @preserve
+ * gcoord 1.0.7, geographic coordinate library
+ * Copyright (c) 2025 Jiulong Hu <me@hujiulong.com>
+ */
+const { sin: sin$1, cos: cos$1, sqrt: sqrt$1, abs: abs$1, PI: PI$1 } = Math;
+const a$1 = 6378245;
+const ee$1 = 0.006693421622965823;
+function isInChinaBbox(lon, lat) {
+  return lon >= 72.004 && lon <= 137.8347 && lat >= 0.8293 && lat <= 55.8271;
+}
+function transformLat(x, y2) {
+  let ret = -100 + 2 * x + 3 * y2 + 0.2 * y2 * y2 + 0.1 * x * y2 + 0.2 * sqrt$1(abs$1(x));
+  ret += (20 * sin$1(6 * x * PI$1) + 20 * sin$1(2 * x * PI$1)) * 2 / 3;
+  ret += (20 * sin$1(y2 * PI$1) + 40 * sin$1(y2 / 3 * PI$1)) * 2 / 3;
+  ret += (160 * sin$1(y2 / 12 * PI$1) + 320 * sin$1(y2 * PI$1 / 30)) * 2 / 3;
+  return ret;
+}
+function transformLon(x, y2) {
+  let ret = 300 + x + 2 * y2 + 0.1 * x * x + 0.1 * x * y2 + 0.1 * sqrt$1(abs$1(x));
+  ret += (20 * sin$1(6 * x * PI$1) + 20 * sin$1(2 * x * PI$1)) * 2 / 3;
+  ret += (20 * sin$1(x * PI$1) + 40 * sin$1(x / 3 * PI$1)) * 2 / 3;
+  ret += (150 * sin$1(x / 12 * PI$1) + 300 * sin$1(x / 30 * PI$1)) * 2 / 3;
+  return ret;
+}
+function delta(lon, lat) {
+  let dLon = transformLon(lon - 105, lat - 35);
+  let dLat = transformLat(lon - 105, lat - 35);
+  const radLat = lat / 180 * PI$1;
+  let magic = sin$1(radLat);
+  magic = 1 - ee$1 * magic * magic;
+  const sqrtMagic = sqrt$1(magic);
+  dLon = dLon * 180 / (a$1 / sqrtMagic * cos$1(radLat) * PI$1);
+  dLat = dLat * 180 / (a$1 * (1 - ee$1) / (magic * sqrtMagic) * PI$1);
+  return [dLon, dLat];
+}
+function WGS84ToGCJ02(coord) {
+  const [lon, lat] = coord;
+  if (!isInChinaBbox(lon, lat))
+    return [lon, lat];
+  const d2 = delta(lon, lat);
+  return [lon + d2[0], lat + d2[1]];
+}
+function GCJ02ToWGS84(coord) {
+  const [lon, lat] = coord;
+  if (!isInChinaBbox(lon, lat))
+    return [lon, lat];
+  let [wgsLon, wgsLat] = [lon, lat];
+  let tempPoint = WGS84ToGCJ02([wgsLon, wgsLat]);
+  let dx = tempPoint[0] - lon;
+  let dy = tempPoint[1] - lat;
+  while (abs$1(dx) > 1e-6 || abs$1(dy) > 1e-6) {
+    wgsLon -= dx;
+    wgsLat -= dy;
+    tempPoint = WGS84ToGCJ02([wgsLon, wgsLat]);
+    dx = tempPoint[0] - lon;
+    dy = tempPoint[1] - lat;
+  }
+  return [wgsLon, wgsLat];
+}
+const { sin, cos, atan2, sqrt, PI } = Math;
+const baiduFactor = PI * 3e3 / 180;
+function BD09ToGCJ02(coord) {
+  const [lon, lat] = coord;
+  const x = lon - 65e-4;
+  const y2 = lat - 6e-3;
+  const z2 = sqrt(x * x + y2 * y2) - 2e-5 * sin(y2 * baiduFactor);
+  const theta = atan2(y2, x) - 3e-6 * cos(x * baiduFactor);
+  const newLon = z2 * cos(theta);
+  const newLat = z2 * sin(theta);
+  return [newLon, newLat];
+}
+function GCJ02ToBD09(coord) {
+  const [lon, lat] = coord;
+  const x = lon;
+  const y2 = lat;
+  const z2 = sqrt(x * x + y2 * y2) + 2e-5 * sin(y2 * baiduFactor);
+  const theta = atan2(y2, x) + 3e-6 * cos(x * baiduFactor);
+  const newLon = z2 * cos(theta) + 65e-4;
+  const newLat = z2 * sin(theta) + 6e-3;
+  return [newLon, newLat];
+}
+const R2D = 180 / Math.PI;
+const D2R = Math.PI / 180;
+const A$1 = 6378137;
+const MAXEXTENT = 20037508342789244e-9;
+function EPSG3857ToWGS84(xy) {
+  return [
+    xy[0] * R2D / A$1,
+    (Math.PI * 0.5 - 2 * Math.atan(Math.exp(-xy[1] / A$1))) * R2D
+  ];
+}
+function WGS84ToEPSG3857(lonLat) {
+  const adjusted = Math.abs(lonLat[0]) <= 180 ? lonLat[0] : lonLat[0] - (lonLat[0] < 0 ? -1 : 1) * 360;
+  const xy = [
+    A$1 * adjusted * D2R,
+    A$1 * Math.log(Math.tan(Math.PI * 0.25 + 0.5 * lonLat[1] * D2R))
+  ];
+  if (xy[0] > MAXEXTENT)
+    xy[0] = MAXEXTENT;
+  if (xy[0] < -MAXEXTENT)
+    xy[0] = -MAXEXTENT;
+  if (xy[1] > MAXEXTENT)
+    xy[1] = MAXEXTENT;
+  if (xy[1] < -MAXEXTENT)
+    xy[1] = -MAXEXTENT;
+  return xy;
+}
+const { abs } = Math;
+const MCBAND = [1289059486e-2, 836237787e-2, 5591021, 348198983e-2, 167804312e-2, 0];
+const LLBAND = [75, 60, 45, 30, 15, 0];
+const MC2LL = [
+  [
+    1410526172116255e-23,
+    898305509648872e-20,
+    -1.9939833816331,
+    200.9824383106796,
+    -187.2403703815547,
+    91.6087516669843,
+    -23.38765649603339,
+    2.57121317296198,
+    -0.03801003308653,
+    173379812e-1
+  ],
+  [
+    -7435856389565537e-24,
+    8983055097726239e-21,
+    -0.78625201886289,
+    96.32687599759846,
+    -1.85204757529826,
+    -59.36935905485877,
+    47.40033549296737,
+    -16.50741931063887,
+    2.28786674699375,
+    1026014486e-2
+  ],
+  [
+    -3030883460898826e-23,
+    898305509983578e-20,
+    0.30071316287616,
+    59.74293618442277,
+    7.357984074871,
+    -25.38371002664745,
+    13.45380521110908,
+    -3.29883767235584,
+    0.32710905363475,
+    685681737e-2
+  ],
+  [
+    -1981981304930552e-23,
+    8983055099779535e-21,
+    0.03278182852591,
+    40.31678527705744,
+    0.65659298677277,
+    -4.44255534477492,
+    0.85341911805263,
+    0.12923347998204,
+    -0.04625736007561,
+    448277706e-2
+  ],
+  [
+    309191371068437e-23,
+    8983055096812155e-21,
+    6995724062e-14,
+    23.10934304144901,
+    -23663490511e-14,
+    -0.6321817810242,
+    -0.00663494467273,
+    0.03430082397953,
+    -0.00466043876332,
+    25551644e-1
+  ],
+  [
+    2890871144776878e-24,
+    8983055095805407e-21,
+    -3068298e-14,
+    7.47137025468032,
+    -353937994e-14,
+    -0.02145144861037,
+    -1234426596e-14,
+    10322952773e-14,
+    -323890364e-14,
+    826088.5
+  ]
+];
+const LL2MC = [
+  [
+    -0.0015702102444,
+    111320.7020616939,
+    1704480524535203,
+    -10338987376042340,
+    26112667856603880,
+    -35149669176653700,
+    26595700718403920,
+    -10725012454188240,
+    1800819912950474,
+    82.5
+  ],
+  [
+    8277824516172526e-19,
+    111320.7020463578,
+    6477955746671607e-7,
+    -4082003173641316e-6,
+    1077490566351142e-5,
+    -1517187553151559e-5,
+    1205306533862167e-5,
+    -5124939663577472e-6,
+    9133119359512032e-7,
+    67.5
+  ],
+  [
+    0.00337398766765,
+    111320.7020202162,
+    4481351045890365e-9,
+    -2339375119931662e-8,
+    7968221547186455e-8,
+    -1159649932797253e-7,
+    9723671115602145e-8,
+    -4366194633752821e-8,
+    8477230501135234e-9,
+    52.5
+  ],
+  [
+    0.00220636496208,
+    111320.7020209128,
+    51751.86112841131,
+    3796837749470245e-9,
+    992013.7397791013,
+    -122195221711287e-8,
+    1340652697009075e-9,
+    -620943.6990984312,
+    144416.9293806241,
+    37.5
+  ],
+  [
+    -3441963504368392e-19,
+    111320.7020576856,
+    278.2353980772752,
+    2485758690035394e-9,
+    6070.750963243378,
+    54821.18345352118,
+    9540.606633304236,
+    -2710.55326746645,
+    1405.483844121726,
+    22.5
+  ],
+  [
+    -3218135878613132e-19,
+    111320.7020701615,
+    0.00369383431289,
+    823725.6402795718,
+    0.46104986909093,
+    2351.343141331292,
+    1.58060784298199,
+    8.77738589078284,
+    0.37238884252424,
+    7.45
+  ]
+];
+function transform$1(x, y2, factors) {
+  const cc = abs(y2) / factors[9];
+  let xt2 = factors[0] + factors[1] * abs(x);
+  let yt2 = factors[2] + factors[3] * cc + factors[4] * Math.pow(cc, 2) + factors[5] * Math.pow(cc, 3) + factors[6] * Math.pow(cc, 4) + factors[7] * Math.pow(cc, 5) + factors[8] * Math.pow(cc, 6);
+  xt2 *= x < 0 ? -1 : 1;
+  yt2 *= y2 < 0 ? -1 : 1;
+  return [xt2, yt2];
+}
+function BD09toBD09MC(coord) {
+  const [lng, lat] = coord;
+  let factors = [];
+  for (let i2 = 0; i2 < LLBAND.length; i2++) {
+    if (abs(lat) > LLBAND[i2]) {
+      factors = LL2MC[i2];
+      break;
+    }
+  }
+  return transform$1(lng, lat, factors);
+}
+function BD09MCtoBD09(coord) {
+  const [x, y2] = coord;
+  let factors = [];
+  for (let i2 = 0; i2 < MCBAND.length; i2++) {
+    if (abs(y2) >= MCBAND[i2]) {
+      factors = MC2LL[i2];
+      break;
+    }
+  }
+  return transform$1(x, y2, factors);
+}
+function assert(condition, msg) {
+  if (!condition)
+    throw new Error(msg);
+}
+function isArray(input) {
+  return !!input && Object.prototype.toString.call(input) === "[object Array]";
+}
+function isNumber(input) {
+  return !isNaN(Number(input)) && input !== null && !isArray(input);
+}
+function compose(...funcs) {
+  const start = funcs.length - 1;
+  return function(...args) {
+    let i2 = start;
+    let result = funcs[start].apply(null, args);
+    while (i2--)
+      result = funcs[i2].call(null, result);
+    return result;
+  };
+}
+function coordEach(geojson, callback, excludeWrapCoord = false) {
+  if (geojson === null)
+    return;
+  let j2;
+  let k;
+  let l2;
+  let geometry;
+  let coords;
+  let stopG;
+  let wrapShrink = 0;
+  let coordIndex = 0;
+  let geometryMaybeCollection;
+  let isGeometryCollection;
+  const { type } = geojson;
+  const isFeatureCollection = type === "FeatureCollection";
+  const isFeature = type === "Feature";
+  const stop = isFeatureCollection ? geojson.features.length : 1;
+  for (let featureIndex = 0; featureIndex < stop; featureIndex++) {
+    geometryMaybeCollection = isFeatureCollection ? geojson.features[featureIndex].geometry : isFeature ? geojson.geometry : geojson;
+    isGeometryCollection = geometryMaybeCollection ? geometryMaybeCollection.type === "GeometryCollection" : false;
+    stopG = isGeometryCollection ? geometryMaybeCollection.geometries.length : 1;
+    for (let geomIndex = 0; geomIndex < stopG; geomIndex++) {
+      let multiFeatureIndex = 0;
+      let geometryIndex = 0;
+      geometry = isGeometryCollection ? geometryMaybeCollection.geometries[geomIndex] : geometryMaybeCollection;
+      if (geometry === null)
+        continue;
+      const geomType = geometry.type;
+      wrapShrink = excludeWrapCoord && (geomType === "Polygon" || geomType === "MultiPolygon") ? 1 : 0;
+      switch (geomType) {
+        case null:
+          break;
+        case "Point":
+          coords = geometry.coordinates;
+          if (callback(coords, coordIndex, featureIndex, multiFeatureIndex, geometryIndex) === false)
+            return false;
+          coordIndex++;
+          multiFeatureIndex++;
+          break;
+        case "LineString":
+        case "MultiPoint":
+          coords = geometry.coordinates;
+          for (j2 = 0; j2 < coords.length; j2++) {
+            if (callback(coords[j2], coordIndex, featureIndex, multiFeatureIndex, geometryIndex) === false)
+              return false;
+            coordIndex++;
+            if (geomType === "MultiPoint")
+              multiFeatureIndex++;
+          }
+          if (geomType === "LineString")
+            multiFeatureIndex++;
+          break;
+        case "Polygon":
+        case "MultiLineString":
+          coords = geometry.coordinates;
+          for (j2 = 0; j2 < coords.length; j2++) {
+            for (k = 0; k < coords[j2].length - wrapShrink; k++) {
+              if (callback(coords[j2][k], coordIndex, featureIndex, multiFeatureIndex, geometryIndex) === false)
+                return false;
+              coordIndex++;
+            }
+            if (geomType === "MultiLineString")
+              multiFeatureIndex++;
+            if (geomType === "Polygon")
+              geometryIndex++;
+          }
+          if (geomType === "Polygon")
+            multiFeatureIndex++;
+          break;
+        case "MultiPolygon":
+          coords = geometry.coordinates;
+          for (j2 = 0; j2 < coords.length; j2++) {
+            geometryIndex = 0;
+            for (k = 0; k < coords[j2].length; k++) {
+              for (l2 = 0; l2 < coords[j2][k].length - wrapShrink; l2++) {
+                if (callback(coords[j2][k][l2], coordIndex, featureIndex, multiFeatureIndex, geometryIndex) === false)
+                  return false;
+                coordIndex++;
+              }
+              geometryIndex++;
+            }
+            multiFeatureIndex++;
+          }
+          break;
+        case "GeometryCollection":
+          for (j2 = 0; j2 < geometry.geometries.length; j2++) {
+            if (coordEach(geometry.geometries[j2], callback, excludeWrapCoord) === false)
+              return false;
+          }
+          break;
+        default:
+          throw new Error("Unknown Geometry Type");
+      }
+    }
+  }
+}
+var CRSTypes;
+(function(CRSTypes2) {
+  CRSTypes2["WGS84"] = "WGS84";
+  CRSTypes2["WGS1984"] = "WGS84";
+  CRSTypes2["EPSG4326"] = "WGS84";
+  CRSTypes2["GCJ02"] = "GCJ02";
+  CRSTypes2["AMap"] = "GCJ02";
+  CRSTypes2["BD09"] = "BD09";
+  CRSTypes2["BD09LL"] = "BD09";
+  CRSTypes2["Baidu"] = "BD09";
+  CRSTypes2["BMap"] = "BD09";
+  CRSTypes2["BD09MC"] = "BD09MC";
+  CRSTypes2["BD09Meter"] = "BD09MC";
+  CRSTypes2["EPSG3857"] = "EPSG3857";
+  CRSTypes2["EPSG900913"] = "EPSG3857";
+  CRSTypes2["EPSG102100"] = "EPSG3857";
+  CRSTypes2["WebMercator"] = "EPSG3857";
+  CRSTypes2["WM"] = "EPSG3857";
+})(CRSTypes || (CRSTypes = {}));
+const WGS84 = {
+  to: {
+    [CRSTypes.GCJ02]: WGS84ToGCJ02,
+    [CRSTypes.BD09]: compose(GCJ02ToBD09, WGS84ToGCJ02),
+    [CRSTypes.BD09MC]: compose(BD09toBD09MC, GCJ02ToBD09, WGS84ToGCJ02),
+    [CRSTypes.EPSG3857]: WGS84ToEPSG3857
+  }
+};
+const GCJ02 = {
+  to: {
+    [CRSTypes.WGS84]: GCJ02ToWGS84,
+    [CRSTypes.BD09]: GCJ02ToBD09,
+    [CRSTypes.BD09MC]: compose(BD09toBD09MC, GCJ02ToBD09),
+    [CRSTypes.EPSG3857]: compose(WGS84ToEPSG3857, GCJ02ToWGS84)
+  }
+};
+const BD09 = {
+  to: {
+    [CRSTypes.WGS84]: compose(GCJ02ToWGS84, BD09ToGCJ02),
+    [CRSTypes.GCJ02]: BD09ToGCJ02,
+    [CRSTypes.EPSG3857]: compose(WGS84ToEPSG3857, GCJ02ToWGS84, BD09ToGCJ02),
+    [CRSTypes.BD09MC]: BD09toBD09MC
+  }
+};
+const EPSG3857 = {
+  to: {
+    [CRSTypes.WGS84]: EPSG3857ToWGS84,
+    [CRSTypes.GCJ02]: compose(WGS84ToGCJ02, EPSG3857ToWGS84),
+    [CRSTypes.BD09]: compose(GCJ02ToBD09, WGS84ToGCJ02, EPSG3857ToWGS84),
+    [CRSTypes.BD09MC]: compose(BD09toBD09MC, GCJ02ToBD09, WGS84ToGCJ02, EPSG3857ToWGS84)
+  }
+};
+const BD09MC = {
+  to: {
+    [CRSTypes.WGS84]: compose(GCJ02ToWGS84, BD09ToGCJ02, BD09MCtoBD09),
+    [CRSTypes.GCJ02]: compose(BD09ToGCJ02, BD09MCtoBD09),
+    [CRSTypes.EPSG3857]: compose(WGS84ToEPSG3857, GCJ02ToWGS84, BD09ToGCJ02, BD09MCtoBD09),
+    [CRSTypes.BD09]: BD09MCtoBD09
+  }
+};
+const crsMap = {
+  WGS84,
+  GCJ02,
+  BD09,
+  EPSG3857,
+  BD09MC
+};
+var crsMap$1 = crsMap;
+function transform(input, crsFrom, crsTo) {
+  assert(!!input, "The args[0] input coordinate is required");
+  assert(!!crsFrom, "The args[1] original coordinate system is required");
+  assert(!!crsTo, "The args[2] target coordinate system is required");
+  if (crsFrom === crsTo)
+    return input;
+  const from = crsMap$1[crsFrom];
+  assert(!!from, `Invalid original coordinate system: ${crsFrom}`);
+  const to = from.to[crsTo];
+  assert(!!to, `Invalid target coordinate system: ${crsTo}`);
+  const type = typeof input;
+  assert(type === "string" || type === "object", `Invalid input coordinate type: ${type}`);
+  if (type === "string") {
+    try {
+      input = JSON.parse(input);
+    } catch (e2) {
+      throw new Error(`Invalid input coordinate: ${input}`);
+    }
+  }
+  let isPosition = false;
+  if (isArray(input)) {
+    assert(input.length >= 2, `Invalid input coordinate: ${input}`);
+    assert(isNumber(input[0]) && isNumber(input[1]), `Invalid input coordinate: ${input}`);
+    input = input.map(Number);
+    isPosition = true;
+  }
+  const convert = to;
+  if (isPosition)
+    return convert(input);
+  coordEach(input, (coord) => {
+    [coord[0], coord[1]] = convert(coord);
+  });
+  return input;
+}
+const exported = Object.assign(Object.assign({}, CRSTypes), {
+  // 兼容原来gcoord.WGS84的使用方式
+  CRSTypes,
+  transform
+});
 const pages = [
   {
     path: "pages/index/index",
@@ -12139,10 +12650,12 @@ exports.createPinia = createPinia;
 exports.createSSRApp = createSSRApp;
 exports.defineStore = defineStore;
 exports.e = e$1;
+exports.exported = exported;
 exports.f = f$1;
 exports.index = index;
 exports.initVueI18n = initVueI18n;
 exports.n = n$1;
+exports.nextTick$1 = nextTick$1;
 exports.o = o$1;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
@@ -12159,5 +12672,6 @@ exports.sr = sr;
 exports.t = t$1;
 exports.tr = tr;
 exports.unref = unref;
+exports.watch = watch;
 exports.wx$1 = wx$1;
 //# sourceMappingURL=../../.sourcemap/mp-weixin/common/vendor.js.map

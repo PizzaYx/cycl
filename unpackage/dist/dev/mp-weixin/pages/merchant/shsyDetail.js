@@ -50,19 +50,19 @@ const _sfc_main = {
       },
       {
         label: "预估重量:",
-        value: pageData.value.estimateWeight + "kg"
+        value: pageData.value.estimateWeight + " kg"
       },
       {
         label: "收运重量:",
-        value: pageData.value.weight + "kg"
+        value: pageData.value.weight + " kg"
       },
       {
         label: "预估桶数:",
-        value: pageData.value.estimateBucketNum + "个"
+        value: pageData.value.estimateBucketNum + " 个"
       },
       {
         label: "收运桶数:",
-        value: pageData.value.estimateBucketNum + "个"
+        value: pageData.value.bucketNum + " 个"
       },
       {
         label: "收运地址:",
@@ -103,16 +103,16 @@ const _sfc_main = {
           driverName: data.driverName,
           status: data.status,
           merchantName: data.merchantName,
-          estimateWeight: data.estimateWeight ?? "暂无",
-          weight: data.weight ?? "暂无",
-          estimateBucketNum: data.estimateBucketNum ?? "暂无",
-          bucketNum: data.bucketNum ?? "暂无",
+          estimateWeight: data.estimateWeight,
+          weight: data.weight,
+          estimateBucketNum: data.estimateBucketNum,
+          bucketNum: data.bucketNum,
           registrationNumber: data.registrationNumber,
           img: data.img ? data.img.split(",") : [],
           appointmentTime: data.appointmentTime,
           arrivalTime: data.arrivalTime,
           address: data.address,
-          explain: data.explain ?? "暂无"
+          explain: data.explain
         };
       }
     };
@@ -129,7 +129,7 @@ const _sfc_main = {
           ["status-bar"]: true,
           ["left-icon"]: "left",
           color: "#000",
-          title: "预约详细"
+          title: "收运详细"
         }),
         c: common_vendor.t(pageData.value.merchantName),
         d: common_vendor.t(statusText.value),

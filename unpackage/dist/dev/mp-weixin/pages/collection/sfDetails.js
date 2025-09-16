@@ -266,7 +266,7 @@ const _sfc_main = {
           ["status-bar"]: true,
           ["left-icon"]: "left",
           color: "#000",
-          title: "收运详情"
+          title: "今日收运详情"
         }),
         c: common_vendor.t(name.value),
         d: common_vendor.o(($event) => contactLine()),

@@ -2,7 +2,7 @@
 <template>
     <view class="container">
         <!-- 头部导航 -->
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="预约详细"
+        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运详细"
             @clickLeft="back" />
 
         <!-- 用户信息 -->
@@ -69,20 +69,20 @@ const infoList = computed(() => [
     },
     {
         label: '预估重量:',
-        value: pageData.value.estimateWeight + 'kg' ?? '暂无'
+        value: pageData.value.estimateWeight + ' kg' ?? '暂无'
 
     },
     {
         label: '收运重量:',
-        value: pageData.value.weight + 'kg' ?? '暂无'
+        value: pageData.value.weight + ' kg' ?? '暂无'
     },
     {
         label: '预估桶数:',
-        value: pageData.value.estimateBucketNum + '个' ?? '暂无'
+        value: pageData.value.estimateBucketNum + ' 个' ?? '暂无'
     },
     {
         label: '收运桶数:',
-        value: pageData.value.estimateBucketNum + '个' ?? '暂无'
+        value: pageData.value.bucketNum + ' 个' ?? '暂无'
     },
     {
         label: '收运地址:',
@@ -139,16 +139,16 @@ const getSyCheckDetail = async () => {
             driverName: data.driverName,
             status: data.status,
             merchantName: data.merchantName,
-            estimateWeight: data.estimateWeight ?? '暂无',
-            weight: data.weight ?? '暂无',
-            estimateBucketNum: data.estimateBucketNum ?? '暂无',
-            bucketNum: data.bucketNum ?? '暂无',
+            estimateWeight: data.estimateWeight,
+            weight: data.weight,
+            estimateBucketNum: data.estimateBucketNum,
+            bucketNum: data.bucketNum,
             registrationNumber: data.registrationNumber,
             img: data.img ? data.img.split(',') : [],
             appointmentTime: data.appointmentTime,
             arrivalTime: data.arrivalTime,
             address: data.address,
-            explain: data.explain ?? '暂无',
+            explain: data.explain,
 
         };
     }

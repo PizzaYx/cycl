@@ -45,45 +45,11 @@
   display: flex;
   align-items: center;
   gap: 10rpx;
-  cursor: pointer;
-  padding: 20rpx 30rpx;
   min-height: 60rpx;
 }
 .container .menu .filter-container .filter-item text.data-v-5f21cbbb {
   font-size: 28rpx;
   color: #333;
-}
-.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker {
-  background: transparent !important;
-  border: none !important;
-}
-.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn {
-  border: none !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  padding: 0 !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:before, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:after {
-  display: none !important;
-}
-.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:active, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:focus, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:hover, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:visited, .container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn:target {
-  background: transparent !important;
-  background-color: transparent !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker .uni-datetime-picker--btn .uni-datetime-picker-text {
-  font-size: 26rpx !important;
-  color: #333 !important;
-  background: transparent !important;
-}
-.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker view,
-.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker text,
-.container .menu .filter-container .filter-select.data-v-5f21cbbb .uni-datetime-picker input {
-  background: transparent !important;
-  background-color: transparent !important;
 }
 .container .tjxx.data-v-5f21cbbb {
   display: flex;

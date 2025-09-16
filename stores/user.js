@@ -86,21 +86,16 @@ export const useUserStore = defineStore('user', {
         async fetchUserInfo() {
             try {
                 const res = await apiGetInfo()
-                console.log('fetchUserInfo收到响应:', res)
-
                 // 检查响应是否存在
                 if (!res) {
                     console.log('响应为空，可能是401跳转情况')
                     return null
                 }
-
-                // 处理响应结构：可能是 {code: 200, ...} 或 {data: {code: 401, ...}}
                 const responseData = res.data || res
                 const code = responseData.code
 
                 if (code === 200) {
                     this.setUserInfo(res.user || responseData.user)
-                    console.log('用户信息获取成功:', res.user || responseData.user)
                     return res.user || responseData.user
                 } else if (code === 401) {
                     // 401错误已被request.js处理（跳转登录），这里不需要抛出异常

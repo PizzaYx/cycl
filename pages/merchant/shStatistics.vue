@@ -13,18 +13,8 @@
                     <uni-icons type="bottom" size="12" color="#666"></uni-icons>
                 </view>
 
-
-                <!-- 时间范围选择器 - 还原正常样式 -->
-                <view class="filter-item">
-                    <uni-datetime-picker ref="datetimePicker" type="datetimerange" v-model="selectedTimeRange"
-                        rangeSeparator="至" start="2020-01-01 00:00:00" :end="getCurrentDateTime()"
-                        @change="onTimeChange" :border="false" class="filter-select time-select">
-                        <template v-slot:default>
-                            <text>时间</text>
-                        </template>
-                    </uni-datetime-picker>
-                    <uni-icons type="bottom" size="12" color="#666"></uni-icons>
-                </view>
+                <!-- 时间范围选择器组件 -->
+                <TimeRangePicker v-model="selectedTimeRange" @change="onTimeChange" />
             </view>
         </view>
         <!-- 统计信息 -->
@@ -64,20 +54,21 @@
                             </view>
                             <view class="info-item">
                                 <text class="label">预估重量:</text>
-                                <text class="value">{{ (item.estimateWeight + 'kg') ?? '暂无' }}</text>
+                                <text class="value">{{ (item.estimateWeight + ' kg') ?? '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运重量:</text>
-                                <text class="value">{{ item.weight ? (item.weight + 'kg') : '暂无' }}</text>
+                                <text class="value">{{ item.weight ? (item.weight + ' kg') : '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">预估桶数:</text>
-                                <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                }}</text>
+                                <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + ' 个') :
+                                    '暂无'
+                                    }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>
-                                <text class="value">{{ item.bucketNum ? (item.bucketNum + '个') : '暂无' }} </text>
+                                <text class="value">{{ item.bucketNum ? (item.bucketNum + ' 个') : '暂无' }} </text>
                             </view>
                             <!-- <view class="info-item">
                                 <text class="label">地址:</text>
@@ -128,6 +119,7 @@ import {
 } from '@/api/apis.js';
 
 import { useUserStore } from '@/stores/user.js'
+import TimeRangePicker from '@/components/TimeRangePicker/TimeRangePicker.vue'
 
 
 const userStore = useUserStore();
@@ -135,6 +127,8 @@ const userStore = useUserStore();
 // 分别定义统计数据
 const bucketCount = ref(0);
 const totalWeight = ref(0);
+
+
 
 // 统计配置（固定不变）
 const statisticsConfig = [
@@ -150,7 +144,6 @@ const statisticsConfig = [
     }
 ];
 
-// 获取状态样式类名
 // 获取状态样式类名
 const getStatusClass = (status) => {
     switch (status) {
@@ -196,7 +189,7 @@ const getToStatistics = async () => {
         params.status = selectedStatus.value;
     }
 
-    if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
+    if (selectedTimeRange.value && selectedTimeRange.value.length === 2 && selectedTimeRange.value[0] && selectedTimeRange.value[1]) {
         params.startTime = selectedTimeRange.value[0];
         params.endTime = selectedTimeRange.value[1];
     }
@@ -253,7 +246,7 @@ const getNetwork = async () => {
             params.status = selectedStatus.value;
         }
 
-        if (selectedTimeRange.value && selectedTimeRange.value.length === 2) {
+        if (selectedTimeRange.value && selectedTimeRange.value.length === 2 && selectedTimeRange.value[0] && selectedTimeRange.value[1]) {
             params.startTime = selectedTimeRange.value[0];
             params.endTime = selectedTimeRange.value[1];
         }
@@ -323,16 +316,23 @@ onPullDownRefresh(() => {
     getToStatistics();
 })
 
-// 引用选择器组件
-const datetimePicker = ref(null);
-
 // 筛选相关方法
 const showStatusPicker = () => {
+    // 创建带颜色的选项列表
+    const itemList = statusOptions.value.map((item, index) => {
+        const isSelected = selectedStatus.value === item.value;
+        return isSelected ? `✓ ${item.text}` : item.text;
+    });
+
     uni.showActionSheet({
-        itemList: statusOptions.value.map(item => item.text),
+        itemList: itemList,
         success: (res) => {
             const selectedOption = statusOptions.value[res.tapIndex];
             onStatusChange(selectedOption.value);
+        },
+        fail: (err) => {
+            // 用户取消操作，重置状态为null
+            onStatusChange(null);
         }
     });
 };
@@ -345,6 +345,7 @@ const onStatusChange = (value) => {
 
 
 const onTimeChange = (value) => {
+    console.log('时间变化:', value);
     selectedTimeRange.value = value;
     // 重置页面并重新加载数据
     resetPageAndReload();
@@ -356,19 +357,6 @@ const resetPageAndReload = () => {
     pageNum.value = 1;
     getNetwork();
     getToStatistics();
-};
-
-
-// 获取当前日期时间（包含时分秒）
-const getCurrentDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hour = String(now.getHours()).padStart(2, '0');
-    const minute = String(now.getMinutes()).padStart(2, '0');
-    const second = String(now.getSeconds()).padStart(2, '0');
-    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 };
 
 
@@ -403,9 +391,6 @@ onMounted(() => {
                 display: flex;
                 align-items: center;
                 gap: 10rpx; // 文字和箭头紧挨着
-                cursor: pointer;
-                // 增加点击范围
-                padding: 20rpx 30rpx;
                 min-height: 60rpx;
 
                 text {
@@ -413,57 +398,6 @@ onMounted(() => {
                     color: #333;
                 }
             }
-
-            .filter-select {
-
-                // 自定义 uni-datetime-picker 样式 - 彻底移除所有背景
-                :deep(.uni-datetime-picker) {
-                    // 移除组件本身的所有样式
-                    background: transparent !important;
-                    border: none !important;
-
-                    .uni-datetime-picker--btn {
-                        border: none !important;
-                        background: transparent !important;
-                        background-color: transparent !important;
-                        padding: 0 !important;
-                        box-shadow: none !important;
-                        outline: none !important;
-
-                        // 强制移除所有可能的背景状态
-                        &:before,
-                        &:after {
-                            display: none !important;
-                        }
-
-                        &:active,
-                        &:focus,
-                        &:hover,
-                        &:visited,
-                        &:target {
-                            background: transparent !important;
-                            background-color: transparent !important;
-                            box-shadow: none !important;
-                            outline: none !important;
-                        }
-
-                        .uni-datetime-picker-text {
-                            font-size: 26rpx !important;
-                            color: #333 !important;
-                            background: transparent !important;
-                        }
-                    }
-
-                    // 移除可能存在的其他子元素背景
-                    view,
-                    text,
-                    input {
-                        background: transparent !important;
-                        background-color: transparent !important;
-                    }
-                }
-            }
-
 
         }
     }

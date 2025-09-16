@@ -138,7 +138,8 @@ const handleScan = () => {
                 binCount: '',
                 weight: '',
                 images: [],
-                isConfirmed: false // 添加确认状态
+                isConfirmed: false, // 添加确认状态
+                bucketCode: res.result // 添加桶编码
             });
             // 增加垃圾桶数量
             ljNum.value++;
@@ -270,8 +271,8 @@ const handleConfirm = (index) => {
 //确认收运上报
 const confirmReport = async (index) => { 
     const record = records.value[index];
-    // 模拟桶编码数据
-    const bucketCode = 'BC' + new Date().getTime();
+    // 从扫码结果中获取桶编码数据，如果没有则使用默认值
+    const bucketCode = record.bucketCode || ('BC' + new Date().getTime());
     
     // 构造上报数据
     const reportData = {

@@ -46,11 +46,11 @@ const _sfc_main = {
       },
       {
         label: "预估重量:",
-        value: pageData.value.estimateWeight + "kg"
+        value: pageData.value.estimateWeight + " kg"
       },
       {
         label: "预估桶数:",
-        value: pageData.value.estimateBucketNum + "个"
+        value: pageData.value.estimateBucketNum + " 个"
       },
       {
         label: "收运地址:",
@@ -69,14 +69,11 @@ const _sfc_main = {
       } else if (options["merchantId "]) {
         merchantId.value = options["merchantId "];
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shyyDetail.vue:99", "接收到的参数:", options);
-      common_vendor.index.__f__("log", "at pages/merchant/shyyDetail.vue:100", "解析后的参数:", { merchantId: merchantId.value, id: id.value });
       getSyCheckDetail();
     });
     common_vendor.onMounted(() => {
     });
     const getSyCheckDetail = async () => {
-      common_vendor.index.__f__("log", "at pages/merchant/shyyDetail.vue:115", "获取收运记录详情", merchantId.value, id.value);
       const res = await api_apis.apiGetPlanTemporaryById({
         merchantId: merchantId.value,
         id: id.value
@@ -84,20 +81,21 @@ const _sfc_main = {
       if (res.code === 200) {
         const data = res.data;
         pageData.value = {
-          driverName: data.driverName,
+          driverName: data.driverName ?? "",
           status: data.status,
-          merchantName: data.merchantName,
-          estimateWeight: data.estimateWeight ?? "暂无",
-          weight: data.weight ?? "暂无",
-          estimateBucketNum: data.estimateBucketNum ?? "暂无",
-          bucketNum: data.bucketNum ?? "暂无",
-          registrationNumber: data.registrationNumber,
+          merchantName: data.merchantName ?? "",
+          estimateWeight: data.estimateWeight ?? 0,
+          weight: data.weight ?? 0,
+          estimateBucketNum: data.estimateBucketNum ?? 0,
+          bucketNum: data.bucketNum ?? 0,
+          registrationNumber: data.registrationNumber ?? 0,
           img: data.img ? data.img.split(",") : [],
-          appointmentTime: data.appointmentTime,
+          appointmentTime: data.appointmentTime ?? 0,
           arrivalTime: data.arrivalTime,
-          address: data.address,
-          explain: data.explain ?? "暂无"
+          address: data.address ?? "",
+          explain: data.explain ?? ""
         };
+        common_vendor.index.__f__("log", "at pages/merchant/shyyDetail.vue:139", "获取收运记录详情成功", pageData.value);
       }
     };
     const back = () => {

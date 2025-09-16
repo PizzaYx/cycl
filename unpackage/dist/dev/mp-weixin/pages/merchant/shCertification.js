@@ -62,6 +62,9 @@ const _sfc_main = {
     const isReadOnly = common_vendor.computed(() => {
       return authStatus.value === "pending" || authStatus.value === "approved";
     });
+    const showMerchantSelector = common_vendor.computed(() => {
+      return authStatus.value === "none" || authStatus.value === "rejected";
+    });
     const formData = common_vendor.reactive({
       merchantName: "",
       address: "",
@@ -89,6 +92,7 @@ const _sfc_main = {
       { value: 6, text: "永商" },
       { value: 7, text: "花源" }
     ];
+    common_vendor.ref([]);
     const formRef = common_vendor.ref();
     const formRules = {
       merchantName: {
@@ -186,30 +190,30 @@ const _sfc_main = {
           {
             required: true,
             validateFunction: function(rule, value, data, callback) {
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:320", "===== 开始验证营业执照 =====");
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:321", "验证营业执照 - 完整数据:", JSON.stringify(value));
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:322", "验证营业执照 - 数据类型:", typeof value);
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:323", "验证营业执照 - 是否数组:", Array.isArray(value));
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:324", "验证营业执照 - 原始值:", value);
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:354", "===== 开始验证营业执照 =====");
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:355", "验证营业执照 - 完整数据:", JSON.stringify(value));
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:356", "验证营业执照 - 数据类型:", typeof value);
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:357", "验证营业执照 - 是否数组:", Array.isArray(value));
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:358", "验证营业执照 - 原始值:", value);
               if (value === void 0 || value === null) {
-                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:328", "验证失败: 值为 undefined 或 null");
+                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:362", "验证失败: 值为 undefined 或 null");
                 callback("请至少上传1张营业执照");
                 return false;
               }
               if (!Array.isArray(value)) {
-                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:335", "验证失败: 不是数组，类型为:", typeof value);
+                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:369", "验证失败: 不是数组，类型为:", typeof value);
                 callback("请至少上传1张营业执照");
                 return false;
               }
               if (value.length === 0) {
-                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:342", "验证失败: 数组为空");
+                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:376", "验证失败: 数组为空");
                 callback("请至少上传1张营业执照");
                 return false;
               }
               const validFiles = value.filter((file, index) => {
-                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:349", `检查文件${index}:`, JSON.stringify(file));
+                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:383", `检查文件${index}:`, JSON.stringify(file));
                 if (!file) {
-                  common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:351", `文件${index}: 文件对象为空`);
+                  common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:385", `文件${index}: 文件对象为空`);
                   return false;
                 }
                 const hasUrl = file.url && file.url.trim();
@@ -221,7 +225,7 @@ const _sfc_main = {
                 const hasSize = file.size;
                 const hasTempFilePath = file.tempFilePath;
                 const hasFile = file.file;
-                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:366", `文件${index}检查结果:`, {
+                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:400", `文件${index}检查结果:`, {
                   hasUrl,
                   hasPath,
                   hasResponse,
@@ -239,23 +243,23 @@ const _sfc_main = {
                   file: file.file
                 });
                 const isValid = hasUrl || hasPath || hasResponse || isString || hasFileId || hasName || hasTempFilePath || hasFile;
-                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:377", `文件${index}是否有效:`, isValid);
+                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:411", `文件${index}是否有效:`, isValid);
                 return isValid;
               });
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:381", "有效文件数量:", validFiles.length);
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:382", "有效文件详情:", validFiles.map((f) => ({ url: f.url, path: f.path, name: f.name })));
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:415", "有效文件数量:", validFiles.length);
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:416", "有效文件详情:", validFiles.map((f) => ({ url: f.url, path: f.path, name: f.name })));
               if (validFiles.length === 0) {
-                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:385", "验证失败: 没有有效文件");
+                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:419", "验证失败: 没有有效文件");
                 callback("请至少上传1张营业执照");
                 return false;
               }
               if (validFiles.length > 3) {
-                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:392", "验证失败: 文件数量超过限制");
+                common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:426", "验证失败: 文件数量超过限制");
                 callback("最多只能上传3张图片");
                 return false;
               }
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:397", "验证成功: 有效文件数量", validFiles.length);
-              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:398", "===== 验证营业执照结束 =====");
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:431", "验证成功: 有效文件数量", validFiles.length);
+              common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:432", "===== 验证营业执照结束 =====");
               return true;
             },
             errorMessage: "请至少上传1张营业执照"
@@ -265,27 +269,43 @@ const _sfc_main = {
     };
     const uploadHeaders = utils_config.createUploadHeaders();
     const submitting = common_vendor.ref(false);
+    const merchantList = common_vendor.ref([]);
+    const searchKeyword = common_vendor.ref("");
+    const showMerchantPopup = common_vendor.ref(false);
+    const filteredMerchantList = common_vendor.computed(() => {
+      if (!searchKeyword.value) {
+        return merchantList.value;
+      }
+      const keyword = searchKeyword.value.toLowerCase().trim();
+      if (!keyword) {
+        return merchantList.value;
+      }
+      return merchantList.value.filter((merchant) => {
+        return merchant.name.toLowerCase().includes(keyword);
+      });
+    });
     common_vendor.onMounted(() => {
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:415", "商户认证页面加载完成");
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:470", "商户认证页面加载完成");
       loadAuthStatus();
+      loadMerchantList();
     });
     const loadAuthStatus = async () => {
       try {
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:423", "开始加载认证状态...");
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:480", "开始加载认证状态...");
         const result = await api_apis.apiGetMerchantCheck({
           userid: userStore.userId
         });
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:430", "获取认证状态API返回:", result);
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:487", "获取认证状态API返回:", result);
         if (result.code === 200 && result.data) {
           merchantData.value = result.data;
           fillFormData(result.data);
-          common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:439", "认证状态加载成功, 状态:", result.data.status);
+          common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:496", "认证状态加载成功, 状态:", result.data.status);
         } else {
-          common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:441", "用户尚未提交认证申请");
+          common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:498", "用户尚未提交认证申请");
           merchantData.value = null;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:446", "加载认证状态失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:503", "加载认证状态失败:", error);
         merchantData.value = null;
       }
     };
@@ -293,7 +313,7 @@ const _sfc_main = {
       var _a, _b;
       if (!data)
         return;
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:456", "开始数据回显:", data);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:513", "开始数据回显:", data);
       formData.merchantName = data.name || "";
       formData.address = data.address || "";
       formData.appcode = data.appcode || "";
@@ -314,65 +334,107 @@ const _sfc_main = {
           name: "营业执照"
         }));
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:485", "数据回显完成:", formData);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:542", "数据回显完成:", formData);
+    };
+    const loadMerchantList = async () => {
+      try {
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:548", "开始加载商户列表...");
+        const result = await api_apis.apiSelectMerchantList();
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:550", "获取商户列表API返回:", result);
+        if (result.code === 200 && result.data) {
+          merchantList.value = result.data.map((item, index) => ({
+            id: item.id || index,
+            // 使用返回的id或索引作为key
+            name: item.name
+          }));
+          common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:558", "商户列表加载成功，数量:", merchantList.value.length);
+        } else {
+          common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:560", "获取商户列表失败");
+          merchantList.value = [];
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:564", "加载商户列表失败:", error);
+        merchantList.value = [];
+      }
+    };
+    const showMerchantList = () => {
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:571", "点击选择按钮");
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:572", "merchantList.value:", merchantList.value);
+      if (merchantList.value.length === 0) {
+        common_vendor.index.showToast({
+          title: "商户列表为空",
+          icon: "none"
+        });
+        return;
+      }
+      showMerchantPopup.value = true;
+    };
+    const closeMerchantList = () => {
+      showMerchantPopup.value = false;
+      searchKeyword.value = "";
+    };
+    const selectMerchant = (merchant) => {
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:594", "选择商户:", merchant);
+      formData.merchantName = merchant.name;
+      closeMerchantList();
     };
     const onUploadSuccess = (res) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:492", "===== 文件上传成功事件 =====");
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:493", "上传成功回调参数:", res);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:494", "tempFiles:", res.tempFiles);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:495", "tempFilePaths:", res.tempFilePaths);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:496", "当前formData.licenseImages:", formData.licenseImages);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:603", "===== 文件上传成功事件 =====");
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:604", "上传成功回调参数:", res);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:605", "tempFiles:", res.tempFiles);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:606", "tempFilePaths:", res.tempFilePaths);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:607", "当前formData.licenseImages:", formData.licenseImages);
       setTimeout(() => {
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:501", "延迟后的formData.licenseImages:", formData.licenseImages);
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:612", "延迟后的formData.licenseImages:", formData.licenseImages);
         if (formRef.value) {
           formRef.value.validateField("licenseImages");
         }
       }, 200);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:507", "===== 文件上传成功事件结束 =====");
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:618", "===== 文件上传成功事件结束 =====");
     };
     const onUploadFail = (err) => {
-      common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:512", "文件上传失败:", err);
+      common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:623", "文件上传失败:", err);
       common_vendor.index.showToast({
         title: "文件上传失败",
         icon: "none"
       });
     };
     const onFileSelect = (res) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:521", "===== 文件选择事件 =====");
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:522", "选择文件:", res);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:523", "tempFiles:", res.tempFiles);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:524", "tempFilePaths:", res.tempFilePaths);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:525", "选择前formData.licenseImages:", formData.licenseImages);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:632", "===== 文件选择事件 =====");
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:633", "选择文件:", res);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:634", "tempFiles:", res.tempFiles);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:635", "tempFilePaths:", res.tempFilePaths);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:636", "选择前formData.licenseImages:", formData.licenseImages);
       if (res.tempFiles && res.tempFiles.length > 0) {
         formData.licenseImages = [...formData.licenseImages, ...res.tempFiles];
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:531", "手动更新后formData.licenseImages:", formData.licenseImages);
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:642", "手动更新后formData.licenseImages:", formData.licenseImages);
         setTimeout(() => {
           if (formRef.value) {
             formRef.value.validateField("licenseImages");
           }
         }, 100);
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:541", "===== 文件选择事件结束 =====");
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:652", "===== 文件选择事件结束 =====");
     };
     const onUploadProgress = (res) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:546", "上传进度:", res);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:657", "上传进度:", res);
     };
     const onFileDelete = (res) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:551", "===== 文件删除事件 =====");
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:552", "文件删除:", res);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:553", "删除前formData.licenseImages:", formData.licenseImages);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:662", "===== 文件删除事件 =====");
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:663", "文件删除:", res);
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:664", "删除前formData.licenseImages:", formData.licenseImages);
       setTimeout(() => {
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:557", "删除后formData.licenseImages:", formData.licenseImages);
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:668", "删除后formData.licenseImages:", formData.licenseImages);
         if (formRef.value) {
           formRef.value.validateField("licenseImages");
         }
       }, 100);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:562", "===== 文件删除事件结束 =====");
+      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:673", "===== 文件删除事件结束 =====");
     };
     const openLocationPicker = () => {
       common_vendor.index.chooseLocation({
         success: function(res) {
-          common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:569", "选择位置成功:", res);
+          common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:680", "选择位置成功:", res);
           formData.latitude = res.latitude.toString();
           formData.longitude = res.longitude.toString();
           formData.locationName = res.name || res.address || "已选择位置";
@@ -382,7 +444,7 @@ const _sfc_main = {
           });
         },
         fail: function(err) {
-          common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:580", "选择位置失败:", err);
+          common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:691", "选择位置失败:", err);
           if (err.errMsg && err.errMsg.includes("cancel")) {
             return;
           }
@@ -398,7 +460,7 @@ const _sfc_main = {
         const result = await formRef.value.validate();
         return true;
       } catch (error) {
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:599", "表单验证失败:", error);
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:710", "表单验证失败:", error);
         return false;
       }
     };
@@ -446,9 +508,9 @@ const _sfc_main = {
           img: imageUrls.join(",")
           // 法人证照片，多张图片用逗号分隔
         };
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:647", "提交认证数据:", submitData);
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:758", "提交认证数据:", submitData);
         const result = await api_apis.apiPostMerchantCheck(submitData);
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:651", "认证提交API返回:", result);
+        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:762", "认证提交API返回:", result);
         common_vendor.index.showToast({
           title: "认证申请提交成功",
           icon: "success"
@@ -465,7 +527,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:673", "提交认证失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:784", "提交认证失败:", error);
         common_vendor.index.showToast({
           title: "提交失败，请重试",
           icon: "none"
@@ -530,68 +592,73 @@ const _sfc_main = {
           disabled: isReadOnly.value,
           modelValue: formData.merchantName
         }),
-        v: common_vendor.p({
+        v: showMerchantSelector.value
+      }, showMerchantSelector.value ? {
+        w: common_vendor.o(showMerchantList),
+        x: isReadOnly.value
+      } : {}, {
+        y: common_vendor.p({
           label: "商户名称",
           name: "merchantName",
           required: true
         }),
-        w: common_vendor.o(($event) => formData.address = $event),
-        x: common_vendor.p({
+        z: common_vendor.o(($event) => formData.address = $event),
+        A: common_vendor.p({
           placeholder: "请输入详细地址",
           clearable: false,
           disabled: isReadOnly.value,
           modelValue: formData.address
         }),
-        y: common_vendor.p({
+        B: common_vendor.p({
           label: "商户地址",
           name: "address",
           required: true
         }),
-        z: common_vendor.o(($event) => formData.appcode = $event),
-        A: common_vendor.p({
+        C: common_vendor.o(($event) => formData.appcode = $event),
+        D: common_vendor.p({
           localdata: appCodeOptions,
           placeholder: "请选择区域",
           clear: false,
           disabled: isReadOnly.value,
           modelValue: formData.appcode
         }),
-        B: common_vendor.p({
+        E: common_vendor.p({
           label: "所属区域",
           name: "appcode",
           required: true
         }),
-        C: formData.latitude && formData.longitude
+        F: formData.latitude && formData.longitude
       }, formData.latitude && formData.longitude ? {
-        D: common_vendor.t(formData.locationName || "已选择位置"),
-        E: common_vendor.t(formData.longitude),
-        F: common_vendor.t(formData.latitude)
+        G: common_vendor.t(formData.locationName || "已选择位置"),
+        H: common_vendor.t(formData.longitude),
+        I: common_vendor.t(formData.latitude)
       } : {}, {
-        G: common_vendor.p({
+        J: common_vendor.p({
           type: "location",
           size: "20",
           color: "#999"
         }),
-        H: common_vendor.o(($event) => !isReadOnly.value && openLocationPicker()),
-        I: isReadOnly.value ? 1 : "",
-        J: common_vendor.p({
+        K: common_vendor.o(($event) => !isReadOnly.value && openLocationPicker()),
+        L: isReadOnly.value ? 1 : "",
+        M: common_vendor.p({
           label: "商户位置",
           name: "latitude",
           required: true
         }),
-        K: common_vendor.o(($event) => formData.contactPerson = $event),
-        L: common_vendor.p({
+        N: common_vendor.o(($event) => formData.contactPerson = $event),
+        O: common_vendor.p({
           placeholder: "请输入联系人姓名",
           clearable: false,
           disabled: isReadOnly.value,
           modelValue: formData.contactPerson
         }),
-        M: common_vendor.p({
+        P: common_vendor.p({
           label: "联系人",
           name: "contactPerson",
           required: true
         }),
-        N: common_vendor.o(($event) => formData.contactPhone = $event),
-        O: common_vendor.p({
+        Q: common_vendor.o(($event) => formData.contactPhone = $event),
+        R: common_vendor.p({
           placeholder: "请输入联系电话",
           type: "number",
           maxlength: "11",
@@ -599,44 +666,44 @@ const _sfc_main = {
           disabled: isReadOnly.value,
           modelValue: formData.contactPhone
         }),
-        P: common_vendor.p({
+        S: common_vendor.p({
           label: "联系电话",
           name: "contactPhone",
           required: true
         }),
-        Q: common_vendor.o(($event) => formData.bucketCount = $event),
-        R: common_vendor.p({
+        T: common_vendor.o(($event) => formData.bucketCount = $event),
+        U: common_vendor.p({
           placeholder: "请输入垃圾桶数量",
           type: "number",
           clearable: false,
           disabled: isReadOnly.value,
           modelValue: formData.bucketCount
         }),
-        S: common_vendor.p({
+        V: common_vendor.p({
           label: "需要垃圾桶数(个)",
           name: "bucketCount",
           required: true
         }),
-        T: common_vendor.o(($event) => formData.estimatedWeight = $event),
-        U: common_vendor.p({
+        W: common_vendor.o(($event) => formData.estimatedWeight = $event),
+        X: common_vendor.p({
           placeholder: "请输入预估垃圾重量",
           type: "number",
           clearable: false,
           disabled: isReadOnly.value,
           modelValue: formData.estimatedWeight
         }),
-        V: common_vendor.p({
+        Y: common_vendor.p({
           label: "预估垃圾重量",
           name: "estimatedWeight",
           required: true
         }),
-        W: common_vendor.o(onFileSelect),
-        X: common_vendor.o(onUploadProgress),
-        Y: common_vendor.o(onUploadSuccess),
-        Z: common_vendor.o(onUploadFail),
-        aa: common_vendor.o(onFileDelete),
-        ab: common_vendor.o(($event) => formData.licenseImages = $event),
-        ac: common_vendor.p({
+        Z: common_vendor.o(onFileSelect),
+        aa: common_vendor.o(onUploadProgress),
+        ab: common_vendor.o(onUploadSuccess),
+        ac: common_vendor.o(onUploadFail),
+        ad: common_vendor.o(onFileDelete),
+        ae: common_vendor.o(($event) => formData.licenseImages = $event),
+        af: common_vendor.p({
           ["file-mediatype"]: "image",
           mode: "grid",
           limit: 3,
@@ -648,28 +715,50 @@ const _sfc_main = {
           ["max-size"]: 20971520,
           modelValue: formData.licenseImages
         }),
-        ad: !isReadOnly.value
+        ag: !isReadOnly.value
       }, !isReadOnly.value ? {} : {}, {
-        ae: common_vendor.p({
+        ah: common_vendor.p({
           label: "营业执照上传",
           name: "licenseImages",
           required: true
         }),
-        af: common_vendor.sr(formRef, "edea1fd9-4", {
+        ai: common_vendor.sr(formRef, "edea1fd9-4", {
           "k": "formRef"
         }),
-        ag: common_vendor.p({
+        aj: common_vendor.p({
           modelValue: formData,
           rules: formRules,
           ["label-position"]: "top"
         }),
-        ah: isReadOnly.value ? 1 : "",
-        ai: authStatus.value === "none" || authStatus.value === "rejected"
+        ak: isReadOnly.value ? 1 : "",
+        al: authStatus.value === "none" || authStatus.value === "rejected"
       }, authStatus.value === "none" || authStatus.value === "rejected" ? {
-        aj: common_vendor.t(authStatus.value === "rejected" ? "重新提交" : "提交认证"),
-        ak: common_vendor.o(submitAuth),
-        al: submitting.value
-      } : {});
+        am: common_vendor.t(authStatus.value === "rejected" ? "重新提交" : "提交认证"),
+        an: common_vendor.o(submitAuth),
+        ao: submitting.value
+      } : {}, {
+        ap: showMerchantPopup.value
+      }, showMerchantPopup.value ? common_vendor.e({
+        aq: common_vendor.o(closeMerchantList),
+        ar: common_vendor.o(($event) => searchKeyword.value = $event),
+        as: common_vendor.p({
+          placeholder: "搜索商户名称",
+          clearable: true,
+          modelValue: searchKeyword.value
+        }),
+        at: common_vendor.f(filteredMerchantList.value, (merchant, k0, i0) => {
+          return {
+            a: common_vendor.t(merchant.name),
+            b: merchant.id,
+            c: common_vendor.o(($event) => selectMerchant(merchant), merchant.id)
+          };
+        }),
+        av: filteredMerchantList.value.length === 0
+      }, filteredMerchantList.value.length === 0 ? {} : {}, {
+        aw: common_vendor.o(() => {
+        }),
+        ax: common_vendor.o(closeMerchantList)
+      }) : {});
     };
   }
 };
