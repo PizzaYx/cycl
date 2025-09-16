@@ -4,18 +4,17 @@ const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _component_uni_button = common_vendor.resolveComponent("uni-button");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _component_uni_button + _easycom_uni_load_more2)();
+  (_easycom_uni_nav_bar2 + _component_uni_button + _easycom_uni_load_more2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons + TimeRangePicker + _easycom_uni_load_more)();
+  (_easycom_uni_nav_bar + StatusPicker + TimeRangePicker + _easycom_uni_load_more)();
 }
 const TimeRangePicker = () => "../../components/TimeRangePicker/TimeRangePicker.js";
+const StatusPicker = () => "../../components/StatusPicker/StatusPicker.js";
 const _sfc_main = {
   __name: "shAllList",
   setup(__props) {
@@ -28,7 +27,7 @@ const _sfc_main = {
       { value: 2, text: "无需收运" }
     ]);
     const getStatusText = (status) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:127", 123);
+      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:125", 123);
       switch (status) {
         case 0:
         case "0":
@@ -65,7 +64,7 @@ const _sfc_main = {
     const loadingStatus = common_vendor.ref("more");
     const allOrderList = common_vendor.ref([]);
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:173", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:171", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
       });
@@ -100,7 +99,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shAllList.vue:224", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shAllList.vue:222", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -128,22 +127,6 @@ const _sfc_main = {
       getNetwork();
     });
     common_vendor.ref(null);
-    const showStatusPicker = () => {
-      const itemList = statusOptions.value.map((item, index) => {
-        const isSelected = selectedStatus.value === item.value;
-        return isSelected ? `✓ ${item.text}` : item.text;
-      });
-      common_vendor.index.showActionSheet({
-        itemList,
-        success: (res) => {
-          const selectedOption = statusOptions.value[res.tapIndex];
-          onStatusChange(selectedOption.value);
-        },
-        fail: (err) => {
-          onStatusChange(null);
-        }
-      });
-    };
     const onStatusChange = (value) => {
       selectedStatus.value = value;
       resetPageAndReload();
@@ -173,20 +156,20 @@ const _sfc_main = {
           color: "#000",
           title: "收运记录"
         }),
-        c: common_vendor.p({
-          type: "bottom",
-          size: "12",
-          color: "#666"
+        c: common_vendor.o(onStatusChange),
+        d: common_vendor.o(($event) => selectedStatus.value = $event),
+        e: common_vendor.p({
+          options: statusOptions.value,
+          modelValue: selectedStatus.value
         }),
-        d: common_vendor.o(showStatusPicker),
-        e: common_vendor.o(onTimeChange),
-        f: common_vendor.o(($event) => selectedTimeRange.value = $event),
-        g: common_vendor.p({
+        f: common_vendor.o(onTimeChange),
+        g: common_vendor.o(($event) => selectedTimeRange.value = $event),
+        h: common_vendor.p({
           modelValue: selectedTimeRange.value
         }),
-        h: allOrderList.value.length > 0
+        i: allOrderList.value.length > 0
       }, allOrderList.value.length > 0 ? {
-        i: common_vendor.f(allOrderList.value, (item, index, i0) => {
+        j: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.merchantName),
             b: common_vendor.t(getStatusText(item.status)),
@@ -209,7 +192,7 @@ const _sfc_main = {
             n: index
           });
         }),
-        j: common_vendor.p({
+        k: common_vendor.p({
           status: loadingStatus.value,
           ["content-text"]: {
             contentdown: "上拉显示更多",
@@ -218,7 +201,7 @@ const _sfc_main = {
           }
         })
       } : loadingStatus.value !== "loading" ? {} : {}, {
-        k: loadingStatus.value !== "loading"
+        l: loadingStatus.value !== "loading"
       });
     };
   }

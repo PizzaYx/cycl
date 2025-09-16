@@ -7,11 +7,8 @@
         <view class="menu">
 
             <view class="filter-container">
-                <!-- 状态选择器 - 改回底部弹出 -->
-                <view class="filter-item" @click="showStatusPicker">
-                    <text>状态</text>
-                    <uni-icons type="bottom" size="12" color="#666"></uni-icons>
-                </view>
+                <!-- 状态选择器组件 -->
+                <StatusPicker v-model="selectedStatus" :options="statusOptions" @change="onStatusChange" />
 
 
                 <!-- 时间范围选择器组件 -->
@@ -105,6 +102,7 @@ import {
 
 import { useUserStore } from '@/stores/user.js'
 import TimeRangePicker from '@/components/TimeRangePicker/TimeRangePicker.vue'
+import StatusPicker from '@/components/StatusPicker/StatusPicker.vue'
 
 
 
@@ -268,25 +266,6 @@ onPullDownRefresh(() => {
 const datetimePicker = ref(null);
 
 // 筛选相关方法
-const showStatusPicker = () => {
-    // 创建带颜色的选项列表
-    const itemList = statusOptions.value.map((item, index) => {
-        const isSelected = selectedStatus.value === item.value;
-        return isSelected ? `✓ ${item.text}` : item.text;
-    });
-
-    uni.showActionSheet({
-        itemList: itemList,
-        success: (res) => {
-            const selectedOption = statusOptions.value[res.tapIndex];
-            onStatusChange(selectedOption.value);
-        },
-        fail: (err) => {
-            // 用户取消操作，重置状态为null
-            onStatusChange(null);
-        }
-    });
-};
 
 const onStatusChange = (value) => {
     selectedStatus.value = value;

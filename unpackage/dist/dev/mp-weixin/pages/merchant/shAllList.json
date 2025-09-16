@@ -4,8 +4,8 @@
   "navigationStyle": "custom",
   "usingComponents": {
     "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
-    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
     "uni-load-more": "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more",
-    "time-range-picker": "../../components/TimeRangePicker/TimeRangePicker"
+    "time-range-picker": "../../components/TimeRangePicker/TimeRangePicker",
+    "status-picker": "../../components/StatusPicker/StatusPicker"
   }
 }

@@ -1,0 +1,1 @@
+<view class="status-picker data-v-e667379f"><view class="filter-item data-v-e667379f" bindtap="{{b}}"><text class="data-v-e667379f">状态</text><uni-icons wx:if="{{a}}" class="data-v-e667379f" u-i="e667379f-0" bind:__l="__l" u-p="{{a}}"></uni-icons></view></view>
