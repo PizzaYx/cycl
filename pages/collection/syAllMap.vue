@@ -1,4 +1,3 @@
-
 <template>
     <view class="container">
         <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运地图详情"
@@ -292,12 +291,20 @@ const addCurrentLocationMarker = (lat, lng) => {
 // 添加任务地点标记
 const addTaskMarkers = () => {
     taskList.value.forEach((task, index) => {
-        // 这里需要根据实际的地址获取经纬度，暂时使用示例坐标
-        // 实际项目中应该调用地理编码API或者任务数据中包含经纬度信息
+        // 使用任务数据中的真实经纬度
+        const taskLat = parseFloat(task.lat)
+        const taskLon = parseFloat(task.lon)
+
+        // 验证经纬度是否有效
+        if (isNaN(taskLat) || isNaN(taskLon)) {
+            console.warn(`任务 ${task.merchantName} 的经纬度无效:`, task.lat, task.lon)
+            return
+        }
+
         const marker = {
             id: index + 1, // 使用数字ID，从1开始（0已被当前位置使用）
-            latitude: currentLocation.value.latitude + ((index + 1) * 0.01), // 基于当前位置的示例坐标偏移，+1确保不与起点重复
-            longitude: currentLocation.value.longitude + ((index + 1) * 0.01),
+            latitude: taskLat,
+            longitude: taskLon,
             title: task.merchantName,
             iconPath: '/static/ssd/positioning.png',
             width: 25,
@@ -320,7 +327,6 @@ const addTaskMarkers = () => {
 
 // 使用天地图API进行路线规划
 const planRoute = async () => {
-
 
     if (mapMarkers.value.length < 1) {
         console.log('标记数量不足，无法进行路线规划')

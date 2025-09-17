@@ -118,10 +118,10 @@
 
                     <uni-forms-item label="营业执照上传" name="licenseImages" required>
                         <uni-file-picker v-model="formData.licenseImages" file-mediatype="image" mode="grid" :limit="3"
-                            :auto-upload="true" :upload-url="uploadUrl" :header="uploadHeaders" @select="onFileSelect"
+                            :auto-upload="false" :upload-url="uploadUrl" :header="uploadHeaders" @select="onFileSelect"
                             @progress="onUploadProgress" @success="onUploadSuccess" @fail="onUploadFail"
                             @delete="onFileDelete" :disabled="isReadOnly" file-extname="jpg,jpeg,png"
-                            :max-size="20971520">
+                            :max-size="20971520" return-type="array">
                         </uni-file-picker>
                         <text class="upload-tip" v-if="!isReadOnly">最多上传3张图片，每张图片不超过20MB，支持jpg、png格式</text>
                     </uni-forms-item>
@@ -131,7 +131,7 @@
             <!-- 提交按钮 -->
             <view class="submit-section" v-if="authStatus === 'none' || authStatus === 'rejected'">
                 <button class="submit-btn" @click="submitAuth" :loading="submitting">
-                    {{ authStatus === 'rejected' ? '重新提交' : '提交认证' }}
+                    {{ authStatus === 'rejected' ? '修改提交' : '提交认证' }}
                 </button>
             </view>
         </view>
@@ -163,7 +163,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
-import { apiPostMerchantCheck, apiGetMerchantCheck, apiSelectMerchantList } from '@/api/apis.js'
+import { apiPostMerchantCheck, apiPostEditMerchantCheck, apiGetMerchantCheck, apiSelectMerchantList } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
 import { uploadUrl, createUploadHeaders } from '@/utils/config.js'
 
@@ -211,7 +211,7 @@ const authStatus = computed(() => {
 })
 
 
-// 是否为只读状态
+// 是否为只读状态 - 只有待审核和已通过状态才是只读
 const isReadOnly = computed(() => {
     return authStatus.value === 'pending' || authStatus.value === 'approved'
 })
@@ -439,7 +439,7 @@ const formRules = {
 }
 
 // 文件上传配置
-const uploadHeaders = createUploadHeaders()
+const uploadHeaders = createUploadHeaders().value // 添加 .value 获取实际值
 
 // 提交状态
 const submitting = ref(false)
@@ -578,7 +578,6 @@ const showMerchantList = () => {
         })
         return
     }
-
     showMerchantPopup.value = true
 }
 
@@ -596,9 +595,7 @@ const selectMerchant = (merchant) => {
     closeMerchantList()
 }
 
-
-
-// 文件上传成功事件
+// 文件上传成功事件（手动上传模式下此事件不会被触发，保留用于兼容性）
 const onUploadSuccess = (res) => {
     console.log('===== 文件上传成功事件 =====')
     console.log('上传成功回调参数:', res)
@@ -606,14 +603,8 @@ const onUploadSuccess = (res) => {
     console.log('tempFilePaths:', res.tempFilePaths)
     console.log('当前formData.licenseImages:', formData.licenseImages)
 
-    // 根据文档，上传成功后 v-model 会自动绑定值
-    // 但我们仍需要触发表单验证
-    setTimeout(() => {
-        console.log('延迟后的formData.licenseImages:', formData.licenseImages)
-        if (formRef.value) {
-            formRef.value.validateField('licenseImages')
-        }
-    }, 200) // 增加延迟时间，确保 v-model 更新完成
+    // 手动上传模式下，此事件不会被触发
+    // 保留用于兼容性，实际的上传成功处理在 uploadFileManually 中
 
     console.log('===== 文件上传成功事件结束 =====')
 }
@@ -624,6 +615,64 @@ const onUploadFail = (err) => {
     uni.showToast({
         title: '文件上传失败',
         icon: 'none'
+    })
+}
+
+// 手动上传文件
+const uploadFileManually = (file) => {
+    console.log('开始手动上传文件:', file)
+    console.log('文件路径:', file.tempFilePath || file.path)
+    console.log('上传URL:', uploadUrl)
+    console.log('请求头:', uploadHeaders)
+
+    uni.uploadFile({
+        url: uploadUrl,
+        filePath: file.tempFilePath || file.path,
+        name: 'file',
+        header: uploadHeaders,
+        success: (res) => {
+            console.log('手动上传成功:', res)
+            // 处理上传成功
+            const response = JSON.parse(res.data)
+            console.log('服务器响应:', response)
+
+            if (response.code === 200 && response.url) {
+                // 更新文件信息
+                const fileIndex = formData.licenseImages.findIndex(f => f === file)
+                if (fileIndex !== -1) {
+                    formData.licenseImages[fileIndex] = {
+                        ...file,
+                        url: response.url,
+                        fileName: response.fileName,
+                        newFileName: response.newFileName,
+                        originalFilename: response.originalFilename,
+                        response: response
+                    }
+                }
+                console.log('文件上传成功，URL:', response.url)
+
+                // 触发表单验证
+                setTimeout(() => {
+                    if (formRef.value) {
+                        formRef.value.validateField('licenseImages')
+                    }
+                }, 100)
+            } else {
+                console.log('上传失败，服务器返回:', response)
+                uni.showToast({
+                    title: '文件上传失败',
+                    icon: 'none'
+                })
+            }
+        },
+        fail: (err) => {
+            console.log('手动上传失败:', err)
+            console.log('错误详情:', JSON.stringify(err))
+            uni.showToast({
+                title: '文件上传失败',
+                icon: 'none'
+            })
+        }
     })
 }
 
@@ -641,6 +690,9 @@ const onFileSelect = (res) => {
         formData.licenseImages = [...formData.licenseImages, ...res.tempFiles]
         console.log('手动更新后formData.licenseImages:', formData.licenseImages)
 
+        // 手动上传文件
+        uploadFileManually(res.tempFiles[0])
+
         // 触发表单验证
         setTimeout(() => {
             if (formRef.value) {
@@ -652,9 +704,11 @@ const onFileSelect = (res) => {
     console.log('===== 文件选择事件结束 =====')
 }
 
-// 文件上传进度事件
+// 文件上传进度事件（手动上传模式下此事件不会被触发，保留用于兼容性）
 const onUploadProgress = (res) => {
     console.log('上传进度:', res)
+    // 手动上传模式下，此事件不会被触发
+    // 保留用于兼容性
 }
 
 // 文件删除事件
@@ -757,14 +811,25 @@ const submitAuth = async () => {
 
         console.log('提交认证数据:', submitData)
 
-        // 调用认证提交API
-        const result = await apiPostMerchantCheck(submitData)
-        console.log('认证提交API返回:', result)
-
-        uni.showToast({
-            title: '认证申请提交成功',
-            icon: 'success'
-        })
+        // 根据认证状态选择不同的API
+        let result
+        if (authStatus.value === 'rejected') {
+            // 审核不通过，使用修改接口
+            result = await apiPostEditMerchantCheck(submitData)
+            console.log('修改认证API返回:', result)
+            uni.showToast({
+                title: '修改提交成功',
+                icon: 'success'
+            })
+        } else {
+            // 首次提交，使用新增接口
+            result = await apiPostMerchantCheck(submitData)
+            console.log('认证提交API返回:', result)
+            uni.showToast({
+                title: '认证申请提交成功',
+                icon: 'success'
+            })
+        }
 
         // 更新认证状态 - 提交成功后状态为待审核(0)
         merchantData.value = {

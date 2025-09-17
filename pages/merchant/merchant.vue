@@ -60,8 +60,7 @@
             </view>
             <view class="records">
                 <view class="record-list">
-                    <view v-for="(item, index) in records" :key="item.id" class="record-item" 
-                        @tap="showDetail(item)">
+                    <view v-for="(item, index) in records" :key="item.id" class="record-item" @tap="showDetail(item)">
                         <view class="record-main">
                             <view class="shop-name">{{ item.merchantName }}</view>
                             <view class="record-time">{{ item.status === 1 ? item.arrivalTime : item.appointmentTime }}
@@ -142,7 +141,7 @@ onMounted(async () => {
     }
 })
 
-onShow(() => { 
+onShow(() => {
     checkUserAuthStatus();
 })
 
@@ -189,14 +188,12 @@ const getMerchantSydList = async () => {
  * 检查用户认证状态并显示相应提示
  * @returns {boolean} true表示已认证，false表示未认证或审核不通过
  */
-const checkUserAuthStatus = async() => {
-    const merchantStatus =  userStore.merchantStatus;
+const checkUserAuthStatus = async () => {
+    const merchantStatus = userStore.merchantStatus;
 
-    console.log('检查用户认证状态111：', merchantStatus)
     // 未认证或审核不通过，显示认证弹窗
     if (merchantStatus === null || merchantStatus === 2) {
         await userStore.fetchUserInfo();
-        console.log('检查用户认证状态222：', merchantStatus)
         showAuthModal.value = true
         return false
     }
@@ -210,7 +207,7 @@ const checkUserAuthStatus = async() => {
     }
     // 已认证
     else {
-        showAuthModal.value = false; 
+        showAuthModal.value = false;
         getMerchantStatistics();
         getMerchantSydList();
         return true
@@ -253,7 +250,7 @@ const onRefresh = async () => {
     try {
         // 重新获取用户信息
         await userStore.fetchUserInfo()
-       
+
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
         checkUserAuthStatus()
     } catch (error) {

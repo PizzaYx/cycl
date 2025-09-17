@@ -83,7 +83,7 @@ export const useUserStore = defineStore('user', {
         },
 
         // 从服务器获取用户信息
-        async fetchUserInfo() {
+        async fetchUserInfo(returnUserType = false) {
             try {
                 const res = await apiGetInfo()
                 // 检查响应是否存在
@@ -95,8 +95,18 @@ export const useUserStore = defineStore('user', {
                 const code = responseData.code
 
                 if (code === 200) {
-                    this.setUserInfo(res.user || responseData.user)
-                    return res.user || responseData.user
+                    const userInfo = res.user || responseData.user
+                    this.setUserInfo(userInfo)
+
+                    // 如果需要返回用户类型，则返回包含用户类型的对象
+                    if (returnUserType) {
+                        return {
+                            userInfo: userInfo,
+                            userType: userInfo?.type
+                        }
+                    }
+
+                    return userInfo
                 } else if (code === 401) {
                     // 401错误已被request.js处理（跳转登录），这里不需要抛出异常
                     console.log('用户未登录，已跳转到登录页')

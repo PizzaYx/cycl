@@ -188,9 +188,15 @@ const loginRequest = async () => {
         })
 
         if (res.code === 200) {
-            // 先获取用户信息
-            await fetchUserInfo()
-        
+            // 先获取用户信息并验证类型
+            const userInfo = await fetchUserInfo()
+
+            // 如果用户类型不匹配，fetchUserInfo会显示提示并返回null
+            if (!userInfo) {
+                uni.hideLoading()
+                return // 直接返回，不继续执行登录成功逻辑
+            }
+
             uni.showToast({
                 title: '登录成功',
                 icon: 'success',
@@ -204,36 +210,63 @@ const loginRequest = async () => {
                 })
             }, 100)
         } else {
-         
+
             uni.showToast({
                 title: res.msg || '登录失败',
                 icon: 'none',
             })
         }
     } catch (err) {
-       
+
         uni.showToast({
             title: '网络请求失败',
             icon: 'none',
         })
         console.error('登录请求失败:', err)
     } finally {
-       
+
     }
 }
 
 // 获取用户信息
 const fetchUserInfo = async () => {
     try {
-        await userStore.fetchUserInfo()
+        const result = await userStore.fetchUserInfo(true) // 传入true获取用户类型
+        if (!result) {
+            throw new Error('获取用户信息失败')
+        }
+        const { userInfo, userType } = result
+        // 验证用户类型是否匹配选择的入口
+        const expectedType = activeTab.value === 0 ? '1' : '2' // 0=商户端(type=1), 1=收运端(type=2)
+        if (userType !== expectedType) {
+            const currentTypeText = activeTab.value === 0 ? '商户端' : '收运端'
+            const actualTypeText = userType === '1' ? '商户端' : '收运端'
+            // 使用Promise来处理异步弹窗
+            return new Promise((resolve) => {
+                uni.showModal({
+                    title: '用户类型不匹配',
+                    content: `您当前选择的是${currentTypeText}，但该账号是${actualTypeText}用户，请重新选择正确的入口`,
+                    showCancel: false,
+                    confirmText: '重新选择',
+                    success: () => {
+                        // 自动切换到正确的入口
+                        activeTab.value = userType === '1' ? 0 : 1
+                        console.log('切换后的activeTab:', activeTab.value)
+
+                        // 不自动登录，返回null让用户重新点击登录
+                        console.log('已切换到正确入口，请重新点击登录')
+                        resolve(null)
+                    }
+                })
+            })
+        }
+        return userInfo
     } catch (error) {
-        console.error('获取用户信息失败:', error)
-        // 即使获取用户信息失败，也不阻止登录流程
-        uni.showToast({
-            title: '获取用户信息失败，请稍后重试',
-            icon: 'none',
-            duration: 2000
-        })
+        // 如果是用户类型不匹配的错误，不显示通用错误提示
+        if (error.message === '用户类型不匹配') {
+            return null
+        }
+        return null
     }
 }
 

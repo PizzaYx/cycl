@@ -42,10 +42,9 @@
                         <text class="label"><text class="required">*</text>厨余垃圾照片</text>
                         <view class="upload-area">
                             <uni-file-picker v-model="item.images" file-mediatype="image" :limit="maxImageCount"
-                                :auto-upload="true" :upload-url="uploadUrl" :header="uploadHeaders"
-                                :disabled="item.isConfirmed" :readonly="item.isConfirmed" return-type="array"
-                                @select="(e) => handleFileSelect(e, index)"
-                                @success="(e) => handleFileSuccess(e, index)" @fail="(e) => handleFileFail(e, index)">
+                                :upload-url="uploadUrl" :header="uploadHeaders" :disabled="item.isConfirmed"
+                                :readonly="item.isConfirmed" return-type="array"
+                                @select="(e) => handleFileSelect(e, index)">
                             </uni-file-picker>
                             <text class="upload-tip">最多可上传{{ maxImageCount }}张图片，每张图片不超过3M</text>
                         </view>
@@ -93,7 +92,8 @@ const merchantId = ref(''); // 商户ID
 const planId = ref(''); // 收运单ID
 const merchantName = ref('')//商家名称
 
-const uploadHeaders = createUploadHeaders()
+// 文件上传配置
+const uploadHeaders = createUploadHeaders().value // 添加 .value 获取实际值
 const userStore = useUserStore()
 
 const records = ref([]);
@@ -110,21 +110,59 @@ onLoad((options) => {
 
 // 文件选择事件处理
 const handleFileSelect = (event, index) => {
+    console.log('选择了图片')
+    console.log('uploadUrl:', uploadUrl)
+    console.log('uploadHeaders:', uploadHeaders)
+    console.log('event:', event)
+
     // 手动更新对应记录的images数据
     if (event.tempFiles && event.tempFiles.length > 0) {
-        // 将新文件添加到现有images数组中，而不是替换整个数组
         const newImages = [...(records.value[index].images || []), ...event.tempFiles];
-        // 更新对应记录的images数据
         records.value[index].images = newImages;
+
+        // 手动上传文件
+        uploadFileManually(event.tempFiles[0], index)
     }
 };
 
-const handleFileSuccess = (event, index) => {
-    console.log('文件上传成功', event);
-};
+// 手动上传文件
+const uploadFileManually = (file, index) => {
+    console.log('开始手动上传文件:', file)
+    console.log('文件路径:', file.tempFilePath || file.path)
+    console.log('上传URL:', uploadUrl)
+    console.log('请求头:', uploadHeaders)
 
-const handleFileFail = (event, index) => {
-    console.log('文件上传失败', event);
+    uni.uploadFile({
+        url: uploadUrl,
+        filePath: file.tempFilePath || file.path,
+        name: 'file',
+        header: uploadHeaders,
+        success: (res) => {
+            console.log('手动上传成功:', res)
+            // 处理上传成功
+            const response = JSON.parse(res.data)
+            console.log('服务器响应:', response)
+
+            if (response.code === 200 && response.url) {
+                // 更新文件信息
+                records.value[index].images[records.value[index].images.length - 1] = {
+                    ...file,
+                    url: response.url,
+                    fileName: response.fileName,
+                    newFileName: response.newFileName,
+                    originalFilename: response.originalFilename,
+                    response: response
+                }
+                console.log('文件上传成功，URL:', response.url)
+            } else {
+                console.log('上传失败，服务器返回:', response)
+            }
+        },
+        fail: (err) => {
+            console.log('手动上传失败:', err)
+            console.log('错误详情:', JSON.stringify(err))
+        }
+    })
 };
 
 // 获取重量按钮点击事件

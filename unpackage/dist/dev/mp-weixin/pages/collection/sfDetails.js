@@ -210,7 +210,7 @@ const _sfc_main = {
                 title: "提交失败",
                 icon: "none"
               });
-              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:421", "提交重量失败:", error);
+              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:379", "提交重量失败:", error);
             }
           }
         }

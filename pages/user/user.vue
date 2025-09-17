@@ -10,11 +10,11 @@
                         <text class="avatar-text">{{ userStore.userType == 1 ? userStore.userAvatar :
                             userStore.userSFAvatar }}</text>
                     </view>
-                    <view class="avatar-edit-overlay">
+                    <!-- <view class="avatar-edit-overlay">
                         <uni-icons type="camera-filled" size="32rpx" color="#fff"></uni-icons>
-                    </view>
+                    </view> -->
                 </view>
-                <text class="change-avatar-text">更换头像</text>
+                <!-- <text class="change-avatar-text">更换头像</text> -->
             </view>
 
             <view class="info-section">
@@ -41,9 +41,9 @@
 
 
 
-        <view class="footer">
+        <!-- <view class="footer">
             <button class="save-btn" @tap="handleSave">保存</button>
-        </view>
+        </view> -->
     </view>
 </template>
 

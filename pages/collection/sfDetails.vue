@@ -322,48 +322,6 @@ const contactLine = () => {
     });
 };
 
-// // 收运
-// const collectTask = (task) => {
-//     console.log('收运:', task.id);
-//     //先判断task.weight是否大于0 he task.bucketNum是否大于0
-//     if (task.weight > 0 && task.bucketNum > 0) {
-//         //确认收运完成
-//         uni.showModal({
-//             title: '确认收运完成',
-//             content: '是否确认收运完成？',
-//             success: async (res) => {
-//                 if (res.confirm) {
-//                     await apiGetdriverConfirmPlan({
-//                         id: task.id,
-//                         driverId: userStore.sfmerchant?.id,
-//                     }).then((res) => {
-//                         if (res.code === 200) {
-//                             uni.showToast({
-//                                 title: res.message || '操作成功',
-//                                 icon: 'success'
-//                             });
-//                             // 刷新任务列表
-//                             getapiGetDriverTodayPlan();
-//                         } else {
-//                             uni.showToast({
-//                                 title: res.message || '操作失败',
-//                                 icon: 'error'
-//                             });
-//                         }
-//                     })
-//                 }
-//             }
-//         })
-
-//     }
-//     else {
-//         uni.showToast({
-//             title: '请先进行 收运上报 操作',
-//             icon: 'none'
-//         });
-//         return;
-//     }
-// };
 // 提交重量
 const handleSubmitWeight = async () => {
     // 验证提交重量是否输入 是否大于等于0，成功提示是否提交过磅重量 是就调取接口apiGetCarWeight

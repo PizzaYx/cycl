@@ -63,7 +63,7 @@ export function apiPostMerchantCheck(data = {}) {
 }
 
 ///商户修改认证
-export function apiPosteditMerchantCheck(data = {}) {
+export function apiPostEditMerchantCheck(data = {}) {
     return request({
         url: "/api/merchantapi/editMerchantCheck",
         data,
@@ -160,6 +160,7 @@ export function apiSelectMerchantList(data = {}) {
         data
     })
 }
+
 
 //------------------------收运端 司机------------------------------//
 

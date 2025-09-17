@@ -1,5 +1,5 @@
-// 公共配置文件
-export const uploadUrl = 'http://192.168.0.118:8089/api/merchantapi/webupload'
+// 公共配置文件上传
+export const uploadUrl = 'http://192.168.0.118:8080/api/merchantapi/webupload'
 
 // 天地图API配置
 export const TIANDITU_CONFIG = {

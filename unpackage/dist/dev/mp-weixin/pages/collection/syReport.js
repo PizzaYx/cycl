@@ -29,7 +29,7 @@ const _sfc_main = {
     const merchantId = common_vendor.ref("");
     const planId = common_vendor.ref("");
     const merchantName = common_vendor.ref("");
-    const uploadHeaders = utils_config.createUploadHeaders();
+    const uploadHeaders = utils_config.createUploadHeaders().value;
     const userStore = stores_user.useUserStore();
     const records = common_vendor.ref([]);
     common_vendor.onLoad((options) => {
@@ -46,19 +46,52 @@ const _sfc_main = {
       common_vendor.index.__f__("log", "at pages/collection/syReport.vue:108", "接收到的参数:", options);
     });
     const handleFileSelect = (event, index) => {
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:113", "选择了图片");
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:114", "uploadUrl:", utils_config.uploadUrl);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:115", "uploadHeaders:", uploadHeaders);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:116", "event:", event);
       if (event.tempFiles && event.tempFiles.length > 0) {
         const newImages = [...records.value[index].images || [], ...event.tempFiles];
         records.value[index].images = newImages;
+        uploadFileManually(event.tempFiles[0], index);
       }
     };
-    const handleFileSuccess = (event, index) => {
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:123", "文件上传成功", event);
-    };
-    const handleFileFail = (event, index) => {
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:127", "文件上传失败", event);
+    const uploadFileManually = (file, index) => {
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:130", "开始手动上传文件:", file);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:131", "文件路径:", file.tempFilePath || file.path);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:132", "上传URL:", utils_config.uploadUrl);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:133", "请求头:", uploadHeaders);
+      common_vendor.index.uploadFile({
+        url: utils_config.uploadUrl,
+        filePath: file.tempFilePath || file.path,
+        name: "file",
+        header: uploadHeaders,
+        success: (res) => {
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:141", "手动上传成功:", res);
+          const response = JSON.parse(res.data);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:144", "服务器响应:", response);
+          if (response.code === 200 && response.url) {
+            records.value[index].images[records.value[index].images.length - 1] = {
+              ...file,
+              url: response.url,
+              fileName: response.fileName,
+              newFileName: response.newFileName,
+              originalFilename: response.originalFilename,
+              response
+            };
+            common_vendor.index.__f__("log", "at pages/collection/syReport.vue:156", "文件上传成功，URL:", response.url);
+          } else {
+            common_vendor.index.__f__("log", "at pages/collection/syReport.vue:158", "上传失败，服务器返回:", response);
+          }
+        },
+        fail: (err) => {
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:162", "手动上传失败:", err);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:163", "错误详情:", JSON.stringify(err));
+        }
+      });
     };
     const handleGetWeight = (index) => {
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:132", "获取重量按钮点击", { index, record: records.value[index] });
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:170", "获取重量按钮点击", { index, record: records.value[index] });
     };
     const getSyCheckDetail = async () => {
       const confirmedRecords = records.value.filter((record) => record.isConfirmed === true);
@@ -77,7 +110,7 @@ const _sfc_main = {
         if (res.code === 200) {
           const data = res.data;
           collectTask(data);
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:158", "详情", data);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:196", "详情", data);
         } else {
           common_vendor.index.showToast({
             title: res.msg || "获取详情失败",
@@ -85,7 +118,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:166", "获取详情异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:204", "获取详情异常:", error);
         common_vendor.index.showToast({
           title: "获取详情异常",
           icon: "none"
@@ -93,7 +126,7 @@ const _sfc_main = {
       }
     };
     const collectTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:176", "收运:", task.id);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:214", "收运:", task.id);
       if (task.weight > 0 && task.bucketNum > 0) {
         common_vendor.index.showModal({
           title: "确认收运完成",
@@ -121,7 +154,7 @@ const _sfc_main = {
                   });
                 }
               } catch (error) {
-                common_vendor.index.__f__("error", "at pages/collection/syReport.vue:208", "确认收运异常:", error);
+                common_vendor.index.__f__("error", "at pages/collection/syReport.vue:246", "确认收运异常:", error);
                 common_vendor.index.showToast({
                   title: "操作异常",
                   icon: "none"
@@ -165,7 +198,7 @@ const _sfc_main = {
     const handleScan = () => {
       common_vendor.index.scanCode({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:272", "扫码结果", res);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:310", "扫码结果", res);
           if (!validateScanResult(res.result)) {
             common_vendor.index.showToast({
               title: "扫码格式不正确，请扫描正确的桶码",
@@ -197,7 +230,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:310", "扫码失败", err);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:348", "扫码失败", err);
           common_vendor.index.showToast({
             title: "扫码失败,请重试!",
             icon: "none"
@@ -327,7 +360,7 @@ const _sfc_main = {
           title: "上报异常",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:465", "上报异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:503", "上报异常:", error);
       }
     };
     return (_ctx, _cache) => {
@@ -363,14 +396,11 @@ const _sfc_main = {
             g: common_vendor.o(($event) => handleGetWeight(index), index),
             h: item.isConfirmed,
             i: common_vendor.o((e) => handleFileSelect(e, index), index),
-            j: common_vendor.o((e) => handleFileSuccess(e), index),
-            k: common_vendor.o((e) => handleFileFail(e), index),
-            l: "e09b3d48-2-" + i0,
-            m: common_vendor.o(($event) => item.images = $event, index),
-            n: common_vendor.p({
+            j: "e09b3d48-2-" + i0,
+            k: common_vendor.o(($event) => item.images = $event, index),
+            l: common_vendor.p({
               ["file-mediatype"]: "image",
               limit: maxImageCount,
-              ["auto-upload"]: true,
               ["upload-url"]: common_vendor.unref(utils_config.uploadUrl),
               header: common_vendor.unref(uploadHeaders),
               disabled: item.isConfirmed,
@@ -378,15 +408,15 @@ const _sfc_main = {
               ["return-type"]: "array",
               modelValue: item.images
             }),
+            m: !item.isConfirmed
+          }, !item.isConfirmed ? {
+            n: common_vendor.o(($event) => handleCancel(index), index)
+          } : {}, {
             o: !item.isConfirmed
           }, !item.isConfirmed ? {
-            p: common_vendor.o(($event) => handleCancel(index), index)
+            p: common_vendor.o(($event) => handleConfirm(index), index)
           } : {}, {
-            q: !item.isConfirmed
-          }, !item.isConfirmed ? {
-            r: common_vendor.o(($event) => handleConfirm(index), index)
-          } : {}, {
-            s: index
+            q: index
           });
         }),
         i: common_vendor.t(maxImageCount),

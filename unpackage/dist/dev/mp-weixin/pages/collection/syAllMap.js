@@ -42,14 +42,14 @@ const _sfc_main = {
       }, 0).toFixed(1);
     });
     const useUniAppLocation = () => {
-      common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:103", "开始定位...");
+      common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:102", "开始定位...");
       isLocating.value = true;
       checkLocationPermission();
     };
     const checkLocationPermission = () => {
       common_vendor.index.getSetting({
         success: (res) => {
-          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:114", "获取权限设置:", res.authSetting);
+          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:113", "获取权限设置:", res.authSetting);
           if (res.authSetting["scope.userLocation"] === false) {
             common_vendor.index.showModal({
               title: "定位权限",
@@ -90,7 +90,7 @@ const _sfc_main = {
         success: (res) => {
           const lat = res.latitude;
           const lng = res.longitude;
-          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:161", "定位成功(GCJ02):", lat, lng);
+          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:160", "定位成功(GCJ02):", lat, lng);
           currentLocation.value = {
             latitude: lat,
             longitude: lng,
@@ -98,7 +98,7 @@ const _sfc_main = {
           };
           mapCenter.value.latitude = lat;
           mapCenter.value.longitude = lng;
-          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:174", "地图中心点已更新为:", lat, lng);
+          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:173", "地图中心点已更新为:", lat, lng);
           setTimeout(() => {
             addCurrentLocationMarker(lat, lng);
             addTaskMarkers();
@@ -111,7 +111,7 @@ const _sfc_main = {
           }, 100);
         },
         fail: (error) => {
-          common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:196", "定位失败:", error);
+          common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:195", "定位失败:", error);
           isLocating.value = false;
           let errorMsg = "定位失败";
           if (error.errMsg) {
@@ -143,7 +143,7 @@ const _sfc_main = {
       });
     };
     const useDefaultLocation = () => {
-      common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:235", "使用默认位置（成都市中心）");
+      common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:234", "使用默认位置（成都市中心）");
       const defaultLat = 30.6586;
       const defaultLng = 104.0647;
       currentLocation.value = {
@@ -153,7 +153,7 @@ const _sfc_main = {
       };
       mapCenter.value.latitude = defaultLat;
       mapCenter.value.longitude = defaultLng;
-      common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:248", "地图中心点已更新为默认位置:", defaultLat, defaultLng);
+      common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:247", "地图中心点已更新为默认位置:", defaultLat, defaultLng);
       setTimeout(() => {
         addCurrentLocationMarker(defaultLat, defaultLng);
         addTaskMarkers();
@@ -188,12 +188,17 @@ const _sfc_main = {
     };
     const addTaskMarkers = () => {
       taskList.value.forEach((task, index) => {
+        const taskLat = parseFloat(task.lat);
+        const taskLon = parseFloat(task.lon);
+        if (isNaN(taskLat) || isNaN(taskLon)) {
+          common_vendor.index.__f__("warn", "at pages/collection/syAllMap.vue:300", `任务 ${task.merchantName} 的经纬度无效:`, task.lat, task.lon);
+          return;
+        }
         const marker = {
           id: index + 1,
           // 使用数字ID，从1开始（0已被当前位置使用）
-          latitude: currentLocation.value.latitude + (index + 1) * 0.01,
-          // 基于当前位置的示例坐标偏移，+1确保不与起点重复
-          longitude: currentLocation.value.longitude + (index + 1) * 0.01,
+          latitude: taskLat,
+          longitude: taskLon,
           title: task.merchantName,
           iconPath: "/static/ssd/positioning.png",
           width: 25,
@@ -213,21 +218,21 @@ const _sfc_main = {
     };
     const planRoute = async () => {
       if (mapMarkers.value.length < 1) {
-        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:326", "标记数量不足，无法进行路线规划");
+        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:332", "标记数量不足，无法进行路线规划");
         return;
       }
       try {
         const startPoint = mapMarkers.value.find((marker) => marker.id === 0);
         if (!startPoint) {
-          common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:334", "找不到起点（当前位置）");
+          common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:340", "找不到起点（当前位置）");
           return;
         }
         const taskPoints = mapMarkers.value.filter((marker) => marker.id !== 0);
         if (taskPoints.length === 0) {
-          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:342", "没有任务点，无法规划路线");
+          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:348", "没有任务点，无法规划路线");
           return;
         }
-        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:346", "开始路线规划 - 任务点数量:", taskPoints.length);
+        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:352", "开始路线规划 - 任务点数量:", taskPoints.length);
         const startWgs84Coord = common_vendor.exported.transform([startPoint.longitude, startPoint.latitude], common_vendor.exported.GCJ02, common_vendor.exported.WGS84);
         let midWgs84Coords = [];
         let endWgs84Coord = null;
@@ -240,10 +245,10 @@ const _sfc_main = {
           midWgs84Coords = midPoints.map(
             (point) => common_vendor.exported.transform([point.longitude, point.latitude], common_vendor.exported.GCJ02, common_vendor.exported.WGS84)
           );
-          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:367", "途经点数量:", midPoints.length);
+          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:373", "途经点数量:", midPoints.length);
         }
         const routeInfo = taskPoints.length === 1 ? `规划直达路线：起点 → ${taskPoints[0].title}` : `规划多点路线：起点 → ${taskPoints.slice(0, -1).map((p) => p.title).join(" → ")} → ${taskPoints[taskPoints.length - 1].title}`;
-        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:375", routeInfo);
+        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:381", routeInfo);
         common_vendor.index.showLoading({
           title: "正在规划路线..."
         });
@@ -251,13 +256,13 @@ const _sfc_main = {
         if (routeData && typeof routeData === "string" && routeData.includes("<result")) {
           parseRouteXML(routeData);
         } else {
-          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:387", "天地图API返回数据格式异常");
+          common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:393", "天地图API返回数据格式异常");
         }
       } catch (error) {
         if (typeof error === "string" && error.includes("<result")) {
           parseRouteXML(error);
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:394", "路线规划失败:", error.message || error);
+          common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:400", "路线规划失败:", error.message || error);
           common_vendor.index.showToast({
             title: "路线规划失败",
             icon: "none"
@@ -297,7 +302,7 @@ const _sfc_main = {
             }
           },
           fail: (error) => {
-            common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:446", "天地图API请求失败:", error);
+            common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:452", "天地图API请求失败:", error);
             reject(error);
           }
         });
@@ -345,7 +350,7 @@ const _sfc_main = {
           const coordinates = routeCoords.split(";").map((coord) => {
             const [lng, lat] = coord.split(",").map(Number);
             if (!coordinateValidator.isValidCoordinate(lng, lat)) {
-              common_vendor.index.__f__("warn", "at pages/collection/syAllMap.vue:517", "无效坐标:", coord);
+              common_vendor.index.__f__("warn", "at pages/collection/syAllMap.vue:523", "无效坐标:", coord);
               return null;
             }
             const gcj02Coord = common_vendor.exported.transform([lng, lat], common_vendor.exported.WGS84, common_vendor.exported.GCJ02);
@@ -370,23 +375,23 @@ const _sfc_main = {
           throw new Error("未找到路线坐标信息");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:552", "解析XML数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:558", "解析XML数据失败:", error);
       }
     };
     const drawRouteFromCoordinates = (coordinates) => {
       if (!coordinates || coordinates.length === 0) {
-        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:559", "坐标数组为空，无法绘制路线");
+        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:565", "坐标数组为空，无法绘制路线");
         return;
       }
       const validCoordinates = coordinates.filter((coord) => {
         const isValid = typeof coord.latitude === "number" && typeof coord.longitude === "number" && !isNaN(coord.latitude) && !isNaN(coord.longitude);
         if (!isValid) {
-          common_vendor.index.__f__("warn", "at pages/collection/syAllMap.vue:571", "无效坐标:", coord);
+          common_vendor.index.__f__("warn", "at pages/collection/syAllMap.vue:577", "无效坐标:", coord);
         }
         return isValid;
       });
       if (validCoordinates.length === 0) {
-        common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:578", "没有有效的坐标点");
+        common_vendor.index.__f__("error", "at pages/collection/syAllMap.vue:584", "没有有效的坐标点");
         return;
       }
       const polyline = {
@@ -400,19 +405,19 @@ const _sfc_main = {
       mapPolyline.value = [];
       common_vendor.nextTick$1(() => {
         mapPolyline.value = [polyline];
-        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:597", "路线已绘制，坐标点数:", validCoordinates.length);
+        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:603", "路线已绘制，坐标点数:", validCoordinates.length);
       });
     };
     common_vendor.onLoad(() => {
-      common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:604", "页面加载，接收参数");
+      common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:610", "页面加载，接收参数");
       const mapData = common_vendor.index.getStorageSync("mapData");
       if (mapData) {
-        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:609", "获取地图数据:", mapData);
+        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:615", "获取地图数据:", mapData);
         setMapData(mapData);
         isDataReceived.value = true;
         common_vendor.index.removeStorageSync("mapData");
       } else {
-        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:615", "暂无数据，等待传递");
+        common_vendor.index.__f__("log", "at pages/collection/syAllMap.vue:621", "暂无数据，等待传递");
       }
     });
     common_vendor.onMounted(() => {

@@ -3,13 +3,11 @@ const common_vendor = require("../../common/vendor.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
-  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2)();
+  _easycom_uni_nav_bar2();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
-const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons)();
+  _easycom_uni_nav_bar();
 }
 const _sfc_main = {
   __name: "user",
@@ -27,12 +25,6 @@ const _sfc_main = {
       if (filePicker.value) {
         filePicker.value.chooseFile();
       }
-    };
-    const handleSave = () => {
-      common_vendor.index.showToast({
-        title: "保存成功",
-        icon: "success"
-      });
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -52,16 +44,10 @@ const _sfc_main = {
       } : {
         e: common_vendor.t(common_vendor.unref(userStore).userType == 1 ? common_vendor.unref(userStore).userAvatar : common_vendor.unref(userStore).userSFAvatar)
       }, {
-        f: common_vendor.p({
-          type: "camera-filled",
-          size: "32rpx",
-          color: "#fff"
-        }),
-        g: common_vendor.o(handleAvatarClick),
-        h: common_vendor.t(common_vendor.unref(userStore).nickName || "未设置"),
-        i: common_vendor.t(common_vendor.unref(userStore).userName || "未设置"),
-        j: common_vendor.t(common_vendor.unref(userStore).userTypeText),
-        k: common_vendor.o(handleSave)
+        f: common_vendor.o(handleAvatarClick),
+        g: common_vendor.t(common_vendor.unref(userStore).nickName || "未设置"),
+        h: common_vendor.t(common_vendor.unref(userStore).userName || "未设置"),
+        i: common_vendor.t(common_vendor.unref(userStore).userTypeText)
       });
     };
   }

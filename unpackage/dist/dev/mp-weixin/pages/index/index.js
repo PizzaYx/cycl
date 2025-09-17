@@ -79,7 +79,11 @@ const _sfc_main = {
           password: formData.password
         });
         if (res.code === 200) {
-          await fetchUserInfo();
+          const userInfo = await fetchUserInfo();
+          if (!userInfo) {
+            common_vendor.index.hideLoading();
+            return;
+          }
           common_vendor.index.showToast({
             title: "登录成功",
             icon: "success"
@@ -100,20 +104,42 @@ const _sfc_main = {
           title: "网络请求失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/index/index.vue:219", "登录请求失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:225", "登录请求失败:", err);
       } finally {
       }
     };
     const fetchUserInfo = async () => {
       try {
-        await userStore.fetchUserInfo();
+        const result = await userStore.fetchUserInfo(true);
+        if (!result) {
+          throw new Error("获取用户信息失败");
+        }
+        const { userInfo, userType } = result;
+        const expectedType = activeTab.value === 0 ? "1" : "2";
+        if (userType !== expectedType) {
+          const currentTypeText = activeTab.value === 0 ? "商户端" : "收运端";
+          const actualTypeText = userType === "1" ? "商户端" : "收运端";
+          return new Promise((resolve) => {
+            common_vendor.index.showModal({
+              title: "用户类型不匹配",
+              content: `您当前选择的是${currentTypeText}，但该账号是${actualTypeText}用户，请重新选择正确的入口`,
+              showCancel: false,
+              confirmText: "重新选择",
+              success: () => {
+                activeTab.value = userType === "1" ? 0 : 1;
+                common_vendor.index.__f__("log", "at pages/index/index.vue:254", "切换后的activeTab:", activeTab.value);
+                common_vendor.index.__f__("log", "at pages/index/index.vue:257", "已切换到正确入口，请重新点击登录");
+                resolve(null);
+              }
+            });
+          });
+        }
+        return userInfo;
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:230", "获取用户信息失败:", error);
-        common_vendor.index.showToast({
-          title: "获取用户信息失败，请稍后重试",
-          icon: "none",
-          duration: 2e3
-        });
+        if (error.message === "用户类型不匹配") {
+          return null;
+        }
+        return null;
       }
     };
     return (_ctx, _cache) => {

@@ -44,6 +44,13 @@ function apiPostMerchantCheck(data = {}) {
     method: "POST"
   });
 }
+function apiPostEditMerchantCheck(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/editMerchantCheck",
+    data,
+    method: "POST"
+  });
+}
 function apiGetMerchantCheck(data = {}) {
   return utils_request.request({
     url: "/api/merchantapi/getMerchantCheck",
@@ -201,6 +208,7 @@ exports.apiGetcancelPlanById = apiGetcancelPlanById;
 exports.apiGetconfirmPlanById = apiGetconfirmPlanById;
 exports.apiGetdriverConfirmPlan = apiGetdriverConfirmPlan;
 exports.apiGetnoNeedCollect = apiGetnoNeedCollect;
+exports.apiPostEditMerchantCheck = apiPostEditMerchantCheck;
 exports.apiPostLogin = apiPostLogin;
 exports.apiPostMerchantCheck = apiPostMerchantCheck;
 exports.apiPostRegister = apiPostRegister;
