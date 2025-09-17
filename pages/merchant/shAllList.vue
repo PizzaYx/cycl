@@ -25,8 +25,8 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text :class="['status-tag', getStatusClass(item.status)]">
-                                    {{ getStatusText(item.status) }}
+                                <text class="status-tag" :class="getStatusClass(item)">
+                                    {{ getStatusText(item) }}
                                 </text>
                             </view>
 
@@ -121,17 +121,19 @@ const statusOptions = ref([
 ]);
 
 // 状态转换函数
-const getStatusText = (status) => {
-    console.log(123)
-    switch (status) {
+const getStatusText = (item) => {
+    switch (item.status) {
         case 0:
-        case '0':
-            return '待确认';
+            return '进行中';
         case 1:
-        case '1':
-            return '已完成';
+            {
+                if (item.merchantConfirm) {
+                    return '已完成';
+                } else {
+                    return '待确认';
+                }
+            }
         case 2:
-        case '2':
             return '无需收运';
         default:
             return '未知状态';
@@ -139,19 +141,18 @@ const getStatusText = (status) => {
 };
 
 // 获取状态样式类名
-const getStatusClass = (status) => {
-    switch (status) {
-        case 0:
-        case '0':
-            return 'booking'; // 待确认 - 蓝色
-        case 1:
-        case '1':
-            return 'completed'; // 已完成 - 灰色
-        case 2:
-        case '2':
-            return 'processing'; // 无需收运 - 绿色
-        default:
-            return 'completed';
+const getStatusClass = (item) => {
+    switch (item.status) {
+        case 0: return 'processing';
+        case 1: {
+            if (item.merchantConfirm) {
+                return 'completed';
+            } else {
+                return 'pending';
+            }
+        }
+        case 2: return 'cancelled';
+        default: return '';
     }
 };
 //返回上一页
@@ -439,19 +440,29 @@ onMounted(() => {
                             justify-content: center;
                             align-items: center;
 
-                            &.booking {
-                                color: rgba(255, 161, 0, 1);
-                                background-color: rgba(255, 161, 0, 0.10);
-                            }
 
                             &.processing {
-                                color: rgba(7, 193, 96, 1);
-                                background-color: rgba(7, 193, 96, 0.10);
+                                //进行中 待完成
+                                color: rgba(0, 170, 255, 1);
+                                background: rgba(0, 170, 255, 0.10);
                             }
 
                             &.completed {
+                                //已完成
                                 color: rgba(61, 61, 61, 0.50);
-                                background-color: rgba(61, 61, 61, 0.10);
+                                background: rgba(153, 153, 153, 0.1);
+                            }
+
+                            &.pending {
+                                //待确认
+                                color: rgba(255, 161, 0, 1);
+                                background: rgba(255, 161, 0, 0.10);
+                            }
+
+                            &.cancelled {
+                                //无法收运
+                                color: rgba(61, 61, 61, 0.50);
+                                background: rgba(153, 153, 153, 0.1);
                             }
                         }
                     }

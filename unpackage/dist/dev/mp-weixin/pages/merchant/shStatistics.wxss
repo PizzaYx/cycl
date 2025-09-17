@@ -109,14 +109,13 @@
   color: #3d3d3d;
 }
 .container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.data-v-5f21cbbb {
+  border-radius: 8rpx;
   font-size: 24rpx;
   width: 120rpx;
   height: 40rpx;
-  border-radius: 8rpx;
   display: flex;
-  align-items: center;
   justify-content: center;
-  text-align: center;
+  align-items: center;
 }
 .container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.processing.data-v-5f21cbbb {
   color: #00aaff;
@@ -126,9 +125,13 @@
   color: rgba(61, 61, 61, 0.5);
   background: rgba(153, 153, 153, 0.1);
 }
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-5f21cbbb {
+.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.pending.data-v-5f21cbbb {
   color: #ffa100;
   background: rgba(255, 161, 0, 0.1);
+}
+.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-5f21cbbb {
+  color: rgba(61, 61, 61, 0.5);
+  background: rgba(153, 153, 153, 0.1);
 }
 .container .content-wrapper .order-list .order-item .order-content.data-v-5f21cbbb {
   padding: 20rpx 0;

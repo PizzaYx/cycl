@@ -34,8 +34,8 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text :class="['status-tag', getStatusClass(item.status)]">
-                                    {{ getStatusText(item.status) }}
+                                <text class="status-tag" :class="getStatusClass(item)">
+                                    {{ getStatusText(item) }}
                                 </text>
                             </view>
 
@@ -61,7 +61,7 @@
                                 <text class="label">预估桶数:</text>
                                 <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + ' 个') :
                                     '暂无'
-                                    }}</text>
+                                }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>
@@ -142,14 +142,6 @@ const statisticsConfig = [
     }
 ];
 
-// 获取状态样式类名
-const getStatusClass = (status) => {
-    switch (status) {
-        case 0: return 'processing';
-        case 1: return 'completed';
-        case 2: return 'cancelled';
-    }
-};
 
 
 const handleViewDetails = (item) => {
@@ -160,19 +152,38 @@ const handleViewDetails = (item) => {
 };
 
 // 状态转换函数
-const getStatusText = (status) => {
-    switch (status) {
+const getStatusText = (item) => {
+    switch (item.status) {
         case 0:
-        case '0':
-            return '待收运';
+            return '进行中';
         case 1:
-        case '1':
-            return '已完成';
+            {
+                if (item.merchantConfirm) {
+                    return '已完成';
+                } else {
+                    return '待确认';
+                }
+            }
         case 2:
-        case '2':
-            return '无法收运';
+            return '无需收运';
         default:
-            return '无法收运';
+            return '未知状态';
+    }
+};
+
+// 获取状态样式类名
+const getStatusClass = (item) => {
+    switch (item.status) {
+        case 0: return 'processing';
+        case 1: {
+            if (item.merchantConfirm) {
+                return 'completed';
+            } else {
+                return 'pending';
+            }
+        }
+        case 2: return 'cancelled';
+        default: return '';
     }
 };
 
@@ -449,14 +460,13 @@ onMounted(() => {
                         }
 
                         .status-tag {
+                            border-radius: 8rpx;
                             font-size: 24rpx;
                             width: 120rpx;
                             height: 40rpx;
-                            border-radius: 8rpx;
                             display: flex;
-                            align-items: center;
                             justify-content: center;
-                            text-align: center;
+                            align-items: center;
 
 
                             &.processing {
@@ -471,11 +481,16 @@ onMounted(() => {
                                 background: rgba(153, 153, 153, 0.1);
                             }
 
-                            &.cancelled {
-                                //无法收运
+                            &.pending {
+                                //待确认
                                 color: rgba(255, 161, 0, 1);
                                 background: rgba(255, 161, 0, 0.10);
+                            }
 
+                            &.cancelled {
+                                //无法收运
+                                color: rgba(61, 61, 61, 0.50);
+                                background: rgba(153, 153, 153, 0.1);
                             }
                         }
                     }

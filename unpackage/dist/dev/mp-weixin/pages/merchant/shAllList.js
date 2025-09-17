@@ -26,35 +26,38 @@ const _sfc_main = {
       { value: 1, text: "已完成" },
       { value: 2, text: "无需收运" }
     ]);
-    const getStatusText = (status) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:125", 123);
-      switch (status) {
+    const getStatusText = (item) => {
+      switch (item.status) {
         case 0:
-        case "0":
-          return "待确认";
-        case 1:
-        case "1":
-          return "已完成";
+          return "进行中";
+        case 1: {
+          if (item.merchantConfirm) {
+            return "已完成";
+          } else {
+            return "待确认";
+          }
+        }
         case 2:
-        case "2":
           return "无需收运";
         default:
           return "未知状态";
       }
     };
-    const getStatusClass = (status) => {
-      switch (status) {
+    const getStatusClass = (item) => {
+      switch (item.status) {
         case 0:
-        case "0":
-          return "booking";
-        case 1:
-        case "1":
-          return "completed";
-        case 2:
-        case "2":
           return "processing";
+        case 1: {
+          if (item.merchantConfirm) {
+            return "completed";
+          } else {
+            return "pending";
+          }
+        }
+        case 2:
+          return "cancelled";
         default:
-          return "completed";
+          return "";
       }
     };
     const back = () => {
@@ -64,7 +67,7 @@ const _sfc_main = {
     const loadingStatus = common_vendor.ref("more");
     const allOrderList = common_vendor.ref([]);
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:171", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:172", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
       });
@@ -99,7 +102,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shAllList.vue:222", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shAllList.vue:223", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -172,8 +175,8 @@ const _sfc_main = {
         j: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.merchantName),
-            b: common_vendor.t(getStatusText(item.status)),
-            c: common_vendor.n(getStatusClass(item.status)),
+            b: common_vendor.t(getStatusText(item)),
+            c: common_vendor.n(getStatusClass(item)),
             d: common_vendor.t(item.deliveryCount ?? 0),
             e: common_vendor.t(item.estimateWeight ?? 0),
             f: common_vendor.t(item.weight ?? 0),

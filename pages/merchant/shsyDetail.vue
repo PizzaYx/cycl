@@ -8,7 +8,9 @@
         <!-- 用户信息 -->
         <view class="user-info">
             <view class="name">{{ pageData.merchantName }}</view>
-            <view class="status-tag" :class="statusClass">{{ statusText }}</view>
+            <view class="status-tag" :class="getStatusClass()">
+                {{ getRecordStatusText() }}
+            </view>
         </view>
         <!-- 内容区域 -->
         <view class="content">
@@ -38,55 +40,72 @@ const pageData = ref({
 
 });
 
-// 根据状态显示对应的文字
-const statusText = computed(() => {
+// 获取收运记录状态文字
+const getRecordStatusText = () => {
     switch (pageData.value.status) {
-        case 0: return '进行中';
-        case 1: return '已完成';
-        case 2: return '无法收运';
-        default: return '';
+        case 0:
+            return '进行中';
+        case 1:
+            {
+                if (pageData.value.merchantConfirm) {
+                    return '已完成';
+                } else {
+                    return '待确认';
+                }
+            }
+        case 2:
+            return '无需收运';
+        default:
+            return '未知状态';
     }
-});
+};
 
-const statusClass = computed(() => {
+// 获取状态样式类名
+const getStatusClass = () => {
     switch (pageData.value.status) {
         case 0: return 'processing';
-        case 1: return 'completed';
+        case 1: {
+            if (pageData.value.merchantConfirm) {
+                return 'completed';
+            } else {
+                return 'pending';
+            }
+        }
         case 2: return 'cancelled';
         default: return '';
     }
-});
+};
 
 // 信息列表配置
 const infoList = computed(() => [
     {
         label: '预估时间:',
-        value: pageData.value.appointmentTime ?? '暂无',
+        value: pageData.value.appointmentTime ? pageData.value.appointmentTime : '暂无',
     },
     {
         label: '收运时间:',
-        value: pageData.value.arrivalTime ?? '暂无',
+        value: pageData.value.arrivalTime ? pageData.value.arrivalTime : '暂无',
     },
     {
         label: '预估重量:',
-        value: pageData.value.estimateWeight + ' kg' ?? '暂无'
+        value: pageData.value.estimateWeight ? pageData.value.estimateWeight + ' kg' : '暂无'
 
     },
     {
         label: '收运重量:',
-        value: pageData.value.weight + ' kg' ?? '暂无'
+        value: pageData.value.weight ? pageData.value.weight + ' kg' : '暂无'
     },
     {
         label: '预估桶数:',
-        value: pageData.value.estimateBucketNum + ' 个' ?? '暂无'
+        value: pageData.value.estimateBucketNum ? pageData.value.estimateBucketNum + ' 个' : '暂无'
     },
     {
         label: '收运桶数:',
-        value: pageData.value.bucketNum + ' 个' ?? '暂无'
+        value: pageData.value.bucketNum ? pageData.value.bucketNum + ' 个' : '暂无'
     },
     {
         label: '收运地址:',
-        value: pageData.value.address ?? '暂无',
+        value: pageData.value.address ? pageData.value.address : '暂无',
     },
     {
         label: '车牌号:',
@@ -149,7 +168,10 @@ const getSyCheckDetail = async () => {
             arrivalTime: data.arrivalTime,
             address: data.address,
             explain: data.explain,
+            merchantConfirm: data.merchantConfirm,
         };
+
+        console.log('获取收运记录详情成功', pageData.value);
     }
 }
 // 返回上一页
@@ -185,14 +207,13 @@ const back = () => {
     }
 
     .status-tag {
+        border-radius: 8rpx;
         font-size: 24rpx;
         width: 120rpx;
         height: 40rpx;
-        border-radius: 8rpx;
         display: flex;
-        align-items: center;
         justify-content: center;
-        text-align: center;
+        align-items: center;
 
 
         &.processing {
@@ -207,11 +228,16 @@ const back = () => {
             background: rgba(153, 153, 153, 0.1);
         }
 
-        &.cancelled {
-            //无法收运
+        &.pending {
+            //待确认
             color: rgba(255, 161, 0, 1);
             background: rgba(255, 161, 0, 0.10);
+        }
 
+        &.cancelled {
+            //无法收运
+            color: rgba(61, 61, 61, 0.50);
+            background: rgba(153, 153, 153, 0.1);
         }
     }
 }

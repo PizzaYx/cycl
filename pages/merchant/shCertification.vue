@@ -493,7 +493,7 @@ const loadAuthStatus = async () => {
             // 数据回显
             fillFormData(result.data)
 
-            console.log('认证状态加载成功, 状态:', result.data.status)
+            console.log('认证状态加载成功, 状态:', result.data)
         } else {
             console.log('用户尚未提交认证申请')
             // 没有认证数据，保持默认状态
@@ -531,12 +531,24 @@ const fillFormData = (data) => {
 
     // 图片回显
     if (data.img) {
+        console.log('===== 开始图片回显 =====')
+        console.log('服务器返回的img字段:', data.img)
+
         const imageUrls = data.img.split(',').filter(url => url.trim())
-        formData.licenseImages = imageUrls.map(url => ({
-            url: url.trim(),
-            path: url.trim(),
-            name: '营业执照'
-        }))
+        console.log('解析后的图片URLs:', imageUrls)
+
+        formData.licenseImages = imageUrls.map((url, index) => {
+            const trimmedUrl = url.trim()
+            console.log(`回显第${index + 1}个图片URL:`, trimmedUrl)
+            return {
+                url: trimmedUrl,
+                path: trimmedUrl,
+                name: '营业执照'
+            }
+        })
+
+        console.log('回显后的formData.licenseImages:', formData.licenseImages)
+        console.log('===== 图片回显完成 =====')
     }
 
     console.log('数据回显完成:', formData)
@@ -619,7 +631,7 @@ const onUploadFail = (err) => {
 }
 
 // 手动上传文件
-const uploadFileManually = (file) => {
+const uploadFileManually = (file, fileIndex = null) => {
     console.log('开始手动上传文件:', file)
     console.log('文件路径:', file.tempFilePath || file.path)
     console.log('上传URL:', uploadUrl)
@@ -637,10 +649,29 @@ const uploadFileManually = (file) => {
             console.log('服务器响应:', response)
 
             if (response.code === 200 && response.url) {
-                // 更新文件信息
-                const fileIndex = formData.licenseImages.findIndex(f => f === file)
-                if (fileIndex !== -1) {
-                    formData.licenseImages[fileIndex] = {
+                console.log('===== 文件上传成功处理 =====')
+                console.log('服务器返回的URL:', response.url)
+                console.log('当前formData.licenseImages:', formData.licenseImages)
+                console.log('要更新的文件:', file)
+
+                // 优先使用传入的文件索引，否则尝试匹配
+                let targetIndex = fileIndex
+                if (targetIndex === null || targetIndex === undefined) {
+                    targetIndex = formData.licenseImages.findIndex(f => {
+                        // 尝试多种匹配方式
+                        return f === file ||
+                            (f.name && file.name && f.name === file.name) ||
+                            (f.uuid && file.uuid && f.uuid === file.uuid) ||
+                            (f.tempFilePath && file.tempFilePath && f.tempFilePath === file.tempFilePath)
+                    })
+                }
+                console.log('目标文件索引:', targetIndex)
+
+                if (targetIndex !== -1 && targetIndex < formData.licenseImages.length) {
+                    const oldFile = formData.licenseImages[targetIndex]
+                    console.log('更新前的文件:', oldFile)
+
+                    formData.licenseImages[targetIndex] = {
                         ...file,
                         url: response.url,
                         fileName: response.fileName,
@@ -648,8 +679,37 @@ const uploadFileManually = (file) => {
                         originalFilename: response.originalFilename,
                         response: response
                     }
+
+                    console.log('更新后的文件:', formData.licenseImages[targetIndex])
+                    console.log('更新后的formData.licenseImages:', formData.licenseImages)
+                } else {
+                    console.log('未找到有效的文件索引，尝试替换最后一个文件')
+                    // 如果找不到有效的索引，替换数组中的最后一个文件（通常是新选择的文件）
+                    const lastIndex = formData.licenseImages.length - 1
+                    if (lastIndex >= 0) {
+                        formData.licenseImages[lastIndex] = {
+                            ...file,
+                            url: response.url,
+                            fileName: response.fileName,
+                            newFileName: response.newFileName,
+                            originalFilename: response.originalFilename,
+                            response: response
+                        }
+                        console.log('替换最后一个文件后的formData.licenseImages:', formData.licenseImages)
+                    } else {
+                        console.log('数组为空，添加新文件')
+                        formData.licenseImages.push({
+                            ...file,
+                            url: response.url,
+                            fileName: response.fileName,
+                            newFileName: response.newFileName,
+                            originalFilename: response.originalFilename,
+                            response: response
+                        })
+                        console.log('添加后的formData.licenseImages:', formData.licenseImages)
+                    }
                 }
-                console.log('文件上传成功，URL:', response.url)
+                console.log('===== 文件上传成功处理完成 =====')
 
                 // 触发表单验证
                 setTimeout(() => {
@@ -690,8 +750,9 @@ const onFileSelect = (res) => {
         formData.licenseImages = [...formData.licenseImages, ...res.tempFiles]
         console.log('手动更新后formData.licenseImages:', formData.licenseImages)
 
-        // 手动上传文件
-        uploadFileManually(res.tempFiles[0])
+        // 手动上传文件 - 传递新文件的索引
+        const newFileIndex = formData.licenseImages.length - 1
+        uploadFileManually(res.tempFiles[0], newFileIndex)
 
         // 触发表单验证
         setTimeout(() => {
@@ -780,23 +841,41 @@ const submitAuth = async () => {
         // 处理上传的图片数据
         let imageUrls = []
         if (formData.licenseImages && formData.licenseImages.length > 0) {
-            imageUrls = formData.licenseImages.map(file => {
+            console.log('===== 开始处理图片数据 =====')
+            console.log('formData.licenseImages:', formData.licenseImages)
+
+            imageUrls = formData.licenseImages.map((file, index) => {
+                console.log(`处理第${index + 1}个文件:`, file)
+                console.log(`文件类型:`, typeof file)
+                console.log(`文件URL:`, file.url)
+                console.log(`文件路径:`, file.path)
+                console.log(`文件响应:`, file.response)
+
                 // uni-file-picker返回的文件对象结构
                 if (typeof file === 'string') {
+                    console.log(`使用字符串值:`, file)
                     return file
                 } else if (file.url) {
+                    console.log(`使用URL:`, file.url)
                     return file.url
                 } else if (file.path) {
+                    console.log(`使用路径:`, file.path)
                     return file.path
                 } else {
+                    console.log(`使用原始值:`, file)
                     return file
                 }
             })
+
+            console.log('最终图片URLs:', imageUrls)
+            console.log('===== 图片数据处理完成 =====')
         }
 
+        console.log('123', userStore.merchant);
         // 准备提交数据 - 只包含API需要的字段
         const submitData = {
             userid: userStore.userId,
+            id: userStore.merchant.id,
             name: formData.merchantName,              // 商户名称
             address: formData.address,                // 地址
             appcode: formData.appcode,                // 区域代码
@@ -806,10 +885,10 @@ const submitAuth = async () => {
             contactTel: formData.contactPhone,        // 联系电话
             bucketNum: parseInt(formData.bucketCount), // 预计桶数量
             trashWeight: parseFloat(formData.estimatedWeight), // 预估垃圾重量
-            img: imageUrls.join(',') // 法人证照片，多张图片用逗号分隔
+            img: imageUrls.join(',') // ，多张图片用逗号分隔
         }
 
-        console.log('提交认证数据:', submitData)
+        console.log('提交修改认证数据:', submitData)
 
         // 根据认证状态选择不同的API
         let result

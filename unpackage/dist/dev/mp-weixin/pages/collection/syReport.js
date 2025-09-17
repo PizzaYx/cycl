@@ -206,6 +206,19 @@ const _sfc_main = {
             });
             return;
           }
+          const scanResult = res.result;
+          const parts = scanResult.split("_");
+          const scannedMerchantId = parts[0];
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:326", "扫码结果:", scanResult);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:327", "扫码中的商户ID:", scannedMerchantId);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:328", "当前商户ID:", merchantId.value);
+          if (scannedMerchantId !== merchantId.value) {
+            common_vendor.index.showToast({
+              title: "桶码不属于当前商户，请扫描正确的桶码",
+              icon: "none"
+            });
+            return;
+          }
           const existingRecord = records.value.find((record) => record.bucketCode === res.result);
           if (existingRecord) {
             common_vendor.index.showToast({
@@ -230,7 +243,7 @@ const _sfc_main = {
           });
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:348", "扫码失败", err);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:365", "扫码失败", err);
           common_vendor.index.showToast({
             title: "扫码失败,请重试!",
             icon: "none"
@@ -329,18 +342,34 @@ const _sfc_main = {
         planId: planId.value,
         // 收运单ID
         img: record.images.map((image) => {
-          if (image.url)
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:489", "处理图片数据:", image);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:490", "图片URL:", image.url);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:491", "图片路径:", image.path);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:492", "图片响应:", image.response);
+          if (image.url) {
+            common_vendor.index.__f__("log", "at pages/collection/syReport.vue:496", "使用image.url:", image.url);
             return image.url;
-          if (image.path)
+          }
+          if (image.path) {
+            common_vendor.index.__f__("log", "at pages/collection/syReport.vue:500", "使用image.path:", image.path);
             return image.path;
-          if (image.response && image.response.url)
+          }
+          if (image.response && image.response.url) {
+            common_vendor.index.__f__("log", "at pages/collection/syReport.vue:504", "使用image.response.url:", image.response.url);
             return image.response.url;
-          if (typeof image === "string")
+          }
+          if (typeof image === "string") {
+            common_vendor.index.__f__("log", "at pages/collection/syReport.vue:508", "使用字符串:", image);
             return image;
+          }
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:511", "没有找到有效的URL");
           return "";
-        }).filter((url) => url !== "").join(",")
-        // 过滤掉空的URL并用逗号连接
+        }).filter((url) => url !== "")
+        // 过滤掉空的URL
       };
+      reportData.img = reportData.img.join(",");
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:519", "最终上报的图片URLs:", reportData.img);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:520", "完整上报数据:", reportData);
       try {
         const res = await api_apis.apiPostreportWeight(reportData);
         if (res.code === 200) {
@@ -360,7 +389,7 @@ const _sfc_main = {
           title: "上报异常",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:503", "上报异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:544", "上报异常:", error);
       }
     };
     return (_ctx, _cache) => {

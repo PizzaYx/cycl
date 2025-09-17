@@ -93,12 +93,15 @@
                         <uni-text class="value">{{ task.merchantName }}</uni-text>
                     </view>
                     <view class="weight-info">
-                        <uni-text class="label">预估重量：</uni-text>
-                        <uni-text class="value">{{ task.estimateWeight }}kg</uni-text>
+                        <uni-text class="label">{{ task.weight != null ? '收运重量：' : ' 预估重量：' }}</uni-text>
+                        <uni-text class="value">{{ task.weight != null ? task.weight : task.estimateWeight ?? 0
+                            }} kg</uni-text>
                     </view>
                     <view class="bin-info">
-                        <uni-text class="label">桶数：</uni-text>
-                        <uni-text class="value">{{ task.estimateBucketNum || 0 }}个</uni-text>
+                        <uni-text class="label"> {{ task.bucketNum != null ? '收运桶数：' : ' 预估桶数：' }}</uni-text>
+                        <uni-text class="value">{{ task.bucketNum != null ? task.bucketNum : task.estimateBucketNum ??
+                            0 }}
+                            个</uni-text>
                     </view>
                     <view class="address-info">
                         <uni-text class="label">地址：</uni-text>
@@ -766,8 +769,7 @@ const back = () => {
 
                 .cancel-btn,
                 .view-btn,
-                .report-btn
-                {
+                .report-btn {
                     width: 120rpx; // 减小按钮宽度以适应4个按钮
                     height: 48rpx;
                     color: #07C160;
@@ -779,7 +781,7 @@ const back = () => {
                     justify-content: center;
                 }
 
-    
+
                 .cancel-btn {
                     border: 1rpx solid rgba(196, 196, 196, 1);
                     color: rgba(61, 61, 61, 1);

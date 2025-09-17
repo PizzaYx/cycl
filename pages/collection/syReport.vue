@@ -318,6 +318,23 @@ const handleScan = () => {
                 return;
             }
 
+            // 验证商户ID是否匹配
+            const scanResult = res.result;
+            const parts = scanResult.split('_');
+            const scannedMerchantId = parts[0]; // 下划线前面的是商户ID
+
+            console.log('扫码结果:', scanResult);
+            console.log('扫码中的商户ID:', scannedMerchantId);
+            console.log('当前商户ID:', merchantId.value);
+
+            if (scannedMerchantId !== merchantId.value) {
+                uni.showToast({
+                    title: '桶码不属于当前商户，请扫描正确的桶码',
+                    icon: 'none'
+                });
+                return;
+            }
+
             // 检查是否已经扫描过相同的桶码
             const existingRecord = records.value.find(record => record.bucketCode === res.result);
             if (existingRecord) {
@@ -469,14 +486,38 @@ const confirmReport = async (index) => {
         merchantId: merchantId.value, // 商户ID
         planId: planId.value, // 收运单ID
         img: record.images.map(image => {
+            console.log('处理图片数据:', image);
+            console.log('图片URL:', image.url);
+            console.log('图片路径:', image.path);
+            console.log('图片响应:', image.response);
+
             // 根据不同情况获取图片URL
-            if (image.url) return image.url;
-            if (image.path) return image.path;
-            if (image.response && image.response.url) return image.response.url;
-            if (typeof image === 'string') return image;
+            if (image.url) {
+                console.log('使用image.url:', image.url);
+                return image.url;
+            }
+            if (image.path) {
+                console.log('使用image.path:', image.path);
+                return image.path;
+            }
+            if (image.response && image.response.url) {
+                console.log('使用image.response.url:', image.response.url);
+                return image.response.url;
+            }
+            if (typeof image === 'string') {
+                console.log('使用字符串:', image);
+                return image;
+            }
+            console.log('没有找到有效的URL');
             return '';
-        }).filter(url => url !== '').join(',') // 过滤掉空的URL并用逗号连接
+        }).filter(url => url !== '') // 过滤掉空的URL
     };
+
+    // 将过滤后的URL用逗号连接
+    reportData.img = reportData.img.join(',');
+
+    console.log('最终上报的图片URLs:', reportData.img);
+    console.log('完整上报数据:', reportData);
 
     try {
         const res = await apiPostreportWeight(reportData);

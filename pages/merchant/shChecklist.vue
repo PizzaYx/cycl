@@ -29,8 +29,8 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text class="status-tag" :class="getStatusClass(item.status)">
-                                    {{ getStatusText(item.status) }}
+                                <text class="status-tag" :class="getStatusClass(item)">
+                                    {{ getStatusText(item) }}
                                 </text>
                             </view>
 
@@ -76,9 +76,13 @@
 
                             <!-- currentTab == 1: 显示确认收运按钮 -->
                             <template v-else-if="currentTab == 1">
-                                <uni-button size="mini" type="primary" class="btn-confirm"
-                                    @tap="handleConfirmTransport(item)">
+                                <uni-button v-if="getStatusText(item) === '待确认'" size="mini" type="primary"
+                                    class="btn-confirm" @tap="handleConfirmTransport(item)">
                                     确认收运
+                                </uni-button>
+                                <uni-button size="mini" type="default" class="btn-confirm"
+                                    @tap="handleViewDetails(item)">
+                                    查看详情
                                 </uni-button>
                             </template>
 
@@ -151,10 +155,10 @@ function handleTabClick(index) {
 
 // 状态转换函数
 
-const getStatusText = (status) => {
+const getStatusText = (item) => {
     if (currentTab.value == 0) {
         // 审核状态
-        switch (status) {
+        switch (item.status) {
             case 0: return '待审核';
             case 1: return '审核通过';
             case 2: return '未通过';
@@ -162,9 +166,15 @@ const getStatusText = (status) => {
         }
     }
     else {
-        switch (status) {
+        switch (item.status) {
             case 0: return '进行中';
-            case 1: return '已完成';
+            case 1: {
+                if (item.merchantConfirm) {
+                    return '已完成';
+                } else {
+                    return '待确认';
+                }
+            };
             case 2: return '无法收运';
             default: return '';
         }
@@ -174,19 +184,25 @@ const getStatusText = (status) => {
 };
 
 // 获取状态样式类名
-const getStatusClass = (status) => {
+const getStatusClass = (item) => {
     if (currentTab.value == 0) {
-        switch (status) {
+        switch (item.status) {
             case 0: return 'booking'; // 待审核 
             case 1: return 'passed'; // 审核通过 
             case 2: return 'notpassed'; // 审核不通过 
-            default: return '';
+
         }
     }
     else {
-        switch (status) {
+        switch (item.status) {
             case 0: return 'processing';
-            case 1: return 'completed';
+            case 1: {
+                if (item.merchantConfirm) {
+                    return 'completed';
+                } else {
+                    return 'pending';
+                }
+            }
             case 2: return 'cancelled';
             default: return '';
         }
@@ -273,7 +289,7 @@ const handleConfirmTransport = async (item) => {
 
         const res = await apiGetconfirmPlanById(params);
 
-    
+
         if (res.code === 200 || res.success) {
             uni.showToast({
                 title: '确认收运成功',
@@ -522,10 +538,17 @@ onMounted(() => {
                                 background: rgba(153, 153, 153, 0.1);
                             }
 
-                            &.cancelled {
-                                //无法收运
+                            &.pending {
+                                //待确认
                                 color: rgba(255, 161, 0, 1);
                                 background: rgba(255, 161, 0, 0.10);
+                                ;
+                            }
+
+                            &.cancelled {
+                                //无法收运
+                                color: rgba(61, 61, 61, 0.50);
+                                background: rgba(153, 153, 153, 0.1);
 
                             }
                         }
@@ -564,9 +587,9 @@ onMounted(() => {
                     display: flex;
                     justify-content: flex-end;
                     margin-top: 20rpx;
+                    gap: 20rpx; // 为所有按钮之间添加间距
 
                     .btn-cancel {
-                        margin-right: 20rpx;
                         color: rgba(61, 61, 61, 1);
                         background-color: #fff;
                         border: 1px solid rgba(196, 196, 196, 1);

@@ -21,7 +21,7 @@ const _sfc_main = {
       agreed.value = !agreed.value;
     };
     const openAgreement = (type) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:86", "打开协议:", type);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:135", "打开协议:", type);
       if (type === "user") {
         common_vendor.index.navigateTo({
           url: "/pages/user/agreement"
@@ -84,27 +84,30 @@ const _sfc_main = {
             common_vendor.index.hideLoading();
             return;
           }
+          common_vendor.index.hideLoading();
           common_vendor.index.showToast({
             title: "登录成功",
             icon: "success"
           });
           setTimeout(() => {
-            common_vendor.index.navigateTo({
+            common_vendor.index.reLaunch({
               url: activeTab.value ? "/pages/collection/collection" : "/pages/merchant/merchant"
             });
           }, 100);
         } else {
+          common_vendor.index.hideLoading();
           common_vendor.index.showToast({
             title: res.msg || "登录失败",
             icon: "none"
           });
         }
       } catch (err) {
+        common_vendor.index.hideLoading();
         common_vendor.index.showToast({
           title: "网络请求失败",
           icon: "none"
         });
-        common_vendor.index.__f__("error", "at pages/index/index.vue:225", "登录请求失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:275", "登录请求失败:", err);
       } finally {
       }
     };
@@ -127,8 +130,8 @@ const _sfc_main = {
               confirmText: "重新选择",
               success: () => {
                 activeTab.value = userType === "1" ? 0 : 1;
-                common_vendor.index.__f__("log", "at pages/index/index.vue:254", "切换后的activeTab:", activeTab.value);
-                common_vendor.index.__f__("log", "at pages/index/index.vue:257", "已切换到正确入口，请重新点击登录");
+                common_vendor.index.__f__("log", "at pages/index/index.vue:304", "切换后的activeTab:", activeTab.value);
+                common_vendor.index.__f__("log", "at pages/index/index.vue:307", "已切换到正确入口，请重新点击登录");
                 resolve(null);
               }
             });

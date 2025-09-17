@@ -47,7 +47,11 @@
             <view class="quick-actions">
                 <view v-for="(action, index) in quickActions" :key="action.id" class="action-item"
                     @tap="handleQuickAction(action)">
-                    <image :src="action.icon" mode="aspectFill"></image>
+                    <view class="action-icon-wrapper">
+                        <image :src="action.icon" mode="aspectFill"></image>
+                        <uni-badge v-if="index === 1 && processingBadgeText > 0" :text="processingBadgeText"
+                            type="error" size="small" class="action-badge"></uni-badge>
+                    </view>
                     <text>{{ action.name }}</text>
                 </view>
             </view>
@@ -67,12 +71,8 @@
                             </view>
                         </view>
                         <view class="record-right">
-                            <view class="status" :class="{
-                                'status-completed': item.status === 1,
-                                'status-pending': item.status === 0,
-                                'status-default': item.status === 2
-                            }">
-                                {{ getRecordStatusText(item.status) }}
+                            <view class="status-tag" :class="getStatusClass(item)">
+                                {{ getRecordStatusText(item) }}
                             </view>
                             <view class="weight">{{ item.status === 1 ? item.weight : item.estimateWeight }} kg</view>
                         </view>
@@ -107,7 +107,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
-import { apiGetMerchantStatistics, apiGetPlanAllPage } from '@/api/apis.js'
+import { apiGetMerchantStatistics, apiGetPlanAllPage, apiGetMerchantNotConfirmNum } from '@/api/apis.js'
 import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
 
 // 使用用户 store
@@ -117,6 +117,9 @@ const yyNum = ref(0) // 预约中
 const syNum = ref(0) // 收运中
 const dqNum = ref(0) // 待确认
 const wcNum = ref(0) // 已完成
+
+// 待确认数量（用于badge显示）
+const processingBadgeText = ref(0)
 
 // 下拉刷新状态
 const refreshing = ref(false)
@@ -184,6 +187,16 @@ const getMerchantSydList = async () => {
     }
 }
 
+// 获取待确认数量（用于badge显示）
+const getMerchantNotConfirmNum = async () => {
+    const res = await apiGetMerchantNotConfirmNum({
+        merchantId: userStore.merchant?.id
+    });
+    if (res.code === 200) {
+        processingBadgeText.value = res.data ?? 0;
+    }
+};
+
 /**
  * 检查用户认证状态并显示相应提示
  * @returns {boolean} true表示已认证，false表示未认证或审核不通过
@@ -210,6 +223,7 @@ const checkUserAuthStatus = async () => {
         showAuthModal.value = false;
         getMerchantStatistics();
         getMerchantSydList();
+        getMerchantNotConfirmNum(); // 获取待确认数量
         return true
     }
 }
@@ -378,20 +392,46 @@ const getAuthTagClass = () => {
     }
 }
 
+
+
 const records = ref([]); // 收运记录列表
 
 // 获取收运记录状态文字
-const getRecordStatusText = (status) => {
-    switch (status) {
+const getRecordStatusText = (item) => {
+    switch (item.status) {
         case 0:
-            return '待确认';
+            return '进行中';
         case 1:
-            return '已完成';
+            {
+                if (item.merchantConfirm) {
+                    return '已完成';
+                } else {
+                    return '待确认';
+                }
+            }
         case 2:
             return '无需收运';
         default:
             return '未知状态';
     }
+};
+
+// 获取状态样式类名
+const getStatusClass = (item) => {
+
+    switch (item.status) {
+        case 0: return 'processing';
+        case 1: {
+            if (item.merchantConfirm) {
+                return 'completed';
+            } else {
+                return 'pending';
+            }
+        }
+        case 2: return 'cancelled';
+        default: return '';
+    }
+
 };
 
 // 跳转到收运总列表页面
@@ -593,10 +633,22 @@ const goToSydAllList = () => {
             justify-content: center;
             gap: 16rpx;
 
-            image {
-                width: 96rpx;
-                height: 96rpx;
-                border-radius: 16rpx;
+            .action-icon-wrapper {
+                position: relative;
+                display: inline-block;
+
+                image {
+                    width: 96rpx;
+                    height: 96rpx;
+                    border-radius: 16rpx;
+                }
+
+                .action-badge {
+                    position: absolute;
+                    top: -8rpx;
+                    right: -8rpx;
+                    z-index: 10;
+                }
             }
 
             text {
@@ -672,31 +724,40 @@ const goToSydAllList = () => {
                         margin-bottom: 8rpx;
                     }
 
-                    .status {
-                        font-size: 24rpx;
+                    .status-tag {
                         border-radius: 8rpx;
-                        width: 96rpx;
+                        font-size: 24rpx;
+                        width: 120rpx;
                         height: 40rpx;
                         display: flex;
-                        align-items: center;
                         justify-content: center;
-                    }
+                        align-items: center;
 
-                    .status-completed {
-                        color: #07C160;
-                        background: rgba(7, 193, 96, 0.2);
-                        border-radius: 8rpx 8rpx 8rpx 8rpx;
-                    }
 
-                    .status-pending {
-                        color: #FFA100;
-                        background: rgba(255, 195, 0, 0.16);
-                        border-radius: 8rpx 8rpx 8rpx 8rpx;
-                    }
+                        &.processing {
+                            //进行中 待完成
+                            color: rgba(0, 170, 255, 1);
+                            background: rgba(0, 170, 255, 0.10);
+                        }
 
-                    .status-default {
-                        color: #666;
-                        background-color: rgba(102, 102, 102, 0.1);
+                        &.completed {
+                            //已完成
+                            color: rgba(61, 61, 61, 0.50);
+                            background: rgba(153, 153, 153, 0.1);
+                        }
+
+                        &.pending {
+                            //待确认
+                            color: rgba(255, 161, 0, 1);
+                            background: rgba(255, 161, 0, 0.10);
+                            ;
+                        }
+
+                        &.cancelled {
+                            //无法收运
+                            color: rgba(61, 61, 61, 0.50);
+                            background: rgba(153, 153, 153, 0.1);
+                        }
                     }
                 }
             }

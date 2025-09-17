@@ -42,15 +42,15 @@ const _sfc_main = {
     const infoList = common_vendor.computed(() => [
       {
         label: "预估时间:",
-        value: pageData.value.appointmentTime ?? "暂无"
+        value: pageData.value.appointmentTime ? pageData.value.appointmentTime : "暂无"
       },
       {
         label: "预估重量:",
-        value: pageData.value.estimateWeight + " kg"
+        value: pageData.value.estimateWeight ? pageData.value.estimateWeight + " kg" : "暂无"
       },
       {
         label: "预估桶数:",
-        value: pageData.value.estimateBucketNum + " 个"
+        value: pageData.value.estimateBucketNum ? pageData.value.estimateBucketNum + " 个" : "暂无"
       },
       {
         label: "收运地址:",

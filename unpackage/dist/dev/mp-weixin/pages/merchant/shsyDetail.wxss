@@ -46,14 +46,13 @@
   color: #333333;
 }
 .user-info .status-tag.data-v-af7fb76b {
+  border-radius: 8rpx;
   font-size: 24rpx;
   width: 120rpx;
   height: 40rpx;
-  border-radius: 8rpx;
   display: flex;
-  align-items: center;
   justify-content: center;
-  text-align: center;
+  align-items: center;
 }
 .user-info .status-tag.processing.data-v-af7fb76b {
   color: #00aaff;
@@ -63,9 +62,13 @@
   color: rgba(61, 61, 61, 0.5);
   background: rgba(153, 153, 153, 0.1);
 }
-.user-info .status-tag.cancelled.data-v-af7fb76b {
+.user-info .status-tag.pending.data-v-af7fb76b {
   color: #ffa100;
   background: rgba(255, 161, 0, 0.1);
+}
+.user-info .status-tag.cancelled.data-v-af7fb76b {
+  color: rgba(61, 61, 61, 0.5);
+  background: rgba(153, 153, 153, 0.1);
 }
 .content.data-v-af7fb76b {
   padding: 32rpx 0;

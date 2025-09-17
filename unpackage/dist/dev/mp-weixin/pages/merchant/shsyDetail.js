@@ -15,58 +15,68 @@ const _sfc_main = {
     const merchantId = common_vendor.ref();
     const id = common_vendor.ref();
     const pageData = common_vendor.ref({});
-    const statusText = common_vendor.computed(() => {
+    const getRecordStatusText = () => {
       switch (pageData.value.status) {
         case 0:
           return "进行中";
-        case 1:
-          return "已完成";
+        case 1: {
+          if (pageData.value.merchantConfirm) {
+            return "已完成";
+          } else {
+            return "待确认";
+          }
+        }
         case 2:
-          return "无法收运";
+          return "无需收运";
         default:
-          return "";
+          return "未知状态";
       }
-    });
-    const statusClass = common_vendor.computed(() => {
+    };
+    const getStatusClass = () => {
       switch (pageData.value.status) {
         case 0:
           return "processing";
-        case 1:
-          return "completed";
+        case 1: {
+          if (pageData.value.merchantConfirm) {
+            return "completed";
+          } else {
+            return "pending";
+          }
+        }
         case 2:
           return "cancelled";
         default:
           return "";
       }
-    });
+    };
     const infoList = common_vendor.computed(() => [
       {
         label: "预估时间:",
-        value: pageData.value.appointmentTime ?? "暂无"
+        value: pageData.value.appointmentTime ? pageData.value.appointmentTime : "暂无"
       },
       {
         label: "收运时间:",
-        value: pageData.value.arrivalTime ?? "暂无"
+        value: pageData.value.arrivalTime ? pageData.value.arrivalTime : "暂无"
       },
       {
         label: "预估重量:",
-        value: pageData.value.estimateWeight + " kg"
+        value: pageData.value.estimateWeight ? pageData.value.estimateWeight + " kg" : "暂无"
       },
       {
         label: "收运重量:",
-        value: pageData.value.weight + " kg"
+        value: pageData.value.weight ? pageData.value.weight + " kg" : "暂无"
       },
       {
         label: "预估桶数:",
-        value: pageData.value.estimateBucketNum + " 个"
+        value: pageData.value.estimateBucketNum ? pageData.value.estimateBucketNum + " 个" : "暂无"
       },
       {
         label: "收运桶数:",
-        value: pageData.value.bucketNum + " 个"
+        value: pageData.value.bucketNum ? pageData.value.bucketNum + " 个" : "暂无"
       },
       {
         label: "收运地址:",
-        value: pageData.value.address ?? "暂无"
+        value: pageData.value.address ? pageData.value.address : "暂无"
       },
       {
         label: "车牌号:",
@@ -85,14 +95,14 @@ const _sfc_main = {
       } else if (options["merchantId "]) {
         merchantId.value = options["merchantId "];
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:111", "接收到的参数:", options);
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:112", "解析后的参数:", { merchantId: merchantId.value, id: id.value });
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:130", "接收到的参数:", options);
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:131", "解析后的参数:", { merchantId: merchantId.value, id: id.value });
       getSyCheckDetail();
     });
     common_vendor.onMounted(() => {
     });
     const getSyCheckDetail = async () => {
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:127", "获取收运记录详情", merchantId.value, id.value);
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:146", "获取收运记录详情", merchantId.value, id.value);
       const res = await api_apis.apiGetPlanById({
         merchantId: merchantId.value,
         id: id.value
@@ -112,8 +122,10 @@ const _sfc_main = {
           appointmentTime: data.appointmentTime,
           arrivalTime: data.arrivalTime,
           address: data.address,
-          explain: data.explain
+          explain: data.explain,
+          merchantConfirm: data.merchantConfirm
         };
+        common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:174", "获取收运记录详情成功", pageData.value);
       }
     };
     const back = () => {
@@ -132,8 +144,8 @@ const _sfc_main = {
           title: "收运详细"
         }),
         c: common_vendor.t(pageData.value.merchantName),
-        d: common_vendor.t(statusText.value),
-        e: common_vendor.n(statusClass.value),
+        d: common_vendor.t(getRecordStatusText()),
+        e: common_vendor.n(getStatusClass()),
         f: common_vendor.f(infoList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.label),

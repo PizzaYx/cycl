@@ -124,17 +124,21 @@
   justify-content: center;
   align-items: center;
 }
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.booking.data-v-31e4eb43 {
-  color: #ffa100;
-  background-color: rgba(255, 161, 0, 0.1);
-}
 .container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.processing.data-v-31e4eb43 {
-  color: #07c160;
-  background-color: rgba(7, 193, 96, 0.1);
+  color: #00aaff;
+  background: rgba(0, 170, 255, 0.1);
 }
 .container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.completed.data-v-31e4eb43 {
   color: rgba(61, 61, 61, 0.5);
-  background-color: rgba(61, 61, 61, 0.1);
+  background: rgba(153, 153, 153, 0.1);
+}
+.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.pending.data-v-31e4eb43 {
+  color: #ffa100;
+  background: rgba(255, 161, 0, 0.1);
+}
+.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-31e4eb43 {
+  color: rgba(61, 61, 61, 0.5);
+  background: rgba(153, 153, 153, 0.1);
 }
 .container .content-wrapper .order-list .order-item .order-content.data-v-31e4eb43 {
   padding: 20rpx 0;

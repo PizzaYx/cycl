@@ -30,9 +30,9 @@ const _sfc_main = {
       pageNum.value = 1;
       getNetwork();
     }
-    const getStatusText = (status) => {
+    const getStatusText = (item) => {
       if (currentTab.value == 0) {
-        switch (status) {
+        switch (item.status) {
           case 0:
             return "待审核";
           case 1:
@@ -43,11 +43,16 @@ const _sfc_main = {
             return "";
         }
       } else {
-        switch (status) {
+        switch (item.status) {
           case 0:
             return "进行中";
-          case 1:
-            return "已完成";
+          case 1: {
+            if (item.merchantConfirm) {
+              return "已完成";
+            } else {
+              return "待确认";
+            }
+          }
           case 2:
             return "无法收运";
           default:
@@ -55,24 +60,27 @@ const _sfc_main = {
         }
       }
     };
-    const getStatusClass = (status) => {
+    const getStatusClass = (item) => {
       if (currentTab.value == 0) {
-        switch (status) {
+        switch (item.status) {
           case 0:
             return "booking";
           case 1:
             return "passed";
           case 2:
             return "notpassed";
-          default:
-            return "";
         }
       } else {
-        switch (status) {
+        switch (item.status) {
           case 0:
             return "processing";
-          case 1:
-            return "completed";
+          case 1: {
+            if (item.merchantConfirm) {
+              return "completed";
+            } else {
+              return "pending";
+            }
+          }
           case 2:
             return "cancelled";
           default:
@@ -81,13 +89,13 @@ const _sfc_main = {
       }
     };
     const handleCancel = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:198", "取消按钮被点击111", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:214", "取消按钮被点击111", item);
       common_vendor.index.showModal({
         title: "提示",
         content: "确定要取消此预约吗？",
         success: async (res) => {
           var _a;
-          common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:203", "用户点击了确定按钮", res);
+          common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:219", "用户点击了确定按钮", res);
           if (res.confirm) {
             const resdata = await api_apis.apiGetcancelPlanById({
               merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
@@ -109,13 +117,13 @@ const _sfc_main = {
               });
             }
           } else if (res.cancel) {
-            common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:232", "取消取消预约");
+            common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:248", "取消取消预约");
           }
         }
       });
     };
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:239", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:255", "查看详情按钮被点击", item);
       if (currentTab.value == 0) {
         common_vendor.index.navigateTo({
           url: `/pages/merchant/shyyDetail?id=${item.id}&merchantId =${item.merchantId}`
@@ -128,7 +136,7 @@ const _sfc_main = {
     };
     const handleConfirmTransport = async (item) => {
       var _a;
-      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:255", "确认收运按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:271", "确认收运按钮被点击", item);
       if (item.arrivalTime == null) {
         common_vendor.index.showToast({
           title: "请等待师傅确认收运完成!",
@@ -162,7 +170,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:295", "确认收运失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:311", "确认收运失败:", error);
         common_vendor.index.showToast({
           title: "网络错误，请重试",
           icon: "none"
@@ -206,7 +214,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:358", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:374", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -277,8 +285,8 @@ const _sfc_main = {
         e: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(item.merchantName),
-            b: common_vendor.t(getStatusText(item.status)),
-            c: common_vendor.n(getStatusClass(item.status)),
+            b: common_vendor.t(getStatusText(item)),
+            c: common_vendor.n(getStatusClass(item)),
             d: common_vendor.t(item.estimateBucketNum),
             e: common_vendor.t(item.bucketNum ? item.bucketNum + " 桶" : "暂无"),
             f: common_vendor.t(item.estimateWeight ?? 0),
@@ -301,22 +309,31 @@ const _sfc_main = {
               size: "mini",
               type: "primary"
             })
-          }) : currentTab.value == 1 ? {
-            q: common_vendor.o(($event) => handleConfirmTransport(item), index),
-            r: "0412d1ef-4-" + i0,
-            s: common_vendor.p({
+          }) : currentTab.value == 1 ? common_vendor.e({
+            q: getStatusText(item) === "待确认"
+          }, getStatusText(item) === "待确认" ? {
+            r: common_vendor.o(($event) => handleConfirmTransport(item), index),
+            s: "0412d1ef-4-" + i0,
+            t: common_vendor.p({
               size: "mini",
               type: "primary"
             })
-          } : currentTab.value == 2 ? {
-            t: common_vendor.o(($event) => handleViewDetails(item), index),
-            v: "0412d1ef-5-" + i0,
-            w: common_vendor.p({
+          } : {}, {
+            v: common_vendor.o(($event) => handleViewDetails(item), index),
+            w: "0412d1ef-5-" + i0,
+            x: common_vendor.p({
+              size: "mini",
+              type: "default"
+            })
+          }) : currentTab.value == 2 ? {
+            y: common_vendor.o(($event) => handleViewDetails(item), index),
+            z: "0412d1ef-6-" + i0,
+            A: common_vendor.p({
               size: "mini",
               type: "default"
             })
           } : {}, {
-            x: index
+            B: index
           });
         }),
         f: currentTab.value == 0,

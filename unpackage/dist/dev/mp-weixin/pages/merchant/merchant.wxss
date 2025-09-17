@@ -184,10 +184,20 @@
   justify-content: center;
   gap: 16rpx;
 }
-.layout .quick-actions .action-item image.data-v-b35646dd {
+.layout .quick-actions .action-item .action-icon-wrapper.data-v-b35646dd {
+  position: relative;
+  display: inline-block;
+}
+.layout .quick-actions .action-item .action-icon-wrapper image.data-v-b35646dd {
   width: 96rpx;
   height: 96rpx;
   border-radius: 16rpx;
+}
+.layout .quick-actions .action-item .action-icon-wrapper .action-badge.data-v-b35646dd {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  z-index: 10;
 }
 .layout .quick-actions .action-item text.data-v-b35646dd {
   font-size: 26rpx;
@@ -249,28 +259,30 @@
   color: #3d3d3d;
   margin-bottom: 8rpx;
 }
-.layout .records .record-list .record-item .record-right .status.data-v-b35646dd {
-  font-size: 24rpx;
+.layout .records .record-list .record-item .record-right .status-tag.data-v-b35646dd {
   border-radius: 8rpx;
-  width: 96rpx;
+  font-size: 24rpx;
+  width: 120rpx;
   height: 40rpx;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
-.layout .records .record-list .record-item .record-right .status-completed.data-v-b35646dd {
-  color: #07C160;
-  background: rgba(7, 193, 96, 0.2);
-  border-radius: 8rpx 8rpx 8rpx 8rpx;
+.layout .records .record-list .record-item .record-right .status-tag.processing.data-v-b35646dd {
+  color: #00aaff;
+  background: rgba(0, 170, 255, 0.1);
 }
-.layout .records .record-list .record-item .record-right .status-pending.data-v-b35646dd {
-  color: #FFA100;
-  background: rgba(255, 195, 0, 0.16);
-  border-radius: 8rpx 8rpx 8rpx 8rpx;
+.layout .records .record-list .record-item .record-right .status-tag.completed.data-v-b35646dd {
+  color: rgba(61, 61, 61, 0.5);
+  background: rgba(153, 153, 153, 0.1);
 }
-.layout .records .record-list .record-item .record-right .status-default.data-v-b35646dd {
-  color: #666;
-  background-color: rgba(102, 102, 102, 0.1);
+.layout .records .record-list .record-item .record-right .status-tag.pending.data-v-b35646dd {
+  color: #ffa100;
+  background: rgba(255, 161, 0, 0.1);
+}
+.layout .records .record-list .record-item .record-right .status-tag.cancelled.data-v-b35646dd {
+  color: rgba(61, 61, 61, 0.5);
+  background: rgba(153, 153, 153, 0.1);
 }
 .layout .records .record-list .no-records.data-v-b35646dd {
   text-align: center;

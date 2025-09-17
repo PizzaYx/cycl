@@ -33,35 +33,44 @@ const _sfc_main = {
         title: "总重量"
       }
     ];
-    const getStatusClass = (status) => {
-      switch (status) {
-        case 0:
-          return "processing";
-        case 1:
-          return "completed";
-        case 2:
-          return "cancelled";
-      }
-    };
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:156", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:148", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
       });
     };
-    const getStatusText = (status) => {
-      switch (status) {
+    const getStatusText = (item) => {
+      switch (item.status) {
         case 0:
-        case "0":
-          return "待收运";
-        case 1:
-        case "1":
-          return "已完成";
+          return "进行中";
+        case 1: {
+          if (item.merchantConfirm) {
+            return "已完成";
+          } else {
+            return "待确认";
+          }
+        }
         case 2:
-        case "2":
-          return "无法收运";
+          return "无需收运";
         default:
-          return "无法收运";
+          return "未知状态";
+      }
+    };
+    const getStatusClass = (item) => {
+      switch (item.status) {
+        case 0:
+          return "processing";
+        case 1: {
+          if (item.merchantConfirm) {
+            return "completed";
+          } else {
+            return "pending";
+          }
+        }
+        case 2:
+          return "cancelled";
+        default:
+          return "";
       }
     };
     const getToStatistics = async () => {
@@ -125,7 +134,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:273", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:284", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -158,7 +167,7 @@ const _sfc_main = {
       resetPageAndReload();
     };
     const onTimeChange = (value) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:327", "时间变化:", value);
+      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:338", "时间变化:", value);
       selectedTimeRange.value = value;
       resetPageAndReload();
     };
@@ -209,8 +218,8 @@ const _sfc_main = {
         k: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.merchantName),
-            b: common_vendor.t(getStatusText(item.status)),
-            c: common_vendor.n(getStatusClass(item.status)),
+            b: common_vendor.t(getStatusText(item)),
+            c: common_vendor.n(getStatusClass(item)),
             d: common_vendor.t(item.appointmentTime ?? "暂无"),
             e: common_vendor.t(item.arrivalTime ?? "暂无"),
             f: common_vendor.t(item.estimateWeight + " kg"),
