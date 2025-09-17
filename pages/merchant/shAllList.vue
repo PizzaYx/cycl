@@ -185,7 +185,7 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            merchantId: userStore.merchant?.id ?? 448,
+            merchantId: userStore.merchant?.id,
         };
 
         // 添加筛选条件

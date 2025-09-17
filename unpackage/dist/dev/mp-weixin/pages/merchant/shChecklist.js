@@ -90,7 +90,7 @@ const _sfc_main = {
           common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:203", "用户点击了确定按钮", res);
           if (res.confirm) {
             const resdata = await api_apis.apiGetcancelPlanById({
-              merchantId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 448,
+              merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
               id: item.id
             });
             if (resdata.code === 200) {
@@ -157,7 +157,7 @@ const _sfc_main = {
           getNetwork();
         } else {
           common_vendor.index.showToast({
-            title: res.message || "确认收运失败",
+            title: res.msg || "确认收运失败",
             icon: "none"
           });
         }
@@ -173,7 +173,7 @@ const _sfc_main = {
     const getMerchantNotConfirmNum = async () => {
       var _a;
       const res = await api_apis.apiGetMerchantNotConfirmNum({
-        merchantId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 448
+        merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
       });
       if (res.code === 200) {
         processingBadgeText.value = res.data ?? 0;
@@ -190,7 +190,7 @@ const _sfc_main = {
         }
         const res = await api_apis.apiGetPlanPage({
           pageNum: pageNum.value,
-          merchantId: ((_a = userStore.merchant) == null ? void 0 : _a.id) ?? 448,
+          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
           status: tabs[currentTab.value].key
           // 使用tabs中的key值
         });

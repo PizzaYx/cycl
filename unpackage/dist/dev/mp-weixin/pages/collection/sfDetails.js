@@ -59,11 +59,11 @@ const _sfc_main = {
         getapiGetDriverInfo();
         getapiGetDriverTodayPlan();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:194", "页面初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:192", "页面初始化失败:", error);
       }
     });
     common_vendor.onShow(async () => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:201", "页面显示时刷新数据");
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:199", "页面显示时刷新数据");
       getapiGetDriverInfo();
       getapiGetDriverTodayPlan();
     });
@@ -71,7 +71,7 @@ const _sfc_main = {
       var _a;
       try {
         const res = await api_apis.apiGetDriverInfo({
-          driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
+          driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
         });
         if (res.code === 200) {
           if (res.data === null)
@@ -85,30 +85,30 @@ const _sfc_main = {
           allCarId.value = res.data.carId;
           allRecordNo.value = res.data.crecordNo;
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:228", "获取司机信息失败:", res.message || "未知错误");
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:226", "获取司机信息失败:", res.message || "未知错误");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:231", "获取司机信息异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:229", "获取司机信息异常:", error);
       }
     };
     const getapiGetDriverTodayPlan = async () => {
       var _a;
       try {
         const res = await api_apis.apiGetDriverTodayPlan({
-          driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5,
+          driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id,
           page: 1
         });
         if (res.code === 200) {
           taskList.value = res.data;
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:246", "获取今日收运计划失败:", res.message || "未知错误");
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:244", "获取今日收运计划失败:", res.message || "未知错误");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:249", "获取今日收运计划异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:247", "获取今日收运计划异常:", error);
       }
     };
     const cancelTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:257", "取消任务:", task.id);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:255", "取消任务:", task.id);
       common_vendor.index.showModal({
         title: "确认取消",
         content: "是否确认取消当前任务？",
@@ -117,17 +117,17 @@ const _sfc_main = {
           if (res.confirm) {
             await api_apis.apiGetnoNeedCollect({
               id: task.id,
-              driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
+              driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
             }).then((res2) => {
               if (res2.code === 200) {
                 common_vendor.index.showToast({
-                  title: res2.message || "操作成功",
+                  title: res2.msg || "操作成功",
                   icon: "success"
                 });
                 getapiGetDriverTodayPlan();
               } else {
                 common_vendor.index.showToast({
-                  title: res2.message || "操作失败",
+                  title: res2.msg || "操作失败",
                   icon: "error"
                 });
               }
@@ -142,13 +142,13 @@ const _sfc_main = {
       });
     };
     const reportTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:298", "收运上报:", task);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:296", "收运上报:", task);
       common_vendor.index.navigateTo({
-        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}`
+        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}&merchantName=${task.merchantName}`
       });
     };
     const contactLine = () => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:308", "查看线路");
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:306", "查看线路");
       const mapData = {
         taskList: taskList.value,
         driverName: name.value,
@@ -157,47 +157,10 @@ const _sfc_main = {
         currentDate
       };
       common_vendor.index.setStorageSync("mapData", mapData);
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:320", "数据已存储，跳转页面");
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:318", "数据已存储，跳转页面");
       common_vendor.index.navigateTo({
         url: "/pages/collection/syAllMap"
       });
-    };
-    const collectTask = (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:329", "收运:", task.id);
-      if (task.weight > 0 && task.bucketNum > 0) {
-        common_vendor.index.showModal({
-          title: "确认收运完成",
-          content: "是否确认收运完成？",
-          success: async (res) => {
-            var _a;
-            if (res.confirm) {
-              await api_apis.apiGetdriverConfirmPlan({
-                id: task.id,
-                driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
-              }).then((res2) => {
-                if (res2.code === 200) {
-                  common_vendor.index.showToast({
-                    title: res2.message || "操作成功",
-                    icon: "success"
-                  });
-                  getapiGetDriverTodayPlan();
-                } else {
-                  common_vendor.index.showToast({
-                    title: res2.message || "操作失败",
-                    icon: "error"
-                  });
-                }
-              });
-            }
-          }
-        });
-      } else {
-        common_vendor.index.showToast({
-          title: "请先进行 收运上报 操作",
-          icon: "none"
-        });
-        return;
-      }
     };
     const handleSubmitWeight = async () => {
       if (!weightInput.value) {
@@ -227,7 +190,7 @@ const _sfc_main = {
                 recordNo: allRecordNo.value,
                 weight,
                 registrationNumber: registrationNumber.value,
-                driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
+                driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
               });
               if (result.code === 200) {
                 common_vendor.index.showToast({
@@ -247,7 +210,7 @@ const _sfc_main = {
                 title: "提交失败",
                 icon: "none"
               });
-              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:423", "提交重量失败:", error);
+              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:421", "提交重量失败:", error);
             }
           }
         }
@@ -339,31 +302,25 @@ const _sfc_main = {
             G: common_vendor.p({
               size: "mini",
               type: "primary"
-            }),
-            H: common_vendor.o(($event) => collectTask(task), task.id),
-            I: "b624ea25-37-" + i0,
-            J: common_vendor.p({
-              size: "mini",
-              type: "primary"
             })
           } : task.status === 1 ? {
-            L: common_vendor.o(($event) => viewTask(task), task.id),
-            M: "b624ea25-38-" + i0,
-            N: common_vendor.p({
+            I: common_vendor.o(($event) => viewTask(task), task.id),
+            J: "b624ea25-37-" + i0,
+            K: common_vendor.p({
               size: "mini",
               type: "primary"
             })
           } : task.status === 2 ? {
-            P: common_vendor.o(($event) => viewTask(task), task.id),
-            Q: "b624ea25-39-" + i0,
-            R: common_vendor.p({
+            M: common_vendor.o(($event) => viewTask(task), task.id),
+            N: "b624ea25-38-" + i0,
+            O: common_vendor.p({
               size: "mini",
               type: "primary"
             })
           } : {}, {
-            K: task.status === 1,
-            O: task.status === 2,
-            S: task.id
+            H: task.status === 1,
+            L: task.status === 2,
+            P: task.id
           });
         }),
         x: common_vendor.p({

@@ -80,7 +80,7 @@ const _sfc_main = {
       var _a;
       const res = await api_apis.apiGetDriverPlanStatistics({
         title: searchKeyword.value ?? "",
-        driverId: ((_a = userStore.driverId) == null ? void 0 : _a.id) || 5
+        driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
       });
       if (res.code === 200) {
         merchantCount.value = res.data.merchantNum ?? 0;
@@ -97,7 +97,7 @@ const _sfc_main = {
         }
         const params = {
           pageNum: pageNum.value,
-          driverId: ((_a = userStore.driverId) == null ? void 0 : _a.id) || 5
+          driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
         };
         if (searchKeyword.value) {
           params.title = searchKeyword.value;
@@ -208,7 +208,7 @@ const _sfc_main = {
             c: common_vendor.n(getStatusClass(item.status)),
             d: common_vendor.t(item.appointmentTime ?? "暂无"),
             e: common_vendor.t(item.arrivalTime ?? "暂无"),
-            f: common_vendor.t(item.estimateWeight + "kg"),
+            f: common_vendor.t(item.estimateWeight ? item.estimateWeight + "kg" : "暂无"),
             g: common_vendor.t(item.weight ? item.weight + "kg" : "暂无"),
             h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + "个" : "暂无"),
             i: common_vendor.t(item.bucketNum ? item.bucketNum + "个" : "暂无"),

@@ -281,35 +281,33 @@
   color: #3d3d3d;
 }
 .layout .records .order-list .order-item .order-footer.data-v-cd17183b {
+  margin-top: 30rpx;
   display: flex;
   justify-content: flex-end;
-  margin-top: 20rpx;
+  gap: 15rpx;
+  flex-wrap: wrap;
 }
-.layout .records .order-list .order-item .order-footer .btn-cancel.data-v-cd17183b {
-  margin-right: 20rpx;
+.layout .records .order-list .order-item .order-footer .cancel-btn.data-v-cd17183b,
+.layout .records .order-list .order-item .order-footer .view-btn.data-v-cd17183b,
+.layout .records .order-list .order-item .order-footer .report-btn.data-v-cd17183b {
+  width: 120rpx;
+  height: 48rpx;
+  color: #07C160;
+  border-radius: 100rpx;
+  border: 2rpx solid #07C160;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.layout .records .order-list .order-item .order-footer .cancel-btn.data-v-cd17183b {
+  border: 1rpx solid #c4c4c4;
   color: #3d3d3d;
-  background-color: #fff;
-  border: 1px solid #c4c4c4;
-  font-size: 26rpx;
-  width: 144rpx;
-  height: 48rpx;
-  border-radius: 20rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
 }
-.layout .records .order-list .order-item .order-footer .btn-confirm.data-v-cd17183b {
+.layout .records .order-list .order-item .order-footer .report-btn.data-v-cd17183b {
+  background-color: #FFA500;
+  border-color: #FFA500;
   color: white;
-  background-color: #07c160;
-  font-size: 26rpx;
-  width: 144rpx;
-  height: 48rpx;
-  border-radius: 20rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  box-sizing: border-box;
 }
 .layout .auth-modal.data-v-cd17183b {
   position: fixed;

@@ -105,7 +105,7 @@ const infoList = computed(() => [
     },
     {
         label: '收运桶数:',
-        value: pageData.value.estimateBucketNum + '个' ?? '暂无'
+        value: pageData.value.bucketNum + '个' ?? '暂无'
     },
     {
         label: '收运地址:',

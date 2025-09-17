@@ -5,51 +5,47 @@
             @clickLeft="back" />
         <!-- 添加商店信息和扫码区域 -->
         <view class="store-info">
-            <view class="store-name">商店名称</view>
+            <view class="store-name">商店名称: {{ merchantName }}</view>
             <view class="bin-info">
                 <text>垃圾桶个数: {{ ljNum }}个</text>
-                <uni-icons type="scan" size="24" color="#07C160" class="scan-icon" @click="handleScan" />
+                <uni-icons type="scan" size="30" color="#07C160" class="scan-icon" @click="handleScan" />
             </view>
         </view>
         <scroll-view class="content" scroll-y>
             <view class="record-list">
+                <!-- 当没有数据时显示提示 -->
+                <view v-if="records.length === 0" class="empty-tip">
+                    <text>请点击扫码按钮添加垃圾桶数据</text>
+                </view>
+
+                <!-- 有数据时显示记录列表 -->
                 <view v-for="(item, index) in records" :key="index" class="record-card">
                     <view class="input-group">
                         <view class="input-item">
                             <text class="label"><text class="required">*</text>垃圾桶数（个）</text>
-                            <input type="number" 
-                                v-model="item.binCount" 
-                                class="input underline-input readonly"
-                                disabled
+                            <input type="number" v-model="item.binCount" class="input underline-input readonly" disabled
                                 placeholder="1" />
                         </view>
                         <view class="input-item">
                             <text class="label"><text class="required">*</text>厨余垃圾重量（kg）</text>
-                            <input type="number" 
-                                v-model="item.weight" 
-                                class="input underline-input" 
-                                :class="{ 'readonly-input': item.isConfirmed }"
-                                :disabled="item.isConfirmed"
-                                placeholder="请输入垃圾重量" />
+                            <view class="weight-input-container">
+                                <input type="number" v-model="item.weight" class="input underline-input"
+                                    :class="{ 'readonly-input': item.isConfirmed }" :disabled="item.isConfirmed"
+                                    placeholder="请输入垃圾重量" />
+                                <button class="get-weight-btn" @tap="handleGetWeight(index)"
+                                    :disabled="item.isConfirmed">获取重量</button>
+                            </view>
                         </view>
                     </view>
 
                     <view class="upload-section">
                         <text class="label"><text class="required">*</text>厨余垃圾照片</text>
                         <view class="upload-area">
-                            <uni-file-picker 
-                                v-model="item.images" 
-                                file-mediatype="image" 
-                                :limit="maxImageCount"
-                                :auto-upload="true" 
-                                :upload-url="uploadUrl" 
-                                :header="uploadHeaders" 
-                                :disabled="item.isConfirmed"
-                                :readonly="item.isConfirmed"
-                                return-type="array"
+                            <uni-file-picker v-model="item.images" file-mediatype="image" :limit="maxImageCount"
+                                :auto-upload="true" :upload-url="uploadUrl" :header="uploadHeaders"
+                                :disabled="item.isConfirmed" :readonly="item.isConfirmed" return-type="array"
                                 @select="(e) => handleFileSelect(e, index)"
-                                @success="(e) => handleFileSuccess(e, index)"
-                                @fail="(e) => handleFileFail(e, index)">
+                                @success="(e) => handleFileSuccess(e, index)" @fail="(e) => handleFileFail(e, index)">
                             </uni-file-picker>
                             <text class="upload-tip">最多可上传{{ maxImageCount }}张图片，每张图片不超过3M</text>
                         </view>
@@ -57,11 +53,17 @@
 
                     <view class="button-group">
                         <button v-if="!item.isConfirmed" class="btn btn-cancel" @click="handleCancel(index)">取消</button>
-                        <button v-if="!item.isConfirmed" class="btn btn-confirm" @click="handleConfirm(index)">确认</button>
+                        <button v-if="!item.isConfirmed" class="btn btn-confirm"
+                            @click="handleConfirm(index)">确认</button>
                     </view>
                 </view>
             </view>
         </scroll-view>
+
+        <!-- 固定底部按钮 -->
+        <view class="bottom-button">
+            <button class="btn-complete" @click="getSyCheckDetail">收运完成</button>
+        </view>
     </view>
 </template>
 
@@ -70,7 +72,8 @@
 import { ref } from 'vue';
 import { onLoad, onUnload } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
 import { uploadUrl, createUploadHeaders } from '@/utils/config.js';
-import {apiPostreportWeight } from '@/api/apis.js'
+import { apiPostreportWeight, apiGetDriverPlanById, apiGetdriverConfirmPlan } from '@/api/apis.js'
+import { useUserStore } from '@/stores/user.js'
 
 // 返回上一页
 const back = () => {
@@ -79,7 +82,7 @@ const back = () => {
     uni.navigateBack();
 };
 
-const ljNum = ref(1); // 垃圾桶数量
+const ljNum = ref(0); // 垃圾桶数量
 const maxImageCount = 3; // 最大上传图片数量
 const maxImageSize = 3 * 1024 * 1024; // 每张图片最大大小 3M
 
@@ -88,17 +91,12 @@ const carId = ref(''); // 车辆ID
 const driverId = ref(''); // 司机ID
 const merchantId = ref(''); // 商户ID
 const planId = ref(''); // 收运单ID
+const merchantName = ref('')//商家名称
 
 const uploadHeaders = createUploadHeaders()
+const userStore = useUserStore()
 
-const records = ref([
-    {
-        binCount: '',
-        weight: '',
-        images: [], // 改为数组存储多张图片
-        isConfirmed: false // 添加确认状态
-    }
-]);
+const records = ref([]);
 
 // 页面加载时获取传入的参数
 onLoad((options) => {
@@ -106,6 +104,7 @@ onLoad((options) => {
     if (options.driverId) driverId.value = options.driverId;
     if (options.merchantId) merchantId.value = options.merchantId;
     if (options.planId) planId.value = options.planId;
+    if (options.merchantName) merchantName.value = options.merchantName;
     console.log('接收到的参数:', options);
 });
 
@@ -128,11 +127,169 @@ const handleFileFail = (event, index) => {
     console.log('文件上传失败', event);
 };
 
+// 获取重量按钮点击事件
+const handleGetWeight = (index) => {
+    console.log('获取重量按钮点击', { index, record: records.value[index] });
+    // TODO: 在这里添加获取重量的具体逻辑
+};
+
+// 获取收运详情
+const getSyCheckDetail = async () => {
+    // 先检查本地是否有已确认的记录
+    const confirmedRecords = records.value.filter(record => record.isConfirmed === true);
+
+    if (confirmedRecords.length === 0) {
+        uni.showToast({
+            title: '请先进行收运上报操作并确认数据',
+            icon: 'none'
+        });
+        return;
+    }
+
+    try {
+        const res = await apiGetDriverPlanById({
+            driverId: driverId.value,
+            id: planId.value
+        })
+
+        if (res.code === 200) {
+            const data = res.data;
+            collectTask(data);
+            console.log('详情', data);
+        } else {
+            uni.showToast({
+                title: res.msg || '获取详情失败',
+                icon: 'none'
+            });
+        }
+    } catch (error) {
+        console.error('获取详情异常:', error);
+        uni.showToast({
+            title: '获取详情异常',
+            icon: 'none'
+        });
+    }
+}
+
+// 收运完成
+const collectTask = (task) => {
+    console.log('收运:', task.id);
+
+    // 检查服务器返回的数据，判断是否有上报数据
+    if (task.weight > 0 && task.bucketNum > 0) {
+        //确认收运完成
+        uni.showModal({
+            title: '确认收运完成',
+            content: '是否确认收运完成？',
+            success: async (res) => {
+                if (res.confirm) {
+                    try {
+                        const confirmRes = await apiGetdriverConfirmPlan({
+                            id: task.id,
+                            driverId: userStore.sfmerchant?.id,
+                        });
+
+                        if (confirmRes.code === 200) {
+                            uni.showToast({
+                                title: confirmRes.msg || '操作成功',
+                                icon: 'success'
+                            });
+                            // 返回上一页
+                            setTimeout(() => {
+                                back();
+                            }, 1500);
+                        } else {
+                            uni.showToast({
+                                title: confirmRes.msg || '操作失败',
+                                icon: 'error'
+                            });
+                        }
+                    } catch (error) {
+                        console.error('确认收运异常:', error);
+                        uni.showToast({
+                            title: '操作异常',
+                            icon: 'none'
+                        });
+                    }
+                }
+            }
+        })
+    }
+    else {
+        uni.showToast({
+            title: '服务器未检测到上报数据，请先进行收运上报操作',
+            icon: 'none'
+        });
+        return;
+    }
+};
+
+// 验证扫码结果格式
+const validateScanResult = (scanResult) => {
+    if (!scanResult || typeof scanResult !== 'string') {
+        return false;
+    }
+
+    // 检查是否包含下划线
+    if (!scanResult.includes('_')) {
+        return false;
+    }
+
+    // 检查是否可以用下划线分割成2段
+    const parts = scanResult.split('_');
+    if (parts.length !== 2) {
+        return false;
+    }
+
+    // 检查两段都不为空
+    if (!parts[0] || !parts[1]) {
+        return false;
+    }
+
+    // 可以添加更多验证规则，比如：
+    // - 第一段是否为数字（桶编号）
+    // - 第二段是否为时间格式（20250913145507）
+    const bucketId = parts[0];
+    const timestamp = parts[1];
+
+    // 验证桶编号是否为数字
+    if (!/^\d+$/.test(bucketId)) {
+        return false;
+    }
+
+    // 验证时间戳格式（14位数字）
+    if (!/^\d{14}$/.test(timestamp)) {
+        return false;
+    }
+
+    return true;
+};
+
 const handleScan = () => {
     // @ts-ignore
     uni.scanCode({
         success: (res) => {
             console.log('扫码结果', res);
+
+            // 验证扫码结果格式
+            if (!validateScanResult(res.result)) {
+                uni.showToast({
+                    title: '扫码格式不正确，请扫描正确的桶码',
+                    icon: 'none'
+                });
+                return;
+            }
+
+            // 检查是否已经扫描过相同的桶码
+            const existingRecord = records.value.find(record => record.bucketCode === res.result);
+            if (existingRecord) {
+                uni.showToast({
+                    title: '该桶码已扫描，请勿重复扫描',
+                    icon: 'none'
+                });
+                return;
+            }
+
             // 扫描成功后添加一条新记录
             records.value.push({
                 binCount: '',
@@ -143,32 +300,23 @@ const handleScan = () => {
             });
             // 增加垃圾桶数量
             ljNum.value++;
+
+            uni.showToast({
+                title: '扫码成功',
+                icon: 'success'
+            });
         },
         fail: (err) => {
             console.log('扫码失败', err);
-            // 即使扫描失败也添加一条新记录（模拟）
-            records.value.push({
-                binCount: '',
-                weight: '',
-                images: [],
-                isConfirmed: false // 添加确认状态
+            uni.showToast({
+                title: '扫码失败,请重试!',
+                icon: 'none'
             });
-            // 增加垃圾桶数量
-            ljNum.value++;
         }
     });
 };
 
 const handleCancel = (index) => {
-    // 如果只有一条数据，不允许删除
-    if (records.value.length <= 1) {
-        uni.showToast({
-            title: '至少保留一条数据',
-            icon: 'none'
-        });
-        return;
-    }
-
     // 弹出确认对话框
     uni.showModal({
         title: '确认删除',
@@ -187,7 +335,7 @@ const handleCancel = (index) => {
 //验证
 const handleConfirm = (index) => {
     const record = records.value[index];
-    
+
     // 验证重量是否输入
     if (!record.weight || record.weight.trim() === '') {
         uni.showToast({
@@ -196,7 +344,7 @@ const handleConfirm = (index) => {
         });
         return;
     }
-    
+
     // 验证是否至少上传了一张图片
     // 1. 检查数据是否存在
     if (record.images === undefined || record.images === null) {
@@ -265,15 +413,15 @@ const handleConfirm = (index) => {
 
 
     confirmReport(index);
-   
+
 };
 
 //确认收运上报
-const confirmReport = async (index) => { 
+const confirmReport = async (index) => {
     const record = records.value[index];
     // 从扫码结果中获取桶编码数据，如果没有则使用默认值
     const bucketCode = record.bucketCode || ('BC' + new Date().getTime());
-    
+
     // 构造上报数据
     const reportData = {
         bucketCode: bucketCode, // 桶编码
@@ -291,7 +439,7 @@ const confirmReport = async (index) => {
             return '';
         }).filter(url => url !== '').join(',') // 过滤掉空的URL并用逗号连接
     };
-    
+
     try {
         const res = await apiPostreportWeight(reportData);
         if (res.code === 200) {
@@ -299,12 +447,13 @@ const confirmReport = async (index) => {
                 title: '上报成功',
                 icon: 'success'
             });
-            
+
             // 设置为已确认状态
             record.isConfirmed = true;
         } else {
+
             uni.showToast({
-                title: res.message || '上报失败',
+                title: res.msg || '上报失败',
                 icon: 'none'
             });
         }
@@ -335,7 +484,7 @@ const confirmReport = async (index) => {
     border-radius: 20rpx;
 
     .store-name {
-        font-size: 16px;
+        font-size: 30rpx;
         font-weight: 500;
         color: #333333;
         margin-bottom: 16rpx;
@@ -345,7 +494,7 @@ const confirmReport = async (index) => {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 14px;
+        font-size: 28rpx;
         color: #666666;
 
         .scan-icon {
@@ -357,9 +506,17 @@ const confirmReport = async (index) => {
 .content {
     flex: 1;
     overflow: auto;
+    padding-bottom: 120rpx; // 为底部按钮留出空间
 
     .record-list {
         padding: 24rpx;
+
+        .empty-tip {
+            text-align: center;
+            padding: 120rpx 0;
+            color: #999999;
+            font-size: 34rpx;
+        }
 
         .record-card {
             background-color: #FFFFFF;
@@ -397,6 +554,43 @@ const confirmReport = async (index) => {
                         font-size: 14px;
                     }
 
+                    // 重量输入容器样式
+                    .weight-input-container {
+                        display: flex;
+                        align-items: center;
+                        gap: 16rpx;
+
+                        .input {
+                            flex: 1;
+                        }
+
+                        .get-weight-btn {
+                            width: 120rpx;
+                            height: 54rpx;
+                            background-color: #07C160;
+                            color: #FFFFFF;
+                            border: none;
+                            border-radius: 32rpx;
+                            font-size: 24rpx;
+                            font-weight: 500;
+                            line-height: 54rpx;
+                            text-align: center;
+                            white-space: nowrap;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+
+                            &:active {
+                                background-color: #06AD56;
+                            }
+
+                            &[disabled] {
+                                background-color: #CCCCCC;
+                                color: #fff;
+                            }
+                        }
+                    }
+
                     // 下划线样式输入框
                     .underline-input {
                         height: 88rpx;
@@ -420,7 +614,7 @@ const confirmReport = async (index) => {
                             -webkit-text-fill-color: #999; // 防止iOS设备上disabled文字变淡
                             opacity: 1; // 防止某些浏览器中disabled元素透明度变化
                         }
-                        
+
                         &.readonly-input {
                             background-color: #f5f5f5;
                             color: #999;
@@ -448,7 +642,7 @@ const confirmReport = async (index) => {
                     margin-top: 16rpx;
 
                     .upload-tip {
-                        font-size: 12px;
+                        font-size: 24rpx;
                         color: #999999;
                         line-height: 1.5;
                         margin-top: 16rpx;
@@ -485,6 +679,35 @@ const confirmReport = async (index) => {
                     }
                 }
             }
+        }
+    }
+}
+
+// 底部固定按钮样式
+.bottom-button {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: #FFFFFF;
+    padding: 24rpx;
+    border-top: 1px solid #E5E5E5;
+    z-index: 999;
+
+    .btn-complete {
+        width: 100%;
+        height: 88rpx;
+        background-color: #07C160;
+        color: #FFFFFF;
+        border: none;
+        border-radius: 44rpx;
+        font-size: 32rpx;
+        font-weight: 500;
+        line-height: 88rpx;
+        text-align: center;
+
+        &:active {
+            background-color: #06AD56;
         }
     }
 }

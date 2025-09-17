@@ -76,7 +76,8 @@
                             </view>
                             <view class="info-item">
                                 <text class="label">预估重量:</text>
-                                <text class="value">{{ (item.estimateWeight + 'kg') ?? '暂无' }}</text>
+                                <text class="value">{{ item.estimateWeight ? (item.estimateWeight + 'kg') : '暂无'
+                                }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运重量:</text>
@@ -85,7 +86,7 @@
                             <view class="info-item">
                                 <text class="label">预估桶数:</text>
                                 <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                    }}</text>
+                                }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>
@@ -99,17 +100,16 @@
                         </view>
                         <view class="order-footer">
                             <template v-if="item.status == 0 || item.status == '0'">
-                                <uni-button size="mini" type="default" class="btn-cancel" @tap="handleCancel(item)">
+                                <uni-button size="mini" type="default" class="cancel-btn" @tap="handleCancel(item)">
                                     取消
                                 </uni-button>
-                                <uni-button size="mini" type="primary" class="btn-confirm"
+                                <uni-button size="mini" type="primary" class="report-btn"
                                     @tap="handleConfirmTransport(item)">
-                                    收运
+                                    收运上报
                                 </uni-button>
                             </template>
                             <template v-else>
-                                <uni-button size="mini" type="default" class="btn-confirm"
-                                    @tap="handleViewDetails(item)">
+                                <uni-button size="mini" type="default" class="view-btn" @tap="handleViewDetails(item)">
                                     查看详情
                                 </uni-button>
                             </template>
@@ -125,6 +125,7 @@
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { apiGetDriverTodayStatistics, apiGetDriverPlanPage, apiGetdriverConfirmPlan, apiGetnoNeedCollect } from '@/api/apis.js'
+import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
 
 // 使用用户 store
 const userStore = useUserStore()
@@ -155,6 +156,12 @@ onMounted(async () => {
         // 其他非401错误的处理
         console.error('页面初始化失败:', error)
     }
+})
+
+onShow(async () => {
+    console.log('页面显示时刷新数据')
+    getMerchantStatistics();
+    getMerchantSydList();
 })
 
 //获取商户首页数据统计
@@ -202,13 +209,13 @@ const getMerchantSydList = async () => {
     const res = await apiGetDriverPlanPage({
         pageNum: 1,
         pageSize: 5,
-        driverId: userStore.driverId || 5,
+        driverId: userStore.sfmerchant?.id,
     })
     if (res.code === 200) {
         allOrderList.value = res.data.list;
 
     } else {
-        console.error('收运端首页收运明细失败', res.message)
+        console.error('收运端首页收运明细失败', res.msg)
     }
 }
 
@@ -232,18 +239,18 @@ const handleCancel = (item) => {
             if (res.confirm) {
                 await apiGetnoNeedCollect({
                     id: item.id,
-                    driverId: userStore.merchant?.id || 5
+                    driverId: userStore.sfmerchant?.id
                 }).then((res) => {
                     if (res.code === 200) {
                         uni.showToast({
-                            title: res.message || '操作成功',
+                            title: res.msg || '操作成功',
                             icon: 'success'
                         });
                         // 刷新任务列表
                         clearSearch();
                     } else {
                         uni.showToast({
-                            title: res.message || '操作失败',
+                            title: res.msg || '操作失败',
                             icon: 'error'
                         });
                     }
@@ -265,45 +272,11 @@ const handleViewDetails = (item) => {
 };
 
 const handleConfirmTransport = async (task) => {
-    console.log('收运:', task.id);
-    //先判断task.weight是否大于0 he task.bucketNum是否大于0
-    if (task.weight > 0 && task.bucketNum > 0) {
-        //确认收运完成
-        uni.showModal({
-            title: '确认收运完成',
-            content: '是否确认收运完成？',
-            success: async (res) => {
-                if (res.confirm) {
-                    await apiGetdriverConfirmPlan({
-                        id: task.id,
-                        driverId: userStore.sfmerchant?.id || 5,
-                    }).then((res) => {
-                        if (res.code === 200) {
-                            uni.showToast({
-                                title: res.message || '操作成功',
-                                icon: 'success'
-                            });
-                            // 刷新任务列表
-                            clearSearch();
-                        } else {
-                            uni.showToast({
-                                title: res.message || '操作失败',
-                                icon: 'error'
-                            });
-                        }
-                    })
-                }
-            }
-        })
+    console.log('收运上报:', task);
 
-    }
-    else {
-        uni.showToast({
-            title: '请先进行 收运上报 操作',
-            icon: 'none'
-        });
-        return;
-    }
+    uni.navigateTo({
+        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}&merchantName=${task.merchantName}`
+    });
 };
 
 
@@ -681,36 +654,36 @@ const goToSydAllList = () => {
                 }
 
                 .order-footer {
+                    margin-top: 30rpx;
                     display: flex;
                     justify-content: flex-end;
-                    margin-top: 20rpx;
+                    gap: 15rpx;
+                    flex-wrap: wrap; // 允许换行以适应4个按钮
 
-                    .btn-cancel {
-                        margin-right: 20rpx;
-                        color: rgba(61, 61, 61, 1);
-                        background-color: #fff;
-                        border: 1px solid rgba(196, 196, 196, 1);
-                        font-size: 26rpx;
-                        width: 144rpx;
+                    .cancel-btn,
+                    .view-btn,
+                    .report-btn {
+                        width: 120rpx; // 减小按钮宽度以适应4个按钮
                         height: 48rpx;
-                        border-radius: 20rpx;
+                        color: #07C160;
+                        border-radius: 100rpx;
+                        border: 2rpx solid #07C160;
+                        font-size: 24rpx; // 稍微减小字体
                         display: flex;
-                        justify-content: center;
                         align-items: center;
-                        box-sizing: border-box; // 使用border-box盒模型
+                        justify-content: center;
                     }
 
-                    .btn-confirm {
-                        color: rgba(255, 255, 255, 1);
-                        background-color: rgba(7, 193, 96, 1);
-                        font-size: 26rpx;
-                        width: 144rpx;
-                        height: 48rpx;
-                        border-radius: 20rpx;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        box-sizing: border-box; // 使用border-box盒模型
+
+                    .cancel-btn {
+                        border: 1rpx solid rgba(196, 196, 196, 1);
+                        color: rgba(61, 61, 61, 1);
+                    }
+
+                    .report-btn {
+                        background-color: #FFA500;
+                        border-color: #FFA500;
+                        color: white;
                     }
                 }
             }

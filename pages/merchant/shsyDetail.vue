@@ -149,7 +149,6 @@ const getSyCheckDetail = async () => {
             arrivalTime: data.arrivalTime,
             address: data.address,
             explain: data.explain,
-
         };
     }
 }

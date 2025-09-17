@@ -34,6 +34,11 @@ const _sfc_main = {
       pageNum.value = 1;
       getNetwork();
     }
+    common_vendor.onShow(async () => {
+      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:160", "页面显示时刷新数据");
+      getDriverNotConfirmNum();
+      getNetwork();
+    });
     const getStatusText = (status) => {
       switch (status) {
         case 0:
@@ -60,7 +65,7 @@ const _sfc_main = {
       }
     };
     const handleCancel = (item) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:184", "取消任务:", item);
+      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:194", "取消任务:", item);
       common_vendor.index.showModal({
         title: "确认取消",
         content: "是否确认取消当前任务？",
@@ -69,17 +74,17 @@ const _sfc_main = {
           if (res.confirm) {
             await api_apis.apiGetnoNeedCollect({
               id: item.id,
-              driverId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 5
+              driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
             }).then((res2) => {
               if (res2.code === 200) {
                 common_vendor.index.showToast({
-                  title: res2.message || "操作成功",
+                  title: res2.msg || "操作成功",
                   icon: "success"
                 });
                 clearSearch();
               } else {
                 common_vendor.index.showToast({
-                  title: res2.message || "操作失败",
+                  title: res2.msg || "操作失败",
                   icon: "error"
                 });
               }
@@ -89,13 +94,13 @@ const _sfc_main = {
       });
     };
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:216", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:226", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/collection/syCheckDetail?planId=${item.id}&driverId=${item.driverId}`
       });
     };
     const handleConfirmTransport = async (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:225", "收运:", task.id);
+      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:235", "收运:", task.id);
       if (task.weight > 0 && task.bucketNum > 0) {
         common_vendor.index.showModal({
           title: "确认收运完成",
@@ -105,17 +110,17 @@ const _sfc_main = {
             if (res.confirm) {
               await api_apis.apiGetdriverConfirmPlan({
                 id: task.id,
-                driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
+                driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
               }).then((res2) => {
                 if (res2.code === 200) {
                   common_vendor.index.showToast({
-                    title: res2.message || "操作成功",
+                    title: res2.msg || "操作成功",
                     icon: "success"
                   });
                   clearSearch();
                 } else {
                   common_vendor.index.showToast({
-                    title: res2.message || "操作失败",
+                    title: res2.msg || "操作失败",
                     icon: "error"
                   });
                 }
@@ -135,7 +140,7 @@ const _sfc_main = {
     const getDriverNotConfirmNum = async () => {
       var _a;
       const res = await api_apis.apiGetDriverNotConfirmNum({
-        driverId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 5
+        driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
       });
       if (res.code === 200) {
         bookingBadgeText.value = res.data ?? 0;
@@ -152,7 +157,7 @@ const _sfc_main = {
         }
         const params = {
           pageNum: pageNum.value,
-          driverId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 5,
+          driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id,
           status: currentStatusKey.value
           // 使用当前选中tab对应的整数类型
         };
@@ -172,7 +177,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfsyRecord.vue:327", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfsyRecord.vue:337", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -193,7 +198,7 @@ const _sfc_main = {
       resetPageAndReload();
     };
     const resetPageAndReload = () => {
-      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:363", "重置页码和重新加载数据");
+      common_vendor.index.__f__("log", "at pages/collection/sfsyRecord.vue:373", "重置页码和重新加载数据");
       allOrderList.value = [];
       pageNum.value = 1;
       getNetwork();
@@ -277,7 +282,7 @@ const _sfc_main = {
             c: common_vendor.n(getStatusClass(item.status)),
             d: common_vendor.t(item.appointmentTime ?? "暂无"),
             e: common_vendor.t(item.arrivalTime ?? "暂无"),
-            f: common_vendor.t(item.estimateWeight + "kg"),
+            f: common_vendor.t(item.estimateWeight ? item.estimateWeight + "kg" : "暂无"),
             g: common_vendor.t(item.weight ? item.weight + "kg" : "暂无"),
             h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + "个" : "暂无"),
             i: common_vendor.t(item.bucketNum ? item.bucketNum + "个" : "暂无"),

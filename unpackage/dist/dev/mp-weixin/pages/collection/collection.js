@@ -25,14 +25,19 @@ const _sfc_main = {
       try {
         const userInfo = await userStore.ensureUserInfo();
         if (userInfo === null) {
-          common_vendor.index.__f__("log", "at pages/collection/collection.vue:148", "用户未登录，已跳转到登录页");
+          common_vendor.index.__f__("log", "at pages/collection/collection.vue:149", "用户未登录，已跳转到登录页");
           return;
         }
         getMerchantStatistics();
         getMerchantSydList();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:156", "页面初始化失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:157", "页面初始化失败:", error);
       }
+    });
+    common_vendor.onShow(async () => {
+      common_vendor.index.__f__("log", "at pages/collection/collection.vue:162", "页面显示时刷新数据");
+      getMerchantStatistics();
+      getMerchantSydList();
     });
     const getMerchantStatistics = async () => {
       var _a;
@@ -71,15 +76,16 @@ const _sfc_main = {
       }
     };
     const getMerchantSydList = async () => {
+      var _a;
       const res = await api_apis.apiGetDriverPlanPage({
         pageNum: 1,
         pageSize: 5,
-        driverId: userStore.driverId || 5
+        driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
       });
       if (res.code === 200) {
         allOrderList.value = res.data.list;
       } else {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:211", "收运端首页收运明细失败", res.message);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:218", "收运端首页收运明细失败", res.msg);
       }
     };
     const getUserInfo = () => {
@@ -88,7 +94,7 @@ const _sfc_main = {
       });
     };
     const handleCancel = (item) => {
-      common_vendor.index.__f__("log", "at pages/collection/collection.vue:227", "取消任务:", item);
+      common_vendor.index.__f__("log", "at pages/collection/collection.vue:234", "取消任务:", item);
       common_vendor.index.showModal({
         title: "确认取消",
         content: "是否确认取消当前任务？",
@@ -97,17 +103,17 @@ const _sfc_main = {
           if (res.confirm) {
             await api_apis.apiGetnoNeedCollect({
               id: item.id,
-              driverId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 5
+              driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
             }).then((res2) => {
               if (res2.code === 200) {
                 common_vendor.index.showToast({
-                  title: res2.message || "操作成功",
+                  title: res2.msg || "操作成功",
                   icon: "success"
                 });
                 clearSearch();
               } else {
                 common_vendor.index.showToast({
-                  title: res2.message || "操作失败",
+                  title: res2.msg || "操作失败",
                   icon: "error"
                 });
               }
@@ -117,47 +123,16 @@ const _sfc_main = {
       });
     };
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/collection/collection.vue:259", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/collection/collection.vue:266", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/collection/syCheckDetail?planId=${item.id}&driverId=${item.driverId}`
       });
     };
     const handleConfirmTransport = async (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/collection.vue:268", "收运:", task.id);
-      if (task.weight > 0 && task.bucketNum > 0) {
-        common_vendor.index.showModal({
-          title: "确认收运完成",
-          content: "是否确认收运完成？",
-          success: async (res) => {
-            var _a;
-            if (res.confirm) {
-              await api_apis.apiGetdriverConfirmPlan({
-                id: task.id,
-                driverId: ((_a = userStore.sfmerchant) == null ? void 0 : _a.id) || 5
-              }).then((res2) => {
-                if (res2.code === 200) {
-                  common_vendor.index.showToast({
-                    title: res2.message || "操作成功",
-                    icon: "success"
-                  });
-                  clearSearch();
-                } else {
-                  common_vendor.index.showToast({
-                    title: res2.message || "操作失败",
-                    icon: "error"
-                  });
-                }
-              });
-            }
-          }
-        });
-      } else {
-        common_vendor.index.showToast({
-          title: "请先进行 收运上报 操作",
-          icon: "none"
-        });
-        return;
-      }
+      common_vendor.index.__f__("log", "at pages/collection/collection.vue:275", "收运上报:", task);
+      common_vendor.index.navigateTo({
+        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}&merchantName=${task.merchantName}`
+      });
     };
     const quickActions = common_vendor.ref([
       {
@@ -180,7 +155,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/collection/collection.vue:334", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/collection/collection.vue:307", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"
@@ -199,7 +174,7 @@ const _sfc_main = {
       try {
         await userStore.fetchUserInfo();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:357", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:330", "刷新失败:", error);
         common_vendor.index.showToast({
           title: "刷新失败",
           icon: "none"
@@ -246,7 +221,7 @@ const _sfc_main = {
             c: common_vendor.n(getStatusClass(item.status)),
             d: common_vendor.t(item.appointmentTime ?? "暂无"),
             e: common_vendor.t(item.arrivalTime ?? "暂无"),
-            f: common_vendor.t(item.estimateWeight + "kg"),
+            f: common_vendor.t(item.estimateWeight ? item.estimateWeight + "kg" : "暂无"),
             g: common_vendor.t(item.weight ? item.weight + "kg" : "暂无"),
             h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + "个" : "暂无"),
             i: common_vendor.t(item.bucketNum ? item.bucketNum + "个" : "暂无"),

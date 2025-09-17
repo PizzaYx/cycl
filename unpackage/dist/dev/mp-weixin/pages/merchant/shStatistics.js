@@ -67,7 +67,7 @@ const _sfc_main = {
     const getToStatistics = async () => {
       var _a;
       const params = {
-        merchantId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 448
+        merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
       };
       if (selectedStatus.value !== null) {
         params.status = selectedStatus.value;
@@ -103,7 +103,7 @@ const _sfc_main = {
         }
         const params = {
           pageNum: pageNum.value,
-          merchantId: ((_a = userStore.merchant) == null ? void 0 : _a.id) || 448
+          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
         };
         if (selectedStatus.value !== null) {
           params.status = selectedStatus.value;

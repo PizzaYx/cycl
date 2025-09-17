@@ -205,7 +205,7 @@ const handleCancel = (item) => {
 
 
                 const resdata = await apiGetcancelPlanById({
-                    merchantId: userStore.merchant?.id || 448,
+                    merchantId: userStore.merchant?.id,
                     id: item.id
                 });
 
@@ -287,7 +287,7 @@ const handleConfirmTransport = async (item) => {
             getNetwork();
         } else {
             uni.showToast({
-                title: res.message || '确认收运失败',
+                title: res.msg || '确认收运失败',
                 icon: 'none'
             });
         }
@@ -305,7 +305,7 @@ const processingBadgeText = ref(0);
 
 const getMerchantNotConfirmNum = async () => {
     const res = await apiGetMerchantNotConfirmNum({
-        merchantId: userStore.merchant?.id || 448
+        merchantId: userStore.merchant?.id
     });
     if (res.code === 200) {
         processingBadgeText.value = res.data ?? 0;
@@ -332,7 +332,7 @@ const getNetwork = async () => {
 
         const res = await apiGetPlanPage({
             pageNum: pageNum.value,
-            merchantId: userStore.merchant?.id ?? 448,
+            merchantId: userStore.merchant?.id,
             status: tabs[currentTab.value].key // 使用tabs中的key值
         });
 

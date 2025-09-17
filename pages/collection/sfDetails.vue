@@ -113,8 +113,6 @@
                         <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
                         <uni-button size="mini" type="primary" class="report-btn"
                             @tap="reportTask(task)">收运上报</uni-button>
-                        <uni-button size="mini" type="primary" class="collect-btn"
-                            @tap="collectTask(task)">收运完成</uni-button>
                     </template>
                     <template v-else-if="task.status === 1">
                         <!-- 已完成状态：只显示查看按钮 -->
@@ -137,7 +135,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
 import { useUserStore } from '@/stores/user.js'
-import { apiGetDriverInfo, apiGetDriverTodayPlan, apiGetnoNeedCollect, apiGetdriverConfirmPlan, apiAddCarWeight } from '@/api/apis.js'
+import { apiGetDriverInfo, apiGetDriverTodayPlan, apiGetnoNeedCollect, apiAddCarWeight } from '@/api/apis.js'
 
 // 获取当前日期并格式化为 YYYY-MM-DD 格式
 const getCurrentDate = () => {
@@ -208,7 +206,7 @@ onShow(async () => {
 const getapiGetDriverInfo = async () => {
     try {
         const res = await apiGetDriverInfo({
-            driverId: userStore.sfmerchant?.id || 5,
+            driverId: userStore.sfmerchant?.id,
 
         })
 
@@ -236,7 +234,7 @@ const getapiGetDriverInfo = async () => {
 const getapiGetDriverTodayPlan = async () => {
     try {
         const res = await apiGetDriverTodayPlan({
-            driverId: userStore.sfmerchant?.id || 5,
+            driverId: userStore.sfmerchant?.id,
             page: 1,
         })
         // status  0进行中  1已完成  2无需收运
@@ -262,18 +260,18 @@ const cancelTask = (task) => {
             if (res.confirm) {
                 await apiGetnoNeedCollect({
                     id: task.id,
-                    driverId: userStore.sfmerchant?.id || 5,
+                    driverId: userStore.sfmerchant?.id,
                 }).then((res) => {
                     if (res.code === 200) {
                         uni.showToast({
-                            title: res.message || '操作成功',
+                            title: res.msg || '操作成功',
                             icon: 'success'
                         });
                         // 刷新任务列表
                         getapiGetDriverTodayPlan();
                     } else {
                         uni.showToast({
-                            title: res.message || '操作失败',
+                            title: res.msg || '操作失败',
                             icon: 'error'
                         });
                     }
@@ -298,7 +296,7 @@ const reportTask = (task) => {
     console.log('收运上报:', task);
 
     uni.navigateTo({
-        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}`
+        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}&merchantName=${task.merchantName}`
     });
 };
 
@@ -324,48 +322,48 @@ const contactLine = () => {
     });
 };
 
-// 收运
-const collectTask = (task) => {
-    console.log('收运:', task.id);
-    //先判断task.weight是否大于0 he task.bucketNum是否大于0
-    if (task.weight > 0 && task.bucketNum > 0) {
-        //确认收运完成
-        uni.showModal({
-            title: '确认收运完成',
-            content: '是否确认收运完成？',
-            success: async (res) => {
-                if (res.confirm) {
-                    await apiGetdriverConfirmPlan({
-                        id: task.id,
-                        driverId: userStore.sfmerchant?.id || 5,
-                    }).then((res) => {
-                        if (res.code === 200) {
-                            uni.showToast({
-                                title: res.message || '操作成功',
-                                icon: 'success'
-                            });
-                            // 刷新任务列表
-                            getapiGetDriverTodayPlan();
-                        } else {
-                            uni.showToast({
-                                title: res.message || '操作失败',
-                                icon: 'error'
-                            });
-                        }
-                    })
-                }
-            }
-        })
+// // 收运
+// const collectTask = (task) => {
+//     console.log('收运:', task.id);
+//     //先判断task.weight是否大于0 he task.bucketNum是否大于0
+//     if (task.weight > 0 && task.bucketNum > 0) {
+//         //确认收运完成
+//         uni.showModal({
+//             title: '确认收运完成',
+//             content: '是否确认收运完成？',
+//             success: async (res) => {
+//                 if (res.confirm) {
+//                     await apiGetdriverConfirmPlan({
+//                         id: task.id,
+//                         driverId: userStore.sfmerchant?.id,
+//                     }).then((res) => {
+//                         if (res.code === 200) {
+//                             uni.showToast({
+//                                 title: res.message || '操作成功',
+//                                 icon: 'success'
+//                             });
+//                             // 刷新任务列表
+//                             getapiGetDriverTodayPlan();
+//                         } else {
+//                             uni.showToast({
+//                                 title: res.message || '操作失败',
+//                                 icon: 'error'
+//                             });
+//                         }
+//                     })
+//                 }
+//             }
+//         })
 
-    }
-    else {
-        uni.showToast({
-            title: '请先进行 收运上报 操作',
-            icon: 'none'
-        });
-        return;
-    }
-};
+//     }
+//     else {
+//         uni.showToast({
+//             title: '请先进行 收运上报 操作',
+//             icon: 'none'
+//         });
+//         return;
+//     }
+// };
 // 提交重量
 const handleSubmitWeight = async () => {
     // 验证提交重量是否输入 是否大于等于0，成功提示是否提交过磅重量 是就调取接口apiGetCarWeight
@@ -397,7 +395,7 @@ const handleSubmitWeight = async () => {
                         recordNo: allRecordNo.value,
                         weight: weight,
                         registrationNumber: registrationNumber.value,
-                        driverId: userStore.sfmerchant?.id || 5
+                        driverId: userStore.sfmerchant?.id
                     });
 
                     if (result.code === 200) {
@@ -810,8 +808,8 @@ const back = () => {
 
                 .cancel-btn,
                 .view-btn,
-                .report-btn,
-                .collect-btn {
+                .report-btn
+                {
                     width: 120rpx; // 减小按钮宽度以适应4个按钮
                     height: 48rpx;
                     color: #07C160;
@@ -823,11 +821,7 @@ const back = () => {
                     justify-content: center;
                 }
 
-                .collect-btn {
-                    background-color: #07C160;
-                    color: white;
-                }
-
+    
                 .cancel-btn {
                     border: 1rpx solid rgba(196, 196, 196, 1);
                     color: rgba(61, 61, 61, 1);

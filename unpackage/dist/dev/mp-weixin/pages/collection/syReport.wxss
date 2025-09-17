@@ -36,7 +36,7 @@
   border-radius: 20rpx;
 }
 .store-info .store-name.data-v-e09b3d48 {
-  font-size: 16px;
+  font-size: 30rpx;
   font-weight: 500;
   color: #333333;
   margin-bottom: 16rpx;
@@ -45,7 +45,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  font-size: 28rpx;
   color: #666666;
 }
 .store-info .bin-info .scan-icon.data-v-e09b3d48 {
@@ -54,9 +54,16 @@
 .content.data-v-e09b3d48 {
   flex: 1;
   overflow: auto;
+  padding-bottom: 120rpx;
 }
 .content .record-list.data-v-e09b3d48 {
   padding: 24rpx;
+}
+.content .record-list .empty-tip.data-v-e09b3d48 {
+  text-align: center;
+  padding: 120rpx 0;
+  color: #999999;
+  font-size: 34rpx;
 }
 .content .record-list .record-card.data-v-e09b3d48 {
   background-color: #FFFFFF;
@@ -89,6 +96,37 @@
   border-radius: 8rpx;
   padding: 0 24rpx;
   font-size: 14px;
+}
+.content .record-list .record-card .input-group .input-item .weight-input-container.data-v-e09b3d48 {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.content .record-list .record-card .input-group .input-item .weight-input-container .input.data-v-e09b3d48 {
+  flex: 1;
+}
+.content .record-list .record-card .input-group .input-item .weight-input-container .get-weight-btn.data-v-e09b3d48 {
+  width: 120rpx;
+  height: 54rpx;
+  background-color: #07C160;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 32rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+  line-height: 54rpx;
+  text-align: center;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.content .record-list .record-card .input-group .input-item .weight-input-container .get-weight-btn.data-v-e09b3d48:active {
+  background-color: #06AD56;
+}
+.content .record-list .record-card .input-group .input-item .weight-input-container .get-weight-btn[disabled].data-v-e09b3d48 {
+  background-color: #CCCCCC;
+  color: #fff;
 }
 .content .record-list .record-card .input-group .input-item .underline-input.data-v-e09b3d48 {
   height: 88rpx;
@@ -131,7 +169,7 @@
   margin-top: 16rpx;
 }
 .content .record-list .record-card .upload-section .upload-area .upload-tip.data-v-e09b3d48 {
-  font-size: 12px;
+  font-size: 24rpx;
   color: #999999;
   line-height: 1.5;
   margin-top: 16rpx;
@@ -161,4 +199,29 @@
   right: 0;
   background-color: #07C160;
   color: #FFFFFF;
+}
+.bottom-button.data-v-e09b3d48 {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #FFFFFF;
+  padding: 24rpx;
+  border-top: 1px solid #E5E5E5;
+  z-index: 999;
+}
+.bottom-button .btn-complete.data-v-e09b3d48 {
+  width: 100%;
+  height: 88rpx;
+  background-color: #07C160;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  font-weight: 500;
+  line-height: 88rpx;
+  text-align: center;
+}
+.bottom-button .btn-complete.data-v-e09b3d48:active {
+  background-color: #06AD56;
 }

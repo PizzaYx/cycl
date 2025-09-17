@@ -51,7 +51,7 @@
                             </view>
                             <view class="info-item">
                                 <text class="label">预估重量:</text>
-                                <text class="value">{{ (item.estimateWeight + 'kg') ?? '暂无' }}</text>
+                                <text class="value">{{ item.estimateWeight ? (item.estimateWeight + 'kg') : '暂无' }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运重量:</text>
@@ -189,7 +189,7 @@ const getToStatistics = async () => {
     // 添加搜索关键词
     const res = await apiGetDriverPlanStatistics({
         title: searchKeyword.value ?? '',
-        driverId: userStore.driverId?.id || 5
+        driverId: userStore.sfmerchant?.id, 
     });
 
     if (res.code === 200) {
@@ -211,7 +211,7 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            driverId: userStore.driverId?.id || 5
+            driverId: userStore.sfmerchant?.id,
         };
 
 

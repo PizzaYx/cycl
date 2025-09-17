@@ -348,8 +348,7 @@
 }
 .container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25,
 .container .task-list .task-item .task-footer .view-btn.data-v-b624ea25,
-.container .task-list .task-item .task-footer .report-btn.data-v-b624ea25,
-.container .task-list .task-item .task-footer .collect-btn.data-v-b624ea25 {
+.container .task-list .task-item .task-footer .report-btn.data-v-b624ea25 {
   width: 120rpx;
   height: 48rpx;
   color: #07C160;
@@ -359,10 +358,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.container .task-list .task-item .task-footer .collect-btn.data-v-b624ea25 {
-  background-color: #07C160;
-  color: white;
 }
 .container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25 {
   border: 1rpx solid #c4c4c4;

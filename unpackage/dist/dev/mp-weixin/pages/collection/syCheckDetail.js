@@ -77,7 +77,7 @@ const _sfc_main = {
       },
       {
         label: "收运桶数:",
-        value: pageData.value.estimateBucketNum + "个"
+        value: pageData.value.bucketNum + "个"
       },
       {
         label: "收运地址:",
