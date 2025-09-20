@@ -146,6 +146,7 @@ onMounted(async () => {
 
 onShow(() => {
     checkUserAuthStatus();
+    getMerchantNotConfirmNum();
 })
 
 const showDetail = (item) => {

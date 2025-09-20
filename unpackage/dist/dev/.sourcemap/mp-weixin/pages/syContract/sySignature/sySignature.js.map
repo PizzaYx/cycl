@@ -1,0 +1,1 @@
+{"version":3,"file":"sySignature.js","sources":["pages/syContract/sySignature/sySignature.vue?type=page"],"sourcesContent":["import MiniProgramPage from '/Users/yx/Documents/Vue3Projects/cycl/pages/syContract/sySignature/sySignature.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;AACA,GAAG,WAAW,eAAe;"}

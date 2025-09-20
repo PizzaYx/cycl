@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const BASE_URL = "https://demo.vps4cloud.com";
+const BASE_URL = "http://183.223.252.50:18080";
 let refreshingPromise = null;
 common_vendor.index.addInterceptor("request", {
   invoke(args) {

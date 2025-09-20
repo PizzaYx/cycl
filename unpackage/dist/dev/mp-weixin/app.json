@@ -19,7 +19,10 @@
     "pages/merchant/shsyDetail",
     "pages/user/agreement",
     "pages/user/privacyPolicy",
-    "pages/user/register"
+    "pages/user/register",
+    "pages/syContract/syContract",
+    "pages/syContract/syPreview",
+    "pages/syContract/shSignature"
   ],
   "window": {
     "navigationBarTextStyle": "black",

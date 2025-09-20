@@ -1,0 +1,1 @@
+{"version":3,"file":"syPreview.js","sources":["pages/syContract/syPreview/syPreview.vue?type=page"],"sourcesContent":["import MiniProgramPage from '/Users/yx/Documents/Vue3Projects/cycl/pages/syContract/syPreview/syPreview.vue'\nwx.createPage(MiniProgramPage)"],"names":[],"mappings":";;;;;;;AACA,GAAG,WAAW,eAAe;"}

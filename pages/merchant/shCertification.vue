@@ -84,7 +84,7 @@
                                 <view v-if="formData.latitude && formData.longitude" class="location-info">
                                     <text class="location-name">{{ formData.locationName || '已选择位置' }}</text>
                                     <text class="location-coords">经度: {{ formData.longitude }}, 纬度: {{ formData.latitude
-                                        }}</text>
+                                    }}</text>
                                 </view>
                                 <text class="location-placeholder" v-else>点击选择商户位置</text>
                                 <uni-icons type="location" size="20" color="#999"></uni-icons>
@@ -117,10 +117,10 @@
                     </uni-forms-item>
 
                     <uni-forms-item label="营业执照上传" name="licenseImages" required>
+                        <!-- @success="onUploadSuccess" @fail="onUploadFail" @delete="onFileDelete" -->
                         <uni-file-picker v-model="formData.licenseImages" file-mediatype="image" mode="grid" :limit="3"
                             :auto-upload="false" :upload-url="uploadUrl" :header="uploadHeaders" @select="onFileSelect"
-                            @progress="onUploadProgress" @success="onUploadSuccess" @fail="onUploadFail"
-                            @delete="onFileDelete" :disabled="isReadOnly" file-extname="jpg,jpeg,png"
+                            @progress="onUploadProgress" :disabled="isReadOnly" file-extname="jpg,jpeg,png"
                             :max-size="20971520" return-type="array">
                         </uni-file-picker>
                         <text class="upload-tip" v-if="!isReadOnly">最多上传3张图片，每张图片不超过20MB，支持jpg、png格式</text>
@@ -131,7 +131,7 @@
             <!-- 提交按钮 -->
             <view class="submit-section" v-if="authStatus === 'none' || authStatus === 'rejected'">
                 <button class="submit-btn" @click="submitAuth" :loading="submitting">
-                    {{ authStatus === 'rejected' ? '修改提交' : '提交认证' }}
+                    {{ authStatus === 'rejected' ? '重新提交' : '提交认证' }}
                 </button>
             </view>
         </view>
@@ -765,28 +765,28 @@ const onFileSelect = (res) => {
     console.log('===== 文件选择事件结束 =====')
 }
 
-// 文件上传进度事件（手动上传模式下此事件不会被触发，保留用于兼容性）
-const onUploadProgress = (res) => {
-    console.log('上传进度:', res)
-    // 手动上传模式下，此事件不会被触发
-    // 保留用于兼容性
-}
+// // 文件上传进度事件（手动上传模式下此事件不会被触发，保留用于兼容性）
+// const onUploadProgress = (res) => {
+//     console.log('上传进度:', res)
+//     // 手动上传模式下，此事件不会被触发
+//     // 保留用于兼容性
+// }
 
-// 文件删除事件
-const onFileDelete = (res) => {
-    console.log('===== 文件删除事件 =====')
-    console.log('文件删除:', res)
-    console.log('删除前formData.licenseImages:', formData.licenseImages)
+// // 文件删除事件
+// const onFileDelete = (res) => {
+//     console.log('===== 文件删除事件 =====')
+//     console.log('文件删除:', res)
+//     console.log('删除前formData.licenseImages:', formData.licenseImages)
 
-    // v-model 应该会自动更新，但我们确保验证被触发
-    setTimeout(() => {
-        console.log('删除后formData.licenseImages:', formData.licenseImages)
-        if (formRef.value) {
-            formRef.value.validateField('licenseImages')
-        }
-    }, 100)
-    console.log('===== 文件删除事件结束 =====')
-}
+//     // v-model 应该会自动更新，但我们确保验证被触发
+//     setTimeout(() => {
+//         console.log('删除后formData.licenseImages:', formData.licenseImages)
+//         if (formRef.value) {
+//             formRef.value.validateField('licenseImages')
+//         }
+//     }, 100)
+//     console.log('===== 文件删除事件结束 =====')
+// }
 
 // 打开地图选择器
 const openLocationPicker = () => {

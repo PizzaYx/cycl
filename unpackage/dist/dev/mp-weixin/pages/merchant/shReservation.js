@@ -34,7 +34,7 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       props.value.id = options.id ? parseInt(options.id) : null;
       props.value.status = options.status ? parseInt(options.status) : null;
-      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:134", "接收到的参数:", props.value);
+      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:132", "接收到的参数:", props.value);
     });
     const isReadOnly = common_vendor.computed(() => {
       return authStatus.value === "pending" || authStatus.value === "approved";
@@ -58,7 +58,7 @@ const _sfc_main = {
       const max = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1e3);
       return max.toISOString().slice(0, 19).replace("T", " ");
     });
-    const currentStep = common_vendor.computed(() => {
+    common_vendor.computed(() => {
       const status = props.value.status;
       switch (status) {
         case 0:
@@ -132,7 +132,7 @@ const _sfc_main = {
     });
     const fillFormData = (data) => {
       var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
-      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:270", "开始数据回显:", data, "用户信息:", userStore.userInfo);
+      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:267", "开始数据回显:", data, "用户信息:", userStore.userInfo);
       formData.merchantName = ((_a = userStore.merchant) == null ? void 0 : _a.name) || ((_b = userStore.userInfo) == null ? void 0 : _b.name) || "";
       formData.address = ((_c = userStore.merchant) == null ? void 0 : _c.address) || ((_d = userStore.userInfo) == null ? void 0 : _d.address) || "";
       formData.contactPerson = ((_e = userStore.merchant) == null ? void 0 : _e.contactTruename) || ((_f = userStore.userInfo) == null ? void 0 : _f.contactTruename) || "";
@@ -143,13 +143,13 @@ const _sfc_main = {
         formData.estimatedTime = data.estimatedTime || "";
         formData.estimatedRemarks = data.estimatedRemarks || "";
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:286", "数据回显完成:", formData);
+      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:283", "数据回显完成:", formData);
     };
     const validateForm = async () => {
       try {
         return await formRef.value.validate();
       } catch (error) {
-        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:295", "表单验证失败:", error);
+        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:292", "表单验证失败:", error);
         return false;
       }
     };
@@ -182,7 +182,7 @@ const _sfc_main = {
           // 备注说明
         };
         const result = await api_apis.apiPostaddPlanTemporary(submitData);
-        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:324", "预约提交API返回:", submitData);
+        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:321", "预约提交API返回:", submitData);
         if (result && result.code === 200) {
           common_vendor.index.showToast({
             title: "预约申请提交成功",
@@ -199,7 +199,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shReservation.vue:349", "提交认证失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shReservation.vue:346", "提交认证失败:", error);
         common_vendor.index.showToast({
           title: "提交失败，请重试",
           icon: "none"
@@ -220,109 +220,92 @@ const _sfc_main = {
           color: "#000",
           title: "临时预约"
         }),
-        c: currentStep.value <= 1
-      }, currentStep.value <= 1 ? {} : {}, {
-        d: currentStep.value >= 1 ? 1 : "",
-        e: currentStep.value > 1 ? 1 : "",
-        f: currentStep.value > 1 ? 1 : "",
-        g: currentStep.value <= 2
-      }, currentStep.value <= 2 ? {} : {}, {
-        h: currentStep.value >= 2 ? 1 : "",
-        i: currentStep.value > 2 ? 1 : "",
-        j: currentStep.value > 2 ? 1 : "",
-        k: currentStep.value >= 3 ? 1 : "",
-        l: isReadOnly.value
+        c: isReadOnly.value
       }, isReadOnly.value ? common_vendor.e({
-        m: authStatus.value === "pending"
+        d: authStatus.value === "pending"
       }, authStatus.value === "pending" ? {
-        n: common_vendor.p({
+        e: common_vendor.p({
           type: "info",
           size: "16",
           color: "#ff9500"
         })
       } : authStatus.value === "approved" ? {
-        p: common_vendor.p({
+        g: common_vendor.p({
           type: "checkmarkempty",
           size: "16",
           color: "#07c160"
         })
       } : {}, {
-        o: authStatus.value === "approved"
+        f: authStatus.value === "approved"
       }) : {}, {
-        q: authStatus.value === "rejected"
+        h: authStatus.value === "rejected"
       }, authStatus.value === "rejected" ? {
-        r: common_vendor.p({
+        i: common_vendor.p({
           type: "closeempty",
           size: "16",
           color: "#ff4444"
         })
       } : {}, {
-        s: common_vendor.o(($event) => formData.merchantName = $event),
-        t: common_vendor.p({
-          placeholder: "请输入商户名称",
+        j: common_vendor.o(($event) => formData.merchantName = $event),
+        k: common_vendor.p({
           clearable: false,
           disabled: true,
           modelValue: formData.merchantName
         }),
-        v: common_vendor.p({
+        l: common_vendor.p({
           label: "商户名称",
-          name: "merchantName",
-          required: true
+          name: "merchantName"
         }),
-        w: common_vendor.o(($event) => formData.address = $event),
-        x: common_vendor.p({
-          placeholder: "请输入详细地址",
+        m: common_vendor.o(($event) => formData.address = $event),
+        n: common_vendor.p({
           clearable: false,
           disabled: true,
           modelValue: formData.address
         }),
-        y: common_vendor.p({
+        o: common_vendor.p({
           label: "商户地址",
-          name: "address",
-          required: true
+          name: "address"
         }),
-        z: common_vendor.o(($event) => formData.contactPhone = $event),
-        A: common_vendor.p({
-          placeholder: "请输入联系电话",
+        p: common_vendor.o(($event) => formData.contactPhone = $event),
+        q: common_vendor.p({
           type: "number",
           maxlength: "11",
           clearable: false,
           disabled: true,
           modelValue: formData.contactPhone
         }),
-        B: common_vendor.p({
+        r: common_vendor.p({
           label: "联系电话",
-          name: "contactPhone",
-          required: true
+          name: "contactPhone"
         }),
-        C: common_vendor.o(($event) => formData.bucketCount = $event),
-        D: common_vendor.p({
+        s: common_vendor.o(($event) => formData.bucketCount = $event),
+        t: common_vendor.p({
           placeholder: "请输入垃圾桶数量",
           type: "number",
           clearable: false,
           disabled: isReadOnly.value,
           modelValue: formData.bucketCount
         }),
-        E: common_vendor.p({
+        v: common_vendor.p({
           label: "需要垃圾桶数(个)",
           name: "bucketCount",
           required: true
         }),
-        F: common_vendor.o(($event) => formData.estimatedWeight = $event),
-        G: common_vendor.p({
+        w: common_vendor.o(($event) => formData.estimatedWeight = $event),
+        x: common_vendor.p({
           placeholder: "请输入预估垃圾重量",
           type: "number",
           clearable: false,
           disabled: isReadOnly.value,
           modelValue: formData.estimatedWeight
         }),
-        H: common_vendor.p({
+        y: common_vendor.p({
           label: "预估垃圾重量",
           name: "estimatedWeight",
           required: true
         }),
-        I: common_vendor.o(($event) => formData.estimatedTime = $event),
-        J: common_vendor.p({
+        z: common_vendor.o(($event) => formData.estimatedTime = $event),
+        A: common_vendor.p({
           type: "date",
           start: minDate.value,
           end: maxDate.value,
@@ -331,38 +314,38 @@ const _sfc_main = {
           disabled: isReadOnly.value,
           modelValue: formData.estimatedTime
         }),
-        K: common_vendor.p({
+        B: common_vendor.p({
           label: "预约时间",
           name: "estimatedTime",
           required: true
         }),
-        L: common_vendor.o(($event) => formData.estimatedRemarks = $event),
-        M: common_vendor.p({
+        C: common_vendor.o(($event) => formData.estimatedRemarks = $event),
+        D: common_vendor.p({
           placeholder: "请输入其他要说明的信息",
           type: "text",
           clearable: false,
           disabled: isReadOnly.value,
           modelValue: formData.estimatedRemarks
         }),
-        N: common_vendor.p({
+        E: common_vendor.p({
           label: "备注说明",
           name: "estimatedRemarks",
           required: true
         }),
-        O: common_vendor.sr(formRef, "9b099ba5-4", {
+        F: common_vendor.sr(formRef, "9b099ba5-4", {
           "k": "formRef"
         }),
-        P: common_vendor.p({
+        G: common_vendor.p({
           modelValue: formData,
           rules: formRules,
           ["label-position"]: "top"
         }),
-        Q: isReadOnly.value ? 1 : "",
-        R: authStatus.value === "none" || authStatus.value === "rejected"
+        H: isReadOnly.value ? 1 : "",
+        I: authStatus.value === "none" || authStatus.value === "rejected"
       }, authStatus.value === "none" || authStatus.value === "rejected" ? {
-        S: common_vendor.t(authStatus.value === "rejected" ? "重新提交" : "提交"),
-        T: common_vendor.o(submitAuth),
-        U: submitting.value
+        J: common_vendor.t(authStatus.value === "rejected" ? "重新提交" : "提交"),
+        K: common_vendor.o(submitAuth),
+        L: submitting.value
       } : {});
     };
   }

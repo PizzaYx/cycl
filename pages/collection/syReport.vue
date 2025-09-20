@@ -22,7 +22,7 @@
                 <view v-for="(item, index) in records" :key="index" class="record-card">
                     <view class="input-group">
                         <view class="input-item">
-                            <text class="label"><text class="required">*</text>垃圾桶数（个）</text>
+                            <!-- <text class="label"><text class="required">*</text>垃圾桶数（个）</text> -->
                             <input type="number" v-model="item.binCount" class="input underline-input readonly" disabled
                                 placeholder="1" />
                         </view>

@@ -38,16 +38,17 @@ const _sfc_main = {
     });
     common_vendor.onShow(() => {
       checkUserAuthStatus();
+      getMerchantNotConfirmNum();
     });
     const showDetail = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:152", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:153", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
       });
     };
     const getMerchantStatistics = async () => {
       var _a;
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:162", "获取商户首页数据统计");
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:163", "获取商户首页数据统计");
       const res = await api_apis.apiGetMerchantStatistics({
         merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
       });
@@ -68,7 +69,7 @@ const _sfc_main = {
       if (res.code === 200) {
         records.value = res.data.list;
       } else {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:186", "商户首页收运记录失败", res.message);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:187", "商户首页收运记录失败", res.message);
       }
     };
     const getMerchantNotConfirmNum = async () => {
@@ -113,7 +114,7 @@ const _sfc_main = {
         await userStore.fetchUserInfo();
         checkUserAuthStatus();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:271", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:272", "刷新失败:", error);
       } finally {
         refreshing.value = false;
       }
@@ -158,13 +159,13 @@ const _sfc_main = {
       }
     ]);
     const handleQuickAction = (action) => {
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:321", "快捷操作点击:", action);
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:322", "快捷操作点击:", action);
       if (action.name === "商户认证") {
         if (action.url) {
           common_vendor.index.navigateTo({
             url: action.url,
             fail: (err) => {
-              common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:329", "页面跳转失败:", err);
+              common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:330", "页面跳转失败:", err);
               common_vendor.index.showToast({
                 title: "页面暂未开放",
                 icon: "none"
@@ -181,7 +182,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:350", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:351", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"

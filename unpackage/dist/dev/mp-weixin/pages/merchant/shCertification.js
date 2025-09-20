@@ -387,21 +387,6 @@ const _sfc_main = {
       formData.merchantName = merchant.name;
       closeMerchantList();
     };
-    const onUploadSuccess = (res) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:612", "===== 文件上传成功事件 =====");
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:613", "上传成功回调参数:", res);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:614", "tempFiles:", res.tempFiles);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:615", "tempFilePaths:", res.tempFilePaths);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:616", "当前formData.licenseImages:", formData.licenseImages);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:621", "===== 文件上传成功事件结束 =====");
-    };
-    const onUploadFail = (err) => {
-      common_vendor.index.__f__("error", "at pages/merchant/shCertification.vue:626", "文件上传失败:", err);
-      common_vendor.index.showToast({
-        title: "文件上传失败",
-        icon: "none"
-      });
-    };
     const uploadFileManually = (file, fileIndex = null) => {
       common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:635", "开始手动上传文件:", file);
       common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:636", "文件路径:", file.tempFilePath || file.path);
@@ -509,21 +494,6 @@ const _sfc_main = {
         }, 100);
       }
       common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:765", "===== 文件选择事件结束 =====");
-    };
-    const onUploadProgress = (res) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:770", "上传进度:", res);
-    };
-    const onFileDelete = (res) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:777", "===== 文件删除事件 =====");
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:778", "文件删除:", res);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:779", "删除前formData.licenseImages:", formData.licenseImages);
-      setTimeout(() => {
-        common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:783", "删除后formData.licenseImages:", formData.licenseImages);
-        if (formRef.value) {
-          formRef.value.validateField("licenseImages");
-        }
-      }, 100);
-      common_vendor.index.__f__("log", "at pages/merchant/shCertification.vue:788", "===== 文件删除事件结束 =====");
     };
     const openLocationPicker = () => {
       common_vendor.index.chooseLocation({
@@ -817,12 +787,9 @@ const _sfc_main = {
           required: true
         }),
         Z: common_vendor.o(onFileSelect),
-        aa: common_vendor.o(onUploadProgress),
-        ab: common_vendor.o(onUploadSuccess),
-        ac: common_vendor.o(onUploadFail),
-        ad: common_vendor.o(onFileDelete),
-        ae: common_vendor.o(($event) => formData.licenseImages = $event),
-        af: common_vendor.p({
+        aa: common_vendor.o(_ctx.onUploadProgress),
+        ab: common_vendor.o(($event) => formData.licenseImages = $event),
+        ac: common_vendor.p({
           ["file-mediatype"]: "image",
           mode: "grid",
           limit: 3,
@@ -835,49 +802,49 @@ const _sfc_main = {
           ["return-type"]: "array",
           modelValue: formData.licenseImages
         }),
-        ag: !isReadOnly.value
+        ad: !isReadOnly.value
       }, !isReadOnly.value ? {} : {}, {
-        ah: common_vendor.p({
+        ae: common_vendor.p({
           label: "营业执照上传",
           name: "licenseImages",
           required: true
         }),
-        ai: common_vendor.sr(formRef, "edea1fd9-4", {
+        af: common_vendor.sr(formRef, "edea1fd9-4", {
           "k": "formRef"
         }),
-        aj: common_vendor.p({
+        ag: common_vendor.p({
           modelValue: formData,
           rules: formRules,
           ["label-position"]: "top"
         }),
-        ak: isReadOnly.value ? 1 : "",
-        al: authStatus.value === "none" || authStatus.value === "rejected"
+        ah: isReadOnly.value ? 1 : "",
+        ai: authStatus.value === "none" || authStatus.value === "rejected"
       }, authStatus.value === "none" || authStatus.value === "rejected" ? {
-        am: common_vendor.t(authStatus.value === "rejected" ? "修改提交" : "提交认证"),
-        an: common_vendor.o(submitAuth),
-        ao: submitting.value
+        aj: common_vendor.t(authStatus.value === "rejected" ? "重新提交" : "提交认证"),
+        ak: common_vendor.o(submitAuth),
+        al: submitting.value
       } : {}, {
-        ap: showMerchantPopup.value
+        am: showMerchantPopup.value
       }, showMerchantPopup.value ? common_vendor.e({
-        aq: common_vendor.o(closeMerchantList),
-        ar: common_vendor.o(($event) => searchKeyword.value = $event),
-        as: common_vendor.p({
+        an: common_vendor.o(closeMerchantList),
+        ao: common_vendor.o(($event) => searchKeyword.value = $event),
+        ap: common_vendor.p({
           placeholder: "搜索商户名称",
           clearable: true,
           modelValue: searchKeyword.value
         }),
-        at: common_vendor.f(filteredMerchantList.value, (merchant, k0, i0) => {
+        aq: common_vendor.f(filteredMerchantList.value, (merchant, k0, i0) => {
           return {
             a: common_vendor.t(merchant.name),
             b: merchant.id,
             c: common_vendor.o(($event) => selectMerchant(merchant), merchant.id)
           };
         }),
-        av: filteredMerchantList.value.length === 0
+        ar: filteredMerchantList.value.length === 0
       }, filteredMerchantList.value.length === 0 ? {} : {}, {
-        aw: common_vendor.o(() => {
+        as: common_vendor.o(() => {
         }),
-        ax: common_vendor.o(closeMerchantList)
+        at: common_vendor.o(closeMerchantList)
       }) : {});
     };
   }

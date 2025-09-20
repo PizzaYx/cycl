@@ -40,17 +40,17 @@
                     <view class="progress-stats">
                         <view class="stat-item">
                             <image src="/static/ssd/greenbg.png" mode="aspectFill"></image>
-                            <uni-text class="value green">{{ confirmNum ?? 0 }}</uni-text>
+                            <uni-text class="value green">{{ confirmNum }} 个</uni-text>
                             <uni-text class="label">已收运</uni-text>
                         </view>
                         <view class="stat-item">
                             <image src="/static/ssd/orangebg.png" mode="aspectFill"></image>
-                            <uni-text class="value orange">{{ notConfirmNum }}</uni-text>
+                            <uni-text class="value orange">{{ notConfirmNum }} 个</uni-text>
                             <uni-text class="label">未收运</uni-text>
                         </view>
                         <view class="stat-item">
                             <image src="/static/ssd/bluebg.png" mode="aspectFill"></image>
-                            <uni-text class="value blue">{{ weightNum }}</uni-text>
+                            <uni-text class="value blue">{{ weightNum }} kg</uni-text>
                             <uni-text class="label">总重量</uni-text>
                         </view>
                     </view>

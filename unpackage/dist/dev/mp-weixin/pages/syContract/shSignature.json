@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "合同签名",
+  "navigationStyle": "custom",
+  "pageOrientation": "landscape",
+  "usingComponents": {
+    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
+    "l-signature": "../../uni_modules/lime-signature/components/l-signature/l-signature"
+  }
+}

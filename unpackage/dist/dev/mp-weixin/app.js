@@ -22,6 +22,9 @@ if (!Math) {
   "./pages/user/agreement.js";
   "./pages/user/privacyPolicy.js";
   "./pages/user/register.js";
+  "./pages/syContract/syContract.js";
+  "./pages/syContract/syPreview.js";
+  "./pages/syContract/shSignature.js";
 }
 const _sfc_main = {
   onLaunch: function() {

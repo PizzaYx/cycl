@@ -1,5 +1,5 @@
 {
-    "pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+    "pages": [
         {
             "path": "pages/index/index",
             "style": {
@@ -95,62 +95,76 @@
             }
         },
         {
-        	"path" : "pages/collection/syCheckDetail",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "收运详细",
-				"navigationStyle": "custom"
-        	}
-        },
-        {
-        	"path" : "pages/collection/syStatistics",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "收运统计",
-				"navigationStyle": "custom"
-        	}
-        },
-        {
-        	"path" : "pages/merchant/shyyDetail",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "商户预约详情",
+            "path": "pages/collection/syCheckDetail",
+            "style": {
+                "navigationBarTitleText": "收运详细",
                 "navigationStyle": "custom"
-        	}
+            }
         },
         {
-        	"path" : "pages/merchant/shsyDetail",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "商户收运详细",
+            "path": "pages/collection/syStatistics",
+            "style": {
+                "navigationBarTitleText": "收运统计",
                 "navigationStyle": "custom"
-        	}
+            }
         },
         {
-        	"path" : "pages/user/agreement",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "用户协议",
+            "path": "pages/merchant/shyyDetail",
+            "style": {
+                "navigationBarTitleText": "商户预约详情",
                 "navigationStyle": "custom"
-        	}
+            }
         },
         {
-        	"path" : "pages/user/privacyPolicy",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "隐私协议",
+            "path": "pages/merchant/shsyDetail",
+            "style": {
+                "navigationBarTitleText": "商户收运详细",
                 "navigationStyle": "custom"
-        	}
+            }
         },
         {
-        	"path" : "pages/user/register",
-        	"style" : 
-        	{
-        		"navigationBarTitleText" : "注册",
-                 "navigationStyle": "custom"
-        	}
+            "path": "pages/user/agreement",
+            "style": {
+                "navigationBarTitleText": "用户协议",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/user/privacyPolicy",
+            "style": {
+                "navigationBarTitleText": "隐私协议",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/user/register",
+            "style": {
+                "navigationBarTitleText": "注册",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/syContract/syContract",
+            "style": {
+                "navigationBarTitleText": "签名合同",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/syContract/syPreview",
+            "style": {
+                "navigationBarTitleText": "合同预览",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/syContract/shSignature",
+            "style": {
+                "navigationBarTitleText": "合同签名",
+                "navigationStyle": "custom",
+				"pageOrientation": "landscape"
+            }
         }
-        
     ],
     "globalStyle": {
         "navigationBarTextStyle": "black",

@@ -4,7 +4,7 @@
         <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="临时预约"
             @clickLeft="back" />
         <!-- 步骤条 -->
-        <view class="step-container">
+        <!-- <view class="step-container">
             <view class="step-item" :class="{ active: currentStep >= 1, completed: currentStep > 1 }">
                 <view class="step-circle">
                     <text class="step-number" v-if="currentStep <= 1">1</text>
@@ -27,7 +27,7 @@
                 </view>
                 <text class="step-label">预约成功</text>
             </view>
-        </view>
+        </view> -->
 
         <!-- 认证表单 -->
         <view class="auth-form">
@@ -54,21 +54,19 @@
 
                 <!-- 使用uni-forms表单组件 -->
                 <uni-forms ref="formRef" :modelValue="formData" :rules="formRules" label-position="top">
-                    <uni-forms-item label="商户名称" name="merchantName" required>
-                        <uni-easyinput v-model="formData.merchantName" placeholder="请输入商户名称" :clearable="false"
-                            :disabled="true">
+                    <uni-forms-item label="商户名称" name="merchantName">
+                        <uni-easyinput v-model="formData.merchantName" :clearable="false" :disabled="true">
                         </uni-easyinput>
                     </uni-forms-item>
 
-                    <uni-forms-item label="商户地址" name="address" required>
-                        <uni-easyinput v-model="formData.address" placeholder="请输入详细地址" :clearable="false"
-                            :disabled="true">
+                    <uni-forms-item label="商户地址" name="address">
+                        <uni-easyinput v-model="formData.address" :clearable="false" :disabled="true">
                         </uni-easyinput>
                     </uni-forms-item>
 
-                    <uni-forms-item label="联系电话" name="contactPhone" required>
-                        <uni-easyinput v-model="formData.contactPhone" placeholder="请输入联系电话" type="number"
-                            maxlength="11" :clearable="false" :disabled="true">
+                    <uni-forms-item label="联系电话" name="contactPhone">
+                        <uni-easyinput v-model="formData.contactPhone" type="number" maxlength="11" :clearable="false"
+                            :disabled="true">
                         </uni-easyinput>
                     </uni-forms-item>
 
@@ -205,7 +203,6 @@ const formRef = ref()
 
 // 表单验证规则
 const formRules = {
-
     bucketCount: {
         rules: [
             { required: true, errorMessage: '请输入垃圾桶数量' },

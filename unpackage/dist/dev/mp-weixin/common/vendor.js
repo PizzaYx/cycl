@@ -7391,7 +7391,7 @@ function isConsoleWritable() {
 function initRuntimeSocketService() {
   const hosts = "127.0.0.1,192.168.0.184";
   const port = "8090";
-  const id = "mp-weixin_os2y0n";
+  const id = "mp-weixin_dSmnlM";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9118,6 +9118,11 @@ const onLoad = /* @__PURE__ */ createLifeCycleHook(
   2
   /* HookFlags.PAGE */
 );
+const onUnload = /* @__PURE__ */ createLifeCycleHook(
+  ON_UNLOAD,
+  2
+  /* HookFlags.PAGE */
+);
 const onReachBottom = /* @__PURE__ */ createLifeCycleHook(
   ON_REACH_BOTTOM,
   2
@@ -9781,6 +9786,28 @@ const pages = [
     style: {
       navigationBarTitleText: "注册",
       navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/syContract/syContract",
+    style: {
+      navigationBarTitleText: "签名合同",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/syContract/syPreview",
+    style: {
+      navigationBarTitleText: "合同预览",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/syContract/shSignature",
+    style: {
+      navigationBarTitleText: "合同签名",
+      navigationStyle: "custom",
+      pageOrientation: "landscape"
     }
   }
 ];
@@ -12662,6 +12689,7 @@ exports.onMounted = onMounted;
 exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
 exports.onShow = onShow;
+exports.onUnload = onUnload;
 exports.p = p$1;
 exports.r = r$1;
 exports.reactive = reactive;

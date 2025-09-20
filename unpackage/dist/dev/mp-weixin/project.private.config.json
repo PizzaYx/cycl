@@ -3,11 +3,18 @@
     "miniprogram": {
       "list": [
         {
-          "name": "商户端收运统计",
-          "pathName": "pages/merchant/shStatistics",
+          "name": "商户签名",
+          "pathName": "pages/syContract/syContract",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "商户端收运统计",
+          "pathName": "pages/merchant/shStatistics",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "注册",

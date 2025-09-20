@@ -77,53 +77,53 @@ const agreed = ref(false)
 // 使用用户 store
 const userStore = useUserStore()
 
-// 页面加载时检查缓存
-// onMounted(async () => {
-//     await checkLoginStatus()
-// })
+//页面加载时检查缓存
+onMounted(async () => {
+    await checkLoginStatus()
+})
 
-// 检查登录状态
-// const checkLoginStatus = async () => {
-//     try {
-//         // 检查是否有access_token
-//         const token = uni.getStorageSync('access_token')
-//         if (!token) {
-//             console.log('没有access_token，需要登录')
-//             return
-//         }
+//检查登录状态
+const checkLoginStatus = async () => {
+    try {
+        // 检查是否有access_token
+        const token = uni.getStorageSync('access_token')
+        if (!token) {
+            console.log('没有access_token，需要登录')
+            return
+        }
 
-//         console.log('检测到token，获取用户信息...')
+        console.log('检测到token，获取用户信息...')
 
-//         // 获取用户信息
-//         const userInfo = await userStore.fetchUserInfo()
-//         if (!userInfo) {
-//             console.log('获取用户信息失败，需要重新登录')
-//             return
-//         }
+        // 获取用户信息
+        const userInfo = await userStore.fetchUserInfo()
+        if (!userInfo) {
+            console.log('获取用户信息失败，需要重新登录')
+            return
+        }
 
-//         // 根据用户类型跳转
-//         const userType = userInfo.type
-//         console.log('用户类型:', userType)
+        // 根据用户类型跳转
+        const userType = userInfo.type
+        console.log('用户类型:', userType)
 
-//         if (userType === '1') {
-//             // 商户端
-//             console.log('跳转到商户端')
-//             uni.reLaunch({
-//                 url: '/pages/merchant/merchant'
-//             })
-//         } else if (userType === '2') {
-//             // 收运端
-//             console.log('跳转到收运端')
-//             uni.reLaunch({
-//                 url: '/pages/collection/collection'
-//             })
-//         } else {
-//             console.log('未知用户类型，需要重新登录')
-//         }
-//     } catch (error) {
-//         console.error('检查登录状态失败:', error)
-//     }
-// }
+        if (userType === '1') {
+            // 商户端
+            console.log('跳转到商户端')
+            uni.reLaunch({
+                url: '/pages/merchant/merchant'
+            })
+        } else if (userType === '2') {
+            // 收运端
+            console.log('跳转到收运端')
+            uni.reLaunch({
+                url: '/pages/collection/collection'
+            })
+        } else {
+            console.log('未知用户类型，需要重新登录')
+        }
+    } catch (error) {
+        console.error('检查登录状态失败:', error)
+    }
+}
 
 const toggleAgreement = () => {
     agreed.value = !agreed.value

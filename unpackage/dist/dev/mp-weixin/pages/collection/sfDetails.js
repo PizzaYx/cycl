@@ -243,7 +243,7 @@ const _sfc_main = {
         i: common_vendor.t(progressPercentage.value),
         j: `conic-gradient(#07C160 ${progressPercentage.value}%, rgba(216, 216, 216, 0.5) ${progressPercentage.value}% 100%)`,
         k: common_assets._imports_0,
-        l: common_vendor.t(confirmNum.value ?? 0),
+        l: common_vendor.t(confirmNum.value),
         m: common_assets._imports_1$2,
         n: common_vendor.t(notConfirmNum.value),
         o: common_assets._imports_2$1,

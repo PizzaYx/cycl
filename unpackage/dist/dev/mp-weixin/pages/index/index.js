@@ -17,6 +17,41 @@ const _sfc_main = {
     const activeTab = common_vendor.ref(0);
     const agreed = common_vendor.ref(false);
     const userStore = stores_user.useUserStore();
+    common_vendor.onMounted(async () => {
+      await checkLoginStatus();
+    });
+    const checkLoginStatus = async () => {
+      try {
+        const token = common_vendor.index.getStorageSync("access_token");
+        if (!token) {
+          common_vendor.index.__f__("log", "at pages/index/index.vue:91", "没有access_token，需要登录");
+          return;
+        }
+        common_vendor.index.__f__("log", "at pages/index/index.vue:95", "检测到token，获取用户信息...");
+        const userInfo = await userStore.fetchUserInfo();
+        if (!userInfo) {
+          common_vendor.index.__f__("log", "at pages/index/index.vue:100", "获取用户信息失败，需要重新登录");
+          return;
+        }
+        const userType = userInfo.type;
+        common_vendor.index.__f__("log", "at pages/index/index.vue:106", "用户类型:", userType);
+        if (userType === "1") {
+          common_vendor.index.__f__("log", "at pages/index/index.vue:110", "跳转到商户端");
+          common_vendor.index.reLaunch({
+            url: "/pages/merchant/merchant"
+          });
+        } else if (userType === "2") {
+          common_vendor.index.__f__("log", "at pages/index/index.vue:116", "跳转到收运端");
+          common_vendor.index.reLaunch({
+            url: "/pages/collection/collection"
+          });
+        } else {
+          common_vendor.index.__f__("log", "at pages/index/index.vue:121", "未知用户类型，需要重新登录");
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/index/index.vue:124", "检查登录状态失败:", error);
+      }
+    };
     const toggleAgreement = () => {
       agreed.value = !agreed.value;
     };
