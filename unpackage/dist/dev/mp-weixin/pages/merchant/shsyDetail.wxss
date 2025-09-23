@@ -45,31 +45,6 @@
   font-weight: bold;
   color: #333333;
 }
-.user-info .status-tag.data-v-af7fb76b {
-  border-radius: 8rpx;
-  font-size: 24rpx;
-  width: 120rpx;
-  height: 40rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.user-info .status-tag.processing.data-v-af7fb76b {
-  color: #00aaff;
-  background: rgba(0, 170, 255, 0.1);
-}
-.user-info .status-tag.completed.data-v-af7fb76b {
-  color: rgba(61, 61, 61, 0.5);
-  background: rgba(153, 153, 153, 0.1);
-}
-.user-info .status-tag.pending.data-v-af7fb76b {
-  color: #ffa100;
-  background: rgba(255, 161, 0, 0.1);
-}
-.user-info .status-tag.cancelled.data-v-af7fb76b {
-  color: rgba(61, 61, 61, 0.5);
-  background: rgba(153, 153, 153, 0.1);
-}
 .content.data-v-af7fb76b {
   padding: 32rpx 0;
   position: relative;
@@ -80,11 +55,11 @@
 }
 .content .info-list.data-v-af7fb76b {
   padding: 0 30rpx;
+  margin-bottom: 40rpx;
 }
 .content .info-list .info-item.data-v-af7fb76b {
-  display: flex;
-  margin-bottom: 32rpx;
-  padding-bottom: 32rpx;
+  display: block;
+  margin-bottom: 30rpx;
   border-bottom: 1rpx solid #f0f0f0;
 }
 .content .info-list .info-item.data-v-af7fb76b:last-child {
@@ -93,16 +68,17 @@
   padding-bottom: 0;
 }
 .content .info-list .info-item .label.data-v-af7fb76b {
-  width: 140rpx;
+  display: block;
   font-size: 14px;
   color: #999999;
-  flex-shrink: 0;
+  margin-bottom: 20rpx;
 }
 .content .info-list .info-item .value.data-v-af7fb76b {
-  margin-left: 30rpx;
-  flex: 1;
+  display: block;
   font-size: 14px;
   color: #333333;
+  line-height: 1.4;
+  margin-bottom: 5rpx;
 }
 .content .photo-section.data-v-af7fb76b {
   margin-top: 48rpx;

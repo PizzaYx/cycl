@@ -133,12 +133,8 @@ export const useUserStore = defineStore('user', {
 
         // 检查是否有用户信息，没有则自动获取
         async ensureUserInfo() {
-            // 如果已有用户信息，直接返回
-            if (this.userInfo) {
-                return this.userInfo
-            }
-
-            // 尝试获取用户信息（request.js会自动处理token验证）
+            // 每次都重新获取用户信息，确保数据是最新的
+            // 因为用户信息随时会改变，不应该依赖缓存
             const result = await this.fetchUserInfo()
             if (result === null) {
                 // 获取失败（可能是401、网络错误等），返回null而不抛出异常

@@ -2,6 +2,7 @@
   "navigationBarTitleText": "商户收运详细",
   "navigationStyle": "custom",
   "usingComponents": {
-    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar"
+    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
+    "status-tag": "../../components/StatusTag/StatusTag"
   }
 }

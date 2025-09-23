@@ -209,11 +209,12 @@ const back = () => {
 
     .info-list {
         padding: 0 30rpx;
+        margin-bottom: 40rpx;
 
         .info-item {
-            display: flex;
-            margin-bottom: 32rpx;
-            padding-bottom: 32rpx;
+            display: block;
+            margin-bottom: 30rpx;
+            // padding-bottom: 32rpx;
             border-bottom: 1rpx solid #f0f0f0;
 
             &:last-child {
@@ -223,17 +224,18 @@ const back = () => {
             }
 
             .label {
-                width: 140rpx;
+                display: block;
                 font-size: 14px;
                 color: #999999;
-                flex-shrink: 0;
+                margin-bottom: 20rpx;
             }
 
             .value {
-                margin-left: 30rpx;
-                flex: 1;
+                display: block;
                 font-size: 14px;
                 color: #333333;
+                line-height: 1.4;
+                margin-bottom: 5rpx;
             }
         }
     }

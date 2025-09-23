@@ -42,14 +42,14 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 9999;
+  z-index: 100;
   pointer-events: none;
 }
 .time-range-picker .clear-button-overlay .clear-button.data-v-b8a775ab {
   position: absolute;
-  top: 740rpx;
-  left: 30rpx;
-  transform: translateY(-50%);
+  bottom: calc(var(--window-bottom) + 445px);
+  left: 10%;
+  transform: translateX(-50%) translateY(100vh);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -57,6 +57,9 @@
   background-color: #007aff;
   border-radius: 50rpx;
   pointer-events: auto;
+  box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
+  transition: transform 0.43s ease, opacity 0.1s ease;
+  opacity: 0;
 }
 .time-range-picker .clear-button-overlay .clear-button text.data-v-b8a775ab {
   font-size: 28rpx;
@@ -64,4 +67,9 @@
 }
 .time-range-picker .clear-button-overlay .clear-button.data-v-b8a775ab:active {
   background-color: #0056cc;
+  transform: translateX(-50%) scale(0.95);
+}
+.time-range-picker .clear-button-overlay.show .clear-button.data-v-b8a775ab {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
 }

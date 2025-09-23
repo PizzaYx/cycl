@@ -12,7 +12,7 @@
             <view class="signature-buttons-rotated">
                 <button class="signature-btn clear-btn" @click="clearSignature">清空</button>
                 <button class="signature-btn undo-btn" @click="undoSignature">撤销</button>
-                <button class="signature-btn save-btn" @click="saveSignature">保存签名</button>
+                <button class="signature-btn save-btn" @click="saveSignature">保存</button>
                 <button class="signature-btn cancel-btn" @click="cancelSignature">取消</button>
             </view>
         </view>
@@ -22,6 +22,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { onLoad, onUnload } from '@dcloudio/uni-app'
+import { uploadUrl, createUploadHeaders } from '@/utils/config.js'
 
 // 页面参数
 const contractId = ref('')
@@ -32,6 +33,9 @@ const penColor = ref('black')
 const penSize = ref(3)
 const openSmooth = ref(true)
 const signatureRef = ref(null)
+
+// 上传相关
+const uploadHeaders = createUploadHeaders()
 
 // 页面加载
 onLoad((options) => {
@@ -87,23 +91,61 @@ const saveSignature = () => {
                 return
             }
 
-            uni.showToast({
-                title: '签名保存成功',
-                icon: 'success'
+            // 显示上传中提示
+            uni.showLoading({
+                title: '上传签名中...'
             })
 
-            // 返回上一页并传递签名数据
-            setTimeout(() => {
-                uni.navigateBack({
-                    delta: 1,
-                    success: () => {
-                        // 通过事件传递签名数据
-                        uni.$emit('signatureUpdated', {
-                            partyB: res.tempFilePath
+            // 上传签名到服务器
+            uni.uploadFile({
+                url: uploadUrl,
+                filePath: res.tempFilePath,
+                name: 'file',
+                header: uploadHeaders.value,
+                success: (uploadRes) => {
+                    uni.hideLoading()
+
+
+                    try {
+                        const response = JSON.parse(uploadRes.data)
+                        if (response.code === 200 && response.url) {
+                            uni.showToast({
+                                title: '签名保存成功',
+                                icon: 'success'
+                            })
+                            console.log('签名上传成功:', uploadRes)
+                            // 返回上一页并传递签名数据
+                            setTimeout(() => {
+                                uni.navigateBack({
+                                    delta: 1,
+                                    success: () => {
+                                        // 通过事件传递签名数据
+                                        uni.$emit('signatureUpdated', {
+                                            partyB: response.url
+                                        })
+                                    }
+                                })
+                            }, 1500)
+                        } else {
+                            throw new Error(response.message || '上传失败')
+                        }
+                    } catch (error) {
+                        console.error('解析上传响应失败:', error)
+                        uni.showToast({
+                            title: '上传失败，请重试',
+                            icon: 'none'
                         })
                     }
-                })
-            }, 1500)
+                },
+                fail: (error) => {
+                    uni.hideLoading()
+                    console.error('上传签名失败:', error)
+                    uni.showToast({
+                        title: '上传失败，请重试',
+                        icon: 'none'
+                    })
+                }
+            })
         },
         fail: (error) => {
             console.error('保存签名失败:', error)
@@ -163,7 +205,7 @@ const back = () => {
         z-index: 10;
         background: rgba(255, 255, 255, 0.9);
         padding: 10rpx;
-        border-radius: 8rpx;
+
 
         .signature-btn {
             height: 25rpx;
@@ -173,27 +215,28 @@ const back = () => {
             border: none;
             line-height: 25rpx;
             text-align: center;
+            background: #07c160;
+            color: #fff;
 
+            // &.clear-btn {
+            //     background: #ff4444;
+            //     color: #fff;
+            // }
 
-            &.clear-btn {
-                background: #ff4444;
-                color: #fff;
-            }
+            // &.undo-btn {
+            //     background: #ff9500;
+            //     color: #fff;
+            // }
 
-            &.undo-btn {
-                background: #ff9500;
-                color: #fff;
-            }
+            // &.save-btn {
+            //     background: #07c160;
+            //     color: #fff;
+            // }
 
-            &.save-btn {
-                background: #07c160;
-                color: #fff;
-            }
-
-            &.cancel-btn {
-                background: #999;
-                color: #fff;
-            }
+            // &.cancel-btn {
+            //     background: #999;
+            //     color: #fff;
+            // }
         }
     }
 }

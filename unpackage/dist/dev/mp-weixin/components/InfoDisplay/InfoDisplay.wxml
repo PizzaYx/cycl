@@ -1,0 +1,1 @@
+<view class="info-content data-v-e3352e09"><view wx:for="{{a}}" wx:for-item="field" wx:key="c" class="info-item data-v-e3352e09"><text class="label data-v-e3352e09">{{field.a}}:</text><text class="value data-v-e3352e09">{{field.b}}</text></view></view>

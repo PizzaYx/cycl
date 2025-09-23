@@ -54,76 +54,93 @@
 
                 <!-- 使用uni-forms表单组件 -->
                 <uni-forms ref="formRef" :modelValue="formData" :rules="formRules" label-position="top">
-                    <uni-forms-item label="商户名称" name="merchantName" required>
+                    <uni-forms-item label="商户名称" name="merchantName" :required="!isReadOnly">
                         <view class="merchant-name-input">
-                            <uni-easyinput v-model="formData.merchantName" placeholder="请输入商户名称" :clearable="false"
-                                :disabled="isReadOnly" class="merchant-input" />
-                            <button v-if="showMerchantSelector" class="select-btn" @click="showMerchantList"
-                                :disabled="isReadOnly">
-                                选择
-                            </button>
+                            <input v-model="formData.merchantName" placeholder="请输入商户名称" :disabled="isReadOnly"
+                                class="input-field" placeholder-class="custom-placeholder" />
+                            <image v-if="!isReadOnly" src="/static/logo.png" class="select-icon"
+                                @click="showMerchantList" />
                         </view>
                     </uni-forms-item>
 
-                    <uni-forms-item label="商户地址" name="address" required>
-                        <uni-easyinput v-model="formData.address" placeholder="请输入详细地址" :clearable="false"
-                            :disabled="isReadOnly">
-                        </uni-easyinput>
+                    <uni-forms-item label="商户地址" name="address" :required="!isReadOnly">
+                        <input v-model="formData.address" placeholder="请输入详细地址" :disabled="isReadOnly"
+                            class="input-field" placeholder-class="custom-placeholder" />
                     </uni-forms-item>
 
-                    <uni-forms-item label="所属区域" name="appcode" required>
-                        <uni-data-select v-model="formData.appcode" :localdata="appCodeOptions" placeholder="请选择区域"
-                            :clear="false" :disabled="isReadOnly">
-                        </uni-data-select>
+                    <uni-forms-item label="所属区域" name="appcode" :required="!isReadOnly">
+                        <!-- 只读模式：使用input显示 -->
+                        <input v-if="isReadOnly" :value="getSelectedAreaText()" :disabled="true" class="input-field" />
+                        <!-- 可编辑模式：使用uni-data-select -->
+                        <view v-else class="area-select-wrapper">
+                            <uni-data-select v-model="formData.appcode" :localdata="appCodeOptions" mode="selector"
+                                :clear="false" class="area-select">
+                                <template v-slot:selected="{ selectedItems }">
+                                    <view class="custom-selected">
+                                        <text v-if="selectedItems.length > 0" class="selected-text">
+                                            {{ selectedItems[0].text }}
+                                        </text>
+                                        <text v-else class="placeholder-text">请选择区域</text>
+                                    </view>
+                                </template>
+                            </uni-data-select>
+                            <view class="area-underline"></view>
+                        </view>
                     </uni-forms-item>
 
-                    <uni-forms-item label="商户位置" name="latitude" required>
-                        <view class="location-picker">
-                            <view class="location-input" @click="!isReadOnly && openLocationPicker()"
-                                :class="{ disabled: isReadOnly }">
-                                <view v-if="formData.latitude && formData.longitude" class="location-info">
-                                    <text class="location-name">{{ formData.locationName || '已选择位置' }}</text>
-                                    <text class="location-coords">经度: {{ formData.longitude }}, 纬度: {{ formData.latitude
+                    <uni-forms-item label="商户位置" name="latitude" :required="!isReadOnly">
+                        <view class="location-field">
+                            <view class="location-display" @click="isReadOnly ? viewLocation() : openLocationPicker()">
+                                <text v-if="getLocationText()" class="location-text">{{ getLocationText() }}</text>
+                                <text v-else class="location-placeholder">{{ isReadOnly ? '点击查看位置' : '点击选择商户位置'
                                     }}</text>
-                                </view>
-                                <text class="location-placeholder" v-else>点击选择商户位置</text>
-                                <uni-icons type="location" size="20" color="#999"></uni-icons>
                             </view>
+                            <image src="/static/logo.png" class="select-icon"
+                                @click="isReadOnly ? viewLocation() : openLocationPicker()" />
                         </view>
                     </uni-forms-item>
 
-                    <uni-forms-item label="联系人" name="contactPerson" required>
-                        <uni-easyinput v-model="formData.contactPerson" placeholder="请输入联系人姓名" :clearable="false"
-                            :disabled="isReadOnly">
-                        </uni-easyinput>
+                    <uni-forms-item label="联系人" name="contactPerson" :required="!isReadOnly">
+                        <input v-model="formData.contactPerson" placeholder="请输入联系人姓名" :disabled="isReadOnly"
+                            class="input-field" placeholder-class="custom-placeholder" />
                     </uni-forms-item>
 
-                    <uni-forms-item label="联系电话" name="contactPhone" required>
-                        <uni-easyinput v-model="formData.contactPhone" placeholder="请输入联系电话" type="number"
-                            maxlength="11" :clearable="false" :disabled="isReadOnly">
-                        </uni-easyinput>
+                    <uni-forms-item label="联系电话" name="contactPhone" :required="!isReadOnly">
+                        <input v-model="formData.contactPhone" placeholder="请输入联系电话" type="number" maxlength="11"
+                            :disabled="isReadOnly" class="input-field" placeholder-class="custom-placeholder" />
                     </uni-forms-item>
 
-                    <uni-forms-item label="需要垃圾桶数(个)" name="bucketCount" required>
-                        <uni-easyinput v-model="formData.bucketCount" placeholder="请输入垃圾桶数量" type="number"
-                            :clearable="false" :disabled="isReadOnly">
-                        </uni-easyinput>
+                    <uni-forms-item label="需要垃圾桶数(个)" name="bucketCount" :required="!isReadOnly">
+                        <input v-model="formData.bucketCount" placeholder="请输入垃圾桶数量" type="number"
+                            :disabled="isReadOnly" class="input-field" placeholder-class="custom-placeholder" />
                     </uni-forms-item>
 
-                    <uni-forms-item label="预估垃圾重量" name="estimatedWeight" required>
-                        <uni-easyinput v-model="formData.estimatedWeight" placeholder="请输入预估垃圾重量" type="number"
-                            :clearable="false" :disabled="isReadOnly">
-                        </uni-easyinput>
+                    <uni-forms-item label="预估垃圾重量(kg)" name="estimatedWeight" :required="!isReadOnly">
+                        <input v-model="formData.estimatedWeight" placeholder="请输入预估垃圾重量" type="number"
+                            :disabled="isReadOnly" class="input-field" placeholder-class="custom-placeholder" />
                     </uni-forms-item>
 
-                    <uni-forms-item label="营业执照上传" name="licenseImages" required>
-                        <!-- @success="onUploadSuccess" @fail="onUploadFail" @delete="onFileDelete" -->
+                    <uni-forms-item label="营业执照上传" name="licenseImages" :required="!isReadOnly">
                         <uni-file-picker v-model="formData.licenseImages" file-mediatype="image" mode="grid" :limit="3"
                             :auto-upload="false" :upload-url="uploadUrl" :header="uploadHeaders" @select="onFileSelect"
-                            @progress="onUploadProgress" :disabled="isReadOnly" file-extname="jpg,jpeg,png"
+                            :readonly="isReadOnly" :del-icon="!isReadOnly" file-extname="jpg,jpeg,png"
                             :max-size="20971520" return-type="array">
                         </uni-file-picker>
                         <text class="upload-tip" v-if="!isReadOnly">最多上传3张图片，每张图片不超过20MB，支持jpg、png格式</text>
+                    </uni-forms-item>
+
+                    <uni-forms-item label="电子合同" name="contractData" :required="!isReadOnly">
+                        <view class="contract-field">
+                            <view class="contract-display" @click="goToContract()">
+                                <text v-if="formData.contractData" class="contract-text">已签名</text>
+                                <text v-else
+                                    :class="isReadOnly ? 'contract-placeholder-readonly' : 'contract-placeholder'">{{
+                                        isReadOnly ?
+                                            '已签电子合同' : '请点击查看电子合同并签名'
+                                    }}</text>
+                            </view>
+                            <image src="/static/logo.png" class="select-icon" @click="goToContract()" />
+                        </view>
                     </uni-forms-item>
                 </uni-forms>
             </view>
@@ -144,7 +161,7 @@
                     <text class="popup-close" @click="closeMerchantList">关闭</text>
                 </view>
                 <view class="search-box">
-                    <uni-easyinput v-model="searchKeyword" placeholder="搜索商户名称" :clearable="true" />
+                    <input v-model="searchKeyword" placeholder="搜索商户名称" class="search-input" />
                 </view>
                 <scroll-view class="merchant-list" scroll-y>
                     <view v-for="merchant in filteredMerchantList" :key="merchant.id" class="merchant-item"
@@ -216,10 +233,10 @@ const isReadOnly = computed(() => {
     return authStatus.value === 'pending' || authStatus.value === 'approved'
 })
 
-// 是否显示商户选择器（只有需要认证的状态才显示）
-const showMerchantSelector = computed(() => {
-    return authStatus.value === 'none' || authStatus.value === 'rejected'
-})
+// // 是否显示商户选择器（只有需要认证的状态才显示）
+// const showMerchantSelector = computed(() => {
+//     return authStatus.value === 'none' || authStatus.value === 'rejected'
+// })
 
 // 表单数据
 const formData = reactive({
@@ -233,7 +250,9 @@ const formData = reactive({
     latitude: '', // 纬度
     longitude: '', // 经度
     locationName: '', // 选择的位置名称（用于显示）
-    licenseImages: [] // 改为数组支持多图上传
+    licenseImages: [], // 改为数组支持多图上传
+    contractData: null, // 合同回传的数据，null表示未签名，有值表示已签名
+    tempId: null // 合同模板ID（最外层）
 })
 
 // 区域选择数据
@@ -247,8 +266,8 @@ const appCodeOptions = [
     { value: 7, text: '花源' }
 ]
 
-//商户名称选择
-const merchantNameOptions = ref([])
+// //商户名称选择
+// const merchantNameOptions = ref([])
 
 // 表单引用
 const formRef = ref()
@@ -351,11 +370,6 @@ const formRules = {
             {
                 required: true,
                 validateFunction: function (rule, value, data, callback) {
-                    console.log('===== 开始验证营业执照 =====')
-                    console.log('验证营业执照 - 完整数据:', JSON.stringify(value))
-                    console.log('验证营业执照 - 数据类型:', typeof value)
-                    console.log('验证营业执照 - 是否数组:', Array.isArray(value))
-                    console.log('验证营业执照 - 原始值:', value)
 
                     // 特殊处理：如果是 undefined 或 null，直接失败
                     if (value === undefined || value === null) {
@@ -435,6 +449,21 @@ const formRules = {
                 errorMessage: '请至少上传1张营业执照'
             }
         ]
+    },
+    contractData: {
+        rules: [
+            {
+                required: true,
+                validateFunction: function (rule, value, data, callback) {
+                    if (!value) {
+                        callback('请查看并签署电子合同')
+                        return false
+                    }
+                    return true
+                },
+                errorMessage: '请查看并签署电子合同'
+            }
+        ]
     }
 }
 
@@ -465,20 +494,120 @@ const filteredMerchantList = computed(() => {
     })
 })
 
+// 获取选中区域的文本（用于只读显示）
+const getSelectedAreaText = () => {
+    if (!formData.appcode) {
+        return ''
+    }
+    const selectedOption = appCodeOptions.find(option => option.value === parseInt(formData.appcode))
+    return selectedOption ? selectedOption.text : ''
+}
+
+// 获取位置文本（用于只读显示）
+const getLocationText = () => {
+    if (formData.latitude && formData.longitude) {
+        return formData.locationName || `经度: ${formData.longitude}, 纬度: ${formData.latitude}`
+    }
+    return ''
+}
+
+
+
+// 获取电子合同状态文本
+// const getContractStatusText = () => {
+//     return formData.contractStatus === 'signed' ? '已签名' : '请点击查看电子合同并签名'
+// }
+
+// 跳转到电子合同页面
+const goToContract = () => {
+    // 根据认证状态决定页面参数
+    const isReadOnly = authStatus.value === 'pending' || authStatus.value === 'approved'
+    const needReturn = authStatus.value === 'none' || authStatus.value === 'rejected'
+
+    // 构建URL参数
+    let url = `/pages/syContract/syContract?isReadOnly=${isReadOnly}&needReturn=${needReturn}`
+
+    // 如果是只读模式且有tempId，传入tempId
+    if (isReadOnly && formData.tempId) {
+        url += `&tempId=${formData.tempId}`
+    }
+
+    uni.navigateTo({
+        url: url,
+        success: () => {
+            console.log('跳转到电子合同页面，传递参数:', {
+                isReadOnly: isReadOnly,
+                needReturn: needReturn,
+                tempId: formData.tempId
+            })
+        },
+        fail: (err) => {
+            console.error('跳转失败:', err)
+            uni.showToast({
+                title: '页面跳转失败',
+                icon: 'none'
+            })
+        }
+    })
+}
+
+// 查看位置（只读模式）
+const viewLocation = () => {
+    if (formData.latitude && formData.longitude) {
+        // 使用系统地图查看位置
+        uni.openLocation({
+            latitude: parseFloat(formData.latitude),
+            longitude: parseFloat(formData.longitude),
+            name: formData.locationName || '商户位置',
+            address: formData.locationName || '商户位置',
+            success: () => {
+                console.log('打开系统地图成功')
+            },
+            fail: (err) => {
+                console.error('打开系统地图失败:', err)
+                // 如果系统地图打开失败，显示位置信息弹窗
+                uni.showModal({
+                    title: '商户位置',
+                    content: `位置名称：${formData.locationName || '已选择位置'}\n经度：${formData.longitude}\n纬度：${formData.latitude}`,
+                    showCancel: false,
+                    confirmText: '确定'
+                })
+            }
+        })
+    } else {
+        uni.showToast({
+            title: '暂无位置信息',
+            icon: 'none'
+        })
+    }
+}
+
+
+
 // 页面加载完成
 onMounted(() => {
-    console.log('商户认证页面加载完成')
     // 这里可以调用接口获取认证状态
     loadAuthStatus()
     // 加载商户列表
     loadMerchantList()
+
+    // 监听合同页面返回的数据
+    uni.$on('contractUpdated', (contractData) => {
+        console.log('收到合同页面返回的数据:', contractData)
+        // 判断返回的数据是否有值，有值才更新合同状态
+        if (contractData && contractData.content) {
+            formData.contractData = contractData // 保存合同回传的数据
+            uni.showToast({
+                title: '合同签名成功',
+                icon: 'success'
+            })
+        }
+    })
 })
 
 // 加载认证状态
 const loadAuthStatus = async () => {
     try {
-        console.log('开始加载认证状态...')
-
         // 调用获取认证信息接口
         const result = await apiGetMerchantCheck({
             userid: userStore.userId
@@ -521,6 +650,7 @@ const fillFormData = (data) => {
     formData.bucketCount = data.bucketNum?.toString() || ''
     formData.estimatedWeight = data.trashWeight?.toString() || ''
 
+
     // 经纬度回显
     if (data.lat && data.lon) {
         formData.latitude = data.lat.toString()
@@ -550,6 +680,19 @@ const fillFormData = (data) => {
         console.log('回显后的formData.licenseImages:', formData.licenseImages)
         console.log('===== 图片回显完成 =====')
     }
+
+    // 电子合同状态回显（如果有合同数据则回显）
+    if (data.contractStatus === 'signed') {
+        formData.contractData = {
+            content: data.contractContent || '',
+            createTime: data.contractCreateTime || '',
+            endTime: data.contractEndTime || '',
+            id: data.contractId || ''
+        }
+    }
+
+    // 回显tempId（最外层）
+    formData.tempId = data.tempId || ''
 
     console.log('数据回显完成:', formData)
 }
@@ -607,36 +750,9 @@ const selectMerchant = (merchant) => {
     closeMerchantList()
 }
 
-// 文件上传成功事件（手动上传模式下此事件不会被触发，保留用于兼容性）
-const onUploadSuccess = (res) => {
-    console.log('===== 文件上传成功事件 =====')
-    console.log('上传成功回调参数:', res)
-    console.log('tempFiles:', res.tempFiles)
-    console.log('tempFilePaths:', res.tempFilePaths)
-    console.log('当前formData.licenseImages:', formData.licenseImages)
-
-    // 手动上传模式下，此事件不会被触发
-    // 保留用于兼容性，实际的上传成功处理在 uploadFileManually 中
-
-    console.log('===== 文件上传成功事件结束 =====')
-}
-
-// 文件上传失败事件
-const onUploadFail = (err) => {
-    console.error('文件上传失败:', err)
-    uni.showToast({
-        title: '文件上传失败',
-        icon: 'none'
-    })
-}
 
 // 手动上传文件
 const uploadFileManually = (file, fileIndex = null) => {
-    console.log('开始手动上传文件:', file)
-    console.log('文件路径:', file.tempFilePath || file.path)
-    console.log('上传URL:', uploadUrl)
-    console.log('请求头:', uploadHeaders)
-
     uni.uploadFile({
         url: uploadUrl,
         filePath: file.tempFilePath || file.path,
@@ -646,14 +762,7 @@ const uploadFileManually = (file, fileIndex = null) => {
             console.log('手动上传成功:', res)
             // 处理上传成功
             const response = JSON.parse(res.data)
-            console.log('服务器响应:', response)
-
             if (response.code === 200 && response.url) {
-                console.log('===== 文件上传成功处理 =====')
-                console.log('服务器返回的URL:', response.url)
-                console.log('当前formData.licenseImages:', formData.licenseImages)
-                console.log('要更新的文件:', file)
-
                 // 优先使用传入的文件索引，否则尝试匹配
                 let targetIndex = fileIndex
                 if (targetIndex === null || targetIndex === undefined) {
@@ -665,7 +774,6 @@ const uploadFileManually = (file, fileIndex = null) => {
                             (f.tempFilePath && file.tempFilePath && f.tempFilePath === file.tempFilePath)
                     })
                 }
-                console.log('目标文件索引:', targetIndex)
 
                 if (targetIndex !== -1 && targetIndex < formData.licenseImages.length) {
                     const oldFile = formData.licenseImages[targetIndex]
@@ -679,11 +787,7 @@ const uploadFileManually = (file, fileIndex = null) => {
                         originalFilename: response.originalFilename,
                         response: response
                     }
-
-                    console.log('更新后的文件:', formData.licenseImages[targetIndex])
-                    console.log('更新后的formData.licenseImages:', formData.licenseImages)
                 } else {
-                    console.log('未找到有效的文件索引，尝试替换最后一个文件')
                     // 如果找不到有效的索引，替换数组中的最后一个文件（通常是新选择的文件）
                     const lastIndex = formData.licenseImages.length - 1
                     if (lastIndex >= 0) {
@@ -718,7 +822,6 @@ const uploadFileManually = (file, fileIndex = null) => {
                     }
                 }, 100)
             } else {
-                console.log('上传失败，服务器返回:', response)
                 uni.showToast({
                     title: '文件上传失败',
                     icon: 'none'
@@ -726,8 +829,6 @@ const uploadFileManually = (file, fileIndex = null) => {
             }
         },
         fail: (err) => {
-            console.log('手动上传失败:', err)
-            console.log('错误详情:', JSON.stringify(err))
             uni.showToast({
                 title: '文件上传失败',
                 icon: 'none'
@@ -738,11 +839,6 @@ const uploadFileManually = (file, fileIndex = null) => {
 
 // 文件选择事件
 const onFileSelect = (res) => {
-    console.log('===== 文件选择事件 =====')
-    console.log('选择文件:', res)
-    console.log('tempFiles:', res.tempFiles)
-    console.log('tempFilePaths:', res.tempFilePaths)
-    console.log('选择前formData.licenseImages:', formData.licenseImages)
 
     // 手动更新表单数据，因为 v-model 可能要等上传完成后才更新
     if (res.tempFiles && res.tempFiles.length > 0) {
@@ -765,28 +861,6 @@ const onFileSelect = (res) => {
     console.log('===== 文件选择事件结束 =====')
 }
 
-// // 文件上传进度事件（手动上传模式下此事件不会被触发，保留用于兼容性）
-// const onUploadProgress = (res) => {
-//     console.log('上传进度:', res)
-//     // 手动上传模式下，此事件不会被触发
-//     // 保留用于兼容性
-// }
-
-// // 文件删除事件
-// const onFileDelete = (res) => {
-//     console.log('===== 文件删除事件 =====')
-//     console.log('文件删除:', res)
-//     console.log('删除前formData.licenseImages:', formData.licenseImages)
-
-//     // v-model 应该会自动更新，但我们确保验证被触发
-//     setTimeout(() => {
-//         console.log('删除后formData.licenseImages:', formData.licenseImages)
-//         if (formRef.value) {
-//             formRef.value.validateField('licenseImages')
-//         }
-//     }, 100)
-//     console.log('===== 文件删除事件结束 =====')
-// }
 
 // 打开地图选择器
 const openLocationPicker = () => {
@@ -845,11 +919,6 @@ const submitAuth = async () => {
             console.log('formData.licenseImages:', formData.licenseImages)
 
             imageUrls = formData.licenseImages.map((file, index) => {
-                console.log(`处理第${index + 1}个文件:`, file)
-                console.log(`文件类型:`, typeof file)
-                console.log(`文件URL:`, file.url)
-                console.log(`文件路径:`, file.path)
-                console.log(`文件响应:`, file.response)
 
                 // uni-file-picker返回的文件对象结构
                 if (typeof file === 'string') {
@@ -875,7 +944,7 @@ const submitAuth = async () => {
         // 准备提交数据 - 只包含API需要的字段
         const submitData = {
             userid: userStore.userId,
-            id: userStore.merchant.id,
+            id: userStore.merchant?.id || '',
             name: formData.merchantName,              // 商户名称
             address: formData.address,                // 地址
             appcode: formData.appcode,                // 区域代码
@@ -885,7 +954,11 @@ const submitAuth = async () => {
             contactTel: formData.contactPhone,        // 联系电话
             bucketNum: parseInt(formData.bucketCount), // 预计桶数量
             trashWeight: parseFloat(formData.estimatedWeight), // 预估垃圾重量
-            img: imageUrls.join(',') // ，多张图片用逗号分隔
+            img: imageUrls.join(','), // 多张图片用逗号分隔
+            tempId: formData.tempId, // 合同模板ID
+            content: formData.contractData?.content, // 合同内容
+            startTime: formData.contractData?.createTime, // 合同开始时间
+            endTime: formData.contractData?.endTime // 合同结束时间
         }
 
         console.log('提交修改认证数据:', submitData)
@@ -1093,247 +1166,247 @@ const submitAuth = async () => {
                 }
             }
 
-            // uni-easyinput样式调整，根据官方文档优化
-            // 使用!important是因为uni-app组件有内联样式和深层嵌套样式，需要强制覆盖
-            :deep(.uni-easyinput) {
-                .uni-easyinput__content {
-                    border: none !important;
-                    border-radius: 0 !important;
-                    border-bottom: 2rpx solid #e5e5e5 !important;
-                    background: transparent !important;
-                    padding: 0 30rpx 10rpx 30rpx !important; // 左右各30rpx边距
-                    height: 60rpx !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: flex-start !important;
-                    position: relative !important;
+            // input样式调整
+            .input-field {
+                width: calc(100% - 24rpx); // 减去左右边距，与下划线对齐
+                height: 55rpx;
+                border: none;
+                border-bottom: 2rpx solid #e5e5e5;
+                background: transparent;
+                padding: 0; // 
+                font-size: 28rpx;
+                color: rgba(38, 38, 38, 1);
+                line-height: 40rpx;
+                text-align: left;
+                box-sizing: border-box;
+                margin-left: 12rpx; // 可输入状态：向右偏移12rpx来对齐*号
+                margin-right: 12rpx; // 右边距12rpx，与下划线对齐
 
-                    &.is-focused {
-                        border-bottom-color: #07c160 !important;
-                    }
+                &:focus {
+                    border-bottom-color: #07c160;
+                    outline: none;
                 }
 
-                .uni-easyinput__content-input {
-                    font-size: 28rpx !important;
-                    color: rgba(38, 38, 38, 1) !important;
-                    height: 40rpx !important; // 设置固定高度
-                    line-height: 40rpx !important; // 行高与高度一致实现垂直居中
-                    padding: 0 !important;
-                    margin: 0 !important;
-                    flex: 1 !important;
-                    text-align: left !important;
-                    transform: translateY(5rpx) !important; // 向下偏移10rpx
-                    box-sizing: border-box !important;
-                }
-
-                .uni-easyinput__placeholder-class {
-                    color: rgba(191, 191, 191, 1) !important;
-                    font-size: 28rpx !important;
-                    line-height: 40rpx !important;
-                    text-align: left !important;
-                    transform: translateY(5rpx) !important; // 占位符也向下偏移10rpx
-                }
-
-                // 清除按钮样式调整
-                .uni-easyinput__content-clear-icon {
-                    transform: translateY(10rpx) !important; // 清除按钮也向下偏移
+                // 只读状态：不偏移，因为没有*号
+                &:disabled {
+                    margin-left: 0;
+                    margin-right: 0;
+                    width: 100%;
                 }
             }
 
-            // uni-data-select样式调整，与uni-easyinput保持一致
-            :deep(.uni-data-select) {
-                .uni-data-select__input-box {
-                    border: none !important;
-                    border-radius: 0 !important;
-                    border-bottom: 2rpx solid #e5e5e5 !important;
-                    background: transparent !important;
-                    padding: 0 30rpx 10rpx 30rpx !important; // 左右各30rpx边距
-                    height: 60rpx !important;
-                    box-shadow: none !important;
-                    display: flex !important;
-                    align-items: center !important;
-                    justify-content: flex-start !important;
-                    position: relative !important;
-
-                    .uni-data-select__input {
-                        font-size: 28rpx !important;
-                        color: rgba(38, 38, 38, 1) !important;
-                        height: 40rpx !important; // 设置固定高度
-                        line-height: 40rpx !important; // 行高与高度一致
-                        border: none !important;
-                        padding: 0 !important;
-                        margin: 0 !important;
-                        flex: 1 !important;
-                        text-align: left !important;
-                        transform: translateY(10rpx) !important; // 向下偏移10rpx
-                        box-sizing: border-box !important;
-                    }
-
-                    .uni-data-select__input.uni-data-select__input--placeholder {
-                        color: rgba(191, 191, 191, 1) !important;
-                        line-height: 40rpx !important;
-                        text-align: left !important;
-                        transform: translateY(10rpx) !important; // 占位符也向下偏移10rpx
-                    }
-
-                    // 下拉箭头也向下偏移
-                    .uni-data-select__input-arrow {
-                        transform: translateY(10rpx) !important;
-                    }
-                }
-
-                // 移除选择器的外层边框
-                .uni-data-select__selector {
-                    border: none !important;
-                    box-shadow: none !important;
-                }
-
-                // 移除可能存在的其他边框
-                &>view {
-                    border: none !important;
-                }
+            // 微信小程序placeholder样式
+            ::v-deep .custom-placeholder {
+                color: rgba(191, 191, 191, 1) !important;
+                font-size: 28rpx !important;
+                line-height: 40rpx !important;
             }
 
-            // 上传提示样式
-            .upload-tip {
-                font-size: 24rpx;
-                color: #999999;
-                margin-top: 10rpx;
-                line-height: 1.4;
+            // 只读状态：label不显示*号，需要偏移12rpx来对齐
+            &.readonly ::v-deep .uni-forms-item__label {
+                margin-left: 12rpx !important;
             }
 
-            // 位置选择器样式，与其他输入框保持一致
-            .location-picker {
-                .location-input {
-                    border: none;
-                    border-bottom: 2rpx solid #e5e5e5;
-                    padding: 0 30rpx 10rpx 30rpx; // 左右各30rpx边距
-                    height: 60rpx;
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    cursor: pointer;
-                    position: relative;
 
-                    .location-info {
-                        display: flex;
-                        flex-direction: column;
-                        gap: 2rpx; // 减小间距
-                        flex: 1;
-                        justify-content: center;
-                        align-items: flex-start;
-                        transform: translateY(10rpx); // 向下偏移10rpx
-
-                        .location-name {
-                            font-size: 28rpx;
-                            color: rgba(38, 38, 38, 1);
-                            font-weight: 500;
-                            line-height: 1.3;
-                            text-align: left;
-                        }
-
-                        .location-coords {
-                            font-size: 20rpx; // 稍微减小字体
-                            color: #666666;
-                            line-height: 1.2;
-                            text-align: left;
-                        }
-                    }
-
-                    .location-placeholder {
-                        color: rgba(191, 191, 191, 1);
-                        font-size: 28rpx;
-                        flex: 1;
-                        line-height: 40rpx; // 与输入框保持一致
-                        display: flex;
-                        align-items: center;
-                        text-align: left;
-                        transform: translateY(10rpx); // 向下偏移10rpx
-                    }
-
-                    // 位置图标也向下偏移
-                    .uni-icons {
-                        transform: translateY(10rpx) !important;
-                    }
-
-                    &:active {
-                        background-color: rgba(0, 0, 0, 0.05);
-                    }
-
-                    &.disabled {
-                        cursor: not-allowed;
-                        opacity: 0.6;
-
-                        &:active {
-                            background-color: transparent;
-                        }
-                    }
-                }
-            }
-
-            // 商户名称输入框样式
-            .merchant-name-input {
-                display: flex;
-                align-items: center;
-                gap: 10rpx;
-
-                .merchant-input {
-                    flex: 1;
-                }
-
-                .select-btn {
-                    width: 120rpx;
-                    height: 60rpx;
-                    background: #007aff;
-                    color: white;
-                    border: none;
-                    border-radius: 8rpx;
-                    font-size: 24rpx;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-
-                    &:disabled {
-                        background: #ccc;
-                        color: #999;
-                    }
-
-                    &:active:not(:disabled) {
-                        background: #0056b3;
-                    }
-                }
-            }
-
-            // 只读状态样式
-            &.readonly {
-                :deep(.uni-easyinput) {
-                    .uni-easyinput__content {
-                        background-color: #f5f5f5 !important;
-
-                        .uni-easyinput__content-input {
-                            color: #999 !important;
-                        }
-                    }
-                }
-
-                :deep(.uni-data-select) {
-                    .uni-data-select__input-box {
-                        background-color: #f5f5f5 !important;
-
-                        .uni-data-select__input {
-                            color: #999 !important;
-                        }
-                    }
-                }
-
-                :deep(.uni-file-picker) {
-                    opacity: 0.6;
-                    pointer-events: none;
-                }
+            &:disabled {
+                background-color: #f5f5f5;
+                color: #999;
+                margin-left: 0; // 只读状态不偏移
             }
         }
-    }
 
+        // 商户名称输入框样式
+        .merchant-name-input {
+            display: flex;
+            align-items: center;
+            gap: 10rpx;
+
+            .input-field {
+                flex: 1;
+            }
+
+            .select-icon {
+                width: 40rpx;
+                height: 40rpx;
+                cursor: pointer;
+            }
+        }
+
+        // uni-data-select 插槽自定义样式
+        .custom-selected {
+            display: flex;
+            align-items: center;
+            height: 40rpx;
+            margin-left: -8rpx; // 往左偏移8rpx对齐
+
+            .selected-text {
+                font-size: 28rpx;
+                color: rgba(38, 38, 38, 1) !important;
+                line-height: 40rpx;
+            }
+
+            .placeholder-text {
+                font-size: 28rpx;
+                color: rgba(191, 191, 191, 1) !important;
+                line-height: 40rpx;
+            }
+        }
+
+        // 所属区域包装器样式
+        .area-select-wrapper {
+
+            height: 55rpx;
+            margin-top: -10rpx;
+        }
+
+        // uni-data-select 组件整体样式调整（微信小程序兼容）
+        ::v-deep .area-select .uni-data-select__input-box {
+            border: none !important; // 完全移除自带的下划线
+            background: transparent !important;
+            padding: 0 12rpx 0 12rpx !important; // 恢复正常的padding
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+
+            margin-left: 0 !important;
+        }
+
+
+        // 自定义下划线
+        .area-underline {
+            position: absolute;
+            bottom: -15rpx;
+            left: 12rpx;
+            right: 12rpx;
+            height: 2rpx;
+
+            background-color: #e5e5e5;
+        }
+
+        // 确保placeholder颜色一致（微信小程序兼容）
+        ::v-deep .uni-data-select .uni-data-select__input-box .uni-data-select__input {
+            color: rgba(38, 38, 38, 1) !important;
+        }
+
+        ::v-deep .uni-data-select .uni-data-select__input-box .uni-data-select__placeholder {
+            color: rgba(191, 191, 191, 1) !important;
+        }
+
+        // 位置字段样式
+        .location-field {
+            display: flex;
+            align-items: center;
+            gap: 10rpx;
+
+            .location-display {
+                flex: 1;
+                height: 55rpx;
+                border: none;
+                border-bottom: 2rpx solid #e5e5e5;
+                background: transparent;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                margin-left: 12rpx;
+                margin-right: 12rpx; // 右边距12rpx，与下划线对齐
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent; // 移除点击高亮效果
+
+                .location-text {
+                    font-size: 28rpx;
+                    color: rgba(38, 38, 38, 1);
+                    line-height: 40rpx;
+                }
+
+                .location-placeholder {
+                    font-size: 28rpx;
+                    color: rgba(191, 191, 191, 1);
+                    line-height: 40rpx;
+                }
+            }
+
+            // 只读状态：位置字段不偏移
+            &.readonly .location-display {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .select-icon {
+                width: 40rpx;
+                height: 40rpx;
+                cursor: pointer;
+            }
+        }
+
+        // 电子合同字段样式（与位置字段相同）
+        .contract-field {
+            display: flex;
+            align-items: center;
+            gap: 10rpx;
+
+            .contract-display {
+                flex: 1;
+                height: 55rpx;
+                border: none;
+                border-bottom: 2rpx solid #e5e5e5;
+                background: transparent;
+                padding: 0;
+                display: flex;
+                align-items: center;
+                margin-left: 12rpx;
+                margin-right: 12rpx; // 右边距12rpx，与下划线对齐
+                cursor: pointer;
+                -webkit-tap-highlight-color: transparent; // 移除点击高亮效果
+
+                .contract-text {
+                    font-size: 28rpx;
+                    color: rgba(38, 38, 38, 1);
+                    line-height: 40rpx;
+                }
+
+                .contract-placeholder {
+                    font-size: 28rpx;
+                    color: rgba(191, 191, 191, 1);
+                    line-height: 40rpx;
+                }
+
+                .contract-placeholder-readonly {
+                    font-size: 28rpx;
+                    color: rgba(38, 38, 38, 1);
+                    line-height: 40rpx;
+                }
+            }
+
+            // 只读状态：电子合同字段不偏移
+            &.readonly .contract-display {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .select-icon {
+                width: 40rpx;
+                height: 40rpx;
+                cursor: pointer;
+            }
+        }
+
+        // 上传提示样式
+        .upload-tip {
+            font-size: 24rpx;
+            color: #999999;
+            margin-top: 10rpx;
+            line-height: 1.4;
+        }
+
+
+        // 只读状态样式
+        &.readonly {
+            .input-field {
+                color: rgba(38, 38, 38, 1);
+            }
+
+        }
+    }
 
     // 上传区域样式（保留旧的，以防需要）
     .upload-group {
@@ -1412,16 +1485,8 @@ const submitAuth = async () => {
             }
         }
     }
-
-    // 自定义导航栏字体大小为34rpx
-    :deep(.uni-navbar__content-title) {
-        font-size: 34rpx !important;
-    }
-
-    :deep(.uni-nav-bar-text) {
-        font-size: 34rpx !important;
-    }
 }
+
 
 // 商户选择弹窗样式
 .merchant-popup-mask {
@@ -1474,6 +1539,27 @@ const submitAuth = async () => {
         height: 100rpx; // 固定搜索框高度
         display: flex;
         align-items: center;
+
+        .search-input {
+            width: 100%;
+            height: 60rpx;
+            border: 1rpx solid #e5e5e5;
+            border-radius: 30rpx;
+            background: #f8f8f8;
+            padding: 0 20rpx;
+            font-size: 28rpx;
+            color: #333;
+
+            &::placeholder {
+                color: rgba(191, 191, 191, 1);
+            }
+
+            &:focus {
+                border-color: #07c160;
+                background: #fff;
+                outline: none;
+            }
+        }
     }
 
     .merchant-list {

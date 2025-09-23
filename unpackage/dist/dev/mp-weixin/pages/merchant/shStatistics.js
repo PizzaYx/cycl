@@ -11,10 +11,12 @@ if (!Array) {
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + StatusPicker + TimeRangePicker + _easycom_uni_load_more)();
+  (_easycom_uni_nav_bar + StatusPicker + TimeRangePicker + StatusTag + InfoDisplay + _easycom_uni_load_more)();
 }
 const TimeRangePicker = () => "../../components/TimeRangePicker/TimeRangePicker.js";
 const StatusPicker = () => "../../components/StatusPicker/StatusPicker.js";
+const StatusTag = () => "../../components/StatusTag/StatusTag.js";
+const InfoDisplay = () => "../../components/InfoDisplay/InfoDisplay.js";
 const _sfc_main = {
   __name: "shStatistics",
   setup(__props) {
@@ -34,44 +36,20 @@ const _sfc_main = {
       }
     ];
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:148", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:119", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
         url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
       });
     };
-    const getStatusText = (item) => {
-      switch (item.status) {
-        case 0:
-          return "进行中";
-        case 1: {
-          if (item.merchantConfirm) {
-            return "已完成";
-          } else {
-            return "待确认";
-          }
-        }
-        case 2:
-          return "无需收运";
-        default:
-          return "未知状态";
-      }
-    };
-    const getStatusClass = (item) => {
-      switch (item.status) {
-        case 0:
-          return "processing";
-        case 1: {
-          if (item.merchantConfirm) {
-            return "completed";
-          } else {
-            return "pending";
-          }
-        }
-        case 2:
-          return "cancelled";
-        default:
-          return "";
-      }
+    const getInfoFields = (item) => {
+      return [
+        { key: "appointmentTime", label: "预估时间", value: item.appointmentTime },
+        { key: "arrivalTime", label: "收运时间", value: item.arrivalTime },
+        { key: "estimateWeight", label: "预估重量", value: item.estimateWeight },
+        { key: "weight", label: "收运重量", value: item.weight },
+        { key: "estimateBucketNum", label: "预估桶数", value: item.estimateBucketNum },
+        { key: "bucketNum", label: "收运桶数", value: item.bucketNum }
+      ];
     };
     const getToStatistics = async () => {
       var _a;
@@ -134,7 +112,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:284", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shStatistics.vue:232", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -167,7 +145,7 @@ const _sfc_main = {
       resetPageAndReload();
     };
     const onTimeChange = (value) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:338", "时间变化:", value);
+      common_vendor.index.__f__("log", "at pages/merchant/shStatistics.vue:286", "时间变化:", value);
       selectedTimeRange.value = value;
       resetPageAndReload();
     };
@@ -218,17 +196,17 @@ const _sfc_main = {
         k: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.merchantName),
-            b: common_vendor.t(getStatusText(item)),
-            c: common_vendor.n(getStatusClass(item)),
-            d: common_vendor.t(item.appointmentTime ?? "暂无"),
-            e: common_vendor.t(item.arrivalTime ?? "暂无"),
-            f: common_vendor.t(item.estimateWeight + " kg"),
-            g: common_vendor.t(item.weight ? item.weight + " kg" : "暂无"),
-            h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + " 个" : "暂无"),
-            i: common_vendor.t(item.bucketNum ? item.bucketNum + " 个" : "暂无"),
-            j: common_vendor.o(($event) => handleViewDetails(item), index),
-            k: "5f21cbbb-3-" + i0,
-            l: index
+            b: "5f21cbbb-3-" + i0,
+            c: common_vendor.p({
+              status: item.status
+            }),
+            d: "5f21cbbb-4-" + i0,
+            e: common_vendor.p({
+              fields: getInfoFields(item)
+            }),
+            f: common_vendor.o(($event) => handleViewDetails(item), index),
+            g: "5f21cbbb-5-" + i0,
+            h: index
           };
         }),
         l: common_vendor.p({

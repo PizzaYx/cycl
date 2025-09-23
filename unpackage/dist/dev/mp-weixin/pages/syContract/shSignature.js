@@ -1,5 +1,6 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const utils_config = require("../../utils/config.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_l_signature2 = common_vendor.resolveComponent("l-signature");
@@ -19,19 +20,20 @@ const _sfc_main = {
     const penSize = common_vendor.ref(3);
     const openSmooth = common_vendor.ref(true);
     const signatureRef = common_vendor.ref(null);
+    const uploadHeaders = utils_config.createUploadHeaders();
     common_vendor.onLoad((options) => {
       contractId.value = options.contractId || "";
       contractTitle.value = options.title || "合同签名";
     });
     common_vendor.onUnload(() => {
-      common_vendor.index.__f__("log", "at pages/syContract/shSignature.vue:45", "签名页面卸载");
+      common_vendor.index.__f__("log", "at pages/syContract/shSignature.vue:49", "签名页面卸载");
     });
     const clearSignature = () => {
       if (signatureRef.value) {
         try {
           signatureRef.value.clear();
         } catch (error) {
-          common_vendor.index.__f__("warn", "at pages/syContract/shSignature.vue:54", "清空签名失败:", error);
+          common_vendor.index.__f__("warn", "at pages/syContract/shSignature.vue:58", "清空签名失败:", error);
         }
       }
     };
@@ -40,7 +42,7 @@ const _sfc_main = {
         try {
           signatureRef.value.undo();
         } catch (error) {
-          common_vendor.index.__f__("warn", "at pages/syContract/shSignature.vue:65", "撤销签名失败:", error);
+          common_vendor.index.__f__("warn", "at pages/syContract/shSignature.vue:69", "撤销签名失败:", error);
         }
       }
     };
@@ -61,23 +63,57 @@ const _sfc_main = {
             });
             return;
           }
-          common_vendor.index.showToast({
-            title: "签名保存成功",
-            icon: "success"
+          common_vendor.index.showLoading({
+            title: "上传签名中..."
           });
-          setTimeout(() => {
-            common_vendor.index.navigateBack({
-              delta: 1,
-              success: () => {
-                common_vendor.index.$emit("signatureUpdated", {
-                  partyB: res.tempFilePath
+          common_vendor.index.uploadFile({
+            url: utils_config.uploadUrl,
+            filePath: res.tempFilePath,
+            name: "file",
+            header: uploadHeaders.value,
+            success: (uploadRes) => {
+              common_vendor.index.hideLoading();
+              try {
+                const response = JSON.parse(uploadRes.data);
+                if (response.code === 200 && response.url) {
+                  common_vendor.index.showToast({
+                    title: "签名保存成功",
+                    icon: "success"
+                  });
+                  common_vendor.index.__f__("log", "at pages/syContract/shSignature.vue:116", "签名上传成功:", uploadRes);
+                  setTimeout(() => {
+                    common_vendor.index.navigateBack({
+                      delta: 1,
+                      success: () => {
+                        common_vendor.index.$emit("signatureUpdated", {
+                          partyB: response.url
+                        });
+                      }
+                    });
+                  }, 1500);
+                } else {
+                  throw new Error(response.message || "上传失败");
+                }
+              } catch (error) {
+                common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:133", "解析上传响应失败:", error);
+                common_vendor.index.showToast({
+                  title: "上传失败，请重试",
+                  icon: "none"
                 });
               }
-            });
-          }, 1500);
+            },
+            fail: (error) => {
+              common_vendor.index.hideLoading();
+              common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:142", "上传签名失败:", error);
+              common_vendor.index.showToast({
+                title: "上传失败，请重试",
+                icon: "none"
+              });
+            }
+          });
         },
         fail: (error) => {
-          common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:109", "保存签名失败:", error);
+          common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:151", "保存签名失败:", error);
           common_vendor.index.showToast({
             title: "保存签名失败",
             icon: "none"

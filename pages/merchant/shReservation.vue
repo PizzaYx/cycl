@@ -76,15 +76,25 @@
                         </uni-easyinput>
                     </uni-forms-item>
 
-                    <uni-forms-item label="预估垃圾重量" name="estimatedWeight" required>
+                    <uni-forms-item label="预估垃圾重量(kg)" name="estimatedWeight" required>
                         <uni-easyinput v-model="formData.estimatedWeight" placeholder="请输入预估垃圾重量" type="number"
                             :clearable="false" :disabled="isReadOnly">
                         </uni-easyinput>
                     </uni-forms-item>
 
                     <uni-forms-item label="预约时间" name="estimatedTime" required>
-                        <uni-datetime-picker v-model="formData.estimatedTime" type="date" :start="minDate"
-                            :end="maxDate" placeholder="请选择预约时间" :clearable="false" :disabled="isReadOnly">
+                        <!-- 只读状态：使用 uni-easyinput 显示文本 -->
+                        <uni-easyinput v-if="isReadOnly" :value="getDateTimeText()" :disabled="true"
+                            placeholder="请选择预约时间" :clearable="false" />
+                        <!-- 编辑状态：使用 uni-datetime-picker 插槽 -->
+                        <uni-datetime-picker v-else v-model="formData.estimatedTime" type="date" :start="minDate"
+                            :end="maxDate" :clearable="false">
+                            <view class="datetime-slot" @click="openDateTimePicker">
+                                <text v-if="formData.estimatedTime" class="datetime-text">{{
+                                    formatDateTime(formData.estimatedTime) }}</text>
+                                <text v-else class="datetime-placeholder">请选择预约时间</text>
+                                <uni-icons type="calendar" size="20" color="#999"></uni-icons>
+                            </view>
                         </uni-datetime-picker>
                     </uni-forms-item>
 
@@ -128,13 +138,8 @@ onLoad((options) => {
     // 接收参数并设置默认值
     props.value.id = options.id ? parseInt(options.id) : null;
     props.value.status = options.status ? parseInt(options.status) : null; // 默认为null
-
     console.log('接收到的参数:', props.value);
 
-    // // 可以根据接收到的参数进行相应处理
-    // if (props.value.id) {
-    //     // 根据id获取相关数据
-    // }
 });
 
 
@@ -243,6 +248,30 @@ const formRules = {
 
 // 提交状态
 const submitting = ref(false)
+
+// 获取日期时间文本（用于只读显示）
+const getDateTimeText = () => {
+    if (formData.estimatedTime) {
+        return formatDateTime(formData.estimatedTime)
+    }
+    return ''
+}
+
+// 格式化日期时间
+const formatDateTime = (dateTime) => {
+    if (!dateTime) return ''
+    const date = new Date(dateTime)
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
+// 打开日期时间选择器
+const openDateTimePicker = () => {
+    // uni-datetime-picker 会自动处理点击事件
+    // 这里可以添加额外的逻辑，比如日志记录等
+}
 
 // 页面加载完成
 onMounted(async () => {
@@ -446,6 +475,7 @@ const submitAuth = async () => {
             border-radius: 16rpx;
             padding: 30rpx;
             margin-bottom: 30rpx;
+            margin-top: 30rpx;
             box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
 
             .status-tip {
@@ -510,7 +540,8 @@ const submitAuth = async () => {
                 }
             }
 
-            // uni-easyinput样式调整，根据官方文档优化
+
+            // uni-easyinput样式调整，参照shCertification.vue的input-field样式
             // 使用!important是因为uni-app组件有内联样式和深层嵌套样式，需要强制覆盖
             :deep(.uni-easyinput) {
                 .uni-easyinput__content {
@@ -518,15 +549,26 @@ const submitAuth = async () => {
                     border-radius: 0 !important;
                     border-bottom: 2rpx solid #e5e5e5 !important;
                     background: transparent !important;
-                    padding: 0 30rpx 10rpx 30rpx !important; // 左右各30rpx边距
-                    height: 60rpx !important;
+                    padding: 0 !important;
+                    height: 55rpx !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: flex-start !important;
                     position: relative !important;
+                    width: calc(100% - 24rpx) !important; // 减去左右边距，与下划线对齐
+                    margin-left: 12rpx !important; // 可输入状态：向右偏移12rpx来对齐*号
+                    margin-right: 12rpx !important; // 右边距12rpx，与下划线对齐
+                    box-sizing: border-box !important;
 
                     &.is-focused {
                         border-bottom-color: #07c160 !important;
+                    }
+
+                    // 只读状态：不偏移，因为没有*号
+                    &.is-disabled {
+                        margin-left: 0 !important;
+                        margin-right: 0 !important;
+                        width: 100% !important;
                     }
                 }
 
@@ -539,7 +581,6 @@ const submitAuth = async () => {
                     margin: 0 !important;
                     flex: 1 !important;
                     text-align: left !important;
-                    transform: translateY(5rpx) !important; // 向下偏移10rpx
                     box-sizing: border-box !important;
                 }
 
@@ -548,13 +589,8 @@ const submitAuth = async () => {
                     font-size: 28rpx !important;
                     line-height: 40rpx !important;
                     text-align: left !important;
-                    transform: translateY(5rpx) !important; // 占位符也向下偏移10rpx
                 }
 
-                // 清除按钮样式调整
-                .uni-easyinput__content-clear-icon {
-                    transform: translateY(10rpx) !important; // 清除按钮也向下偏移
-                }
             }
 
             // uni-data-select样式调整，与uni-easyinput保持一致
@@ -564,13 +600,17 @@ const submitAuth = async () => {
                     border-radius: 0 !important;
                     border-bottom: 2rpx solid #e5e5e5 !important;
                     background: transparent !important;
-                    padding: 0 30rpx 10rpx 30rpx !important; // 左右各30rpx边距
-                    height: 60rpx !important;
+                    padding: 0 !important;
+                    height: 55rpx !important;
                     box-shadow: none !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: flex-start !important;
                     position: relative !important;
+                    width: calc(100% - 24rpx) !important; // 减去左右边距，与下划线对齐
+                    margin-left: 12rpx !important; // 可输入状态：向右偏移12rpx来对齐*号
+                    margin-right: 12rpx !important; // 右边距12rpx，与下划线对齐
+                    box-sizing: border-box !important;
 
                     .uni-data-select__input {
                         font-size: 28rpx !important;
@@ -582,7 +622,6 @@ const submitAuth = async () => {
                         margin: 0 !important;
                         flex: 1 !important;
                         text-align: left !important;
-                        transform: translateY(10rpx) !important; // 向下偏移10rpx
                         box-sizing: border-box !important;
                     }
 
@@ -590,13 +629,8 @@ const submitAuth = async () => {
                         color: rgba(191, 191, 191, 1) !important;
                         line-height: 40rpx !important;
                         text-align: left !important;
-                        transform: translateY(10rpx) !important; // 占位符也向下偏移10rpx
                     }
 
-                    // 下拉箭头也向下偏移
-                    .uni-data-select__input-arrow {
-                        transform: translateY(10rpx) !important;
-                    }
                 }
 
                 // 移除选择器的外层边框
@@ -611,18 +645,64 @@ const submitAuth = async () => {
                 }
             }
 
-            // 日期时间选择器样式，与其他输入框保持一致
+            // 日期时间选择器插槽样式，与其他输入框保持一致
+            .datetime-slot {
+                border: none;
+                border-bottom: 2rpx solid #e5e5e5;
+                padding: 0;
+                height: 55rpx;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                cursor: pointer;
+                position: relative;
+                width: calc(100% - 24rpx); // 减去左右边距，与下划线对齐
+                margin-left: 12rpx; // 可输入状态：向右偏移12rpx来对齐*号
+                margin-right: 12rpx; // 右边距12rpx，与下划线对齐
+                box-sizing: border-box;
+
+                .datetime-text {
+                    font-size: 28rpx;
+                    color: rgba(38, 38, 38, 1);
+                    flex: 1;
+                    line-height: 40rpx; // 与输入框保持一致
+                    display: flex;
+                    align-items: center;
+                    text-align: left;
+                }
+
+                .datetime-placeholder {
+                    color: rgba(191, 191, 191, 1);
+                    font-size: 28rpx;
+                    flex: 1;
+                    line-height: 40rpx; // 与输入框保持一致
+                    display: flex;
+                    align-items: center;
+                    text-align: left;
+                }
+
+
+                &:active {
+                    background-color: rgba(0, 0, 0, 0.05);
+                }
+            }
+
+            // 日期时间选择器样式（仅在编辑状态使用）
             :deep(.uni-datetime-picker) {
                 .uni-date-editor--x {
                     border: none !important;
                     border-bottom: 2rpx solid #e5e5e5 !important;
                     background: transparent !important;
-                    padding: 0 30rpx 10rpx 30rpx !important;
-                    height: 60rpx !important;
+                    padding: 0 !important;
+                    height: 55rpx !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: flex-start !important;
                     position: relative !important;
+                    width: calc(100% - 24rpx) !important; // 减去左右边距，与下划线对齐
+                    margin-left: 12rpx !important; // 可输入状态：向右偏移12rpx来对齐*号
+                    margin-right: 12rpx !important; // 右边距12rpx，与下划线对齐
+                    box-sizing: border-box !important;
 
                     .uni-date__x-input {
                         font-size: 28rpx !important;
@@ -633,7 +713,6 @@ const submitAuth = async () => {
                         margin: 0 !important;
                         flex: 1 !important;
                         text-align: left !important;
-                        transform: translateY(5rpx) !important;
                         box-sizing: border-box !important;
                     }
 
@@ -642,7 +721,6 @@ const submitAuth = async () => {
                         font-size: 28rpx !important;
                         line-height: 40rpx !important;
                         text-align: left !important;
-                        transform: translateY(5rpx) !important;
                     }
                 }
 
@@ -733,46 +811,88 @@ const submitAuth = async () => {
                 }
             }
 
-            // 禁用状态样式（针对disabled的uni-easyinput）
+            // 禁用状态样式（等同于只读样式）
             :deep(.uni-easyinput) {
                 .uni-easyinput__content.is-disabled {
-                    background-color: #f5f5f5 !important;
+                    margin-left: 12rpx !important;
+                    margin-right: 12rpx !important;
+                    width: calc(100% - 24rpx) !important;
 
                     .uni-easyinput__content-input {
-                        color: #999 !important;
+                        color: rgba(38, 38, 38, 1) !important; // 禁用状态保持正常字体颜色
+                    }
+                }
+            }
+
+            // 禁用字段的label样式（等同于只读样式）
+            // 商户名称、商户地址、联系电话字段整体向左缩进12rpx
+            :deep(.uni-forms-item) {
+
+                &:nth-child(1),
+                &:nth-child(2),
+                &:nth-child(3) {
+                    .uni-forms-item__label {
+                        margin-left: 12rpx !important;
                     }
                 }
             }
 
             // 只读状态样式
             &.readonly {
+
+                // 只读状态：label不显示*号，需要偏移12rpx来对齐
+                :deep(.uni-forms-item__label) {
+                    margin-left: 12rpx !important;
+                }
+
                 :deep(.uni-easyinput) {
                     .uni-easyinput__content {
-                        background-color: #f5f5f5 !important;
+                        margin-left: 0 !important;
+                        margin-right: 0 !important;
+                        width: 100% !important;
 
                         .uni-easyinput__content-input {
-                            color: #999 !important;
+                            color: rgba(38, 38, 38, 1) !important; // 只读状态保持正常颜色
                         }
                     }
                 }
 
                 :deep(.uni-data-select) {
                     .uni-data-select__input-box {
-                        background-color: #f5f5f5 !important;
+                        margin-left: 0 !important;
+                        margin-right: 0 !important;
+                        width: 100% !important;
 
                         .uni-data-select__input {
-                            color: #999 !important;
+                            color: rgba(38, 38, 38, 1) !important; // 只读状态保持正常颜色
                         }
                     }
                 }
 
                 :deep(.uni-datetime-picker) {
                     .uni-date-editor--x {
-                        background-color: #f5f5f5 !important;
+                        margin-left: 0 !important;
+                        margin-right: 0 !important;
+                        width: 100% !important;
 
                         .uni-date__x-input {
-                            color: #999 !important;
+                            color: rgba(38, 38, 38, 1) !important; // 只读状态保持正常颜色
                         }
+                    }
+                }
+
+                // 只读状态下插槽内容的样式
+                .datetime-slot {
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
+                    width: 100% !important;
+
+                    .datetime-text {
+                        color: rgba(38, 38, 38, 1) !important; // 只读状态保持正常颜色
+                    }
+
+                    .datetime-placeholder {
+                        color: rgba(38, 38, 38, 1) !important; // 只读状态保持正常颜色
                     }
                 }
 

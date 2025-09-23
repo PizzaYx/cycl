@@ -3,6 +3,6 @@
   "navigationStyle": "custom",
   "usingComponents": {
     "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
-    "uni-badge": "../../uni_modules/uni-badge/components/uni-badge/uni-badge"
+    "status-tag": "../../components/StatusTag/StatusTag"
   }
 }

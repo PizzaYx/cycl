@@ -39,23 +39,16 @@
             </view>
         </view>
 
-
-
-        <!-- <view class="footer">
-            <button class="save-btn" @tap="handleSave">保存</button>
-        </view> -->
+        <!-- 退出登录按钮 -->
+        <view class="footer">
+            <button class="logout-btn" @tap="handleLogout">退出登录</button>
+        </view>
     </view>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
-
-
-
-
-
-
 
 
 // 使用用户 store
@@ -125,6 +118,23 @@ const handleSave = () => {
     uni.showToast({
         title: '保存成功',
         icon: 'success'
+    })
+}
+
+// 退出登录
+const handleLogout = () => {
+    uni.showModal({
+        title: '确认退出',
+        content: '确定要退出登录吗？',
+        confirmText: '退出',
+        cancelText: '取消',
+        confirmColor: '#ff4444',
+        success: (res) => {
+            if (res.confirm) {
+                // 用户确认退出
+                userStore.logout()
+            }
+        }
     })
 }
 </script>
@@ -309,15 +319,15 @@ const handleSave = () => {
         box-shadow: 0 -2rpx 20rpx rgba(0, 0, 0, 0.1);
         z-index: 999;
 
-        .save-btn {
+        .logout-btn {
             width: 100%;
             height: 88rpx;
             line-height: 88rpx;
-            background: linear-gradient(135deg, #07C160 0%, #05A64F 100%);
+            background: linear-gradient(135deg, #ff4444 0%, #cc3333 100%);
             color: #ffffff;
             font-size: 16px;
             border-radius: 44rpx;
-            box-shadow: 0 8rpx 20rpx rgba(7, 193, 96, 0.3);
+            box-shadow: 0 8rpx 20rpx rgba(255, 68, 68, 0.3);
             border: none;
 
             &::after {

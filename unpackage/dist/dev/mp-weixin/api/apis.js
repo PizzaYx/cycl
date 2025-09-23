@@ -112,6 +112,24 @@ function apiSelectMerchantList(data = {}) {
     data
   });
 }
+function apiGetCovenantTemplat() {
+  return utils_request.request({
+    url: "/api/merchantapi/getCovenantTemplate"
+  });
+}
+function apiGetMerchantCovenant(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/getMerchantCovenant",
+    data
+  });
+}
+function apiAddMerchantCovenant(data = {}) {
+  return utils_request.request({
+    url: "/api/merchantapi/addMerchantCovenant",
+    data,
+    method: "POST"
+  });
+}
 function apiGetDriverTodayStatistics(data = {}) {
   return utils_request.request({
     url: "/api/driver/getDriverTodayStatistics",
@@ -186,6 +204,8 @@ function apiGetDriverNotConfirmNum(data = {}) {
   });
 }
 exports.apiAddCarWeight = apiAddCarWeight;
+exports.apiAddMerchantCovenant = apiAddMerchantCovenant;
+exports.apiGetCovenantTemplat = apiGetCovenantTemplat;
 exports.apiGetDriverInfo = apiGetDriverInfo;
 exports.apiGetDriverNotConfirmNum = apiGetDriverNotConfirmNum;
 exports.apiGetDriverPlanById = apiGetDriverPlanById;
@@ -196,6 +216,7 @@ exports.apiGetDriverTodayPlan = apiGetDriverTodayPlan;
 exports.apiGetDriverTodayStatistics = apiGetDriverTodayStatistics;
 exports.apiGetInfo = apiGetInfo;
 exports.apiGetMerchantCheck = apiGetMerchantCheck;
+exports.apiGetMerchantCovenant = apiGetMerchantCovenant;
 exports.apiGetMerchantNotConfirmNum = apiGetMerchantNotConfirmNum;
 exports.apiGetMerchantStatistics = apiGetMerchantStatistics;
 exports.apiGetPlanAllPage = apiGetPlanAllPage;

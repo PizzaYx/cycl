@@ -50,7 +50,6 @@
   z-index: 10;
   background: rgba(255, 255, 255, 0.9);
   padding: 10rpx;
-  border-radius: 8rpx;
 }
 .signature-modal-native .signature-buttons-rotated .signature-btn.data-v-0634d544 {
   height: 25rpx;
@@ -60,20 +59,6 @@
   border: none;
   line-height: 25rpx;
   text-align: center;
-}
-.signature-modal-native .signature-buttons-rotated .signature-btn.clear-btn.data-v-0634d544 {
-  background: #ff4444;
-  color: #fff;
-}
-.signature-modal-native .signature-buttons-rotated .signature-btn.undo-btn.data-v-0634d544 {
-  background: #ff9500;
-  color: #fff;
-}
-.signature-modal-native .signature-buttons-rotated .signature-btn.save-btn.data-v-0634d544 {
   background: #07c160;
-  color: #fff;
-}
-.signature-modal-native .signature-buttons-rotated .signature-btn.cancel-btn.data-v-0634d544 {
-  background: #999;
   color: #fff;
 }

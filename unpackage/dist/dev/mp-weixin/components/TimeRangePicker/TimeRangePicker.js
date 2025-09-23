@@ -50,21 +50,19 @@ const _sfc_main = {
     };
     const onTimePickerShow = () => {
       common_vendor.index.__f__("log", "at components/TimeRangePicker/TimeRangePicker.vue:89", "时间选择器已打开");
-      setTimeout(() => {
-        showClearButton.value = true;
-      }, 350);
+      showClearButton.value = true;
     };
     const onTimePickerClose = () => {
-      common_vendor.index.__f__("log", "at components/TimeRangePicker/TimeRangePicker.vue:101", "时间选择器已关闭");
+      common_vendor.index.__f__("log", "at components/TimeRangePicker/TimeRangePicker.vue:99", "时间选择器已关闭");
       showClearButton.value = false;
     };
     const onTimeChange = (value) => {
-      common_vendor.index.__f__("log", "at components/TimeRangePicker/TimeRangePicker.vue:110", "时间变化:", value);
+      common_vendor.index.__f__("log", "at components/TimeRangePicker/TimeRangePicker.vue:109", "时间变化:", value);
       selectedTimeRange.value = value;
       showClearButton.value = false;
     };
     const clearTimeRange = () => {
-      common_vendor.index.__f__("log", "at components/TimeRangePicker/TimeRangePicker.vue:121", "清除时间范围");
+      common_vendor.index.__f__("log", "at components/TimeRangePicker/TimeRangePicker.vue:120", "清除时间范围");
       if (datetimePicker.value) {
         datetimePicker.value.clear();
         datetimePicker.value.close();
@@ -87,7 +85,7 @@ const _sfc_main = {
       // 关闭方法
     });
     return (_ctx, _cache) => {
-      return common_vendor.e({
+      return {
         a: common_vendor.p({
           type: "bottom",
           size: "12",
@@ -107,10 +105,9 @@ const _sfc_main = {
           end: getCurrentDateTime(),
           modelValue: selectedTimeRange.value
         }),
-        h: showClearButton.value
-      }, showClearButton.value ? {
+        h: showClearButton.value ? 1 : "",
         i: common_vendor.o(clearTimeRange)
-      } : {});
+      };
     };
   }
 };

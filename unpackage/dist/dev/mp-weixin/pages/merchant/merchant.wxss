@@ -88,6 +88,10 @@
   font-size: 32rpx;
   color: black;
   line-height: 32rpx;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .layout .header .info .sub-name.data-v-b35646dd {
   font-weight: 400;
@@ -182,22 +186,12 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16rpx;
+  gap: 2rpx;
 }
-.layout .quick-actions .action-item .action-icon-wrapper.data-v-b35646dd {
-  position: relative;
-  display: inline-block;
-}
-.layout .quick-actions .action-item .action-icon-wrapper image.data-v-b35646dd {
+.layout .quick-actions .action-item image.data-v-b35646dd {
   width: 96rpx;
   height: 96rpx;
   border-radius: 16rpx;
-}
-.layout .quick-actions .action-item .action-icon-wrapper .action-badge.data-v-b35646dd {
-  position: absolute;
-  top: -8rpx;
-  right: -8rpx;
-  z-index: 10;
 }
 .layout .quick-actions .action-item text.data-v-b35646dd {
   font-size: 26rpx;
@@ -222,7 +216,9 @@
   color: rgba(19, 19, 19, 0.5);
   display: flex;
   align-items: center;
-  gap: 4rpx;
+}
+.layout .records-header .more text.data-v-b35646dd {
+  line-height: 1;
 }
 .layout .records.data-v-b35646dd {
   position: relative;
@@ -234,55 +230,42 @@
 .layout .records .record-list .record-item.data-v-b35646dd {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: stretch;
   height: 138rpx;
   margin-bottom: 22rpx;
   background-color: #fff;
   border-radius: 16rpx;
-  padding: 0 30rpx 0 30rpx;
+  padding: 20rpx 30rpx;
+}
+.layout .records .record-list .record-item .record-main.data-v-b35646dd {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .layout .records .record-list .record-item .record-main .shop-name.data-v-b35646dd {
   font-size: 26rpx;
   color: #131313;
-  margin-bottom: 8rpx;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .layout .records .record-list .record-item .record-main .record-time.data-v-b35646dd {
   font-size: 24rpx;
   color: rgba(61, 61, 61, 0.5);
 }
 .layout .records .record-list .record-item .record-right.data-v-b35646dd {
-  text-align: right;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
 }
 .layout .records .record-list .record-item .record-right .weight.data-v-b35646dd {
   font-size: 32rpx;
   font-weight: 400;
   color: #3d3d3d;
-  margin-bottom: 8rpx;
-}
-.layout .records .record-list .record-item .record-right .status-tag.data-v-b35646dd {
-  border-radius: 8rpx;
-  font-size: 24rpx;
-  width: 120rpx;
-  height: 40rpx;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.layout .records .record-list .record-item .record-right .status-tag.processing.data-v-b35646dd {
-  color: #00aaff;
-  background: rgba(0, 170, 255, 0.1);
-}
-.layout .records .record-list .record-item .record-right .status-tag.completed.data-v-b35646dd {
-  color: rgba(61, 61, 61, 0.5);
-  background: rgba(153, 153, 153, 0.1);
-}
-.layout .records .record-list .record-item .record-right .status-tag.pending.data-v-b35646dd {
-  color: #ffa100;
-  background: rgba(255, 161, 0, 0.1);
-}
-.layout .records .record-list .record-item .record-right .status-tag.cancelled.data-v-b35646dd {
-  color: rgba(61, 61, 61, 0.5);
-  background: rgba(153, 153, 153, 0.1);
 }
 .layout .records .record-list .no-records.data-v-b35646dd {
   text-align: center;

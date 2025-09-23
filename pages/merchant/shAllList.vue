@@ -25,37 +25,12 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text class="status-tag" :class="getStatusClass(item)">
-                                    {{ getStatusText(item) }}
-                                </text>
+                                <StatusTag :status="item.status" />
                             </view>
 
                         </view>
                         <view class="order-content">
-                            <view class="info-item">
-                                <text class="label">今日收运：</text>
-                                <text class="value">{{ item.deliveryCount ?? 0 }} 桶</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估重量：</text>
-                                <text class="value">{{ item.estimateWeight ?? 0 }} kg</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运重量：</text>
-                                <text class="value">{{ item.weight ?? 0 }} kg</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">车辆信息：</text>
-                                <text class="value">{{ item.registrationNumber ?? "暂无" }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估时间：</text>
-                                <text class="value">{{ item.appointmentTime ?? "暂无" }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运时间：</text>
-                                <text class="value">{{ item.arrivalTime ?? "暂无" }}</text>
-                            </view>
+                            <InfoDisplay :fields="getInfoFields(item)" />
                         </view>
                         <view class="order-footer">
                             <uni-button v-if="item.status != 0" size="mini" type="default" class="btn-confirm"
@@ -103,10 +78,8 @@ import {
 import { useUserStore } from '@/stores/user.js'
 import TimeRangePicker from '@/components/TimeRangePicker/TimeRangePicker.vue'
 import StatusPicker from '@/components/StatusPicker/StatusPicker.vue'
-
-
-
-
+import StatusTag from '@/components/StatusTag/StatusTag.vue'
+import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
 const userStore = useUserStore();
 
 // 筛选相关状态
@@ -120,41 +93,6 @@ const statusOptions = ref([
     { value: 2, text: '无需收运' }
 ]);
 
-// 状态转换函数
-const getStatusText = (item) => {
-    switch (item.status) {
-        case 0:
-            return '进行中';
-        case 1:
-            {
-                if (item.merchantConfirm) {
-                    return '已完成';
-                } else {
-                    return '待确认';
-                }
-            }
-        case 2:
-            return '无需收运';
-        default:
-            return '未知状态';
-    }
-};
-
-// 获取状态样式类名
-const getStatusClass = (item) => {
-    switch (item.status) {
-        case 0: return 'processing';
-        case 1: {
-            if (item.merchantConfirm) {
-                return 'completed';
-            } else {
-                return 'pending';
-            }
-        }
-        case 2: return 'cancelled';
-        default: return '';
-    }
-};
 //返回上一页
 const back = () => {
     uni.navigateBack()
@@ -173,6 +111,18 @@ const handleViewDetails = (item) => {
     uni.navigateTo({
         url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
     });
+};
+
+// 生成信息字段配置
+const getInfoFields = (item) => {
+    return [
+        { key: 'deliveryCount', label: '今日收运', value: item.deliveryCount },
+        { key: 'estimateWeight', label: '预估重量', value: item.estimateWeight },
+        { key: 'weight', label: '收运重量', value: item.weight },
+        { key: 'registrationNumber', label: '车辆信息', value: item.registrationNumber },
+        { key: 'appointmentTime', label: '预估时间', value: item.appointmentTime },
+        { key: 'arrivalTime', label: '收运时间', value: item.arrivalTime }
+    ];
 };
 
 //后获取数据
@@ -431,69 +381,13 @@ onMounted(() => {
                             color: rgba(61, 61, 61, 1);
                         }
 
-                        .status-tag {
-                            border-radius: 8rpx;
-                            font-size: 24rpx;
-                            width: 120rpx;
-                            height: 40rpx;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-
-
-                            &.processing {
-                                //进行中 待完成
-                                color: rgba(0, 170, 255, 1);
-                                background: rgba(0, 170, 255, 0.10);
-                            }
-
-                            &.completed {
-                                //已完成
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
-                            }
-
-                            &.pending {
-                                //待确认
-                                color: rgba(255, 161, 0, 1);
-                                background: rgba(255, 161, 0, 0.10);
-                            }
-
-                            &.cancelled {
-                                //无法收运
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
-                            }
-                        }
                     }
 
 
                 }
 
                 .order-content {
-                    padding: 20rpx 0;
-                    border-top: 1px solid #f0f0f0;
-                    border-bottom: 1px solid #f0f0f0;
-
-                    .info-item {
-                        display: flex;
-                        margin-bottom: 16rpx;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-
-                        .label {
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 0.50);
-                        }
-
-                        .value {
-                            margin-left: 100rpx;
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 1);
-                        }
-                    }
+                    // 样式已移到 InfoDisplay 组件中
                 }
 
                 .order-footer {

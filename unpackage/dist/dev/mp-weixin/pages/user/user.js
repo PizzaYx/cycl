@@ -26,6 +26,20 @@ const _sfc_main = {
         filePicker.value.chooseFile();
       }
     };
+    const handleLogout = () => {
+      common_vendor.index.showModal({
+        title: "确认退出",
+        content: "确定要退出登录吗？",
+        confirmText: "退出",
+        cancelText: "取消",
+        confirmColor: "#ff4444",
+        success: (res) => {
+          if (res.confirm) {
+            userStore.logout();
+          }
+        }
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.o(back),
@@ -47,7 +61,8 @@ const _sfc_main = {
         f: common_vendor.o(handleAvatarClick),
         g: common_vendor.t(common_vendor.unref(userStore).nickName || "未设置"),
         h: common_vendor.t(common_vendor.unref(userStore).userName || "未设置"),
-        i: common_vendor.t(common_vendor.unref(userStore).userTypeText)
+        i: common_vendor.t(common_vendor.unref(userStore).userTypeText),
+        j: common_vendor.o(handleLogout)
       });
     };
   }

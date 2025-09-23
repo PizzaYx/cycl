@@ -16,7 +16,7 @@
         </view>
 
         <!-- 清除按钮 - 覆盖在弹出层上 -->
-        <view v-if="showClearButton" class="clear-button-overlay" @click="clearTimeRange">
+        <view class="clear-button-overlay" :class="{ show: showClearButton }" @click="clearTimeRange">
             <view class="clear-button">
                 <text>清除</text>
             </view>
@@ -83,22 +83,21 @@ const getCurrentDateTime = () => {
 
 /**
  * 时间选择器显示时触发
- * 延迟显示清除按钮，确保弹窗完全显示后再显示
+ * 让按钮跟随时间选择器一起从底部弹出
  */
 const onTimePickerShow = () => {
     console.log('时间选择器已打开')
-    // 延迟显示清除按钮，确保弹窗完全显示后再显示
-    setTimeout(() => {
-        showClearButton.value = true
-    }, 350)
+    // 添加show类，让按钮从底部升起来
+    showClearButton.value = true
 }
 
 /**
  * 时间选择器关闭时触发
- * 隐藏清除按钮
+ * 让按钮回到底部
  */
 const onTimePickerClose = () => {
     console.log('时间选择器已关闭')
+    // 移除show类，让按钮回到底部
     showClearButton.value = false
 }
 
@@ -156,21 +155,24 @@ defineExpose({
         }
     }
 
-    // 清除按钮覆盖层
+    // 清除按钮覆盖层 - 基于 uni-datetime-picker 的实际弹出层位置
     .clear-button-overlay {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         bottom: 0;
-        z-index: 9999;
+        z-index: 100; // 确保在弹出层之上（弹出层z-index是99）
         pointer-events: none; // 让点击穿透到下层
 
         .clear-button {
             position: absolute;
-            top: 740rpx;
-            left: 30rpx;
-            transform: translateY(-50%);
+            // 基于 uni-datetime-picker 移动端弹出层位置定位
+            // 弹出层从底部向上滑入，使用 translateY(0) 显示在底部
+            // 清除按钮放在弹出层上方
+            bottom: calc(var(--window-bottom) + 445px); // 弹出层高度 + 安全距离
+            left: 10%; // 水平居中
+            transform: translateX(-50%) translateY(100vh); // 水平居中 + 初始位置在视窗外
             display: flex;
             align-items: center;
             justify-content: center;
@@ -178,6 +180,9 @@ defineExpose({
             background-color: #007aff;
             border-radius: 50rpx;
             pointer-events: auto; // 恢复按钮的点击事件
+            box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
+            transition: transform 0.43s ease, opacity 0.1s ease; // 跟随弹出层动画
+            opacity: 0; // 初始透明
 
             text {
                 font-size: 28rpx;
@@ -186,8 +191,16 @@ defineExpose({
 
             &:active {
                 background-color: #0056cc;
+                transform: translateX(-50%) scale(0.95);
             }
         }
     }
+
+    // 当弹出层显示时，清除按钮也显示（跟随动画）
+    .clear-button-overlay.show .clear-button {
+        transform: translateX(-50%) translateY(0); // 显示状态：只水平居中，不向下偏移
+        opacity: 1; // 显示状态：完全不透明
+    }
+
 }
 </style>

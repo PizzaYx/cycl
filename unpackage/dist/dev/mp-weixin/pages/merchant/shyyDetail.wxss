@@ -77,11 +77,11 @@
 }
 .content .info-list.data-v-44f007f0 {
   padding: 0 30rpx;
+  margin-bottom: 40rpx;
 }
 .content .info-list .info-item.data-v-44f007f0 {
-  display: flex;
-  margin-bottom: 32rpx;
-  padding-bottom: 32rpx;
+  display: block;
+  margin-bottom: 30rpx;
   border-bottom: 1rpx solid #f0f0f0;
 }
 .content .info-list .info-item.data-v-44f007f0:last-child {
@@ -90,16 +90,17 @@
   padding-bottom: 0;
 }
 .content .info-list .info-item .label.data-v-44f007f0 {
-  width: 140rpx;
+  display: block;
   font-size: 14px;
   color: #999999;
-  flex-shrink: 0;
+  margin-bottom: 20rpx;
 }
 .content .info-list .info-item .value.data-v-44f007f0 {
-  margin-left: 30rpx;
-  flex: 1;
+  display: block;
   font-size: 14px;
   color: #333333;
+  line-height: 1.4;
+  margin-bottom: 5rpx;
 }
 .content .photo-section.data-v-44f007f0 {
   margin-top: 48rpx;

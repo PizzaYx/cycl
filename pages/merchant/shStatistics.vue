@@ -34,43 +34,12 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text class="status-tag" :class="getStatusClass(item)">
-                                    {{ getStatusText(item) }}
-                                </text>
+                                <StatusTag :status="item.status" />
                             </view>
 
                         </view>
                         <view class="order-content">
-                            <view class="info-item">
-                                <text class="label">预估时间:</text>
-                                <text class="value">{{ item.appointmentTime ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运时间:</text>
-                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估重量:</text>
-                                <text class="value">{{ (item.estimateWeight + ' kg') ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运重量:</text>
-                                <text class="value">{{ item.weight ? (item.weight + ' kg') : '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估桶数:</text>
-                                <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + ' 个') :
-                                    '暂无'
-                                }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运桶数:</text>
-                                <text class="value">{{ item.bucketNum ? (item.bucketNum + ' 个') : '暂无' }} </text>
-                            </view>
-                            <!-- <view class="info-item">
-                                <text class="label">地址:</text>
-                                <text class="value">{{ item.address ?? '暂无' }} </text>
-                            </view> -->
+                            <InfoDisplay :fields="getInfoFields(item)" />
                         </view>
                         <view class="order-footer">
 
@@ -118,6 +87,8 @@ import {
 import { useUserStore } from '@/stores/user.js'
 import TimeRangePicker from '@/components/TimeRangePicker/TimeRangePicker.vue'
 import StatusPicker from '@/components/StatusPicker/StatusPicker.vue'
+import StatusTag from '@/components/StatusTag/StatusTag.vue'
+import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
 
 
 const userStore = useUserStore();
@@ -151,41 +122,18 @@ const handleViewDetails = (item) => {
     });
 };
 
-// 状态转换函数
-const getStatusText = (item) => {
-    switch (item.status) {
-        case 0:
-            return '进行中';
-        case 1:
-            {
-                if (item.merchantConfirm) {
-                    return '已完成';
-                } else {
-                    return '待确认';
-                }
-            }
-        case 2:
-            return '无需收运';
-        default:
-            return '未知状态';
-    }
+// 生成信息字段配置
+const getInfoFields = (item) => {
+    return [
+        { key: 'appointmentTime', label: '预估时间', value: item.appointmentTime },
+        { key: 'arrivalTime', label: '收运时间', value: item.arrivalTime },
+        { key: 'estimateWeight', label: '预估重量', value: item.estimateWeight },
+        { key: 'weight', label: '收运重量', value: item.weight },
+        { key: 'estimateBucketNum', label: '预估桶数', value: item.estimateBucketNum },
+        { key: 'bucketNum', label: '收运桶数', value: item.bucketNum }
+    ];
 };
 
-// 获取状态样式类名
-const getStatusClass = (item) => {
-    switch (item.status) {
-        case 0: return 'processing';
-        case 1: {
-            if (item.merchantConfirm) {
-                return 'completed';
-            } else {
-                return 'pending';
-            }
-        }
-        case 2: return 'cancelled';
-        default: return '';
-    }
-};
 
 //搜索统计数据
 const getToStatistics = async () => {
@@ -459,69 +407,11 @@ onMounted(() => {
                             color: rgba(61, 61, 61, 1);
                         }
 
-                        .status-tag {
-                            border-radius: 8rpx;
-                            font-size: 24rpx;
-                            width: 120rpx;
-                            height: 40rpx;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-
-
-                            &.processing {
-                                //进行中 待完成
-                                color: rgba(0, 170, 255, 1);
-                                background: rgba(0, 170, 255, 0.10);
-                            }
-
-                            &.completed {
-                                //已完成
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
-                            }
-
-                            &.pending {
-                                //待确认
-                                color: rgba(255, 161, 0, 1);
-                                background: rgba(255, 161, 0, 0.10);
-                            }
-
-                            &.cancelled {
-                                //无法收运
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
-                            }
-                        }
                     }
-
-
                 }
 
                 .order-content {
-                    padding: 20rpx 0;
-                    border-top: 1px solid #f0f0f0;
-                    border-bottom: 1px solid #f0f0f0;
-
-                    .info-item {
-                        display: flex;
-                        margin-bottom: 16rpx;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-
-                        .label {
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 0.50);
-                        }
-
-                        .value {
-                            margin-left: 30rpx;
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 1);
-                        }
-                    }
+                    // 样式已移到 InfoDisplay 组件中
                 }
 
                 .order-footer {

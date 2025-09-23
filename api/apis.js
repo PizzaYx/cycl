@@ -161,6 +161,32 @@ export function apiSelectMerchantList(data = {}) {
     })
 }
 
+///api/merchantapi/getCovenantTemplat 商户合同模版
+export function apiGetCovenantTemplat() {
+    return request({
+        url: "/api/merchantapi/getCovenantTemplate",
+    })
+}
+
+/// /api/merchantapi/getMerchantCovenant 获取商户合同
+export function apiGetMerchantCovenant(data = {}) {
+    return request({
+        url: "/api/merchantapi/getMerchantCovenant",
+        data
+    })
+}
+
+///api/merchantapi/addMerchantCovenant 提交商户合同
+export function apiAddMerchantCovenant(data = {}) {
+    return request({
+        url: "/api/merchantapi/addMerchantCovenant",
+        data,
+        method: "POST"
+    })
+}
+
+
+
 
 //------------------------收运端 司机------------------------------//
 

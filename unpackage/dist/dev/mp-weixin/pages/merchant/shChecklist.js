@@ -4,17 +4,16 @@ const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
-  const _easycom_uni_badge2 = common_vendor.resolveComponent("uni-badge");
   const _component_uni_button = common_vendor.resolveComponent("uni-button");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_nav_bar2 + _easycom_uni_badge2 + _component_uni_button + _easycom_uni_load_more2)();
+  (_easycom_uni_nav_bar2 + _component_uni_button + _easycom_uni_load_more2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
-const _easycom_uni_badge = () => "../../uni_modules/uni-badge/components/uni-badge/uni-badge.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_badge + _easycom_uni_load_more)();
+  (_easycom_uni_nav_bar + InfoDisplay + _easycom_uni_load_more)();
 }
+const InfoDisplay = () => "../../components/InfoDisplay/InfoDisplay.js";
 const _sfc_main = {
   __name: "shChecklist",
   setup(__props) {
@@ -46,13 +45,8 @@ const _sfc_main = {
         switch (item.status) {
           case 0:
             return "进行中";
-          case 1: {
-            if (item.merchantConfirm) {
-              return "已完成";
-            } else {
-              return "待确认";
-            }
-          }
+          case 1:
+            return "已完成";
           case 2:
             return "无法收运";
           default:
@@ -74,13 +68,8 @@ const _sfc_main = {
         switch (item.status) {
           case 0:
             return "processing";
-          case 1: {
-            if (item.merchantConfirm) {
-              return "completed";
-            } else {
-              return "pending";
-            }
-          }
+          case 1:
+            return "completed";
           case 2:
             return "cancelled";
           default:
@@ -89,13 +78,13 @@ const _sfc_main = {
       }
     };
     const handleCancel = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:214", "取消按钮被点击111", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:175", "取消按钮被点击111", item);
       common_vendor.index.showModal({
         title: "提示",
         content: "确定要取消此预约吗？",
         success: async (res) => {
           var _a;
-          common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:219", "用户点击了确定按钮", res);
+          common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:180", "用户点击了确定按钮", res);
           if (res.confirm) {
             const resdata = await api_apis.apiGetcancelPlanById({
               merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
@@ -117,13 +106,13 @@ const _sfc_main = {
               });
             }
           } else if (res.cancel) {
-            common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:248", "取消取消预约");
+            common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:209", "取消取消预约");
           }
         }
       });
     };
     const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:255", "查看详情按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:216", "查看详情按钮被点击", item);
       if (currentTab.value == 0) {
         common_vendor.index.navigateTo({
           url: `/pages/merchant/shyyDetail?id=${item.id}&merchantId =${item.merchantId}`
@@ -134,9 +123,19 @@ const _sfc_main = {
         });
       }
     };
+    const getInfoFields = (item) => {
+      return [
+        { key: "estimateBucketNum", label: "预估收运", value: item.estimateBucketNum },
+        { key: "bucketNum", label: "今日收运", value: item.bucketNum },
+        { key: "estimateWeight", label: "预估重量", value: item.estimateWeight },
+        { key: "weight", label: "收运重量", value: item.weight },
+        { key: "registrationNumber", label: "车辆信息", value: item.registrationNumber },
+        { key: "arrivalTime", label: "收运时间", value: item.arrivalTime }
+      ];
+    };
     const handleConfirmTransport = async (item) => {
       var _a;
-      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:271", "确认收运按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:244", "确认收运按钮被点击", item);
       if (item.arrivalTime == null) {
         common_vendor.index.showToast({
           title: "请等待师傅确认收运完成!",
@@ -170,7 +169,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:311", "确认收运失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:284", "确认收运失败:", error);
         common_vendor.index.showToast({
           title: "网络错误，请重试",
           icon: "none"
@@ -214,7 +213,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:374", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:347", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -262,22 +261,11 @@ const _sfc_main = {
         c: common_vendor.f(tabs, (tab, index, i0) => {
           return common_vendor.e({
             a: common_vendor.t(tab.value),
-            b: tab.value === "进行中" && processingBadgeText.value !== 0
-          }, tab.value === "进行中" && processingBadgeText.value !== 0 ? {
-            c: "0412d1ef-1-" + i0,
-            d: common_vendor.p({
-              type: "error",
-              text: processingBadgeText.value,
-              ["is-dot"]: false,
-              absolute: "rightTop",
-              offset: [-5, -12]
-            })
-          } : {}, {
-            e: currentTab.value === index
+            b: currentTab.value === index
           }, currentTab.value === index ? {} : {}, {
-            f: index,
-            g: currentTab.value === index ? 1 : "",
-            h: common_vendor.o(($event) => handleTabClick(index), index)
+            c: index,
+            d: currentTab.value === index ? 1 : "",
+            e: common_vendor.o(($event) => handleTabClick(index), index)
           });
         }),
         d: allOrderList.value.length > 0
@@ -287,53 +275,51 @@ const _sfc_main = {
             a: common_vendor.t(item.merchantName),
             b: common_vendor.t(getStatusText(item)),
             c: common_vendor.n(getStatusClass(item)),
-            d: common_vendor.t(item.estimateBucketNum),
-            e: common_vendor.t(item.bucketNum ? item.bucketNum + " 桶" : "暂无"),
-            f: common_vendor.t(item.estimateWeight ?? 0),
-            g: common_vendor.t(item.weight ? item.weight + " kg" : "暂无"),
-            h: common_vendor.t(item.registrationNumber ?? "暂无"),
-            i: common_vendor.t(item.arrivalTime ?? "暂无")
+            d: "0412d1ef-1-" + i0,
+            e: common_vendor.p({
+              fields: getInfoFields(item)
+            })
           }, currentTab.value == 0 ? common_vendor.e({
-            j: item.status == 0
+            f: item.status == 0
           }, item.status == 0 ? {
-            k: common_vendor.o(($event) => handleCancel(item), index),
-            l: "0412d1ef-2-" + i0,
-            m: common_vendor.p({
+            g: common_vendor.o(($event) => handleCancel(item), index),
+            h: "0412d1ef-2-" + i0,
+            i: common_vendor.p({
               size: "mini",
               type: "default"
             })
           } : {}, {
-            n: common_vendor.o(($event) => handleViewDetails(item), index),
-            o: "0412d1ef-3-" + i0,
-            p: common_vendor.p({
+            j: common_vendor.o(($event) => handleViewDetails(item), index),
+            k: "0412d1ef-3-" + i0,
+            l: common_vendor.p({
               size: "mini",
               type: "primary"
             })
           }) : currentTab.value == 1 ? common_vendor.e({
-            q: getStatusText(item) === "待确认"
+            m: getStatusText(item) === "待确认"
           }, getStatusText(item) === "待确认" ? {
-            r: common_vendor.o(($event) => handleConfirmTransport(item), index),
-            s: "0412d1ef-4-" + i0,
-            t: common_vendor.p({
+            n: common_vendor.o(($event) => handleConfirmTransport(item), index),
+            o: "0412d1ef-4-" + i0,
+            p: common_vendor.p({
               size: "mini",
               type: "primary"
             })
           } : {}, {
-            v: common_vendor.o(($event) => handleViewDetails(item), index),
-            w: "0412d1ef-5-" + i0,
-            x: common_vendor.p({
+            q: common_vendor.o(($event) => handleViewDetails(item), index),
+            r: "0412d1ef-5-" + i0,
+            s: common_vendor.p({
               size: "mini",
               type: "default"
             })
           }) : currentTab.value == 2 ? {
-            y: common_vendor.o(($event) => handleViewDetails(item), index),
-            z: "0412d1ef-6-" + i0,
-            A: common_vendor.p({
+            t: common_vendor.o(($event) => handleViewDetails(item), index),
+            v: "0412d1ef-6-" + i0,
+            w: common_vendor.p({
               size: "mini",
               type: "default"
             })
           } : {}, {
-            B: index
+            x: index
           });
         }),
         f: currentTab.value == 0,

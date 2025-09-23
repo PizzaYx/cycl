@@ -1,97 +1,168 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
+const api_apis = require("../../api/apis.js");
+const stores_user = require("../../stores/user.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_mp_html2 = common_vendor.resolveComponent("mp-html");
-  (_easycom_uni_nav_bar2 + _easycom_mp_html2)();
+  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _easycom_mp_html2)();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_mp_html = () => "../../uni_modules/mp-html/components/mp-html/mp-html.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_mp_html)();
+  (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_mp_html)();
 }
 const _sfc_main = {
   __name: "syContract",
   setup(__props) {
-    const contractId = common_vendor.ref("");
+    const tempId = common_vendor.ref("");
     const contractData = common_vendor.ref({});
+    const isReadOnly = common_vendor.ref(false);
+    const needReturnData = common_vendor.ref(false);
+    const fromMerchant = common_vendor.ref(false);
+    const contractExpired = common_vendor.ref(false);
+    const userStore = stores_user.useUserStore();
     const signatures = common_vendor.ref({
       partyB: ""
       // 乙方签名
     });
-    const contractContent = common_vendor.ref(`
-<div style="font-size: 16px; line-height: 1.8; color: #333; padding: 20px;">
-    <h2 style="text-align: center; margin-bottom: 30px; color: #333;">垃圾收运服务合同</h2>
-    
-    <p><strong>甲方（商户）：</strong>________________</p>
-    <p><strong>乙方（收运方）：</strong>________________</p>
-    
-    <p style="margin: 20px 0;">根据《中华人民共和国合同法》及相关法律法规，甲乙双方在平等、自愿、协商一致的基础上，就垃圾收运服务事宜达成如下协议：</p>
-    
-    <h3 style="color: #333; margin: 20px 0 10px 0;">第一条 服务内容</h3>
-    <p>乙方为甲方提供垃圾收运服务，包括但不限于：</p>
-    <ol style="margin: 10px 0; padding-left: 20px;">
-        <li>定期上门收集生活垃圾；</li>
-        <li>按照环保要求进行分类处理；</li>
-        <li>提供收运服务相关证明文件。</li>
-    </ol>
-    
-    <h3 style="color: #333; margin: 20px 0 10px 0;">第二条 服务时间</h3>
-    <p>服务时间：每周一、三、五上午8:00-12:00</p>
-    
-    <h3 style="color: #333; margin: 20px 0 10px 0;">第三条 费用标准</h3>
-    <p>服务费用：每月500元，按季度结算。</p>
-    
-    <h3 style="color: #333; margin: 20px 0 10px 0;">第四条 双方权利义务</h3>
-    <p><strong>甲方权利：</strong></p>
-    <ol style="margin: 10px 0; padding-left: 20px;">
-        <li>要求乙方按时提供收运服务；</li>
-        <li>对服务质量进行监督。</li>
-    </ol>
-    
-    <p><strong>甲方义务：</strong></p>
-    <ol style="margin: 10px 0; padding-left: 20px;">
-        <li>按时支付服务费用；</li>
-        <li>配合乙方收运工作。</li>
-    </ol>
-    
-    <h3 style="color: #333; margin: 20px 0 10px 0;">第五条 违约责任</h3>
-    <p>任何一方违反本合同约定，应承担相应的违约责任。</p>
-    
-    <h3 style="color: #333; margin: 20px 0 10px 0;">第六条 合同期限</h3>
-    <p>本合同自双方签字盖章之日起生效，有效期为一年。</p>
-    
-    <h3 style="color: #333; margin: 20px 0 10px 0;">第七条 争议解决</h3>
-    <p>因本合同引起的争议，双方应友好协商解决；协商不成的，可向有管辖权的人民法院起诉。</p>
-    
-    <div style="margin-top: 40px;">
-        <p><strong>乙方（签字）：</strong><span id="signature-btn" style="padding: 8px 16px; background: #07c160; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; display: inline-block; margin-left: 10px;">点击签名</span></p>
-        <p><strong>日期：</strong>________________</p>
-    </div>
-</div>
-`);
+    const contractContent = common_vendor.ref("");
+    const decodeHtmlEntities = (str) => {
+      if (!str)
+        return "";
+      return str.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+    };
+    const checkContractExpiry = (endTime) => {
+      if (!endTime)
+        return false;
+      try {
+        let endDate;
+        if (endTime.includes("年") && endTime.includes("月") && endTime.includes("日")) {
+          const match = endTime.match(/(\d{4})年(\d{1,2})月(\d{1,2})日/);
+          if (match) {
+            const [, year, month, day] = match;
+            endDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          }
+        } else {
+          endDate = new Date(endTime);
+        }
+        if (!endDate || isNaN(endDate.getTime())) {
+          common_vendor.index.__f__("warn", "at pages/syContract/syContract.vue:89", "无法解析合同结束时间:", endTime);
+          return false;
+        }
+        const currentDate = /* @__PURE__ */ new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        endDate.setHours(23, 59, 59, 999);
+        const isExpired = currentDate > endDate;
+        common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:98", "合同过期检查:", {
+          endTime,
+          endDate: endDate.toISOString(),
+          currentDate: currentDate.toISOString(),
+          isExpired
+        });
+        return isExpired;
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:107", "检查合同过期时间失败:", error);
+        return false;
+      }
+    };
     const canSubmit = common_vendor.computed(() => {
       return signatures.value.partyB;
     });
     common_vendor.onLoad((options) => {
-      contractId.value = options.id || "";
-      loadContractData();
+      tempId.value = options.tempId || "";
+      isReadOnly.value = options.isReadOnly === "true";
+      needReturnData.value = options.needReturn === "true";
+      fromMerchant.value = !options.isReadOnly && !options.needReturn;
+      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:124", "接收到的状态参数:", {
+        isReadOnly: isReadOnly.value,
+        needReturnData: needReturnData.value,
+        tempId: tempId.value,
+        fromMerchant: fromMerchant.value
+      });
+      if (fromMerchant.value) {
+        loadContractForMerchant();
+      } else if (isReadOnly.value) {
+        loadMerchantCovenant();
+      } else {
+        loadCovenantTemplate();
+      }
       loadSignatures();
     });
-    const loadContractData = async () => {
+    const loadMerchantCovenant = async () => {
+      var _a, _b;
+      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:146", "加载商户合同（只读模式）", tempId.value, (_a = userStore.merchant) == null ? void 0 : _a.id);
       try {
-        contractData.value = {
-          title: "垃圾收运服务合同",
-          date: "2024年1月1日",
-          content: contractContent.value
-        };
+        const result = await api_apis.apiGetMerchantCovenant({
+          tempId: tempId.value,
+          merchantId: (_b = userStore.merchant) == null ? void 0 : _b.id
+        });
+        if (result.code === 200 && result.data) {
+          contractContent.value = decodeHtmlEntities(result.data.content || "");
+        } else {
+          contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">暂无合同数据</div>';
+        }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:126", "加载合同数据失败:", error);
         common_vendor.index.showToast({
           title: "加载合同失败",
           icon: "none"
         });
+        contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">加载合同失败</div>';
       }
+    };
+    const loadCovenantTemplate = async () => {
+      try {
+        const result = await api_apis.apiGetCovenantTemplat();
+        if (result.code === 200 && result.data && result.data.content) {
+          contractContent.value = decodeHtmlEntities(result.data.content);
+          contractData.value = result.data;
+        } else {
+          contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">暂无合同模板</div>';
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:179", "加载合同模板失败:", error);
+        contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">加载合同模板失败</div>';
+      }
+    };
+    const loadContractForMerchant = async () => {
+      var _a;
+      try {
+        common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:187", "从merchant页面进入，先尝试获取商户合同");
+        const merchantResult = await api_apis.apiGetMerchantCovenant({
+          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+        });
+        if (merchantResult.code === 200 && merchantResult.data && merchantResult.data.content) {
+          const contractData2 = merchantResult.data;
+          const isExpired = checkContractExpiry(contractData2.endTime);
+          if (isExpired) {
+            common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:200", "合同已过期，需要重新编辑");
+            contractExpired.value = true;
+            await loadCovenantTemplate();
+            isReadOnly.value = false;
+          } else {
+            common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:206", "合同未过期，只读显示");
+            contractContent.value = decodeHtmlEntities(contractData2.content);
+            isReadOnly.value = true;
+          }
+        } else {
+          common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:212", "未找到商户合同，获取模板进入编辑模式");
+          await loadCovenantTemplate();
+          isReadOnly.value = false;
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:217", "加载商户合同失败，尝试获取模板:", error);
+        await loadCovenantTemplate();
+        isReadOnly.value = false;
+      }
+    };
+    const getCurrentDate = () => {
+      const currentDate = /* @__PURE__ */ new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
     };
     const loadSignatures = () => {
       signatures.value = {
@@ -100,33 +171,27 @@ const _sfc_main = {
     };
     const updateContractWithSignature = () => {
       if (signatures.value.partyB) {
-        const signatureHtml = `<img src="${signatures.value.partyB}" style="max-width: 150px; max-height: 40px; border-radius: 4px; vertical-align: middle;" alt="乙方签名" />`;
+        const signatureHtml = `<img src="${signatures.value.partyB}" style="max-width: 270px; max-height: 80px; vertical-align: middle; cursor: pointer;" alt="乙方签名" />`;
         contractContent.value = contractContent.value.replace(
-          '<span id="signature-btn" style="padding: 8px 16px; background: #07c160; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; display: inline-block; margin-left: 10px;">点击签名</span>',
+          '<span id="signature-btn" style="display: inline-block; width: 270px; height: 80px; border: 2px dashed #ccc; border-radius: 8px; margin-left: 10px; text-align: center; line-height: 76px; color: #999; font-size: 16px; cursor: pointer; background: #fafafa; transition: all 0.3s ease;">点击此处签名</span>',
           signatureHtml
+        );
+        const currentDate = getCurrentDate();
+        contractContent.value = contractContent.value.replace(
+          '<span id="start-date">________________</span>',
+          `<span id="start-date">${currentDate}</span>`
         );
       }
     };
     const onRichTextTap = (e) => {
-      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:155", "富文本点击事件触发:", e);
-      goToSignature();
+      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:264", "富文本点击事件触发:", e);
+      if (!isReadOnly.value) {
+        goToSignature();
+      }
     };
     const goToSignature = () => {
       common_vendor.index.navigateTo({
-        url: `/pages/syContract/shSignature?contractId=${contractId.value}`
-      });
-    };
-    const goToPreview = () => {
-      let content = contractContent.value;
-      if (signatures.value.partyB) {
-        const signatureHtml = `<img src="${signatures.value.partyB}" style="max-width: 150px; max-height: 40px; border-radius: 4px; vertical-align: middle;" alt="乙方签名" />`;
-        content = content.replace(
-          '<span id="signature-btn" style="padding: 8px 16px; background: #07c160; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; display: inline-block; margin-left: 10px;">点击签名</span>',
-          signatureHtml
-        );
-      }
-      common_vendor.index.navigateTo({
-        url: `/pages/syContract/syPreview?content=${encodeURIComponent(content)}&title=${encodeURIComponent(contractData.value.title || "垃圾收运服务合同")}`
+        url: `/pages/syContract/shSignature`
       });
     };
     const submitContract = () => {
@@ -148,122 +213,65 @@ const _sfc_main = {
       });
     };
     const submitContractToServer = async () => {
+      var _a;
       try {
         common_vendor.index.showLoading({
           title: "提交中..."
         });
-        try {
-          await new Promise((resolve) => setTimeout(resolve, 500));
-          common_vendor.index.createSelectorQuery().select(".contract-body").fields({
-            node: true,
-            size: true,
-            rect: true
-          }).exec(async (res) => {
-            if (res[0]) {
-              try {
-                common_vendor.index.createSelectorQuery().select(".contract-body").boundingClientRect().exec(async (rectRes) => {
-                  if (rectRes[0]) {
-                    const ctx = common_vendor.index.createCanvasContext("contractCanvas");
-                    const dpr = common_vendor.index.getSystemInfoSync().pixelRatio;
-                    const width = 750 * dpr;
-                    const height = 2e3 * dpr;
-                    ctx.setFillStyle("#ffffff");
-                    ctx.fillRect(0, 0, width, height);
-                    ctx.setFillStyle("#333333");
-                    ctx.setFontSize(16 * dpr);
-                    ctx.setTextAlign("left");
-                    ctx.setFontSize(20 * dpr);
-                    ctx.fillText("垃圾收运服务合同", 20 * dpr, 50 * dpr);
-                    ctx.setFontSize(14 * dpr);
-                    const contractText = contractContent.value.replace(/<[^>]*>/g, "");
-                    const lines = contractText.split("\n");
-                    let y = 100 * dpr;
-                    const lineHeight = 25 * dpr;
-                    const maxWidth = width - 40 * dpr;
-                    lines.forEach((line) => {
-                      if (line.trim()) {
-                        const words = line.trim().split("");
-                        let currentLine = "";
-                        let currentY = y;
-                        words.forEach((char) => {
-                          currentLine += char;
-                          if (currentLine.length > 50) {
-                            ctx.fillText(currentLine, 20 * dpr, currentY);
-                            currentLine = "";
-                            currentY += lineHeight;
-                          }
-                        });
-                        if (currentLine) {
-                          ctx.fillText(currentLine, 20 * dpr, currentY);
-                          currentY += lineHeight;
-                        }
-                        y = currentY + 10 * dpr;
-                      }
-                    });
-                    if (signatures.value.partyB) {
-                      ctx.drawImage(signatures.value.partyB, 20 * dpr, y, 200 * dpr, 80 * dpr);
-                    }
-                    ctx.draw(false, () => {
-                      common_vendor.index.canvasToTempFilePath({
-                        canvasId: "contractCanvas",
-                        success: async (canvasRes) => {
-                          try {
-                            await common_vendor.index.saveImageToPhotosAlbum({
-                              filePath: canvasRes.tempFilePath,
-                              success: () => {
-                                common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:305", "合同图片已保存到相册");
-                                common_vendor.index.showToast({
-                                  title: "合同图片已保存",
-                                  icon: "success"
-                                });
-                              },
-                              fail: (error) => {
-                                common_vendor.index.__f__("warn", "at pages/syContract/syContract.vue:312", "保存合同图片到相册失败:", error);
-                                common_vendor.index.showToast({
-                                  title: "保存失败",
-                                  icon: "none"
-                                });
-                              }
-                            });
-                          } catch (error) {
-                            common_vendor.index.__f__("warn", "at pages/syContract/syContract.vue:320", "保存合同图片失败:", error);
-                          }
-                        },
-                        fail: (error) => {
-                          common_vendor.index.__f__("warn", "at pages/syContract/syContract.vue:324", "生成合同图片失败:", error);
-                          common_vendor.index.showToast({
-                            title: "生成图片失败",
-                            icon: "none"
-                          });
-                        }
-                      });
-                    });
-                  }
-                });
-              } catch (error) {
-                common_vendor.index.__f__("warn", "at pages/syContract/syContract.vue:335", "生成合同图片失败:", error);
-              }
-            }
-          });
-        } catch (error) {
-          common_vendor.index.__f__("warn", "at pages/syContract/syContract.vue:340", "保存合同失败:", error);
+        let finalContractContent = contractContent.value;
+        if (signatures.value.partyB) {
+          const signatureHtml = `<img src="${signatures.value.partyB}" style="max-width: 300px; max-height: 80px; border-radius: 8px; vertical-align: middle; border: 1px solid #e0e0e0;" alt="乙方签名" />`;
+          finalContractContent = finalContractContent.replace(
+            '<span id="signature-btn" style="display: inline-block; width: 270px; height: 80px; border: 2px dashed #ccc; border-radius: 8px; margin-left: 10px; text-align: center; line-height: 76px; color: #999; font-size: 16px; cursor: pointer; background: #fafafa; transition: all 0.3s ease;">点击此处签名</span>',
+            signatureHtml
+          );
+          const currentDate = getCurrentDate();
+          finalContractContent = finalContractContent.replace(
+            '<span id="start-date">________________</span>',
+            `<span id="start-date">${currentDate}</span>`
+          );
         }
-        setTimeout(() => {
-          common_vendor.index.hideLoading();
-          common_vendor.index.showToast({
-            title: "合同提交成功",
-            icon: "success"
-          });
-          signatures.value = {
-            partyB: ""
+        try {
+          const submitData = {
+            content: finalContractContent,
+            // 富文本内容
+            merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+            // 商户ID
+            startTime: getCurrentDate(),
+            // 开始日期
+            endTime: contractData.value.endTime,
+            // 结束日期
+            tempId: contractData.value.id
+            // 合同模板ID
           };
-          setTimeout(() => {
-            common_vendor.index.navigateBack();
-          }, 1500);
-        }, 2e3);
+          common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:338", "提交合同数据:", submitData);
+          const response = await api_apis.apiAddMerchantCovenant(submitData);
+          if (response.code === 200) {
+            common_vendor.index.hideLoading();
+            common_vendor.index.showToast({
+              title: "合同提交成功",
+              icon: "success"
+            });
+            signatures.value = {
+              partyB: ""
+            };
+            setTimeout(() => {
+              common_vendor.index.navigateBack();
+            }, 1500);
+          } else {
+            throw new Error(response.message || "提交失败");
+          }
+        } catch (error) {
+          common_vendor.index.hideLoading();
+          common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:364", "提交合同失败:", error);
+          common_vendor.index.showToast({
+            title: "提交失败，请重试",
+            icon: "none"
+          });
+        }
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:364", "提交合同失败:", error);
+        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:373", "提交合同失败:", error);
         common_vendor.index.showToast({
           title: "提交失败，请重试",
           icon: "none"
@@ -271,16 +279,44 @@ const _sfc_main = {
       }
     };
     const back = () => {
+      if (needReturnData.value && !signatures.value.partyB) {
+        common_vendor.index.showToast({
+          title: "请先完成签名",
+          icon: "none"
+        });
+      }
       common_vendor.index.navigateBack();
     };
     common_vendor.onMounted(() => {
       common_vendor.index.$on("signatureUpdated", (signatureData) => {
         signatures.value = signatureData;
         updateContractWithSignature();
+        if (needReturnData.value && signatures.value.partyB) {
+          prepareReturnData();
+        }
       });
     });
+    const prepareReturnData = () => {
+      const currentDate = /* @__PURE__ */ new Date();
+      const year = currentDate.getFullYear();
+      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
+      const day = String(currentDate.getDate()).padStart(2, "0");
+      const createTime = `${year}-${month}-${day}`;
+      const returnData = {
+        content: contractContent.value,
+        // 修改后的富文本内容
+        createTime,
+        // 回显的开始日期
+        endTime: contractData.value.endTime,
+        // 从result.data获取的结束日期
+        id: contractData.value.id
+        // 从result.data获取的合同ID
+      };
+      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:425", "准备返回给上级页面的数据:", returnData);
+      common_vendor.index.$emit("contractUpdated", returnData);
+    };
     return (_ctx, _cache) => {
-      return {
+      return common_vendor.e({
         a: common_vendor.o(back),
         b: common_vendor.p({
           dark: true,
@@ -291,18 +327,23 @@ const _sfc_main = {
           color: "#000",
           title: "合同详情"
         }),
-        c: common_vendor.t(contractData.value.title || "垃圾收运服务合同"),
-        d: common_vendor.t(contractData.value.date || "2024年1月1日"),
+        c: contractExpired.value && fromMerchant.value
+      }, contractExpired.value && fromMerchant.value ? {
+        d: common_vendor.p({
+          type: "info",
+          size: "16",
+          color: "#ff9500"
+        })
+      } : {}, {
         e: common_vendor.o(onRichTextTap),
         f: common_vendor.p({
           content: contractContent.value
         }),
-        g: common_vendor.t(signatures.value.partyB ? "修改签名" : "签名"),
-        h: common_vendor.o(goToSignature),
-        i: common_vendor.o(goToPreview),
-        j: !canSubmit.value,
-        k: common_vendor.o(submitContract)
-      };
+        g: fromMerchant.value && !isReadOnly.value
+      }, fromMerchant.value && !isReadOnly.value ? {
+        h: common_vendor.o(submitContract),
+        i: !canSubmit.value
+      } : {});
     };
   }
 };

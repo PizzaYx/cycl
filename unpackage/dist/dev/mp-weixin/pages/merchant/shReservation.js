@@ -34,7 +34,7 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       props.value.id = options.id ? parseInt(options.id) : null;
       props.value.status = options.status ? parseInt(options.status) : null;
-      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:132", "接收到的参数:", props.value);
+      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:141", "接收到的参数:", props.value);
     });
     const isReadOnly = common_vendor.computed(() => {
       return authStatus.value === "pending" || authStatus.value === "approved";
@@ -124,6 +124,23 @@ const _sfc_main = {
       }
     };
     const submitting = common_vendor.ref(false);
+    const getDateTimeText = () => {
+      if (formData.estimatedTime) {
+        return formatDateTime(formData.estimatedTime);
+      }
+      return "";
+    };
+    const formatDateTime = (dateTime) => {
+      if (!dateTime)
+        return "";
+      const date = new Date(dateTime);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+    const openDateTimePicker = () => {
+    };
     common_vendor.onMounted(async () => {
       await userStore.ensureUserInfo();
       if (props.value.status !== null)
@@ -132,7 +149,7 @@ const _sfc_main = {
     });
     const fillFormData = (data) => {
       var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
-      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:267", "开始数据回显:", data, "用户信息:", userStore.userInfo);
+      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:296", "开始数据回显:", data, "用户信息:", userStore.userInfo);
       formData.merchantName = ((_a = userStore.merchant) == null ? void 0 : _a.name) || ((_b = userStore.userInfo) == null ? void 0 : _b.name) || "";
       formData.address = ((_c = userStore.merchant) == null ? void 0 : _c.address) || ((_d = userStore.userInfo) == null ? void 0 : _d.address) || "";
       formData.contactPerson = ((_e = userStore.merchant) == null ? void 0 : _e.contactTruename) || ((_f = userStore.userInfo) == null ? void 0 : _f.contactTruename) || "";
@@ -143,13 +160,13 @@ const _sfc_main = {
         formData.estimatedTime = data.estimatedTime || "";
         formData.estimatedRemarks = data.estimatedRemarks || "";
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:283", "数据回显完成:", formData);
+      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:312", "数据回显完成:", formData);
     };
     const validateForm = async () => {
       try {
         return await formRef.value.validate();
       } catch (error) {
-        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:292", "表单验证失败:", error);
+        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:321", "表单验证失败:", error);
         return false;
       }
     };
@@ -182,7 +199,7 @@ const _sfc_main = {
           // 备注说明
         };
         const result = await api_apis.apiPostaddPlanTemporary(submitData);
-        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:321", "预约提交API返回:", submitData);
+        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:350", "预约提交API返回:", submitData);
         if (result && result.code === 200) {
           common_vendor.index.showToast({
             title: "预约申请提交成功",
@@ -199,7 +216,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shReservation.vue:346", "提交认证失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shReservation.vue:375", "提交认证失败:", error);
         common_vendor.index.showToast({
           title: "提交失败，请重试",
           icon: "none"
@@ -300,52 +317,70 @@ const _sfc_main = {
           modelValue: formData.estimatedWeight
         }),
         y: common_vendor.p({
-          label: "预估垃圾重量",
+          label: "预估垃圾重量(kg)",
           name: "estimatedWeight",
           required: true
         }),
-        z: common_vendor.o(($event) => formData.estimatedTime = $event),
+        z: isReadOnly.value
+      }, isReadOnly.value ? {
         A: common_vendor.p({
+          value: getDateTimeText(),
+          disabled: true,
+          placeholder: "请选择预约时间",
+          clearable: false
+        })
+      } : common_vendor.e({
+        B: formData.estimatedTime
+      }, formData.estimatedTime ? {
+        C: common_vendor.t(formatDateTime(formData.estimatedTime))
+      } : {}, {
+        D: common_vendor.p({
+          type: "calendar",
+          size: "20",
+          color: "#999"
+        }),
+        E: common_vendor.o(openDateTimePicker),
+        F: common_vendor.o(($event) => formData.estimatedTime = $event),
+        G: common_vendor.p({
           type: "date",
           start: minDate.value,
           end: maxDate.value,
-          placeholder: "请选择预约时间",
           clearable: false,
-          disabled: isReadOnly.value,
           modelValue: formData.estimatedTime
-        }),
-        B: common_vendor.p({
+        })
+      }), {
+        H: common_vendor.p({
           label: "预约时间",
           name: "estimatedTime",
           required: true
         }),
-        C: common_vendor.o(($event) => formData.estimatedRemarks = $event),
-        D: common_vendor.p({
+        I: common_vendor.o(($event) => formData.estimatedRemarks = $event),
+        J: common_vendor.p({
           placeholder: "请输入其他要说明的信息",
           type: "text",
           clearable: false,
           disabled: isReadOnly.value,
           modelValue: formData.estimatedRemarks
         }),
-        E: common_vendor.p({
+        K: common_vendor.p({
           label: "备注说明",
           name: "estimatedRemarks",
           required: true
         }),
-        F: common_vendor.sr(formRef, "9b099ba5-4", {
+        L: common_vendor.sr(formRef, "9b099ba5-4", {
           "k": "formRef"
         }),
-        G: common_vendor.p({
+        M: common_vendor.p({
           modelValue: formData,
           rules: formRules,
           ["label-position"]: "top"
         }),
-        H: isReadOnly.value ? 1 : "",
-        I: authStatus.value === "none" || authStatus.value === "rejected"
+        N: isReadOnly.value ? 1 : "",
+        O: authStatus.value === "none" || authStatus.value === "rejected"
       }, authStatus.value === "none" || authStatus.value === "rejected" ? {
-        J: common_vendor.t(authStatus.value === "rejected" ? "重新提交" : "提交"),
-        K: common_vendor.o(submitAuth),
-        L: submitting.value
+        P: common_vendor.t(authStatus.value === "rejected" ? "重新提交" : "提交"),
+        Q: common_vendor.o(submitAuth),
+        R: submitting.value
       } : {});
     };
   }

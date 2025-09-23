@@ -77,7 +77,7 @@
                             <view class="info-item">
                                 <text class="label">预估重量:</text>
                                 <text class="value">{{ item.estimateWeight ? (item.estimateWeight + 'kg') : '暂无'
-                                }}</text>
+                                    }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运重量:</text>
@@ -86,7 +86,7 @@
                             <view class="info-item">
                                 <text class="label">预估桶数:</text>
                                 <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                }}</text>
+                                    }}</text>
                             </view>
                             <view class="info-item">
                                 <text class="label">收运桶数:</text>

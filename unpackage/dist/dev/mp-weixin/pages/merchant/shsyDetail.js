@@ -7,48 +7,15 @@ if (!Array) {
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 if (!Math) {
-  _easycom_uni_nav_bar();
+  (_easycom_uni_nav_bar + StatusTag)();
 }
+const StatusTag = () => "../../components/StatusTag/StatusTag.js";
 const _sfc_main = {
   __name: "shsyDetail",
   setup(__props) {
     const merchantId = common_vendor.ref();
     const id = common_vendor.ref();
     const pageData = common_vendor.ref({});
-    const getRecordStatusText = () => {
-      switch (pageData.value.status) {
-        case 0:
-          return "进行中";
-        case 1: {
-          if (pageData.value.merchantConfirm) {
-            return "已完成";
-          } else {
-            return "待确认";
-          }
-        }
-        case 2:
-          return "无需收运";
-        default:
-          return "未知状态";
-      }
-    };
-    const getStatusClass = () => {
-      switch (pageData.value.status) {
-        case 0:
-          return "processing";
-        case 1: {
-          if (pageData.value.merchantConfirm) {
-            return "completed";
-          } else {
-            return "pending";
-          }
-        }
-        case 2:
-          return "cancelled";
-        default:
-          return "";
-      }
-    };
     const infoList = common_vendor.computed(() => [
       {
         label: "预估时间:",
@@ -95,14 +62,14 @@ const _sfc_main = {
       } else if (options["merchantId "]) {
         merchantId.value = options["merchantId "];
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:130", "接收到的参数:", options);
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:131", "解析后的参数:", { merchantId: merchantId.value, id: id.value });
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:94", "接收到的参数:", options);
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:95", "解析后的参数:", { merchantId: merchantId.value, id: id.value });
       getSyCheckDetail();
     });
     common_vendor.onMounted(() => {
     });
     const getSyCheckDetail = async () => {
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:146", "获取收运记录详情", merchantId.value, id.value);
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:110", "获取收运记录详情", merchantId.value, id.value);
       const res = await api_apis.apiGetPlanById({
         merchantId: merchantId.value,
         id: id.value
@@ -125,7 +92,7 @@ const _sfc_main = {
           explain: data.explain,
           merchantConfirm: data.merchantConfirm
         };
-        common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:174", "获取收运记录详情成功", pageData.value);
+        common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:138", "获取收运记录详情成功", pageData.value);
       }
     };
     const back = () => {
@@ -144,9 +111,10 @@ const _sfc_main = {
           title: "收运详细"
         }),
         c: common_vendor.t(pageData.value.merchantName),
-        d: common_vendor.t(getRecordStatusText()),
-        e: common_vendor.n(getStatusClass()),
-        f: common_vendor.f(infoList.value, (item, index, i0) => {
+        d: common_vendor.p({
+          status: pageData.value.status
+        }),
+        e: common_vendor.f(infoList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.label),
             b: common_vendor.t(item.value),

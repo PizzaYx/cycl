@@ -8,13 +8,8 @@
                 <view v-for="(tab, index) in tabs" :key="index" class="tab-item"
                     :class="{ active: currentTab === index }" @click="handleTabClick(index)">
                     {{ tab.value }}
-                    <!-- 为预约中tab添加uni-badge -->
-                    <!-- <uni-badge v-if="tab.value === '预约中' && bookingBadgeText !== '0' && bookingBadgeText !== ''"
-                        class="uni-badge" type="error" :text="bookingBadgeText" :is-dot="false" absolute="rightTop"
-                        :offset="[-5, -12]"></uni-badge> -->
-                    <!-- 为进行中tab添加uni-badge -->
-                    <uni-badge v-if="tab.value === '进行中' && processingBadgeText !== 0" class="uni-badge" type="error"
-                        :text="processingBadgeText" :is-dot="false" absolute="rightTop" :offset="[-5, -12]"></uni-badge>
+                    <!-- <uni-badge v-if="tab.value === '进行中' && processingBadgeText !== 0" class="uni-badge" type="error"
+                        :text="processingBadgeText" :is-dot="false" absolute="rightTop" :offset="[-5, -12]"></uni-badge> -->
                     <view class="tab-line" v-if="currentTab === index"></view>
                 </view>
             </view>
@@ -36,30 +31,7 @@
 
                         </view>
                         <view class="order-content">
-                            <view class="info-item">
-                                <text class="label">预估收运：</text>
-                                <text class="value">{{ item.estimateBucketNum }} 桶</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">今日收运：</text>
-                                <text class="value">{{ item.bucketNum ? item.bucketNum + ' 桶' : '暂无' }} </text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估重量：</text>
-                                <text class="value">{{ item.estimateWeight ?? 0 }} kg</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运重量：</text>
-                                <text class="value">{{ item.weight ? item.weight + ' kg' : '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">车辆信息：</text>
-                                <text class="value">{{ item.registrationNumber ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运时间：</text>
-                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
-                            </view>
+                            <InfoDisplay :fields="getInfoFields(item)" />
                         </view>
                         <view class="order-footer">
                             <!-- currentTab == 0: 显示取消和查看详情按钮 -->
@@ -132,6 +104,7 @@ import {
 } from '@/api/apis.js';
 
 import { useUserStore } from '@/stores/user.js'
+import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
 
 //3 预约中 0 待收运 1 已完成
 const tabs = [{ key: "3", value: "预约中" }, { key: "0", value: "进行中" }, { key: "1", value: "已完成" }];
@@ -168,13 +141,7 @@ const getStatusText = (item) => {
     else {
         switch (item.status) {
             case 0: return '进行中';
-            case 1: {
-                if (item.merchantConfirm) {
-                    return '已完成';
-                } else {
-                    return '待确认';
-                }
-            };
+            case 1: return '已完成';
             case 2: return '无法收运';
             default: return '';
         }
@@ -196,13 +163,7 @@ const getStatusClass = (item) => {
     else {
         switch (item.status) {
             case 0: return 'processing';
-            case 1: {
-                if (item.merchantConfirm) {
-                    return 'completed';
-                } else {
-                    return 'pending';
-                }
-            }
+            case 1: return 'completed';
             case 2: return 'cancelled';
             default: return '';
         }
@@ -265,6 +226,18 @@ const handleViewDetails = (item) => {
         });
     }
 
+};
+
+// 生成信息字段配置
+const getInfoFields = (item) => {
+    return [
+        { key: 'estimateBucketNum', label: '预估收运', value: item.estimateBucketNum },
+        { key: 'bucketNum', label: '今日收运', value: item.bucketNum },
+        { key: 'estimateWeight', label: '预估重量', value: item.estimateWeight },
+        { key: 'weight', label: '收运重量', value: item.weight },
+        { key: 'registrationNumber', label: '车辆信息', value: item.registrationNumber },
+        { key: 'arrivalTime', label: '收运时间', value: item.arrivalTime }
+    ];
 };
 
 const handleConfirmTransport = async (item) => {
@@ -538,13 +511,6 @@ onMounted(() => {
                                 background: rgba(153, 153, 153, 0.1);
                             }
 
-                            &.pending {
-                                //待确认
-                                color: rgba(255, 161, 0, 1);
-                                background: rgba(255, 161, 0, 0.10);
-                                ;
-                            }
-
                             &.cancelled {
                                 //无法收运
                                 color: rgba(61, 61, 61, 0.50);
@@ -558,29 +524,7 @@ onMounted(() => {
                 }
 
                 .order-content {
-                    padding: 20rpx 0;
-                    border-top: 1px solid #f0f0f0;
-                    border-bottom: 1px solid #f0f0f0;
-
-                    .info-item {
-                        display: flex;
-                        margin-bottom: 16rpx;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-
-                        .label {
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 0.50);
-                        }
-
-                        .value {
-                            margin-left: 30rpx;
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 1);
-                        }
-                    }
+                    // 样式已移到 InfoDisplay 组件中
                 }
 
                 .order-footer {

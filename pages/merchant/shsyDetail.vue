@@ -8,9 +8,7 @@
         <!-- 用户信息 -->
         <view class="user-info">
             <view class="name">{{ pageData.merchantName }}</view>
-            <view class="status-tag" :class="getStatusClass()">
-                {{ getRecordStatusText() }}
-            </view>
+            <StatusTag :status="pageData.status" />
         </view>
         <!-- 内容区域 -->
         <view class="content">
@@ -30,6 +28,7 @@
 import { onMounted, ref, computed } from 'vue';
 import { apiGetPlanById } from '@/api/apis.js'
 import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
+import StatusTag from '@/components/StatusTag/StatusTag.vue'
 
 // 页面参数
 const merchantId = ref(); // 商户ID
@@ -40,41 +39,6 @@ const pageData = ref({
 
 });
 
-// 获取收运记录状态文字
-const getRecordStatusText = () => {
-    switch (pageData.value.status) {
-        case 0:
-            return '进行中';
-        case 1:
-            {
-                if (pageData.value.merchantConfirm) {
-                    return '已完成';
-                } else {
-                    return '待确认';
-                }
-            }
-        case 2:
-            return '无需收运';
-        default:
-            return '未知状态';
-    }
-};
-
-// 获取状态样式类名
-const getStatusClass = () => {
-    switch (pageData.value.status) {
-        case 0: return 'processing';
-        case 1: {
-            if (pageData.value.merchantConfirm) {
-                return 'completed';
-            } else {
-                return 'pending';
-            }
-        }
-        case 2: return 'cancelled';
-        default: return '';
-    }
-};
 
 // 信息列表配置
 const infoList = computed(() => [
@@ -206,40 +170,6 @@ const back = () => {
         color: #333333;
     }
 
-    .status-tag {
-        border-radius: 8rpx;
-        font-size: 24rpx;
-        width: 120rpx;
-        height: 40rpx;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-
-        &.processing {
-            //进行中 待完成
-            color: rgba(0, 170, 255, 1);
-            background: rgba(0, 170, 255, 0.10);
-        }
-
-        &.completed {
-            //已完成
-            color: rgba(61, 61, 61, 0.50);
-            background: rgba(153, 153, 153, 0.1);
-        }
-
-        &.pending {
-            //待确认
-            color: rgba(255, 161, 0, 1);
-            background: rgba(255, 161, 0, 0.10);
-        }
-
-        &.cancelled {
-            //无法收运
-            color: rgba(61, 61, 61, 0.50);
-            background: rgba(153, 153, 153, 0.1);
-        }
-    }
 }
 
 .content {
@@ -252,11 +182,12 @@ const back = () => {
 
     .info-list {
         padding: 0 30rpx;
+        margin-bottom: 40rpx;
 
         .info-item {
-            display: flex;
-            margin-bottom: 32rpx;
-            padding-bottom: 32rpx;
+            display: block;
+            margin-bottom: 30rpx;
+            // padding-bottom: 32rpx;
             border-bottom: 1rpx solid #f0f0f0;
 
             &:last-child {
@@ -266,17 +197,18 @@ const back = () => {
             }
 
             .label {
-                width: 140rpx;
+                display: block;
                 font-size: 14px;
                 color: #999999;
-                flex-shrink: 0;
+                margin-bottom: 20rpx;
             }
 
             .value {
-                margin-left: 30rpx;
-                flex: 1;
+                display: block;
                 font-size: 14px;
                 color: #333333;
+                line-height: 1.4;
+                margin-bottom: 5rpx;
             }
         }
     }

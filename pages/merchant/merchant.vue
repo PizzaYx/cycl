@@ -12,15 +12,12 @@
                     <view class="avatar-text">{{ userStore.userAvatar }}</view>
                 </view>
                 <view class="info">
-                    <view class="name">{{ userStore.nickName || '未登录' }}</view>
-                    <view class="sub-name">{{ userStore.userName || '未设置用户名' }}</view>
+                    <view class="name">{{ userStore.nickName || '昵称未设置' }}</view>
+                    <view class="sub-name">{{ userStore.userName || '账号未设置' }}</view>
                     <view class="auth-tag" :class="getAuthTagClass()">{{ getAuthStatusText() }}</view>
                 </view>
                 <uni-icons type="right" size="30rpx"></uni-icons>
-
             </view>
-
-
 
             <!-- 数据统计 -->
             <view class="statistics">
@@ -33,10 +30,6 @@
                     <view class="label">收运中</view>
                 </view>
                 <view class="stat-item">
-                    <view class="number">{{ dqNum }}</view>
-                    <view class="label">待确认</view>
-                </view>
-                <view class="stat-item">
                     <view class="number">{{ wcNum }}</view>
                     <view class="label">已完成</view>
                 </view>
@@ -47,11 +40,7 @@
             <view class="quick-actions">
                 <view v-for="(action, index) in quickActions" :key="action.id" class="action-item"
                     @tap="handleQuickAction(action)">
-                    <view class="action-icon-wrapper">
-                        <image :src="action.icon" mode="aspectFill"></image>
-                        <uni-badge v-if="index === 1 && processingBadgeText > 0" :text="processingBadgeText"
-                            type="error" size="small" class="action-badge"></uni-badge>
-                    </view>
+                    <image :src="action.icon" mode="aspectFill"></image>
                     <text>{{ action.name }}</text>
                 </view>
             </view>
@@ -59,8 +48,10 @@
             <!-- 收运记录 -->
             <view class="records-header">
                 <text class="title">收运记录</text>
-                <text class="more" @tap="goToSydAllList">更多 》</text>
-
+                <view class="more" @tap="goToSydAllList">
+                    <text>更多</text>
+                    <uni-icons type="right" size="16" color="rgba(19, 19, 19, 0.50)"></uni-icons>
+                </view>
             </view>
             <view class="records">
                 <view class="record-list">
@@ -71,10 +62,8 @@
                             </view>
                         </view>
                         <view class="record-right">
-                            <view class="status-tag" :class="getStatusClass(item)">
-                                {{ getRecordStatusText(item) }}
-                            </view>
-                            <view class="weight">{{ item.status === 1 ? item.weight : item.estimateWeight }} kg</view>
+                            <StatusTag :status="item.status" />
+                            <view class="weight">{{ formatWeight(item.weight) }}</view>
                         </view>
                     </view>
                     <view v-if="records.length === 0" class="no-records">暂无收运记录</view>
@@ -109,13 +98,14 @@ import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { apiGetMerchantStatistics, apiGetPlanAllPage, apiGetMerchantNotConfirmNum } from '@/api/apis.js'
 import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
+import StatusTag from '@/components/StatusTag/StatusTag.vue'
+import { formatWeight, formatNum } from '@/utils/orderUtils'
 
 // 使用用户 store
 const userStore = useUserStore()
 
 const yyNum = ref(0) // 预约中
 const syNum = ref(0) // 收运中
-const dqNum = ref(0) // 待确认
 const wcNum = ref(0) // 已完成
 
 // 待确认数量（用于badge显示）
@@ -136,6 +126,7 @@ onMounted(async () => {
             console.log('用户未登录，已跳转到登录页')
             return
         }
+
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
         checkUserAuthStatus()
     } catch (error) {
@@ -144,9 +135,16 @@ onMounted(async () => {
     }
 })
 
-onShow(() => {
-    checkUserAuthStatus();
-    getMerchantNotConfirmNum();
+onShow(async () => {
+    // 确保用户信息已加载完成
+    const userInfo = await userStore.ensureUserInfo()
+    if (userInfo === null) {
+        console.log('用户未登录，已跳转到登录页')
+        return
+    }
+    if (checkUserAuthStatus()) {
+        getMerchantNotConfirmNum();
+    }
 })
 
 const showDetail = (item) => {
@@ -156,8 +154,6 @@ const showDetail = (item) => {
     });
 }
 
-
-
 //获取商户首页数据统计
 const getMerchantStatistics = async () => {
     console.log('获取商户首页数据统计')
@@ -166,7 +162,6 @@ const getMerchantStatistics = async () => {
     })
     if (res.code === 200) {
         wcNum.value = res.data.accomplishNum;
-        dqNum.value = res.data.notConfirmNum;
         yyNum.value = res.data.reservationNum;
         syNum.value = res.data.underwayNum;
     }
@@ -202,12 +197,12 @@ const getMerchantNotConfirmNum = async () => {
  * 检查用户认证状态并显示相应提示
  * @returns {boolean} true表示已认证，false表示未认证或审核不通过
  */
-const checkUserAuthStatus = async () => {
+const checkUserAuthStatus = () => {
     const merchantStatus = userStore.merchantStatus;
 
     // 未认证或审核不通过，显示认证弹窗
     if (merchantStatus === null || merchantStatus === 2) {
-        await userStore.fetchUserInfo();
+        userStore.fetchUserInfo();
         showAuthModal.value = true
         return false
     }
@@ -229,34 +224,11 @@ const checkUserAuthStatus = async () => {
     }
 }
 
-// /**
-//  * 检查认证状态并在需要时显示认证弹窗
-//  * 用于页面加载时检查
-//  */
-// const checkAndShowAuthModal = async() => {
-//     // 重新获取用户信息
-//     const merchantStatus = userStore.merchantStatus
-//     console.log('检查认证状态12312312：', merchantStatus)
-//     //未认证时候重新获取
-//     if (merchantStatus === null || merchantStatus === 2) {
-//         //重新获取用户信息
-//         await userStore.fetchUserInfo();
-//         showAuthModal.value = true
-//     }
-//     else {
-//         getMerchantStatistics();
-//         getMerchantSydList();
-//     }
-// }
-
 const getUserInfo = () => {
-    // 检查用户认证状态并执行相应操作
-    if (checkUserAuthStatus()) {
-        // 已认证，跳转到用户页面
-        uni.navigateTo({
-            url: '/pages/user/user'
-        })
-    }
+    // 已认证，跳转到用户页面
+    uni.navigateTo({
+        url: '/pages/user/user'
+    })
 }
 
 // 下拉刷新处理
@@ -314,6 +286,12 @@ const quickActions = ref([
         name: '商户认证',
         icon: '/static/shd/shrz.png',
         url: '/pages/merchant/shCertification' // 商户认证页面
+    },
+    {
+        id: 'certification',
+        name: '合同续签',
+        icon: '/static/shd/shrz.png',
+        url: '/pages/syContract/syContract' // 商户认证页面
     }
 ])
 
@@ -339,7 +317,7 @@ const handleQuickAction = (action) => {
     }
 
     // 检查用户认证状态
-    if (!checkUserAuthStatus()) {
+    if (!(checkUserAuthStatus())) {
         // 未通过认证检查，不继续执行
         return
     }
@@ -397,48 +375,11 @@ const getAuthTagClass = () => {
 
 const records = ref([]); // 收运记录列表
 
-// 获取收运记录状态文字
-const getRecordStatusText = (item) => {
-    switch (item.status) {
-        case 0:
-            return '进行中';
-        case 1:
-            {
-                if (item.merchantConfirm) {
-                    return '已完成';
-                } else {
-                    return '待确认';
-                }
-            }
-        case 2:
-            return '无需收运';
-        default:
-            return '未知状态';
-    }
-};
-
-// 获取状态样式类名
-const getStatusClass = (item) => {
-
-    switch (item.status) {
-        case 0: return 'processing';
-        case 1: {
-            if (item.merchantConfirm) {
-                return 'completed';
-            } else {
-                return 'pending';
-            }
-        }
-        case 2: return 'cancelled';
-        default: return '';
-    }
-
-};
 
 // 跳转到收运总列表页面
 const goToSydAllList = () => {
     // 检查用户认证状态
-    if (!checkUserAuthStatus()) {
+    if (!(checkUserAuthStatus())) {
         // 未通过认证检查，不继续执行
         return
     }
@@ -521,6 +462,10 @@ const goToSydAllList = () => {
                 font-size: 32rpx;
                 color: black;
                 line-height: 32rpx;
+                max-width: 100%;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
 
             .sub-name {
@@ -632,24 +577,12 @@ const goToSydAllList = () => {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 16rpx;
+            gap: 2rpx;
 
-            .action-icon-wrapper {
-                position: relative;
-                display: inline-block;
-
-                image {
-                    width: 96rpx;
-                    height: 96rpx;
-                    border-radius: 16rpx;
-                }
-
-                .action-badge {
-                    position: absolute;
-                    top: -8rpx;
-                    right: -8rpx;
-                    z-index: 10;
-                }
+            image {
+                width: 96rpx;
+                height: 96rpx;
+                border-radius: 16rpx;
             }
 
             text {
@@ -679,7 +612,12 @@ const goToSydAllList = () => {
             color: rgba(19, 19, 19, 0.50);
             display: flex;
             align-items: center;
-            gap: 4rpx;
+
+            text {
+                line-height: 1;
+            }
+
+
         }
     }
 
@@ -694,19 +632,28 @@ const goToSydAllList = () => {
             .record-item {
                 display: flex;
                 justify-content: space-between;
-                align-items: center;
+                align-items: stretch;
                 height: 138rpx;
                 margin-bottom: 22rpx;
                 background-color: #fff;
                 border-radius: 16rpx;
-                padding: 0 30rpx 0 30rpx;
+                padding: 20rpx 30rpx;
 
 
                 .record-main {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+
                     .shop-name {
                         font-size: 26rpx;
                         color: rgba(19, 19, 19, 1);
-                        margin-bottom: 8rpx;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        -webkit-line-clamp: 2;
+                        line-clamp: 2;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                     }
 
                     .record-time {
@@ -716,50 +663,17 @@ const goToSydAllList = () => {
                 }
 
                 .record-right {
-                    text-align: right;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    text-align: center;
 
                     .weight {
                         font-size: 32rpx;
                         font-weight: 400;
                         color: rgba(61, 61, 61, 1);
-                        margin-bottom: 8rpx;
                     }
 
-                    .status-tag {
-                        border-radius: 8rpx;
-                        font-size: 24rpx;
-                        width: 120rpx;
-                        height: 40rpx;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-
-                        &.processing {
-                            //进行中 待完成
-                            color: rgba(0, 170, 255, 1);
-                            background: rgba(0, 170, 255, 0.10);
-                        }
-
-                        &.completed {
-                            //已完成
-                            color: rgba(61, 61, 61, 0.50);
-                            background: rgba(153, 153, 153, 0.1);
-                        }
-
-                        &.pending {
-                            //待确认
-                            color: rgba(255, 161, 0, 1);
-                            background: rgba(255, 161, 0, 0.10);
-                            ;
-                        }
-
-                        &.cancelled {
-                            //无法收运
-                            color: rgba(61, 61, 61, 0.50);
-                            background: rgba(153, 153, 153, 0.1);
-                        }
-                    }
                 }
             }
 

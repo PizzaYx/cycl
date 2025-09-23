@@ -131,12 +131,9 @@ const useUserStore = common_vendor.defineStore("user", {
     },
     // 检查是否有用户信息，没有则自动获取
     async ensureUserInfo() {
-      if (this.userInfo) {
-        return this.userInfo;
-      }
       const result = await this.fetchUserInfo();
       if (result === null) {
-        common_vendor.index.__f__("log", "at stores/user.js:145", "用户信息获取失败，可能未登录或网络异常");
+        common_vendor.index.__f__("log", "at stores/user.js:141", "用户信息获取失败，可能未登录或网络异常");
         return null;
       }
       return this.userInfo;
@@ -145,7 +142,7 @@ const useUserStore = common_vendor.defineStore("user", {
     clearUserInfo() {
       this.userInfo = null;
       this.isLoggedIn = false;
-      common_vendor.index.__f__("log", "at stores/user.js:155", "用户信息已清除");
+      common_vendor.index.__f__("log", "at stores/user.js:151", "用户信息已清除");
     },
     // 退出登录
     logout() {
@@ -154,7 +151,7 @@ const useUserStore = common_vendor.defineStore("user", {
       common_vendor.index.removeStorageSync("access_expire_time");
       common_vendor.index.removeStorageSync("refresh_token");
       common_vendor.index.removeStorageSync("refresh_expire_time");
-      common_vendor.index.__f__("log", "at stores/user.js:169", "用户已退出登录");
+      common_vendor.index.__f__("log", "at stores/user.js:165", "用户已退出登录");
       common_vendor.index.redirectTo({
         url: "/pages/index/index"
       });
