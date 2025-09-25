@@ -6,28 +6,68 @@
 </template>
 
 <script setup>
+/**
+ * 商户收运状态标签组件
+ * 
+ * 功能说明：
+ * - 专门为商户端设计的状态标签组件
+ * - 根据订单状态显示对应的文字和样式
+ * - 与收运端DriverStatusTag组件区分，避免混淆
+ * 
+ * 使用场景：
+ * - 商户端首页订单状态显示
+ * - 商户预约详情页面状态显示
+ * - 商户收运详情页面状态显示
+ * - 商户统计页面状态显示
+ * 
+ * 状态映射：
+ * - 0: 进行中 (蓝色)
+ * - 1: 已完成 (灰色)
+ * - 2: 无需收运 (红色)
+ * 
+ * @author 系统
+ * @version 1.0.0
+ */
+
 import { computed } from 'vue'
 
 // 定义组件属性
 const props = defineProps({
-    // 状态值 (0: 进行中, 1: 已完成, 2: 无需收运)
+    /**
+     * 订单状态值
+     * @type {Number|String}
+     * @description 0-进行中, 1-已完成, 2-无需收运
+     * @required true
+     */
     status: {
         type: [Number, String],
         required: true
     }
 })
 
-// 计算状态文本
+/**
+ * 计算状态文本
+ * 根据状态值返回对应的中文描述
+ */
 const statusText = computed(() => {
     return getStatusText(props.status)
 })
 
-// 计算状态样式类
+/**
+ * 计算状态样式类
+ * 根据状态值返回对应的CSS类名
+ */
 const statusClass = computed(() => {
     return getStatusClass(props.status)
 })
 
-// 获取状态文本（商户收运状态）
+/**
+ * 获取状态文本（商户收运状态）
+ * 将数字状态转换为中文描述
+ * 
+ * @param {Number|String} status - 状态值
+ * @returns {String} 状态中文描述
+ */
 const getStatusText = (status) => {
     const statusValue = Number(status)
 
@@ -43,7 +83,13 @@ const getStatusText = (status) => {
     }
 }
 
-// 获取状态样式类（商户收运状态）
+/**
+ * 获取状态样式类（商户收运状态）
+ * 将数字状态转换为对应的CSS类名
+ * 
+ * @param {Number|String} status - 状态值
+ * @returns {String} CSS类名
+ */
 const getStatusClass = (status) => {
     const statusValue = Number(status)
 

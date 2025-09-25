@@ -24,18 +24,21 @@
             <!-- 数据统计 -->
             <view class="statistics">
                 <view class="stat-item">
-                    <view class="number">{{ yyNum }}kg</view>
+                    <view class="number">{{ syNum }} 个</view>
+                    <view class="label">未收运商家</view>
+                </view>
+                <view class="stat-item">
+                    <view class="number green">{{ yyNum }}kg</view>
                     <view class="label">已收运总量</view>
                 </view>
                 <view class="stat-item">
-                    <view class="number">{{ syNum }}</view>
-                    <view class="label">未收运</view>
+                    <view class="number">{{ dqNum }} 个</view>
+                    <view class="label">已收运商家</view>
                 </view>
-                <view class="stat-item">
-                    <view class="number">{{ dqNum }}</view>
-                    <view class="label">已收运</view>
+                <!-- 上半圆弧形进度条 -->
+                <view class="progress-arc">
+                    <canvas canvas-id="progressArc" class="arc-canvas"></canvas>
                 </view>
-
             </view>
 
             <!-- 快捷操作 -->
@@ -51,7 +54,10 @@
             <!-- 收运记录 -->
             <view class="records-header">
                 <text class="title">收运明细</text>
-                <text class="more" @tap="goToSydAllList">更多 》</text>
+                <view class="more" @tap="goToSydAllList">
+                    <text>更多</text>
+                    <uni-icons type="right" size="16" color="rgba(19, 19, 19, 0.50)"></uni-icons>
+                </view>
 
             </view>
             <view class="records">
@@ -60,72 +66,35 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text class="status-tag" :class="getStatusClass(item.status)">
-                                    {{ getStatusText(item.status) }}
-                                </text>
+                                <DriverStatusTag :status="item.status" />
                             </view>
                         </view>
                         <view class="order-content">
-                            <view class="info-item">
-                                <text class="label">预估时间:</text>
-                                <text class="value">{{ item.appointmentTime ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运时间:</text>
-                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估重量:</text>
-                                <text class="value">{{ item.estimateWeight ? (item.estimateWeight + 'kg') : '暂无'
-                                    }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运重量:</text>
-                                <text class="value">{{ item.weight ? (item.weight + 'kg') : '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估桶数:</text>
-                                <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                    }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运桶数:</text>
-                                <text class="value">{{ item.bucketNum ? (item.bucketNum + '个') : '暂无' }} </text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">地址:</text>
-                                <text class="value">{{ item.address ?? '暂无' }} </text>
-                            </view>
-
+                            <InfoDisplay :fields="getInfoFields(item)" />
                         </view>
-                        <view class="order-footer">
-                            <template v-if="item.status == 0 || item.status == '0'">
-                                <uni-button size="mini" type="default" class="cancel-btn" @tap="handleCancel(item)">
-                                    取消
-                                </uni-button>
-                                <uni-button size="mini" type="primary" class="report-btn"
-                                    @tap="handleConfirmTransport(item)">
-                                    收运上报
-                                </uni-button>
-                            </template>
-                            <template v-else>
-                                <uni-button size="mini" type="default" class="view-btn" @tap="handleViewDetails(item)">
-                                    查看详情
-                                </uni-button>
-                            </template>
-                        </view>
+                        <DriverOrderActions :status="item.status" :order-data="item" @refresh="handleRefresh"
+                            @abnormalReport="handleAbnormalReport" />
                     </view>
                 </view>
             </view>
         </scroll-view>
+
+        <!-- 异常上报弹窗 -->
+        <AbnormalReportModal :show="showAbnormalModal" :order-data="currentOrderData" @close="closeAbnormalModal"
+            @success="handleAbnormalSuccess" />
     </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { apiGetDriverTodayStatistics, apiGetDriverPlanPage, apiGetdriverConfirmPlan, apiGetnoNeedCollect } from '@/api/apis.js'
 import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
+import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
+import DriverStatusTag from '@/components/DriverStatusTag/DriverStatusTag.vue'
+import DriverOrderActions from '@/components/DriverOrderActions/DriverOrderActions.vue'
+import AbnormalReportModal from '@/components/AbnormalReportModal/AbnormalReportModal.vue'
+
 
 // 使用用户 store
 const userStore = useUserStore()
@@ -134,34 +103,39 @@ const yyNum = ref(0) // 已收运总量
 const syNum = ref(0) // 未收运
 const dqNum = ref(0) // 已收运
 
+// 计算进度百分比
+const progressPercentage = computed(() => {
+
+    const total = dqNum.value + syNum.value
+    if (total === 0) return 0
+    return Math.round((dqNum.value / total) * 100)
+})
+
 const allOrderList = ref([]); // 收运明细列表
 
 // 下拉刷新状态
 const refreshing = ref(false)
 
-// 页面加载时确保用户信息存在
-onMounted(async () => {
-    try {
-        const userInfo = await userStore.ensureUserInfo()
+// 异常上报相关变量
+const showAbnormalModal = ref(false)
+const currentOrderData = ref(null)
 
-        if (userInfo === null) {
-            // 用户未登录，已跳转到登录页，不需要继续执行
-            console.log('用户未登录，已跳转到登录页')
-            return
-        }
+// 监听进度百分比变化，自动重绘canvas
+watch(progressPercentage, () => {
+    nextTick(() => {
+        drawProgressArc()
+    })
+}, { immediate: false })
 
-        getMerchantStatistics()
-        getMerchantSydList()
-    } catch (error) {
-        // 其他非401错误的处理
-        console.error('页面初始化失败:', error)
-    }
-})
 
 onShow(async () => {
     console.log('页面显示时刷新数据')
-    getMerchantStatistics();
-    getMerchantSydList();
+    await getMerchantStatistics()
+    await getMerchantSydList()
+    // 数据加载完成后再绘制canvas，增加延迟确保DOM渲染完成
+    setTimeout(() => {
+        drawProgressArc()
+    }, 300)
 })
 
 //获取商户首页数据统计
@@ -177,30 +151,71 @@ const getMerchantStatistics = async () => {
     }
 }
 
-// 状态转换函数
-const getStatusText = (status) => {
-    switch (status) {
-        case 0:
-        case '0':
-            return '进行中';
-        case 1:
-        case '1':
-            return '已完成';
-        case 2:
-        case '2':
-            return '无法收运';
-        default:
-            return '无法收运';
-    }
-};
 
-// 获取状态样式类名
-const getStatusClass = (status) => {
-    switch (status) {
-        case 0: return 'processing';
-        case 1: return 'completed';
-        case 2: return 'cancelled';
+// 根据状态获取信息字段
+const getInfoFields = (item) => {
+    const status = item.status;
+
+    // 状态为 0（进行中）或 2（无法收运）时显示预估信息
+    if (status === 0 || status === '0' || status === 2 || status === '2') {
+        return [
+            {
+                key: 'appointmentTime',
+                label: '预估时间',
+                value: item.appointmentTime
+            },
+            {
+                key: 'estimateWeight',
+                label: '预估重量',
+                value: item.estimateWeight
+            },
+            {
+                key: 'estimateBucketNum',
+                label: '预估桶数',
+                value: item.estimateBucketNum
+            }
+        ];
     }
+
+    // 状态为 1（已完成）时显示收运信息
+    if (status === 1 || status === '1') {
+        return [
+            {
+                key: 'arrivalTime',
+                label: '收运时间',
+                value: item.arrivalTime
+            },
+            {
+                key: 'weight',
+                label: '收运重量',
+                value: item.weight
+            },
+            {
+                key: 'bucketNum',
+                label: '收运桶数',
+                value: item.bucketNum
+            }
+        ];
+    }
+
+    // 默认返回预估信息
+    return [
+        {
+            key: 'appointmentTime',
+            label: '预估时间',
+            value: item.appointmentTime
+        },
+        {
+            key: 'estimateWeight',
+            label: '预估重量',
+            value: item.estimateWeight
+        },
+        {
+            key: 'estimateBucketNum',
+            label: '预估桶数',
+            value: item.estimateBucketNum
+        }
+    ];
 };
 
 
@@ -229,55 +244,7 @@ const getUserInfo = () => {
 }
 
 
-// 按钮点击事件处理函数
-const handleCancel = (item) => {
-    console.log('取消任务:', item);
-    uni.showModal({
-        title: '确认取消',
-        content: '是否确认取消当前任务？',
-        success: async (res) => {
-            if (res.confirm) {
-                await apiGetnoNeedCollect({
-                    id: item.id,
-                    driverId: userStore.sfmerchant?.id
-                }).then((res) => {
-                    if (res.code === 200) {
-                        uni.showToast({
-                            title: res.msg || '操作成功',
-                            icon: 'success'
-                        });
-                        // 刷新任务列表
-                        clearSearch();
-                    } else {
-                        uni.showToast({
-                            title: res.msg || '操作失败',
-                            icon: 'error'
-                        });
-                    }
-
-                })
-            }
-        }
-    })
-
-};
-
-const handleViewDetails = (item) => {
-    console.log('查看详情按钮被点击', item);
-    // 这里添加查看任务的逻辑
-    uni.navigateTo({
-        url: `/pages/collection/syCheckDetail?planId=${item.id}&driverId=${item.driverId}`
-    });
-
-};
-
-const handleConfirmTransport = async (task) => {
-    console.log('收运上报:', task);
-
-    uni.navigateTo({
-        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}&merchantName=${task.merchantName}`
-    });
-};
+// 按钮点击事件处理函数已封装到 DriverOrderActions 组件中
 
 
 // 快捷操作配置
@@ -325,6 +292,12 @@ const onRefresh = async () => {
     try {
         // 重新获取用户信息
         await userStore.fetchUserInfo()
+        await getMerchantStatistics()
+        await getMerchantSydList()
+        // 数据加载完成后再绘制canvas，增加延迟确保DOM渲染完成
+        setTimeout(() => {
+            drawProgressArc()
+        }, 300)
 
     } catch (error) {
         console.error('刷新失败:', error)
@@ -337,9 +310,39 @@ const onRefresh = async () => {
     }
 }
 
+// 处理异常上报后的刷新
+const handleRefresh = async () => {
+    try {
+        // 重新获取统计数据
+        await getMerchantStatistics()
+        // 重新获取收运列表
+        await getMerchantSydList()
+        // 数据更新后重新绘制canvas
+        setTimeout(() => {
+            drawProgressArc()
+        }, 300)
+    } catch (error) {
+        console.error('刷新数据失败:', error)
+    }
+}
 
+// 处理异常上报事件
+const handleAbnormalReport = (orderData) => {
+    currentOrderData.value = orderData
+    showAbnormalModal.value = true
+}
 
+// 关闭异常上报弹窗
+const closeAbnormalModal = () => {
+    showAbnormalModal.value = false
+    currentOrderData.value = null
+}
 
+// 异常上报成功回调
+const handleAbnormalSuccess = async () => {
+    // 刷新数据
+    await handleRefresh()
+}
 
 
 // 跳转到收运明细页面
@@ -347,6 +350,62 @@ const goToSydAllList = () => {
     uni.navigateTo({
         url: '/pages/collection/sfsyRecord'
     })
+}
+
+// 绘制进度弧形 - 微信小程序专用
+const drawProgressArc = () => {
+
+
+    const ctx = uni.createCanvasContext('progressArc')
+
+    // 获取canvas尺寸
+    const query = uni.createSelectorQuery()
+    query.select('.arc-canvas').boundingClientRect((rect) => {
+
+        if (rect) {
+            const width = rect.width
+            const height = rect.height
+
+            const centerX = width / 2  // 圆心在中央
+            const centerY = height * 0.75 // 圆心在canvas上方
+            const radius = width / 4.8  // 半径调整，让弧形更合适
+
+            // 绘制底色弧形（完整弧形）
+            ctx.beginPath()
+            ctx.arc(centerX, centerY, radius, Math.PI, 0, false)
+            ctx.setStrokeStyle('rgba(7, 193, 96, 0.10)')
+            ctx.setLineWidth(10)
+            ctx.setLineCap('round')
+            ctx.stroke()
+
+            // 绘制进度弧形（根据百分比）
+            const progressAngle = Math.PI * (progressPercentage.value / 100)
+
+
+            if (progressPercentage.value > 0) {
+                ctx.beginPath()
+                ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + progressAngle, false)
+                ctx.setStrokeStyle('rgba(7, 193, 96, 1)')
+                ctx.setLineWidth(10)
+                ctx.setLineCap('round')
+                ctx.stroke()
+
+                // 绘制进度弧形终点圆点
+                const endAngle = Math.PI + progressAngle
+                const endX = centerX + radius * Math.cos(endAngle)
+                const endY = centerY + radius * Math.sin(endAngle)
+                ctx.beginPath()
+                ctx.arc(endX, endY, 10, 0, 2 * Math.PI, false)
+                ctx.setFillStyle('rgba(7, 193, 96, 1)')
+                ctx.fill()
+            }
+
+            ctx.draw()
+
+        } else {
+            console.error('无法获取Canvas尺寸')
+        }
+    }).exec()
 }
 </script>
 
@@ -448,52 +507,59 @@ const goToSydAllList = () => {
 
     .statistics {
         position: relative;
-        height: 128rpx;
+        height: 300rpx;
         display: flex;
-        justify-content: space-between;
+        justify-content: space-around;
         background-color: #fff;
         border-radius: 20rpx;
         margin: 0 30rpx 30rpx;
         align-items: center;
         padding: 0 28rpx;
+        gap: 80rpx;
+        z-index: 1;
 
         .stat-item {
             position: relative;
-            /* 关键：为伪元素提供定位上下文 */
             height: 100%;
-            /* 关键：子项高度等于父容器高度 128rpx */
             flex: 1;
-            /* 等宽（可选） */
             display: flex;
-            /* 让内部内容垂直居中 */
             flex-direction: column;
-            justify-content: center;
-            /* 垂直居中内容 */
+            justify-content: flex-end;
             text-align: center;
-            padding: 0 20rpx;
+            padding: 0 0rpx 65rpx;
 
             .number {
                 font-size: 32rpx;
                 font-weight: 500;
                 color: rgba(61, 61, 61, 1);
                 margin-bottom: 8rpx;
+
+                &.green {
+                    color: #07C160;
+                }
             }
 
             .label {
                 font-size: 24rpx;
                 color: rgba(61, 61, 61, 1);
             }
+        }
 
-            &:not(:first-child)::before {
-                content: '';
-                position: absolute;
-                left: 0;
-                top: 30rpx;
-                bottom: 30rpx;
-                width: 2rpx;
-                background: rgba(216, 216, 216, 1);
-                transform: scaleX(0.5);
-                transform-origin: left center;
+        .progress-arc {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 300rpx;
+            pointer-events: none;
+            z-index: 10;
+            overflow: hidden;
+
+            .arc-canvas {
+                width: 100%;
+                height: 100%;
+                display: block;
+                background: transparent;
             }
         }
     }
@@ -503,6 +569,7 @@ const goToSydAllList = () => {
         font-size: 28rpx;
         font-weight: 400;
         margin-bottom: 10rpx;
+        color: rgba(19, 19, 19, 1);
     }
 
     .quick-actions {
@@ -544,8 +611,7 @@ const goToSydAllList = () => {
         align-items: center;
         padding: 10rpx 30rpx;
         margin-bottom: 10rpx;
-        margin-top: 20rpx;
-        ;
+        margin-top: 10rpx;
 
         .title {
             font-size: 28rpx;
@@ -559,7 +625,12 @@ const goToSydAllList = () => {
             color: rgba(19, 19, 19, 0.50);
             display: flex;
             align-items: center;
-            gap: 4rpx;
+
+            text {
+                line-height: 1;
+            }
+
+
         }
     }
 
@@ -594,98 +665,9 @@ const goToSydAllList = () => {
                             color: rgba(61, 61, 61, 1);
                         }
 
-                        .status-tag {
-                            font-size: 24rpx;
-                            width: 120rpx;
-                            height: 40rpx;
-                            border-radius: 8rpx;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            text-align: center;
-
-
-                            &.processing {
-                                //进行中 待完成
-                                color: rgba(0, 170, 255, 1);
-                                background: rgba(0, 170, 255, 0.10);
-                            }
-
-                            &.completed {
-                                //已完成
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
-                            }
-
-                            &.cancelled {
-                                //无法收运
-                                color: rgba(255, 161, 0, 1);
-                                background: rgba(255, 161, 0, 0.10);
-
-                            }
-                        }
                     }
                 }
 
-                .order-content {
-                    padding: 20rpx 0;
-                    border-top: 1px solid #f0f0f0;
-                    border-bottom: 1px solid #f0f0f0;
-
-                    .info-item {
-                        display: flex;
-                        margin-bottom: 16rpx;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-
-                        .label {
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 0.50);
-                        }
-
-                        .value {
-                            margin-left: 30rpx;
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 1);
-                        }
-                    }
-                }
-
-                .order-footer {
-                    margin-top: 30rpx;
-                    display: flex;
-                    justify-content: flex-end;
-                    gap: 15rpx;
-                    flex-wrap: wrap; // 允许换行以适应4个按钮
-
-                    .cancel-btn,
-                    .view-btn,
-                    .report-btn {
-                        width: 120rpx; // 减小按钮宽度以适应4个按钮
-                        height: 48rpx;
-                        color: #07C160;
-                        border-radius: 100rpx;
-                        border: 2rpx solid #07C160;
-                        font-size: 24rpx; // 稍微减小字体
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-
-
-                    .cancel-btn {
-                        border: 1rpx solid rgba(196, 196, 196, 1);
-                        color: rgba(61, 61, 61, 1);
-                    }
-
-                    .report-btn {
-                        background-color: #FFA500;
-                        border-color: #FFA500;
-                        color: white;
-                    }
-                }
             }
         }
     }

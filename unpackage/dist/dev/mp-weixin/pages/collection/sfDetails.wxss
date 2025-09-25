@@ -28,13 +28,16 @@
   min-height: 100vh;
   box-sizing: border-box;
   padding: 0 30rpx 30rpx;
+  position: relative;
 }
 .container .header-progress-container.data-v-b624ea25 {
   background: #FFFFFF;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 30rpx;
   margin-bottom: 20rpx;
   margin-top: 20rpx;
+  position: relative;
+  z-index: 1;
 }
 .container .header.data-v-b624ea25 {
   background: none;
@@ -53,11 +56,12 @@
 .container .header .driver-info.data-v-b624ea25 {
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
+  gap: 10rpx;
 }
 .container .header .driver-info .info-item.data-v-b624ea25 {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 .container .header .driver-info .info-item .label.data-v-b624ea25 {
   color: rgba(61, 61, 61, 0.5);
@@ -65,15 +69,7 @@
 }
 .container .header .driver-info .info-item .value.data-v-b624ea25 {
   color: #3d3d3d;
-  font-size: 14px;
-}
-.container .header .driver-info .info-item .contact-btn.data-v-b624ea25 {
-  margin-left: auto;
-  color: #07C160;
-  border-radius: 100rpx;
-  padding: 6rpx 20rpx;
-  border: 2rpx solid #07C160;
-  font-size: 26rpx;
+  font-size: 28rpx;
 }
 .container .divider.data-v-b624ea25 {
   height: 2rpx;
@@ -87,100 +83,126 @@
   margin-bottom: 0;
 }
 .container .progress-section .progress-title.data-v-b624ea25 {
-  font-size: 34rpx;
+  font-size: 28rpx;
   color: #3d3d3d;
-  margin-bottom: 30rpx;
 }
 .container .progress-section .progress-content.data-v-b624ea25 {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  margin-top: 66rpx;
 }
-.container .progress-section .progress-content .progress-circle.data-v-b624ea25 {
-  width: 200rpx;
-  height: 200rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.container .progress-section .progress-content .progress-bar.data-v-b624ea25 {
+  width: 650rpx;
+  height: 20rpx;
+  background-color: rgba(7, 193, 96, 0.1);
+  border-radius: 20rpx;
+  overflow: visible;
+  position: relative;
+  margin-bottom: 40rpx;
+}
+.container .progress-section .progress-content .progress-bar .progress-fill.data-v-b624ea25 {
+  height: 100%;
+  background-color: #07C160;
+  border-radius: 20rpx;
+  transition: width 0.3s ease;
   position: relative;
 }
-.container .progress-section .progress-content .progress-circle .circle-text.data-v-b624ea25 {
-  text-align: center;
-  background: white;
-  border-radius: 50%;
-  width: 170rpx;
-  height: 170rpx;
+.container .progress-section .progress-content .progress-bar .progress-fill .progress-bubble.data-v-b624ea25 {
+  position: absolute;
+  right: -32rpx;
+  top: -60rpx;
+  width: 68rpx;
+  height: 50rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
 }
-.container .progress-section .progress-content .progress-circle .circle-text .percentage.data-v-b624ea25 {
+.container .progress-section .progress-content .progress-bar .progress-fill .progress-bubble image.data-v-b624ea25 {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.container .progress-section .progress-content .progress-bar .progress-fill .progress-bubble .bubble-text.data-v-b624ea25 {
+  font-size: 24rpx;
+  color: #07c160;
+  font-weight: bold;
+  z-index: 1;
+  position: relative;
+  transform: translateY(-10rpx);
+}
+.container .progress-section .progress-content .progress-text.data-v-b624ea25 {
+  text-align: center;
+}
+.container .progress-section .progress-content .progress-text .percentage.data-v-b624ea25 {
   font-size: 48rpx;
   color: #07C160;
   font-weight: 400;
   display: block;
 }
-.container .progress-section .progress-content .progress-circle .circle-text .label.data-v-b624ea25 {
+.container .progress-section .progress-content .progress-text .label.data-v-b624ea25 {
   font-size: 24rpx;
   color: rgba(61, 61, 61, 0.5);
 }
 .container .progress-section .progress-content .progress-stats.data-v-b624ea25 {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  margin-left: 40rpx;
   gap: 20rpx;
-  align-items: flex-end;
 }
 .container .progress-section .progress-content .progress-stats .stat-item.data-v-b624ea25 {
-  width: 300rpx;
-  height: 88rpx;
+  width: 204rpx;
+  height: 108rpx;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   position: relative;
+  background: #f5f5f7;
 }
-.container .progress-section .progress-content .progress-stats .stat-item image.data-v-b624ea25 {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 0;
+.container .progress-section .progress-content .progress-stats .stat-item .label-with-color.data-v-b624ea25 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
 }
-.container .progress-section .progress-content .progress-stats .stat-item .value.data-v-b624ea25 {
-  font-size: 32rpx;
-  font-weight: 500;
-  display: block;
-  z-index: 1;
-  text-align: center;
+.container .progress-section .progress-content .progress-stats .stat-item .label-with-color .color-tag.data-v-b624ea25 {
+  width: 4rpx;
+  height: 20rpx;
+  border-radius: 2rpx;
 }
-.container .progress-section .progress-content .progress-stats .stat-item .value.green.data-v-b624ea25 {
-  color: #07c160;
+.container .progress-section .progress-content .progress-stats .stat-item .label-with-color .color-tag.blue.data-v-b624ea25 {
+  background-color: #00aaff;
 }
-.container .progress-section .progress-content .progress-stats .stat-item .value.orange.data-v-b624ea25 {
-  color: #ffa100;
+.container .progress-section .progress-content .progress-stats .stat-item .label-with-color .color-tag.green.data-v-b624ea25 {
+  background-color: #07c160;
 }
-.container .progress-section .progress-content .progress-stats .stat-item .value.blue.data-v-b624ea25 {
-  color: #00aaff;
+.container .progress-section .progress-content .progress-stats .stat-item .label-with-color .color-tag.orange.data-v-b624ea25 {
+  background-color: #ffa100;
 }
-.container .progress-section .progress-content .progress-stats .stat-item .label.data-v-b624ea25 {
+.container .progress-section .progress-content .progress-stats .stat-item .label-with-color .label.data-v-b624ea25 {
   font-size: 24rpx;
   color: rgba(61, 61, 61, 0.5);
   z-index: 1;
   text-align: center;
 }
+.container .progress-section .progress-content .progress-stats .stat-item .value.data-v-b624ea25 {
+  font-size: 32rpx;
+  font-weight: bold;
+  display: block;
+  z-index: 1;
+  text-align: center;
+}
 .container .weight-section.data-v-b624ea25 {
   background: #FFFFFF;
-  border-radius: 16rpx;
+  border-radius: 20rpx;
   padding: 30rpx;
   margin-bottom: 10rpx;
+  position: relative;
+  z-index: 1;
 }
 .container .weight-section .weight-header.data-v-b624ea25 {
-  font-size: 34rpx;
+  font-size: 28rpx;
   color: #3d3d3d;
   display: block;
   margin-bottom: 20rpx;
@@ -224,45 +246,132 @@
   border: 2rpx solid #07C160;
   font-size: 26rpx;
 }
-.container .task-list.data-v-b624ea25 {
-  margin-top: 20rpx;
+.container .abnormal-section.data-v-b624ea25 {
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  margin: 20rpx 0;
   position: relative;
+  z-index: 1;
+  height: 60rpx;
+  overflow: hidden;
+  /* 禁用交互 */
+  pointer-events: none;
+  -webkit-user-select: none;
+          user-select: none;
+}
+.container .abnormal-section .abnormal-item.data-v-b624ea25 {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  height: 60rpx;
+  padding: 0 20rpx;
+}
+.container .abnormal-section .abnormal-item image.data-v-b624ea25 {
+  width: 32rpx;
+  height: 32rpx;
+}
+.container .abnormal-section .abnormal-item .abnormal-label.data-v-b624ea25 {
+  font-size: 26rpx;
+  color: #3d3d3d;
+  flex-shrink: 0;
+}
+.container .abnormal-section .abnormal-item .abnormal-swiper.data-v-b624ea25 {
+  flex: 1;
+  height: 100%;
+}
+.container .abnormal-section .abnormal-item .abnormal-swiper .abnormal-text-wrapper.data-v-b624ea25 {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.container .abnormal-section .abnormal-item .abnormal-swiper .abnormal-text.data-v-b624ea25 {
+  font-size: 26rpx;
+  color: #3d3d3d;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.container .collection-info-section.data-v-b624ea25 {
+  background: #FFFFFF;
+  border-radius: 20rpx 20rpx 0 0;
+  padding: 30rpx;
+  margin-top: 20rpx;
+  border-bottom: 1rpx solid rgba(216, 216, 216, 0.5);
+}
+.container .collection-info-section .collection-info.data-v-b624ea25 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.container .collection-info-section .collection-info .info-title.data-v-b624ea25 {
+  font-size: 28rpx;
+  color: #3d3d3d;
+  font-weight: 500;
+}
+.container .collection-info-section .collection-info .contact-btn.data-v-b624ea25 {
+  color: #07C160;
+  border-radius: 100rpx;
+  padding: 6rpx 20rpx;
+  border: 2rpx solid #07C160;
+  font-size: 26rpx;
+}
+.container .collection-info-section .map-container.data-v-b624ea25 {
+  width: 645rpx;
+  height: 368rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+}
+.container .collection-info-section .map-container .location-map.data-v-b624ea25 {
+  width: 100%;
+  height: 100%;
+}
+.container .task-list.data-v-b624ea25 {
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
+  background: #FFFFFF;
+  border-radius: 0 0 20rpx 20rpx;
+  overflow: hidden;
   /* 移除左右内边距，因为任务项本身已经有30rpx的padding */
   /* 移除整体时间轴线，改用分段方式 */
 }
 .container .task-list .task-item.data-v-b624ea25 {
   background: #FFFFFF;
-  border-radius: 16rpx;
+  border-radius: 0;
   padding: 30rpx;
+  margin-top: 0;
   margin-bottom: 0;
   /* 移除任务项之间的间隔，让图标可以连线 */
   position: relative;
   z-index: 1;
-  /* 为除了第一个item添加上半段线条（从item顶部到uni-icons顶部） */
-  /* 为除了最后一个item添加下半段线条（从uni-icons底部到item底部） */
+  /* 为除了第一个task-item添加上半段线条（从item顶部到uni-icons顶部） */
+  /* 为除了最后一个task-item添加下半段线条（从uni-icons底部到item底部） */
 }
 .container .task-list .task-item.data-v-b624ea25:not(:first-child)::before {
   content: "";
   position: absolute;
-  left: 49rpx;
-  /* uni-icons图标中心位置 */
+  left: 50rpx;
+  /* 图标容器中心位置 */
   top: 0;
   width: 2rpx;
-  height: 35rpx;
-  /* 从item顶部到uni-icons顶部 */
-  background-color: #d8d8d8;
+  height: var(--line-top-height, 15rpx);
+  /* 预计算的高度：容器中心(25rpx) - 图标半径 */
+  background-color: rgba(216, 216, 216, 0.8);
   z-index: 1;
 }
 .container .task-list .task-item.data-v-b624ea25:not(:last-child)::after {
   content: "";
   position: absolute;
-  left: 49rpx;
-  /* uni-icons图标中心位置 */
-  bottom: 0;
+  left: 50rpx;
+  /* 图标容器中心位置 */
+  top: var(--line-bottom-top, 35rpx);
   width: 2rpx;
-  height: 382rpx;
-  /* 从uni-icons底部到item底部 */
-  background-color: #d8d8d8;
+  height: calc(100% - var(--line-bottom-top, 35rpx));
+  /* 预计算：从图标底部到item底部 */
+  background-color: rgba(216, 216, 216, 0.8);
   z-index: 1;
 }
 .container .task-list .task-item .task-header.data-v-b624ea25 {
@@ -280,31 +389,18 @@
   z-index: 10;
   /* 设置高层级，确保图标在时间线之上 */
 }
-.container .task-list .task-item .task-header .time-info .date.data-v-b624ea25 {
-  font-size: 28rpx;
-  color: #666666;
-}
-.container .task-list .task-item .task-header .status.data-v-b624ea25 {
-  font-size: 24rpx;
-  width: 100rpx;
-  height: 40rpx;
-  border-radius: 8rpx;
-  margin-right: 15rpx;
+.container .task-list .task-item .task-header .time-info .icon-container.data-v-b624ea25 {
+  width: 50rpx;
+  height: 50rpx;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  margin-left: -5rpx;
 }
-.container .task-list .task-item .task-header .status.processing.data-v-b624ea25 {
-  color: #00aaff;
-  background: rgba(0, 170, 255, 0.1);
-}
-.container .task-list .task-item .task-header .status.completed.data-v-b624ea25 {
-  color: #ffa100;
-  background: rgba(255, 161, 0, 0.1);
-}
-.container .task-list .task-item .task-header .status.cancelled.data-v-b624ea25 {
-  color: rgba(61, 61, 61, 0.5);
-  background: rgba(153, 153, 153, 0.1);
+.container .task-list .task-item .task-header .time-info .date.data-v-b624ea25 {
+  font-size: 28rpx;
+  color: #666666;
 }
 .container .task-list .task-item .divider.data-v-b624ea25 {
   height: 2rpx;
@@ -313,72 +409,20 @@
 }
 .container .task-list .task-item .task-content.data-v-b624ea25 {
   margin: 22rpx 22rpx 0 55rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-.container .task-list .task-item .task-content .merchant-info.data-v-b624ea25,
-.container .task-list .task-item .task-content .weight-info.data-v-b624ea25,
-.container .task-list .task-item .task-content .bin-info.data-v-b624ea25,
-.container .task-list .task-item .task-content .address-info.data-v-b624ea25 {
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-}
-.container .task-list .task-item .task-content .merchant-info .label.data-v-b624ea25,
-.container .task-list .task-item .task-content .weight-info .label.data-v-b624ea25,
-.container .task-list .task-item .task-content .bin-info .label.data-v-b624ea25,
-.container .task-list .task-item .task-content .address-info .label.data-v-b624ea25 {
-  color: #666666;
-  font-size: 14px;
-}
-.container .task-list .task-item .task-content .merchant-info .value.data-v-b624ea25,
-.container .task-list .task-item .task-content .weight-info .value.data-v-b624ea25,
-.container .task-list .task-item .task-content .bin-info .value.data-v-b624ea25,
-.container .task-list .task-item .task-content .address-info .value.data-v-b624ea25 {
-  color: #333333;
-  font-size: 14px;
-}
-.container .task-list .task-item .task-footer.data-v-b624ea25 {
-  margin-top: 30rpx;
-  display: flex;
-  justify-content: flex-end;
-  gap: 15rpx;
-  flex-wrap: wrap;
-}
-.container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25,
-.container .task-list .task-item .task-footer .view-btn.data-v-b624ea25,
-.container .task-list .task-item .task-footer .report-btn.data-v-b624ea25 {
-  width: 120rpx;
-  height: 48rpx;
-  color: #07C160;
-  border-radius: 100rpx;
-  border: 2rpx solid #07C160;
-  font-size: 24rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.container .task-list .task-item .task-footer .cancel-btn.data-v-b624ea25 {
-  border: 1rpx solid #c4c4c4;
-  color: #3d3d3d;
-}
-.container .task-list .task-item .task-footer .report-btn.data-v-b624ea25 {
-  background-color: #FFA500;
-  border-color: #FFA500;
-  color: white;
 }
 .container .headImage.data-v-b624ea25 {
-  position: fixed;
-  bottom: 0;
+  position: absolute;
+  top: 0;
   left: 0;
   width: 100%;
-  z-index: -1;
+  height: 442rpx;
+  z-index: 0;
+  overflow: hidden;
 }
 .container .headImage image.data-v-b624ea25 {
   width: 100%;
-  height: auto;
-  display: block;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* 确保页面背景色始终正确显示 */

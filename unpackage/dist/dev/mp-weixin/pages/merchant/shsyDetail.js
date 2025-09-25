@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
+const utils_orderUtils = require("../../utils/orderUtils.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   _easycom_uni_nav_bar2();
@@ -27,19 +28,19 @@ const _sfc_main = {
       },
       {
         label: "预估重量:",
-        value: pageData.value.estimateWeight ? pageData.value.estimateWeight + " kg" : "暂无"
+        value: utils_orderUtils.formatWeight(pageData.value.estimateWeight)
       },
       {
         label: "收运重量:",
-        value: pageData.value.weight ? pageData.value.weight + " kg" : "暂无"
+        value: utils_orderUtils.formatWeight(pageData.value.weight)
       },
       {
         label: "预估桶数:",
-        value: pageData.value.estimateBucketNum ? pageData.value.estimateBucketNum + " 个" : "暂无"
+        value: utils_orderUtils.formatNum(pageData.value.estimateBucketNum)
       },
       {
         label: "收运桶数:",
-        value: pageData.value.bucketNum ? pageData.value.bucketNum + " 个" : "暂无"
+        value: utils_orderUtils.formatNum(pageData.value.bucketNum)
       },
       {
         label: "收运地址:",
@@ -62,14 +63,14 @@ const _sfc_main = {
       } else if (options["merchantId "]) {
         merchantId.value = options["merchantId "];
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:94", "接收到的参数:", options);
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:95", "解析后的参数:", { merchantId: merchantId.value, id: id.value });
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:92", "接收到的参数:", options);
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:93", "解析后的参数:", { merchantId: merchantId.value, id: id.value });
       getSyCheckDetail();
     });
     common_vendor.onMounted(() => {
     });
     const getSyCheckDetail = async () => {
-      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:110", "获取收运记录详情", merchantId.value, id.value);
+      common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:108", "获取收运记录详情", merchantId.value, id.value);
       const res = await api_apis.apiGetPlanById({
         merchantId: merchantId.value,
         id: id.value
@@ -92,7 +93,7 @@ const _sfc_main = {
           explain: data.explain,
           merchantConfirm: data.merchantConfirm
         };
-        common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:138", "获取收运记录详情成功", pageData.value);
+        common_vendor.index.__f__("log", "at pages/merchant/shsyDetail.vue:136", "获取收运记录详情成功", pageData.value);
       }
     };
     const back = () => {

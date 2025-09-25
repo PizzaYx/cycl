@@ -3,7 +3,12 @@ const common_vendor = require("../../common/vendor.js");
 const _sfc_main = {
   __name: "StatusTag",
   props: {
-    // 状态值 (0: 进行中, 1: 已完成, 2: 无需收运)
+    /**
+     * 订单状态值
+     * @type {Number|String}
+     * @description 0-进行中, 1-已完成, 2-无需收运
+     * @required true
+     */
     status: {
       type: [Number, String],
       required: true

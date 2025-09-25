@@ -107,7 +107,7 @@
   padding: 30rpx;
   background-color: #fff;
   border-radius: 12rpx;
-  height: 462rpx;
+  height: 330rpx;
   box-sizing: border-box;
 }
 .container .content-wrapper .order-list .order-item .order-header.data-v-4e0aa4c3 {
@@ -120,49 +120,6 @@
   margin-bottom: 16rpx;
 }
 .container .content-wrapper .order-list .order-item .order-header .shop-info .shop-name.data-v-4e0aa4c3 {
-  font-size: 26rpx;
-  color: #3d3d3d;
-}
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.data-v-4e0aa4c3 {
-  font-size: 24rpx;
-  width: 120rpx;
-  height: 40rpx;
-  border-radius: 8rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.processing.data-v-4e0aa4c3 {
-  color: #00aaff;
-  background: rgba(0, 170, 255, 0.1);
-}
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.completed.data-v-4e0aa4c3 {
-  color: rgba(61, 61, 61, 0.5);
-  background: rgba(153, 153, 153, 0.1);
-}
-.container .content-wrapper .order-list .order-item .order-header .shop-info .status-tag.cancelled.data-v-4e0aa4c3 {
-  color: #ffa100;
-  background: rgba(255, 161, 0, 0.1);
-}
-.container .content-wrapper .order-list .order-item .order-content.data-v-4e0aa4c3 {
-  padding: 20rpx 0;
-  border-top: 1px solid #f0f0f0;
-  border-bottom: 1px solid #f0f0f0;
-}
-.container .content-wrapper .order-list .order-item .order-content .info-item.data-v-4e0aa4c3 {
-  display: flex;
-  margin-bottom: 16rpx;
-}
-.container .content-wrapper .order-list .order-item .order-content .info-item.data-v-4e0aa4c3:last-child {
-  margin-bottom: 0;
-}
-.container .content-wrapper .order-list .order-item .order-content .info-item .label.data-v-4e0aa4c3 {
-  font-size: 26rpx;
-  color: rgba(61, 61, 61, 0.5);
-}
-.container .content-wrapper .order-list .order-item .order-content .info-item .value.data-v-4e0aa4c3 {
-  margin-left: 30rpx;
   font-size: 26rpx;
   color: #3d3d3d;
 }

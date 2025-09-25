@@ -3,6 +3,10 @@
   "navigationStyle": "custom",
   "usingComponents": {
     "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
-    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "driver-status-tag": "../../components/DriverStatusTag/DriverStatusTag",
+    "driver-order-actions": "../../components/DriverOrderActions/DriverOrderActions",
+    "info-display": "../../components/InfoDisplay/InfoDisplay",
+    "abnormal-report-modal": "../../components/AbnormalReportModal/AbnormalReportModal"
   }
 }

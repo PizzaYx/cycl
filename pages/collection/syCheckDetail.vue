@@ -8,7 +8,7 @@
         <!-- 用户信息 -->
         <view class="user-info">
             <view class="name">{{ pageData.driverName }}</view>
-            <view class="status-tag" :class="statusClass">{{ statusText }}</view>
+            <DriverStatusTag :status="pageData.status" />
         </view>
         <!-- 内容区域 -->
         <view class="content">
@@ -21,14 +21,6 @@
                 </view>
             </view>
 
-            <!-- 照片区域 -->
-            <view class="photo-section">
-                <text class="photo-title">厨余垃圾照片:</text>
-                <view class="photo-list">
-                    <image v-for="(item, index) in pageData.img" :key="index" class="photo-item" :src="item"
-                        mode="aspectFill" @click="previewImage(index)" />
-                </view>
-            </view>
         </view>
     </view>
 </template>
@@ -37,6 +29,8 @@
 import { onMounted, ref, computed } from 'vue';
 import { apiGetDriverPlanById } from '@/api/apis.js'
 import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
+import DriverStatusTag from '@/components/DriverStatusTag/DriverStatusTag.vue'
+import { formatWeight, formatNum } from '@/utils/orderUtils'
 
 // 页面参数
 const planId = ref(''); // 车辆ID
@@ -57,30 +51,12 @@ const pageData = ref({
     // estimateTime: '' // 预估时间
 });
 
-// 根据状态显示对应的文字
-const statusText = computed(() => {
-    switch (pageData.value.status) {
-        case 0: return '进行中';
-        case 1: return '已完成';
-        case 2: return '无法收运';
-        default: return '';
-    }
-});
-
-const statusClass = computed(() => {
-    switch (pageData.value.status) {
-        case 0: return 'processing';
-        case 1: return 'completed';
-        case 2: return 'cancelled';
-        default: return '';
-    }
-});
 
 // 信息列表配置
 const infoList = computed(() => [
     {
         label: '商家名称:',
-        value: pageData.value.merchantName
+        value: pageData.value.merchantName ?? '暂无'
     },
     {
         label: '预估时间:',
@@ -92,20 +68,19 @@ const infoList = computed(() => [
     },
     {
         label: '预估重量:',
-        value: pageData.value.estimateWeight + 'kg' ?? '暂无'
-
+        value: formatWeight(pageData.value.estimateWeight)
     },
     {
         label: '收运重量:',
-        value: pageData.value.weight + 'kg' ?? '暂无'
+        value: formatWeight(pageData.value.weight)
     },
     {
         label: '预估桶数:',
-        value: pageData.value.estimateBucketNum + '个' ?? '暂无'
+        value: formatNum(pageData.value.estimateBucketNum)
     },
     {
         label: '收运桶数:',
-        value: pageData.value.bucketNum + '个' ?? '暂无'
+        value: formatNum(pageData.value.bucketNum)
     },
     {
         label: '收运地址:',
@@ -115,12 +90,10 @@ const infoList = computed(() => [
         label: '车牌号:',
         value: pageData.value.registrationNumber ?? '暂无',
     },
-
-
-
-
-
-
+    {
+        label: '其他说明:',
+        value: pageData.value.remark ?? '暂无',
+    }
 ]);
 
 onLoad((options) => {
@@ -159,11 +132,10 @@ const getSyCheckDetail = async () => {
             estimateBucketNum: data.estimateBucketNum || 0,
             bucketNum: data.bucketNum || 0,
             registrationNumber: data.registrationNumber,
-            img: data.img ? data.img.split(',') : [],
             appointmentTime: data.appointmentTime,
             arrivalTime: data.arrivalTime,
             address: data.address,
-
+            remark: data.remark,
         };
     }
 }
@@ -172,13 +144,7 @@ const back = () => {
     uni.navigateBack()
 }
 
-// 照片预览功能
-const previewImage = (index) => {
-    uni.previewImage({
-        urls: pageData.value.img,
-        current: index
-    })
-}
+
 </script>
 
 <style lang="scss" scoped>
@@ -206,36 +172,6 @@ const previewImage = (index) => {
         color: #333333;
     }
 
-    .status-tag {
-        font-size: 24rpx;
-        width: 120rpx;
-        height: 40rpx;
-        border-radius: 8rpx;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-
-
-        &.processing {
-            //进行中 待完成
-            color: rgba(0, 170, 255, 1);
-            background: rgba(0, 170, 255, 0.10);
-        }
-
-        &.completed {
-            //已完成
-            color: rgba(61, 61, 61, 0.50);
-            background: rgba(153, 153, 153, 0.1);
-        }
-
-        &.cancelled {
-            //无法收运
-            color: rgba(255, 161, 0, 1);
-            background: rgba(255, 161, 0, 0.10);
-
-        }
-    }
 }
 
 .content {
@@ -248,11 +184,11 @@ const previewImage = (index) => {
 
     .info-list {
         padding: 0 30rpx;
+        margin-bottom: 40rpx;
 
         .info-item {
-            display: flex;
-            margin-bottom: 32rpx;
-            padding-bottom: 32rpx;
+            display: block;
+            margin-bottom: 30rpx;
             border-bottom: 1rpx solid #f0f0f0;
 
             &:last-child {
@@ -262,41 +198,18 @@ const previewImage = (index) => {
             }
 
             .label {
-                width: 140rpx;
+                display: block;
                 font-size: 14px;
                 color: #999999;
-                flex-shrink: 0;
+                margin-bottom: 20rpx;
             }
 
             .value {
-                margin-left: 30rpx;
-                flex: 1;
+                display: block;
                 font-size: 14px;
                 color: #333333;
-            }
-        }
-    }
-
-    .photo-section {
-        margin-top: 48rpx;
-        padding: 0 30rpx;
-
-        .photo-title {
-            font-size: 14px;
-            color: #999999;
-            margin-bottom: 24rpx;
-            display: block;
-        }
-
-        .photo-list {
-            display: flex;
-            gap: 20rpx;
-
-            .photo-item {
-                width: 186rpx;
-                height: 186rpx;
-                border-radius: 8rpx;
-                box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+                line-height: 1.4;
+                margin-bottom: 5rpx;
             }
         }
     }

@@ -34,60 +34,14 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text class="status-tag" :class="getStatusClass(item.status)">
-                                    {{ getStatusText(item.status) }}
-                                </text>
+                                <DriverStatusTag :status="item.status" />
                             </view>
                         </view>
                         <view class="order-content">
-                            <view class="info-item">
-                                <text class="label">预估时间:</text>
-                                <text class="value">{{ item.appointmentTime ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运时间:</text>
-                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估重量:</text>
-                                <text class="value">{{ item.estimateWeight ? (item.estimateWeight + 'kg') : '暂无'
-                                }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运重量:</text>
-                                <text class="value">{{ item.weight ? (item.weight + 'kg') : '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估桶数:</text>
-                                <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运桶数:</text>
-                                <text class="value">{{ item.bucketNum ? (item.bucketNum + '个') : '暂无' }} </text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">地址:</text>
-                                <text class="value">{{ item.address ?? '暂无' }} </text>
-                            </view>
-
+                            <InfoDisplay :fields="getInfoFields(item)" />
                         </view>
-                        <view class="order-footer">
-                            <template v-if="item.status == 0 || item.status == '0'">
-                                <uni-button size="mini" type="default" class="cancel-btn" @tap="handleCancel(item)">
-                                    取消
-                                </uni-button>
-                                <uni-button size="mini" type="primary" class="report-btn"
-                                    @tap="handleConfirmTransport(item)">
-                                    收运上报
-                                </uni-button>
-                            </template>
-                            <template v-else>
-                                <uni-button size="mini" type="default" class="view-btn" @tap="handleViewDetails(item)">
-                                    查看详情
-                                </uni-button>
-                            </template>
-                        </view>
+                        <DriverOrderActions :status="item.status" :order-data="item" @refresh="handleRefresh"
+                            @abnormalReport="handleAbnormalReport" />
                     </view>
 
                     <!-- 加载更多组件 - 只在有数据时显示 -->
@@ -108,6 +62,10 @@
                 </view>
             </scroll-view>
         </view>
+
+        <!-- 异常上报弹窗 -->
+        <AbnormalReportModal :show="showAbnormalModal" :order-data="currentOrderData" @close="closeAbnormalModal"
+            @success="handleAbnormalSuccess" />
     </view>
 </template>
 <script setup>
@@ -126,7 +84,11 @@ import {
 } from '@/api/apis.js';
 
 import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
-
+import DriverStatusTag from '@/components/DriverStatusTag/DriverStatusTag.vue'
+import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
+import DriverOrderActions from '@/components/DriverOrderActions/DriverOrderActions.vue'
+import AbnormalReportModal from '@/components/AbnormalReportModal/AbnormalReportModal.vue'
+import { formatWeight, formatNum } from '@/utils/orderUtils'
 import { useUserStore } from '@/stores/user.js'
 
 
@@ -139,6 +101,87 @@ const currentStatusKey = computed(() => parseInt(tabs[currentTab.value].key));
 
 // 筛选相关状态
 const searchKeyword = ref(''); // 搜索关键词
+
+// 根据状态获取信息字段
+const getInfoFields = (item) => {
+    const status = item.status;
+
+    // 状态为 0（进行中）或 2（无法收运）时显示预估信息
+    if (status === 0 || status === '0' || status === 2 || status === '2') {
+        return [
+            {
+                key: 'appointmentTime',
+                label: '预估时间',
+                value: item.appointmentTime
+            },
+            {
+                key: 'estimateWeight',
+                label: '预估重量',
+                value: item.estimateWeight
+            },
+            {
+                key: 'estimateBucketNum',
+                label: '预估桶数',
+                value: item.estimateBucketNum
+            },
+            {
+                key: 'address',
+                label: '地址',
+                value: item.address
+            }
+        ];
+    }
+
+    // 状态为 1（已完成）时显示收运信息
+    if (status === 1 || status === '1') {
+        return [
+            {
+                key: 'arrivalTime',
+                label: '收运时间',
+                value: item.arrivalTime
+            },
+            {
+                key: 'weight',
+                label: '收运重量',
+                value: item.weight
+            },
+            {
+                key: 'bucketNum',
+                label: '收运桶数',
+                value: item.bucketNum
+            },
+            {
+                key: 'address',
+                label: '地址',
+                value: item.address
+            }
+        ];
+    }
+
+    // 默认返回预估信息
+    return [
+        {
+            key: 'appointmentTime',
+            label: '预估时间',
+            value: item.appointmentTime
+        },
+        {
+            key: 'estimateWeight',
+            label: '预估重量',
+            value: item.estimateWeight
+        },
+        {
+            key: 'estimateBucketNum',
+            label: '预估桶数',
+            value: item.estimateBucketNum
+        },
+        {
+            key: 'address',
+            label: '地址',
+            value: item.address
+        }
+    ];
+};
 
 const userStore = useUserStore();
 
@@ -162,116 +205,45 @@ onShow(async () => {
     getNetwork();
 })
 
-
-// 状态转换函数
-const getStatusText = (status) => {
-    switch (status) {
-        case 0:
-        case '0':
-            return '进行中';
-        case 1:
-        case '1':
-            return '已完成';
-        case 2:
-        case '2':
-            return '无法收运';
-        default:
-            return '无法收运';
+// 处理异常上报后的刷新
+const handleRefresh = async () => {
+    try {
+        // 重置页码并重新获取数据
+        allOrderList.value = [];
+        pageNum.value = 1;
+        await getNetwork();
+        await getDriverNotConfirmNum();
+    } catch (error) {
+        console.error('刷新数据失败:', error)
     }
-};
+}
 
-// 获取状态样式类名
-const getStatusClass = (status) => {
-    switch (status) {
-        case 0: return 'processing';
-        case 1: return 'completed';
-        case 2: return 'cancelled';
-    }
-};
+// 异常上报相关变量
+const showAbnormalModal = ref(false)
+const currentOrderData = ref(null)
 
-// 按钮点击事件处理函数
-const handleCancel = (item) => {
-    console.log('取消任务:', item);
-    uni.showModal({
-        title: '确认取消',
-        content: '是否确认取消当前任务？',
-        success: async (res) => {
-            if (res.confirm) {
-                await apiGetnoNeedCollect({
-                    id: item.id,
-                    driverId: userStore.sfmerchant?.id
-                }).then((res) => {
-                    if (res.code === 200) {
-                        uni.showToast({
-                            title: res.msg || '操作成功',
-                            icon: 'success'
-                        });
-                        // 刷新任务列表
-                        clearSearch();
-                    } else {
-                        uni.showToast({
-                            title: res.msg || '操作失败',
-                            icon: 'error'
-                        });
-                    }
+// 处理异常上报事件
+const handleAbnormalReport = (orderData) => {
+    console.log('异常上报事件', orderData)
+    currentOrderData.value = orderData
+    showAbnormalModal.value = true
+}
 
-                })
-            }
-        }
-    })
+// 关闭异常上报弹窗
+const closeAbnormalModal = () => {
+    showAbnormalModal.value = false
+    currentOrderData.value = null
+}
 
-};
+// 异常上报成功回调
+const handleAbnormalSuccess = async () => {
+    // 刷新数据
+    await handleRefresh()
+}
 
-const handleViewDetails = (item) => {
-    console.log('查看详情按钮被点击', item);
-    // 这里添加查看任务的逻辑
-    uni.navigateTo({
-        url: `/pages/collection/syCheckDetail?planId=${item.id}&driverId=${item.driverId}`
-    });
 
-};
 
-const handleConfirmTransport = async (task) => {
-    console.log('收运:', task.id);
-    //先判断task.weight是否大于0 he task.bucketNum是否大于0
-    if (task.weight > 0 && task.bucketNum > 0) {
-        //确认收运完成
-        uni.showModal({
-            title: '确认收运完成',
-            content: '是否确认收运完成？',
-            success: async (res) => {
-                if (res.confirm) {
-                    await apiGetdriverConfirmPlan({
-                        id: task.id,
-                        driverId: userStore.sfmerchant?.id,
-                    }).then((res) => {
-                        if (res.code === 200) {
-                            uni.showToast({
-                                title: res.msg || '操作成功',
-                                icon: 'success'
-                            });
-                            // 刷新任务列表
-                            clearSearch();
-                        } else {
-                            uni.showToast({
-                                title: res.msg || '操作失败',
-                                icon: 'error'
-                            });
-                        }
-                    })
-                }
-            }
-        })
-
-    }
-    else {
-        uni.showToast({
-            title: '请先进行 收运上报 操作',
-            icon: 'none'
-        });
-        return;
-    }
-};
+// 按钮点击事件处理函数已封装到 DriverOrderActions 组件中
 
 // 添加badgeText的ref变量
 const bookingBadgeText = ref(0);
@@ -517,98 +489,10 @@ onMounted(() => {
                             color: rgba(61, 61, 61, 1);
                         }
 
-                        .status-tag {
-                            font-size: 24rpx;
-                            width: 120rpx;
-                            height: 40rpx;
-                            border-radius: 8rpx;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            text-align: center;
-
-
-                            &.processing {
-                                //进行中 待完成
-                                color: rgba(0, 170, 255, 1);
-                                background: rgba(0, 170, 255, 0.10);
-                            }
-
-                            &.completed {
-                                //已完成
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
-                            }
-
-                            &.cancelled {
-                                //无法收运
-                                color: rgba(255, 161, 0, 1);
-                                background: rgba(255, 161, 0, 0.10);
-
-                            }
-                        }
                     }
                 }
 
-                .order-content {
-                    padding: 20rpx 0;
-                    border-top: 1px solid #f0f0f0;
-                    border-bottom: 1px solid #f0f0f0;
 
-                    .info-item {
-                        display: flex;
-                        margin-bottom: 16rpx;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-
-                        .label {
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 0.50);
-                        }
-
-                        .value {
-                            margin-left: 30rpx;
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 1);
-                        }
-                    }
-                }
-
-                .order-footer {
-                    margin-top: 30rpx;
-                    display: flex;
-                    justify-content: flex-end;
-                    gap: 15rpx;
-                    flex-wrap: wrap; // 允许换行以适应4个按钮
-
-                    .cancel-btn,
-                    .view-btn,
-                    .report-btn {
-                        width: 120rpx; // 减小按钮宽度以适应4个按钮
-                        height: 48rpx;
-                        color: #07C160;
-                        border-radius: 100rpx;
-                        border: 2rpx solid #07C160;
-                        font-size: 24rpx; // 稍微减小字体
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                    }
-
-
-                    .cancel-btn {
-                        border: 1rpx solid rgba(196, 196, 196, 1);
-                        color: rgba(61, 61, 61, 1);
-                    }
-
-                    .report-btn {
-                        background-color: #FFA500;
-                        border-color: #FFA500;
-                        color: white;
-                    }
-                }
             }
         }
 

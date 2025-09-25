@@ -5,13 +5,16 @@ const stores_user = require("../../stores/user.js");
 const api_apis = require("../../api/apis.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  const _component_uni_button = common_vendor.resolveComponent("uni-button");
-  (_easycom_uni_icons2 + _component_uni_button)();
+  _easycom_uni_icons2();
 }
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  _easycom_uni_icons();
+  (_easycom_uni_icons + DriverStatusTag + InfoDisplay + DriverOrderActions + AbnormalReportModal)();
 }
+const InfoDisplay = () => "../../components/InfoDisplay/InfoDisplay.js";
+const DriverStatusTag = () => "../../components/DriverStatusTag/DriverStatusTag.js";
+const DriverOrderActions = () => "../../components/DriverOrderActions/DriverOrderActions.js";
+const AbnormalReportModal = () => "../../components/AbnormalReportModal/AbnormalReportModal.js";
 const _sfc_main = {
   __name: "collection",
   setup(__props) {
@@ -19,25 +22,28 @@ const _sfc_main = {
     const yyNum = common_vendor.ref(0);
     const syNum = common_vendor.ref(0);
     const dqNum = common_vendor.ref(0);
+    const progressPercentage = common_vendor.computed(() => {
+      const total = dqNum.value + syNum.value;
+      if (total === 0)
+        return 0;
+      return Math.round(dqNum.value / total * 100);
+    });
     const allOrderList = common_vendor.ref([]);
     const refreshing = common_vendor.ref(false);
-    common_vendor.onMounted(async () => {
-      try {
-        const userInfo = await userStore.ensureUserInfo();
-        if (userInfo === null) {
-          common_vendor.index.__f__("log", "at pages/collection/collection.vue:149", "用户未登录，已跳转到登录页");
-          return;
-        }
-        getMerchantStatistics();
-        getMerchantSydList();
-      } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:157", "页面初始化失败:", error);
-      }
-    });
+    const showAbnormalModal = common_vendor.ref(false);
+    const currentOrderData = common_vendor.ref(null);
+    common_vendor.watch(progressPercentage, () => {
+      common_vendor.nextTick$1(() => {
+        drawProgressArc();
+      });
+    }, { immediate: false });
     common_vendor.onShow(async () => {
-      common_vendor.index.__f__("log", "at pages/collection/collection.vue:162", "页面显示时刷新数据");
-      getMerchantStatistics();
-      getMerchantSydList();
+      common_vendor.index.__f__("log", "at pages/collection/collection.vue:132", "页面显示时刷新数据");
+      await getMerchantStatistics();
+      await getMerchantSydList();
+      setTimeout(() => {
+        drawProgressArc();
+      }, 300);
     });
     const getMerchantStatistics = async () => {
       var _a;
@@ -50,30 +56,63 @@ const _sfc_main = {
         syNum.value = res.data.notConfirmNum;
       }
     };
-    const getStatusText = (status) => {
-      switch (status) {
-        case 0:
-        case "0":
-          return "进行中";
-        case 1:
-        case "1":
-          return "已完成";
-        case 2:
-        case "2":
-          return "无法收运";
-        default:
-          return "无法收运";
+    const getInfoFields = (item) => {
+      const status = item.status;
+      if (status === 0 || status === "0" || status === 2 || status === "2") {
+        return [
+          {
+            key: "appointmentTime",
+            label: "预估时间",
+            value: item.appointmentTime
+          },
+          {
+            key: "estimateWeight",
+            label: "预估重量",
+            value: item.estimateWeight
+          },
+          {
+            key: "estimateBucketNum",
+            label: "预估桶数",
+            value: item.estimateBucketNum
+          }
+        ];
       }
-    };
-    const getStatusClass = (status) => {
-      switch (status) {
-        case 0:
-          return "processing";
-        case 1:
-          return "completed";
-        case 2:
-          return "cancelled";
+      if (status === 1 || status === "1") {
+        return [
+          {
+            key: "arrivalTime",
+            label: "收运时间",
+            value: item.arrivalTime
+          },
+          {
+            key: "weight",
+            label: "收运重量",
+            value: item.weight
+          },
+          {
+            key: "bucketNum",
+            label: "收运桶数",
+            value: item.bucketNum
+          }
+        ];
       }
+      return [
+        {
+          key: "appointmentTime",
+          label: "预估时间",
+          value: item.appointmentTime
+        },
+        {
+          key: "estimateWeight",
+          label: "预估重量",
+          value: item.estimateWeight
+        },
+        {
+          key: "estimateBucketNum",
+          label: "预估桶数",
+          value: item.estimateBucketNum
+        }
+      ];
     };
     const getMerchantSydList = async () => {
       var _a;
@@ -85,53 +124,12 @@ const _sfc_main = {
       if (res.code === 200) {
         allOrderList.value = res.data.list;
       } else {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:218", "收运端首页收运明细失败", res.msg);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:233", "收运端首页收运明细失败", res.msg);
       }
     };
     const getUserInfo = () => {
       common_vendor.index.navigateTo({
         url: "/pages/user/user"
-      });
-    };
-    const handleCancel = (item) => {
-      common_vendor.index.__f__("log", "at pages/collection/collection.vue:234", "取消任务:", item);
-      common_vendor.index.showModal({
-        title: "确认取消",
-        content: "是否确认取消当前任务？",
-        success: async (res) => {
-          var _a;
-          if (res.confirm) {
-            await api_apis.apiGetnoNeedCollect({
-              id: item.id,
-              driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
-            }).then((res2) => {
-              if (res2.code === 200) {
-                common_vendor.index.showToast({
-                  title: res2.msg || "操作成功",
-                  icon: "success"
-                });
-                clearSearch();
-              } else {
-                common_vendor.index.showToast({
-                  title: res2.msg || "操作失败",
-                  icon: "error"
-                });
-              }
-            });
-          }
-        }
-      });
-    };
-    const handleViewDetails = (item) => {
-      common_vendor.index.__f__("log", "at pages/collection/collection.vue:266", "查看详情按钮被点击", item);
-      common_vendor.index.navigateTo({
-        url: `/pages/collection/syCheckDetail?planId=${item.id}&driverId=${item.driverId}`
-      });
-    };
-    const handleConfirmTransport = async (task) => {
-      common_vendor.index.__f__("log", "at pages/collection/collection.vue:275", "收运上报:", task);
-      common_vendor.index.navigateTo({
-        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}&merchantName=${task.merchantName}`
       });
     };
     const quickActions = common_vendor.ref([
@@ -155,7 +153,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/collection/collection.vue:307", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/collection/collection.vue:274", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"
@@ -173,8 +171,13 @@ const _sfc_main = {
       refreshing.value = true;
       try {
         await userStore.fetchUserInfo();
+        await getMerchantStatistics();
+        await getMerchantSydList();
+        setTimeout(() => {
+          drawProgressArc();
+        }, 300);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:330", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:303", "刷新失败:", error);
         common_vendor.index.showToast({
           title: "刷新失败",
           icon: "none"
@@ -183,15 +186,75 @@ const _sfc_main = {
         refreshing.value = false;
       }
     };
+    const handleRefresh = async () => {
+      try {
+        await getMerchantStatistics();
+        await getMerchantSydList();
+        setTimeout(() => {
+          drawProgressArc();
+        }, 300);
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:325", "刷新数据失败:", error);
+      }
+    };
+    const handleAbnormalReport = (orderData) => {
+      currentOrderData.value = orderData;
+      showAbnormalModal.value = true;
+    };
+    const closeAbnormalModal = () => {
+      showAbnormalModal.value = false;
+      currentOrderData.value = null;
+    };
+    const handleAbnormalSuccess = async () => {
+      await handleRefresh();
+    };
     const goToSydAllList = () => {
       common_vendor.index.navigateTo({
         url: "/pages/collection/sfsyRecord"
       });
     };
+    const drawProgressArc = () => {
+      const ctx = common_vendor.index.createCanvasContext("progressArc");
+      const query = common_vendor.index.createSelectorQuery();
+      query.select(".arc-canvas").boundingClientRect((rect) => {
+        if (rect) {
+          const width = rect.width;
+          const height = rect.height;
+          const centerX = width / 2;
+          const centerY = height * 0.75;
+          const radius = width / 4.8;
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius, Math.PI, 0, false);
+          ctx.setStrokeStyle("rgba(7, 193, 96, 0.10)");
+          ctx.setLineWidth(10);
+          ctx.setLineCap("round");
+          ctx.stroke();
+          const progressAngle = Math.PI * (progressPercentage.value / 100);
+          if (progressPercentage.value > 0) {
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + progressAngle, false);
+            ctx.setStrokeStyle("rgba(7, 193, 96, 1)");
+            ctx.setLineWidth(10);
+            ctx.setLineCap("round");
+            ctx.stroke();
+            const endAngle = Math.PI + progressAngle;
+            const endX = centerX + radius * Math.cos(endAngle);
+            const endY = centerY + radius * Math.sin(endAngle);
+            ctx.beginPath();
+            ctx.arc(endX, endY, 10, 0, 2 * Math.PI, false);
+            ctx.setFillStyle("rgba(7, 193, 96, 1)");
+            ctx.fill();
+          }
+          ctx.draw();
+        } else {
+          common_vendor.index.__f__("error", "at pages/collection/collection.vue:406", "无法获取Canvas尺寸");
+        }
+      }).exec();
+    };
     return (_ctx, _cache) => {
       var _a;
       return common_vendor.e({
-        a: common_assets._imports_4,
+        a: common_assets._imports_0,
         b: common_vendor.t(common_vendor.unref(userStore).userSFAvatar),
         c: common_vendor.t(common_vendor.unref(userStore).nickName || "未登录"),
         d: common_vendor.t(((_a = common_vendor.unref(userStore).sfmerchant) == null ? void 0 : _a.registrationNumber) || "未设置车牌"),
@@ -200,8 +263,8 @@ const _sfc_main = {
           size: "30rpx"
         }),
         f: common_vendor.o(getUserInfo),
-        g: common_vendor.t(yyNum.value),
-        h: common_vendor.t(syNum.value),
+        g: common_vendor.t(syNum.value),
+        h: common_vendor.t(yyNum.value),
         i: common_vendor.t(dqNum.value),
         j: common_vendor.f(quickActions.value, (action, index, i0) => {
           return {
@@ -211,49 +274,44 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleQuickAction(action), action.id)
           };
         }),
-        k: common_vendor.o(goToSydAllList),
-        l: allOrderList.value.length > 0
+        k: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "rgba(19, 19, 19, 0.50)"
+        }),
+        l: common_vendor.o(goToSydAllList),
+        m: allOrderList.value.length > 0
       }, allOrderList.value.length > 0 ? {
-        m: common_vendor.f(allOrderList.value, (item, index, i0) => {
-          return common_vendor.e({
+        n: common_vendor.f(allOrderList.value, (item, index, i0) => {
+          return {
             a: common_vendor.t(item.merchantName),
-            b: common_vendor.t(getStatusText(item.status)),
-            c: common_vendor.n(getStatusClass(item.status)),
-            d: common_vendor.t(item.appointmentTime ?? "暂无"),
-            e: common_vendor.t(item.arrivalTime ?? "暂无"),
-            f: common_vendor.t(item.estimateWeight ? item.estimateWeight + "kg" : "暂无"),
-            g: common_vendor.t(item.weight ? item.weight + "kg" : "暂无"),
-            h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + "个" : "暂无"),
-            i: common_vendor.t(item.bucketNum ? item.bucketNum + "个" : "暂无"),
-            j: common_vendor.t(item.address ?? "暂无"),
-            k: item.status == 0 || item.status == "0"
-          }, item.status == 0 || item.status == "0" ? {
-            l: common_vendor.o(($event) => handleCancel(item), index),
-            m: "cd17183b-1-" + i0,
-            n: common_vendor.p({
-              size: "mini",
-              type: "default"
+            b: "cd17183b-2-" + i0,
+            c: common_vendor.p({
+              status: item.status
             }),
-            o: common_vendor.o(($event) => handleConfirmTransport(item), index),
-            p: "cd17183b-2-" + i0,
-            q: common_vendor.p({
-              size: "mini",
-              type: "primary"
-            })
-          } : {
-            r: common_vendor.o(($event) => handleViewDetails(item), index),
-            s: "cd17183b-3-" + i0,
-            t: common_vendor.p({
-              size: "mini",
-              type: "default"
-            })
-          }, {
-            v: index
-          });
+            d: "cd17183b-3-" + i0,
+            e: common_vendor.p({
+              fields: getInfoFields(item)
+            }),
+            f: common_vendor.o(handleRefresh, index),
+            g: common_vendor.o(handleAbnormalReport, index),
+            h: "cd17183b-4-" + i0,
+            i: common_vendor.p({
+              status: item.status,
+              ["order-data"]: item
+            }),
+            j: index
+          };
         })
       } : {}, {
-        n: refreshing.value,
-        o: common_vendor.o(onRefresh)
+        o: refreshing.value,
+        p: common_vendor.o(onRefresh),
+        q: common_vendor.o(closeAbnormalModal),
+        r: common_vendor.o(handleAbnormalSuccess),
+        s: common_vendor.p({
+          show: showAbnormalModal.value,
+          ["order-data"]: currentOrderData.value
+        })
       });
     };
   }

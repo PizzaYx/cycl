@@ -7426,9 +7426,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "127.0.0.1,192.168.0.184";
+  const hosts = "127.0.0.1,192.168.0.185";
   const port = "8090";
-  const id = "mp-weixin_tCjhEp";
+  const id = "mp-weixin_MGiQUe";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9157,6 +9157,11 @@ const onLoad = /* @__PURE__ */ createLifeCycleHook(
 );
 const onUnload = /* @__PURE__ */ createLifeCycleHook(
   ON_UNLOAD,
+  2
+  /* HookFlags.PAGE */
+);
+const onPageScroll = /* @__PURE__ */ createLifeCycleHook(
+  ON_PAGE_SCROLL,
   2
   /* HookFlags.PAGE */
 );
@@ -12723,6 +12728,7 @@ exports.nextTick$1 = nextTick$1;
 exports.o = o$1;
 exports.onLoad = onLoad;
 exports.onMounted = onMounted;
+exports.onPageScroll = onPageScroll;
 exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
 exports.onShow = onShow;

@@ -242,7 +242,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_4,
+        a: common_assets._imports_0,
         b: common_vendor.t(common_vendor.unref(userStore).userAvatar),
         c: common_vendor.t(common_vendor.unref(userStore).nickName || "昵称未设置"),
         d: common_vendor.t(common_vendor.unref(userStore).userName || "账号未设置"),

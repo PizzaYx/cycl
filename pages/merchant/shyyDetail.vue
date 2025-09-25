@@ -12,7 +12,6 @@
         </view>
         <!-- 内容区域 -->
         <view class="content">
-
             <!-- 基础信息列表 -->
             <view class="info-list">
                 <view class="info-item" v-for="(item, index) in infoList" :key="index">
@@ -20,9 +19,6 @@
                     <text class="value">{{ item.value }}</text>
                 </view>
             </view>
-
-
-
         </view>
     </view>
 </template>
@@ -31,6 +27,7 @@
 import { onMounted, ref, computed } from 'vue';
 import { apiGetPlanTemporaryById } from '@/api/apis.js'
 import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
+import { formatWeight, formatNum } from '@/utils/orderUtils'
 
 // 页面参数
 const merchantId = ref(); // 商户ID
@@ -62,19 +59,17 @@ const statusClass = computed(() => {
 
 // 信息列表配置
 const infoList = computed(() => [
-
     {
         label: '预估时间:',
         value: pageData.value.appointmentTime ? pageData.value.appointmentTime : '暂无',
     },
     {
         label: '预估重量:',
-        value: pageData.value.estimateWeight ? pageData.value.estimateWeight + ' kg' : '暂无'
-
+        value: formatWeight(pageData.value.estimateWeight)
     },
     {
         label: '预估桶数:',
-        value: pageData.value.estimateBucketNum ? pageData.value.estimateBucketNum + ' 个' : '暂无'
+        value: formatNum(pageData.value.estimateBucketNum)
     },
     {
         label: '收运地址:',
@@ -83,8 +78,7 @@ const infoList = computed(() => [
     {
         label: '其他说明:',
         value: pageData.value.explain ?? '暂无',
-    },
-
+    }
 ]);
 
 onLoad((options) => {

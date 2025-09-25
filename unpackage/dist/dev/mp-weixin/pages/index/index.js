@@ -182,8 +182,8 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_assets._imports_4,
-        b: common_assets._imports_0,
+        a: common_assets._imports_0,
+        b: common_assets._imports_0$1,
         c: activeTab.value === 0
       }, activeTab.value === 0 ? {} : {}, {
         d: activeTab.value === 0 ? 1 : "",

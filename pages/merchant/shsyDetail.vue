@@ -12,7 +12,6 @@
         </view>
         <!-- 内容区域 -->
         <view class="content">
-
             <!-- 基础信息列表 -->
             <view class="info-list">
                 <view class="info-item" v-for="(item, index) in infoList" :key="index">
@@ -29,6 +28,7 @@ import { onMounted, ref, computed } from 'vue';
 import { apiGetPlanById } from '@/api/apis.js'
 import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
 import StatusTag from '@/components/StatusTag/StatusTag.vue'
+import { formatWeight, formatNum } from '@/utils/orderUtils'
 
 // 页面参数
 const merchantId = ref(); // 商户ID
@@ -52,20 +52,19 @@ const infoList = computed(() => [
     },
     {
         label: '预估重量:',
-        value: pageData.value.estimateWeight ? pageData.value.estimateWeight + ' kg' : '暂无'
-
+        value: formatWeight(pageData.value.estimateWeight)
     },
     {
         label: '收运重量:',
-        value: pageData.value.weight ? pageData.value.weight + ' kg' : '暂无'
+        value: formatWeight(pageData.value.weight)
     },
     {
         label: '预估桶数:',
-        value: pageData.value.estimateBucketNum ? pageData.value.estimateBucketNum + ' 个' : '暂无'
+        value: formatNum(pageData.value.estimateBucketNum)
     },
     {
         label: '收运桶数:',
-        value: pageData.value.bucketNum ? pageData.value.bucketNum + ' 个' : '暂无'
+        value: formatNum(pageData.value.bucketNum)
     },
     {
         label: '收运地址:',
@@ -78,8 +77,7 @@ const infoList = computed(() => [
     {
         label: '其他说明:',
         value: pageData.value.explain ?? '暂无',
-    },
-
+    }
 ]);
 
 onLoad((options) => {

@@ -28,6 +28,12 @@
   border-top: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
 }
+.info-content.no-top-border.data-v-e3352e09 {
+  border-top: none;
+}
+.info-content.no-bottom-border.data-v-e3352e09 {
+  border-bottom: none;
+}
 .info-content .info-item.data-v-e3352e09 {
   display: flex;
   margin-bottom: 16rpx;
@@ -38,9 +44,31 @@
 .info-content .info-item .label.data-v-e3352e09 {
   font-size: 26rpx;
   color: rgba(61, 61, 61, 0.5);
+  width: 180rpx;
+  flex-shrink: 0;
+}
+.info-content .info-item .value-container.data-v-e3352e09 {
+  display: flex;
+  align-items: center;
+  flex: 1;
 }
 .info-content .info-item .value.data-v-e3352e09 {
-  margin-left: 100rpx;
   font-size: 26rpx;
   color: #3d3d3d;
+  flex-shrink: 0;
+}
+.info-content .info-item .location-icon.data-v-e3352e09 {
+  margin-left: 6rpx;
+  flex-shrink: 0;
+}
+.info-content .info-item.address-item.data-v-e3352e09 {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.info-content .info-item.address-item.data-v-e3352e09:active {
+  background-color: transparent !important;
+  -webkit-tap-highlight-color: transparent !important;
 }

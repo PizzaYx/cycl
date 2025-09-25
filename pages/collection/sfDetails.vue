@@ -1,16 +1,17 @@
 <!-- 收运详情 -->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="今日收运详情"
-            @clickLeft="back" />
+        <view class="headImage">
+            <image src="/static/headTopBg.png" mode="aspectFill"></image>
+        </view>
+        <uni-nav-bar dark :fixed="true" :background-color="navBarBgColor" status-bar left-icon="left" color="#000"
+            title="今日收运详情" @clickLeft="back" />
         <view class="header-progress-container">
             <view class="header">
                 <view class="driver-info">
                     <view class="info-item">
                         <uni-text class="label">司机名称：</uni-text>
                         <uni-text class="value">{{ name }}</uni-text>
-                        <uni-button size="mini" type="primary" class="contact-btn"
-                            @tap="contactLine()">查看线路</uni-button>
                     </view>
                     <view class="info-item">
                         <uni-text class="label">车牌号：</uni-text>
@@ -30,28 +31,36 @@
             <view class="progress-section">
                 <view class="progress-title">收运完成率</view>
                 <view class="progress-content">
-                    <view class="progress-circle"
-                        :style="{ background: `conic-gradient(#07C160 ${progressPercentage}%, rgba(216, 216, 216, 0.5) ${progressPercentage}% 100%)` }">
-                        <view class="circle-text">
-                            <uni-text class="percentage">{{ progressPercentage }}%</uni-text>
-                            <uni-text class="label">已完成</uni-text>
+                    <view class="progress-bar">
+                        <view class="progress-fill" :style="{ width: progressPercentage + '%' }">
+                            <view class="progress-bubble">
+                                <image src="/static/ssd/bubble.png" mode="aspectFill"></image>
+                                <view class="bubble-text">{{ progressPercentage }}%</view>
+                            </view>
                         </view>
                     </view>
                     <view class="progress-stats">
                         <view class="stat-item">
-                            <image src="/static/ssd/greenbg.png" mode="aspectFill"></image>
-                            <uni-text class="value green">{{ confirmNum }} 个</uni-text>
-                            <uni-text class="label">已收运</uni-text>
+                            <view class="label-with-color">
+                                <view class="color-tag blue"></view>
+                                <uni-text class="label">总重量</uni-text>
+                            </view>
+                            <uni-text class="value">{{ weightNum }} kg</uni-text>
                         </view>
                         <view class="stat-item">
-                            <image src="/static/ssd/orangebg.png" mode="aspectFill"></image>
-                            <uni-text class="value orange">{{ notConfirmNum }} 个</uni-text>
-                            <uni-text class="label">未收运</uni-text>
+                            <view class="label-with-color">
+                                <view class="color-tag green"></view>
+                                <uni-text class="label">已收运商家</uni-text>
+                            </view>
+                            <uni-text class="value">{{ confirmNum }} 个</uni-text>
+
                         </view>
                         <view class="stat-item">
-                            <image src="/static/ssd/bluebg.png" mode="aspectFill"></image>
-                            <uni-text class="value blue">{{ weightNum }} kg</uni-text>
-                            <uni-text class="label">总重量</uni-text>
+                            <view class="label-with-color">
+                                <view class="color-tag orange"></view>
+                                <uni-text class="label">未收运商家</uni-text>
+                            </view>
+                            <uni-text class="value">{{ notConfirmNum }} 个</uni-text>
                         </view>
                     </view>
                 </view>
@@ -62,83 +71,87 @@
             <view class="weight-content">
                 <image src="/static/ssd/gbicon.png" mode="aspectFill"></image>
                 <uni-text class="weight-title">重量：</uni-text>
-                <input class="weight-input" type="number" v-model="weightInput" placeholder="0" />
+                <input class="weight-input" type="number" v-model="weightInput" placeholder="0" disabled />
                 <uni-text class="weight-unit">kg</uni-text>
-                <uni-button size="mini" type="primary" class="tj-btn" @tap="handleSubmitWeight()">提交重量</uni-button>
-
+                <uni-button size="mini" type="primary" class="tj-btn" @tap="handleSubmitWeight()">获取重量</uni-button>
             </view>
         </view>
+
+        <view class="abnormal-section" v-if="abnormalList.length > 0">
+            <view class="abnormal-item">
+                <image src="/static/ssd/warning.png" mode="aspectFill"></image>
+                <uni-text class="abnormal-label">异常:</uni-text>
+                <swiper class="abnormal-swiper" :autoplay="abnormalList.length > 1" :interval="3000" :duration="500"
+                    :circular="true" :vertical="true" :indicator-dots="false" :display-multiple-items="1"
+                    :touchable="false" :disable-touch="true">
+                    <swiper-item v-for="(item, index) in abnormalList" :key="index">
+                        <view class="abnormal-text-wrapper">
+                            <uni-text class="abnormal-text">{{ item.merchantName }}连续 {{ item.notCollectNum }}
+                                次未收运</uni-text>
+                        </view>
+                    </swiper-item>
+                </swiper>
+            </view>
+        </view>
+
+        <view class="collection-info-section">
+            <view class="collection-info">
+                <uni-text class="info-title">收运信息</uni-text>
+                <uni-button size="mini" type="primary" class="contact-btn" @tap="contactLine()">查看线路</uni-button>
+            </view>
+            <view class="map-container">
+                <map class="location-map" :longitude="currentLocation.longitude" :latitude="currentLocation.latitude"
+                    :markers="markers" :show-location="true" :enable-zoom="true" :enable-scroll="true">
+                </map>
+            </view>
+        </view>
+
         <view class="task-list">
-            <view class="task-item" v-for="(task, index) in taskList" :key="task.id">
+            <view class="task-item" v-for="(task, index) in taskList" :key="task.id" :style="{
+                '--line-top-height': getLinePositions(index).topHeight + 'rpx',
+                '--line-bottom-top': getLinePositions(index).bottomTop + 'rpx'
+            }">
                 <view class="task-header">
                     <view class="time-info">
-                        <uni-icons type="circle-filled"
-                            :color="index === 0 ? 'rgba(7, 193, 96, 1)' : 'rgba(61, 61, 61, 0.50)'" size="20">
-                        </uni-icons>
+                        <view class="icon-container">
+                            <uni-icons type="circle-filled"
+                                :color="index === 0 ? 'rgba(7, 193, 96, 1)' : 'rgba(61, 61, 61, 0.50)'"
+                                :size="index === 0 ? ICON_SIZE.first : ICON_SIZE.normal">
+                            </uni-icons>
+                        </view>
                         <uni-text class="date">{{ task.appointmentTime }}</uni-text>
                     </view>
-                    <!-- 状态类名对应：0: 进行中, 1: 已完成, 2: 无需收运 -->
-                    <uni-text class="status" :class="{
-                        'processing': task.status === 0,
-                        'completed': task.status === 1,
-                        'cancelled': task.status === 2
-                    }">
-                        {{ getStatusText(task.status) }}
-                    </uni-text>
+                    <DriverStatusTag :status="task.status" />
                 </view>
                 <view class="divider"></view>
                 <view class="task-content">
-                    <view class="merchant-info">
-                        <uni-text class="label">商户名称：</uni-text>
-                        <uni-text class="value">{{ task.merchantName }}</uni-text>
-                    </view>
-                    <view class="weight-info">
-                        <uni-text class="label">{{ task.weight != null ? '收运重量：' : ' 预估重量：' }}</uni-text>
-                        <uni-text class="value">{{ task.weight != null ? task.weight : task.estimateWeight ?? 0
-                            }} kg</uni-text>
-                    </view>
-                    <view class="bin-info">
-                        <uni-text class="label"> {{ task.bucketNum != null ? '收运桶数：' : ' 预估桶数：' }}</uni-text>
-                        <uni-text class="value">{{ task.bucketNum != null ? task.bucketNum : task.estimateBucketNum ??
-                            0 }}
-                            个</uni-text>
-                    </view>
-                    <view class="address-info">
-                        <uni-text class="label">地址：</uni-text>
-                        <uni-text class="value">{{ task.address }}</uni-text>
-                        <uni-icons type="location" size="16" color="#00B578"></uni-icons>
-                    </view>
+                    <InfoDisplay :fields="getInfoFields(task)" :show-bottom-border="false" :showTopBorder="false"
+                        :enable-address-navigation="true" />
                 </view>
-                <view class="task-footer">
-                    <template v-if="task.status === 0">
-                        <!-- 进行中状态：显示4个按钮 -->
-                        <uni-button size="mini" class="cancel-btn" @tap="cancelTask(task)">取消</uni-button>
-                        <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
-                        <uni-button size="mini" type="primary" class="report-btn"
-                            @tap="reportTask(task)">收运上报</uni-button>
-                    </template>
-                    <template v-else-if="task.status === 1">
-                        <!-- 已完成状态：只显示查看按钮 -->
-                        <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
-                    </template>
-                    <template v-else-if="task.status === 2">
-                        <!-- 无需收运状态：只显示查看按钮 -->
-                        <uni-button size="mini" type="primary" class="view-btn" @tap="viewTask(task)">查看</uni-button>
-                    </template>
-                </view>
+                <DriverOrderActions :status="task.status" :order-data="task" @refresh="handleRefresh"
+                    @abnormalReport="handleAbnormalReport" />
             </view>
         </view>
         <view class="headImage">
             <image src="/static/headTopBg.png" mode="aspectFill"></image>
         </view>
+
+        <!-- 异常上报弹窗 -->
+        <AbnormalReportModal :show="showAbnormalModal" :order-data="currentOrderData" @close="closeAbnormalModal"
+            @success="handleAbnormalSuccess" />
     </view>
 
 </template>
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { onShow } from '@dcloudio/uni-app' // 导入onShow生命周期
+import { onShow, onPageScroll } from '@dcloudio/uni-app' // 导入onShow和onPageScroll生命周期
 import { useUserStore } from '@/stores/user.js'
-import { apiGetDriverInfo, apiGetDriverTodayPlan, apiGetnoNeedCollect, apiAddCarWeight } from '@/api/apis.js'
+import { apiGetDriverInfo, apiGetDriverTodayPlan, apiGetnoNeedCollect, apiGetCarWeight, apiGetAbnormalPlan } from '@/api/apis.js'
+import DriverStatusTag from '@/components/DriverStatusTag/DriverStatusTag.vue'
+import DriverOrderActions from '@/components/DriverOrderActions/DriverOrderActions.vue'
+import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
+import AbnormalReportModal from '@/components/AbnormalReportModal/AbnormalReportModal.vue'
+import { formatWeight, formatNum } from '@/utils/orderUtils'
 
 // 获取当前日期并格式化为 YYYY-MM-DD 格式
 const getCurrentDate = () => {
@@ -160,22 +173,102 @@ const currentDate = getCurrentDate() // 当前日期
 const weightInput = ref('') // 重量输入框的值
 const allCarId = ref(0)//车辆Id
 const allRecordNo = ref('')//运单号
+const navBarBgColor = ref('transparent') // 导航栏背景色
 
 const taskList = ref([]) // 任务列表
+const abnormalList = ref([]) // 异常列表
+
+// 地图相关数据
+const currentLocation = ref({
+    longitude: 104.066, // 默认经度
+    latitude: 30.5728   // 默认纬度
+})
+const markers = ref([]) // 地图标记点
+
+// 图标大小配置
+const ICON_SIZE = {
+    first: 25,  // 第一个图标大小
+    normal: 20  // 普通图标大小
+}
+
+// 计算连接线位置
+const getLinePositions = (index) => {
+    const iconSize = index === 0 ? ICON_SIZE.first : ICON_SIZE.normal
+    const containerHeight = 50 // 容器高度
+    const containerCenter = containerHeight / 2 // 容器中心位置 25rpx
+    const iconRadius = iconSize / 2
+
+    // 分析布局结构：
+    // task-item (padding: 30rpx)
+    //   └── task-header (margin-bottom: 20rpx)
+    //       └── time-info (align-items: center)
+    //           └── icon-container (50rpx × 50rpx, margin-left: -5rpx)
+    //               └── 图标 (居中)
+
+    // 从task-item顶部到图标顶部的距离：
+    const taskItemPadding = 30 // task-item的padding
+    const taskHeaderMarginBottom = 20 // task-header的margin-bottom
+    const timeInfoHeight = 50 // time-info的高度（与icon-container相同）
+    const timeInfoTop = (timeInfoHeight - containerHeight) / 2 // time-info在task-header中的垂直居中位置
+    const topToIconTop = taskItemPadding + timeInfoTop + containerCenter - iconRadius
+
+    return {
+        topHeight: topToIconTop, // 上半段高度：从task-item顶部到图标顶部
+        bottomTop: topToIconTop + iconSize  // 下半段起始位置：从task-item顶部到图标底部
+    }
+}
+
+// 获取当前定位
+const getCurrentLocation = () => {
+    uni.getLocation({
+        type: 'gcj02',
+        success: (res) => {
+            currentLocation.value = {
+                longitude: res.longitude,
+                latitude: res.latitude
+            }
+            // 设置当前位置标记
+            markers.value = [{
+                id: 1,
+                longitude: res.longitude,
+                latitude: res.latitude,
+                title: '当前位置',
+                iconPath: '/static/ssd/positioning.png',
+                width: 30,
+                height: 30
+            }]
+            console.log('获取定位成功:', res)
+        },
+        fail: (err) => {
+            console.error('获取定位失败:', err)
+            uni.showToast({
+                title: '获取定位失败',
+                icon: 'none'
+            })
+        }
+    })
+}
 
 // 计算进度百分比
 const progressPercentage = computed(() => {
+
     if (confirmNum.value === 0 && weightNum.value === 0) return 0;
     return Math.round((confirmNum.value / (confirmNum.value + notConfirmNum.value)) * 100);
 });
 
-// 获取状态文本
-const getStatusText = (status) => {
-    switch (status) {
-        case 0: return '进行中';
-        case 1: return '已完成';
-        case 2: return '无需收运';
-        default: return '未知状态';
+
+// 统一调用所有接口的函数
+const loadAllData = async () => {
+    getCurrentLocation(); // 获取当前定位
+    try {
+        // 需要调用的接口列表（方便修改查看）
+        await Promise.all([
+            getapiGetDriverInfo(),
+            getapiGetDriverTodayPlan(),
+            getapiGetAbnormalPlan()
+        ]);
+    } catch (error) {
+        console.error('加载数据失败:', error);
     }
 };
 
@@ -188,20 +281,148 @@ onMounted(async () => {
         //     console.log('用户未登录，已跳转到登录页')
         //     return
         // }
-        getapiGetDriverInfo();
-        getapiGetDriverTodayPlan();
+        // await loadAllData();
+
     } catch (error) {
         // 其他非401错误的处理
         console.error('页面初始化失败:', error)
     }
-
 })
+
+// 根据状态获取信息字段
+const getInfoFields = (task) => {
+    const status = task.status;
+
+    // 状态为 0（进行中）或 2（无法收运）时显示预估信息
+    if (status === 0 || status === '0' || status === 2 || status === '2') {
+        return [
+            {
+                key: 'merchantName',
+                label: '商户名称',
+                value: task.merchantName
+            },
+            {
+                key: 'estimateWeight',
+                label: '预估重量',
+                value: formatWeight(task.estimateWeight)
+            },
+            {
+                key: 'estimateBucketNum',
+                label: '预估桶数',
+                value: formatNum(task.estimateBucketNum)
+            },
+            {
+                key: 'address',
+                label: '地址',
+                value: task.address,
+                taskData: task // 传递完整的任务数据，包含经纬度信息
+            }
+        ];
+    }
+
+    // 状态为 1（已完成）时显示收运信息
+    if (status === 1 || status === '1') {
+        return [
+            {
+                key: 'merchantName',
+                label: '商户名称',
+                value: task.merchantName
+            },
+            {
+                key: 'weight',
+                label: '收运重量',
+                value: formatWeight(task.weight)
+            },
+            {
+                key: 'bucketNum',
+                label: '收运桶数',
+                value: formatNum(task.bucketNum)
+            },
+            {
+                key: 'address',
+                label: '地址',
+                value: task.address,
+                taskData: task // 传递完整的任务数据，包含经纬度信息
+            }
+        ];
+    }
+
+    // 默认返回预估信息
+    return [
+        {
+            key: 'merchantName',
+            label: '商户名称',
+            value: task.merchantName
+        },
+        {
+            key: 'estimateWeight',
+            label: '预估重量',
+            value: formatWeight(task.estimateWeight)
+        },
+        {
+            key: 'estimateBucketNum',
+            label: '预估桶数',
+            value: formatNum(task.estimateBucketNum)
+        },
+        {
+            key: 'address',
+            label: '地址',
+            value: task.address
+        }
+    ];
+};
 
 // 页面显示时刷新数据
 onShow(async () => {
     console.log('页面显示时刷新数据')
-    getapiGetDriverInfo();
-    getapiGetDriverTodayPlan();
+    await loadAllData();
+    getCurrentLocation(); // 获取当前定位
+})
+
+// 处理异常上报后的刷新
+const handleRefresh = async () => {
+    try {
+        // 重新加载所有数据
+        await loadAllData();
+    } catch (error) {
+        console.error('刷新数据失败:', error)
+    }
+}
+
+// 异常上报相关变量
+const showAbnormalModal = ref(false)
+const currentOrderData = ref(null)
+
+// 处理异常上报事件
+const handleAbnormalReport = (orderData) => {
+    console.log('异常上报事件', orderData)
+    currentOrderData.value = orderData
+    showAbnormalModal.value = true
+}
+
+// 关闭异常上报弹窗
+const closeAbnormalModal = () => {
+    showAbnormalModal.value = false
+    currentOrderData.value = null
+}
+
+// 异常上报成功回调
+const handleAbnormalSuccess = async () => {
+    // 刷新数据
+    await handleRefresh()
+}
+
+// 任务操作逻辑已完全封装到 DriverOrderActions 组件中
+
+// 注册页面滚动监听
+onPageScroll((e) => {
+    const scrollTop = e.scrollTop;
+    // 当滚动超过背景图片高度时，显示白色背景
+    if (scrollTop > 20) {
+        navBarBgColor.value = '#fff';
+    } else {
+        navBarBgColor.value = 'transparent';
+    }
 })
 
 
@@ -210,7 +431,6 @@ const getapiGetDriverInfo = async () => {
     try {
         const res = await apiGetDriverInfo({
             driverId: userStore.sfmerchant?.id,
-
         })
 
         if (res.code === 200) {
@@ -251,57 +471,28 @@ const getapiGetDriverTodayPlan = async () => {
     }
 }
 
-
-
-// 取消任务
-const cancelTask = (task) => {
-    console.log('取消任务:', task.id);
-    uni.showModal({
-        title: '确认取消',
-        content: '是否确认取消当前任务？',
-        success: async (res) => {
-            if (res.confirm) {
-                await apiGetnoNeedCollect({
-                    id: task.id,
-                    driverId: userStore.sfmerchant?.id,
-                }).then((res) => {
-                    if (res.code === 200) {
-                        uni.showToast({
-                            title: res.msg || '操作成功',
-                            icon: 'success'
-                        });
-                        // 刷新任务列表
-                        getapiGetDriverTodayPlan();
-                    } else {
-                        uni.showToast({
-                            title: res.msg || '操作失败',
-                            icon: 'error'
-                        });
-                    }
-
-                })
-            }
+//获取异常计划列表
+const getapiGetAbnormalPlan = async () => {
+    try {
+        const res = await apiGetAbnormalPlan({
+            driverId: userStore.sfmerchant?.id,
+        })
+        if (res.code === 200) {
+            abnormalList.value = res.data || [];
+        } else {
+            console.error('获取异常计划失败:', res.message || '未知错误');
+            abnormalList.value = [];
         }
-    })
-};
+    } catch (error) {
+        console.error('获取异常计划异常:', error);
+        abnormalList.value = [];
+    }
+}
 
-// 查看任务
-const viewTask = (task) => {
 
-    // 这里添加查看任务的逻辑
-    uni.navigateTo({
-        url: `/pages/collection/syCheckDetail?planId=${task.id}&driverId=${task.driverId}`
-    });
-};
 
-// 收运上报
-const reportTask = (task) => {
-    console.log('收运上报:', task);
 
-    uni.navigateTo({
-        url: `/pages/collection/syReport?carId=${task.carId}&driverId=${task.driverId}&merchantId=${task.merchantId}&planId=${task.id}&merchantName=${task.merchantName}`
-    });
-};
+// 原来的方法已封装到 DriverOrderActions 组件中
 
 
 
@@ -325,61 +516,46 @@ const contactLine = () => {
     });
 };
 
-// 提交重量
+// 获取重量
 const handleSubmitWeight = async () => {
-    // 验证提交重量是否输入 是否大于等于0，成功提示是否提交过磅重量 是就调取接口apiGetCarWeight
-    if (!weightInput.value) {
-        uni.showToast({
-            title: '请输入重量',
-            icon: 'none'
-        });
-        return;
-    }
-
-    const weight = parseFloat(weightInput.value);
-    if (isNaN(weight) || weight < 0) {
-        uni.showToast({
-            title: '请输入有效的重量(大于等于0)',
-            icon: 'none'
-        });
-        return;
-    }
-
     uni.showModal({
-        title: '确认提交',
-        content: `是否确认提交过磅重量 ${weight}kg？`,
+        title: '注意!',
+        content: '需要车辆过磅后才能获取重量!',
+        showCancel: true,
+        cancelText: '取消',
+        confirmText: '确定',
         success: async (res) => {
             if (res.confirm) {
                 try {
-                    const result = await apiAddCarWeight({
-                        carId: allCarId.value,
-                        recordNo: allRecordNo.value,
-                        weight: weight,
-                        registrationNumber: registrationNumber.value,
+                    const result = await apiGetCarWeight({
                         driverId: userStore.sfmerchant?.id
                     });
 
                     if (result.code === 200) {
-                        uni.showToast({
-                            title: '提交成功',
-                            icon: 'success'
-                        });
-                        // 清空输入框
-                        weightInput.value = '';
-                        // 刷新统计数据
-                        getapiGetDriverInfo();
+                        if (result.data && result.data.weight) {
+                            weightInput.value = result.data.weight;
+                            uni.showToast({
+                                title: '获取重量成功',
+                                icon: 'success'
+                            });
+                        } else {
+                            uni.showToast({
+                                title: '暂无过磅重量数据',
+                                icon: 'none'
+                            });
+                        }
                     } else {
                         uni.showToast({
-                            title: result.message || '提交失败',
+                            title: result.message || '获取重量失败',
                             icon: 'none'
                         });
                     }
                 } catch (error) {
                     uni.showToast({
-                        title: '提交失败',
+                        title: '获取重量失败，请确保车辆已过磅',
                         icon: 'none'
                     });
-                    console.error('提交重量失败:', error);
+                    console.error('获取重量失败:', error);
                 }
             }
         }
@@ -390,6 +566,7 @@ const handleSubmitWeight = async () => {
 const back = () => {
     uni.navigateBack();
 };
+
 
 // 组件逻辑
 </script>
@@ -402,13 +579,16 @@ const back = () => {
     min-height: 100vh;
     box-sizing: border-box;
     padding: 0 30rpx 30rpx;
+    position: relative;
 
     .header-progress-container {
         background: #FFFFFF;
-        border-radius: 16rpx;
+        border-radius: 20rpx;
         padding: 30rpx;
         margin-bottom: 20rpx;
         margin-top: 20rpx;
+        position: relative;
+        z-index: 1;
     }
 
     .header {
@@ -430,11 +610,12 @@ const back = () => {
         .driver-info {
             display: flex;
             flex-direction: column;
-            gap: 20rpx;
+            gap: 10rpx;
 
             .info-item {
                 display: flex;
                 align-items: center;
+                justify-content: space-between;
 
                 .label {
                     color: rgba(61, 61, 61, 0.50);
@@ -443,17 +624,9 @@ const back = () => {
 
                 .value {
                     color: rgba(61, 61, 61, 1);
-                    font-size: 14px;
+                    font-size: 28rpx;
                 }
 
-                .contact-btn {
-                    margin-left: auto;
-                    color: #07C160;
-                    border-radius: 100rpx;
-                    padding: 6rpx 20rpx;
-                    border: 2rpx solid #07C160;
-                    font-size: 26rpx;
-                }
             }
         }
     }
@@ -472,103 +645,137 @@ const back = () => {
 
 
         .progress-title {
-            font-size: 34rpx;
+            font-size: 28rpx;
             color: rgba(61, 61, 61, 1);
 
-            margin-bottom: 30rpx;
         }
 
         .progress-content {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            flex-direction: column;
+            margin-top: 66rpx;
 
-            .progress-circle {
-                width: 200rpx;
-                height: 200rpx;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
+
+            .progress-bar {
+                width: 650rpx;
+                height: 20rpx;
+                background-color: rgba(7, 193, 96, 0.10);
+                border-radius: 20rpx;
+                overflow: visible;
                 position: relative;
+                margin-bottom: 40rpx;
 
-                .circle-text {
-                    text-align: center;
-                    background: white;
-                    border-radius: 50%;
-                    width: 170rpx;
-                    height: 170rpx;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
+                .progress-fill {
+                    height: 100%;
+                    background-color: #07C160;
+                    border-radius: 20rpx;
+                    transition: width 0.3s ease;
+                    position: relative;
 
-                    .percentage {
-                        font-size: 48rpx;
-                        color: #07C160;
-                        font-weight: 400;
-                        display: block;
-                    }
+                    .progress-bubble {
+                        position: absolute;
+                        right: -32rpx;
+                        top: -60rpx;
+                        width: 68rpx;
+                        height: 50rpx;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
 
-                    .label {
-                        font-size: 24rpx;
-                        color: rgba(61, 61, 61, 0.50);
+                        image {
+                            width: 100%;
+                            height: 100%;
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                        }
+
+                        .bubble-text {
+                            font-size: 24rpx;
+                            color: rgba(7, 193, 96, 1);
+                            font-weight: bold;
+                            z-index: 1;
+                            position: relative;
+                            transform: translateY(-10rpx);
+                        }
                     }
                 }
             }
 
+            .progress-text {
+                text-align: center;
+
+                .percentage {
+                    font-size: 48rpx;
+                    color: #07C160;
+                    font-weight: 400;
+                    display: block;
+                }
+
+                .label {
+                    font-size: 24rpx;
+                    color: rgba(61, 61, 61, 0.50);
+                }
+            }
+
+
             .progress-stats {
                 flex: 1;
                 display: flex;
-                flex-direction: column;
-                margin-left: 40rpx;
                 gap: 20rpx;
-                align-items: flex-end;
 
                 .stat-item {
-                    width: 300rpx;
-                    height: 88rpx;
+                    width: 204rpx;
+                    height: 108rpx;
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
                     align-items: center;
                     position: relative;
+                    background: rgba(245, 245, 247, 1);
 
-                    image {
-                        width: 100%;
-                        height: 100%;
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        z-index: 0;
+                    .label-with-color {
+                        display: flex;
+                        align-items: center;
+                        gap: 10rpx;
+
+                        .color-tag {
+                            width: 4rpx;
+                            height: 20rpx;
+                            border-radius: 2rpx;
+
+                            &.blue {
+                                background-color: rgba(0, 170, 255, 1);
+                            }
+
+                            &.green {
+                                background-color: rgba(7, 193, 96, 1);
+                            }
+
+                            &.orange {
+                                background-color: rgba(255, 161, 0, 1);
+                            }
+                        }
+
+                        .label {
+                            font-size: 24rpx;
+                            color: rgba(61, 61, 61, 0.50);
+                            z-index: 1;
+                            text-align: center;
+                        }
                     }
 
                     .value {
                         font-size: 32rpx;
-                        font-weight: 500;
+                        font-weight: bold;
                         display: block;
                         z-index: 1;
                         text-align: center;
 
-                        &.green {
-                            color: rgba(7, 193, 96, 1);
-                        }
-
-                        &.orange {
-                            color: rgba(255, 161, 0, 1);
-                        }
-
-                        &.blue {
-                            color: rgba(0, 170, 255, 1);
-                        }
                     }
 
-                    .label {
-                        font-size: 24rpx;
-                        color: rgba(61, 61, 61, 0.50);
-                        z-index: 1;
-                        text-align: center;
-                    }
+
                 }
             }
         }
@@ -576,12 +783,14 @@ const back = () => {
 
     .weight-section {
         background: #FFFFFF;
-        border-radius: 16rpx;
+        border-radius: 20rpx;
         padding: 30rpx;
         margin-bottom: 10rpx;
+        position: relative;
+        z-index: 1;
 
         .weight-header {
-            font-size: 34rpx;
+            font-size: 28rpx;
             color: rgba(61, 61, 61, 1);
             display: block;
             margin-bottom: 20rpx;
@@ -635,47 +844,147 @@ const back = () => {
         }
     }
 
-    .task-list {
-        margin-top: 20rpx;
+    .abnormal-section {
+        background: #FFFFFF;
+        border-radius: 16rpx;
+        margin: 20rpx 0;
         position: relative;
+        z-index: 1;
+        height: 60rpx;
+        overflow: hidden;
+        /* 禁用交互 */
+        pointer-events: none;
+        user-select: none;
+
+        .abnormal-item {
+            display: flex;
+            align-items: center;
+            gap: 10rpx;
+            height: 60rpx;
+            padding: 0 20rpx;
+
+            image {
+                width: 32rpx;
+                height: 32rpx;
+            }
+
+            .abnormal-label {
+                font-size: 26rpx;
+                color: rgba(61, 61, 61, 1);
+                flex-shrink: 0;
+            }
+
+            .abnormal-swiper {
+                flex: 1;
+                height: 100%;
+
+                .abnormal-text-wrapper {
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-start;
+                }
+
+                .abnormal-text {
+                    font-size: 26rpx;
+                    color: rgba(61, 61, 61, 1);
+                    line-height: 1.2;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+        }
+    }
+
+    .collection-info-section {
+        background: #FFFFFF;
+        border-radius: 20rpx 20rpx 0 0;
+        padding: 30rpx;
+        margin-top: 20rpx;
+        border-bottom: 1rpx solid rgba(216, 216, 216, 0.5);
+
+        .collection-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20rpx;
+
+            .info-title {
+                font-size: 28rpx;
+                color: rgba(61, 61, 61, 1);
+                font-weight: 500;
+            }
+
+            .contact-btn {
+                color: #07C160;
+                border-radius: 100rpx;
+                padding: 6rpx 20rpx;
+                border: 2rpx solid #07C160;
+                font-size: 26rpx;
+            }
+        }
+
+        .map-container {
+            width: 645rpx;
+            height: 368rpx;
+            border-radius: 20rpx;
+            overflow: hidden;
+
+            .location-map {
+                width: 100%;
+                height: 100%;
+            }
+        }
+    }
+
+    .task-list {
+        margin-top: 0;
+        position: relative;
+        z-index: 1;
+        background: #FFFFFF;
+        border-radius: 0 0 20rpx 20rpx;
+        overflow: hidden;
         /* 移除左右内边距，因为任务项本身已经有30rpx的padding */
 
         /* 移除整体时间轴线，改用分段方式 */
 
         .task-item {
             background: #FFFFFF;
-            border-radius: 16rpx;
+            border-radius: 0;
             padding: 30rpx;
+            margin-top: 0;
+
             margin-bottom: 0;
             /* 移除任务项之间的间隔，让图标可以连线 */
             position: relative;
             z-index: 1;
 
-            /* 为除了第一个item添加上半段线条（从item顶部到uni-icons顶部） */
+            /* 为除了第一个task-item添加上半段线条（从item顶部到uni-icons顶部） */
             &:not(:first-child)::before {
                 content: '';
                 position: absolute;
-                left: 49rpx;
-                /* uni-icons图标中心位置 */
+                left: 50rpx;
+                /* 图标容器中心位置 */
                 top: 0;
                 width: 2rpx;
-                height: 35rpx;
-                /* 从item顶部到uni-icons顶部 */
-                background-color: rgba(216, 216, 216, 1);
+                height: var(--line-top-height, 15rpx);
+                /* 预计算的高度：容器中心(25rpx) - 图标半径 */
+                background-color: rgba(216, 216, 216, 0.8);
                 z-index: 1;
             }
 
-            /* 为除了最后一个item添加下半段线条（从uni-icons底部到item底部） */
+            /* 为除了最后一个task-item添加下半段线条（从uni-icons底部到item底部） */
             &:not(:last-child)::after {
                 content: '';
                 position: absolute;
-                left: 49rpx;
-                /* uni-icons图标中心位置 */
-                bottom: 0;
+                left: 50rpx;
+                /* 图标容器中心位置 */
+                top: var(--line-bottom-top, 35rpx);
                 width: 2rpx;
-                height: 382rpx;
-                /* 从uni-icons底部到item底部 */
-                background-color: rgba(216, 216, 216, 1);
+                height: calc(100% - var(--line-bottom-top, 35rpx));
+                /* 预计算：从图标底部到item底部 */
+                background-color: rgba(216, 216, 216, 0.8);
                 z-index: 1;
             }
 
@@ -694,6 +1003,16 @@ const back = () => {
                     z-index: 10;
                     /* 设置高层级，确保图标在时间线之上 */
 
+                    .icon-container {
+                        width: 50rpx;
+                        height: 50rpx;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        position: relative;
+                        margin-left: -5rpx;
+                    }
+
 
                     .date {
                         font-size: 28rpx;
@@ -701,31 +1020,6 @@ const back = () => {
                     }
                 }
 
-                .status {
-                    font-size: 24rpx;
-                    width: 100rpx;
-                    height: 40rpx;
-                    border-radius: 8rpx;
-                    margin-right: 15rpx;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-
-                    &.processing {
-                        color: rgba(0, 170, 255, 1);
-                        background: rgba(0, 170, 255, 0.10);
-                    }
-
-                    &.completed {
-                        color: rgba(255, 161, 0, 1);
-                        background: rgba(255, 161, 0, 0.10);
-                    }
-
-                    &.cancelled {
-                        color: rgba(61, 61, 61, 0.50);
-                        background: rgba(153, 153, 153, 0.1);
-                    }
-                }
             }
 
             .divider {
@@ -736,77 +1030,24 @@ const back = () => {
 
             .task-content {
                 margin: 22rpx 22rpx 0 55rpx;
-                display: flex;
-                flex-direction: column;
-                gap: 20rpx;
-
-                .merchant-info,
-                .weight-info,
-                .bin-info,
-                .address-info {
-                    display: flex;
-                    align-items: center;
-                    gap: 10rpx;
-
-                    .label {
-                        color: #666666;
-                        font-size: 14px;
-                    }
-
-                    .value {
-                        color: #333333;
-                        font-size: 14px;
-                    }
-                }
             }
 
-            .task-footer {
-                margin-top: 30rpx;
-                display: flex;
-                justify-content: flex-end;
-                gap: 15rpx;
-                flex-wrap: wrap; // 允许换行以适应4个按钮
-
-                .cancel-btn,
-                .view-btn,
-                .report-btn {
-                    width: 120rpx; // 减小按钮宽度以适应4个按钮
-                    height: 48rpx;
-                    color: #07C160;
-                    border-radius: 100rpx;
-                    border: 2rpx solid #07C160;
-                    font-size: 24rpx; // 稍微减小字体
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-
-
-                .cancel-btn {
-                    border: 1rpx solid rgba(196, 196, 196, 1);
-                    color: rgba(61, 61, 61, 1);
-                }
-
-                .report-btn {
-                    background-color: #FFA500;
-                    border-color: #FFA500;
-                    color: white;
-                }
-            }
         }
     }
 
     .headImage {
-        position: fixed;
-        bottom: 0;
+        position: absolute;
+        top: 0;
         left: 0;
         width: 100%;
-        z-index: -1;
+        height: 442rpx;
+        z-index: 0;
+        overflow: hidden;
 
         image {
             width: 100%;
-            height: auto;
-            display: block;
+            height: 100%;
+            object-fit: cover;
         }
     }
 }

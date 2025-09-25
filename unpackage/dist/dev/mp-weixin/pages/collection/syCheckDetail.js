@@ -1,14 +1,16 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
+const utils_orderUtils = require("../../utils/orderUtils.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   _easycom_uni_nav_bar2();
 }
 const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 if (!Math) {
-  _easycom_uni_nav_bar();
+  (_easycom_uni_nav_bar + DriverStatusTag)();
 }
+const DriverStatusTag = () => "../../components/DriverStatusTag/DriverStatusTag.js";
 const _sfc_main = {
   __name: "syCheckDetail",
   setup(__props) {
@@ -26,34 +28,10 @@ const _sfc_main = {
       // time: '', // 收运时间
       // estimateTime: '' // 预估时间
     });
-    const statusText = common_vendor.computed(() => {
-      switch (pageData.value.status) {
-        case 0:
-          return "进行中";
-        case 1:
-          return "已完成";
-        case 2:
-          return "无法收运";
-        default:
-          return "";
-      }
-    });
-    const statusClass = common_vendor.computed(() => {
-      switch (pageData.value.status) {
-        case 0:
-          return "processing";
-        case 1:
-          return "completed";
-        case 2:
-          return "cancelled";
-        default:
-          return "";
-      }
-    });
     const infoList = common_vendor.computed(() => [
       {
         label: "商家名称:",
-        value: pageData.value.merchantName
+        value: pageData.value.merchantName ?? "暂无"
       },
       {
         label: "预估时间:",
@@ -65,19 +43,19 @@ const _sfc_main = {
       },
       {
         label: "预估重量:",
-        value: pageData.value.estimateWeight + "kg"
+        value: utils_orderUtils.formatWeight(pageData.value.estimateWeight)
       },
       {
         label: "收运重量:",
-        value: pageData.value.weight + "kg"
+        value: utils_orderUtils.formatWeight(pageData.value.weight)
       },
       {
         label: "预估桶数:",
-        value: pageData.value.estimateBucketNum + "个"
+        value: utils_orderUtils.formatNum(pageData.value.estimateBucketNum)
       },
       {
         label: "收运桶数:",
-        value: pageData.value.bucketNum + "个"
+        value: utils_orderUtils.formatNum(pageData.value.bucketNum)
       },
       {
         label: "收运地址:",
@@ -86,6 +64,10 @@ const _sfc_main = {
       {
         label: "车牌号:",
         value: pageData.value.registrationNumber ?? "暂无"
+      },
+      {
+        label: "其他说明:",
+        value: pageData.value.remark ?? "暂无"
       }
     ]);
     common_vendor.onLoad((options) => {
@@ -93,7 +75,7 @@ const _sfc_main = {
         planId.value = options.planId;
       if (options.driverId)
         driverId.value = options.driverId;
-      common_vendor.index.__f__("log", "at pages/collection/syCheckDetail.vue:130", "接收到的参数:", options);
+      common_vendor.index.__f__("log", "at pages/collection/syCheckDetail.vue:103", "接收到的参数:", options);
     });
     common_vendor.onMounted(() => {
       getSyCheckDetail();
@@ -114,21 +96,15 @@ const _sfc_main = {
           estimateBucketNum: data.estimateBucketNum || 0,
           bucketNum: data.bucketNum || 0,
           registrationNumber: data.registrationNumber,
-          img: data.img ? data.img.split(",") : [],
           appointmentTime: data.appointmentTime,
           arrivalTime: data.arrivalTime,
-          address: data.address
+          address: data.address,
+          remark: data.remark
         };
       }
     };
     const back = () => {
       common_vendor.index.navigateBack();
-    };
-    const previewImage = (index) => {
-      common_vendor.index.previewImage({
-        urls: pageData.value.img,
-        current: index
-      });
     };
     return (_ctx, _cache) => {
       return {
@@ -143,20 +119,14 @@ const _sfc_main = {
           title: "收运记录详细"
         }),
         c: common_vendor.t(pageData.value.driverName),
-        d: common_vendor.t(statusText.value),
-        e: common_vendor.n(statusClass.value),
-        f: common_vendor.f(infoList.value, (item, index, i0) => {
+        d: common_vendor.p({
+          status: pageData.value.status
+        }),
+        e: common_vendor.f(infoList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.label),
             b: common_vendor.t(item.value),
             c: index
-          };
-        }),
-        g: common_vendor.f(pageData.value.img, (item, index, i0) => {
-          return {
-            a: index,
-            b: item,
-            c: common_vendor.o(($event) => previewImage(index), index)
           };
         })
       };

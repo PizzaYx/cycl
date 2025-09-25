@@ -287,3 +287,50 @@ export function apiGetDriverNotConfirmNum(data = {}) {
         data,
     })
 }
+
+
+//api/driver/getCarWeight 获取车辆过磅重量
+export function apiGetCarWeight(data = {}) {
+    return request({
+        url: '/api/driver/getCarWeight',
+        data,
+    })
+}
+
+
+///api/driver/getAbnormalPlan 异常列表
+export function apiGetAbnormalPlan(data = {}) {
+    return request({
+        url: '/api/driver/getAbnormalPlan',
+        data,
+    })
+}
+
+////api/driver/getMerchantBucke 扫码获取商户所有垃圾桶
+export function apiGetMerchantBucke(data = {}) {
+    return request({
+        url: '/api/driver/getMerchantBucke',
+        data,
+    })
+}
+
+
+////api/driver/getBackfillBuckeWeight 回填当日商户垃圾对应重量
+export function apiGetBackfillBuckeWeight(data = {}) {
+    return request({
+        url: '/api/driver/getBackfillBuckeWeight',
+        data,
+    })
+}
+
+////api/driver/getPlanBuckeWeight 获取上报的垃圾重量纪录回显
+export function apiGetPlanBuckeWeight(data = {}) {
+    return request({
+        url: '/api/driver/getPlanBuckeWeight',
+        data,
+    })
+}
+
+
+
+

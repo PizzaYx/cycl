@@ -12,8 +12,10 @@ const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_uni_load_more)();
+  (_easycom_uni_nav_bar + _easycom_uni_icons + DriverStatusTag + InfoDisplay + _easycom_uni_load_more)();
 }
+const DriverStatusTag = () => "../../components/DriverStatusTag/DriverStatusTag.js";
+const InfoDisplay = () => "../../components/InfoDisplay/InfoDisplay.js";
 const _sfc_main = {
   __name: "syStatistics",
   setup(__props) {
@@ -44,32 +46,80 @@ const _sfc_main = {
         title: "未收运"
       }
     ];
-    const getStatusClass = (status) => {
-      switch (status) {
-        case 0:
-          return "processing";
-        case 1:
-          return "completed";
-        case 2:
-          return "cancelled";
-      }
-    };
-    const getStatusText = (status) => {
-      switch (status) {
-        case 0:
-        case "0":
-          return "进行中";
-        case 1:
-        case "1":
-          return "已完成";
-        case 2:
-        case "2":
-          return "无法收运";
-        default:
-          return "无法收运";
-      }
-    };
     const searchKeyword = common_vendor.ref("");
+    const getInfoFields = (item) => {
+      const status = item.status;
+      if (status === 0 || status === "0" || status === 2 || status === "2") {
+        return [
+          {
+            key: "appointmentTime",
+            label: "预估时间",
+            value: item.appointmentTime
+          },
+          {
+            key: "estimateWeight",
+            label: "预估重量",
+            value: item.estimateWeight
+          },
+          {
+            key: "estimateBucketNum",
+            label: "预估桶数",
+            value: item.estimateBucketNum
+          },
+          {
+            key: "address",
+            label: "地址",
+            value: item.address
+          }
+        ];
+      }
+      if (status === 1 || status === "1") {
+        return [
+          {
+            key: "arrivalTime",
+            label: "收运时间",
+            value: item.arrivalTime
+          },
+          {
+            key: "weight",
+            label: "收运重量",
+            value: item.weight
+          },
+          {
+            key: "bucketNum",
+            label: "收运桶数",
+            value: item.bucketNum
+          },
+          {
+            key: "address",
+            label: "地址",
+            value: item.address
+          }
+        ];
+      }
+      return [
+        {
+          key: "appointmentTime",
+          label: "预估时间",
+          value: item.appointmentTime
+        },
+        {
+          key: "estimateWeight",
+          label: "预估重量",
+          value: item.estimateWeight
+        },
+        {
+          key: "estimateBucketNum",
+          label: "预估桶数",
+          value: item.estimateBucketNum
+        },
+        {
+          key: "address",
+          label: "地址",
+          value: item.address
+        }
+      ];
+    };
     const back = () => {
       common_vendor.index.navigateBack();
     };
@@ -115,7 +165,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/syStatistics.vue:244", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/syStatistics.vue:273", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -151,7 +201,7 @@ const _sfc_main = {
       resetPageAndReload();
     };
     const resetPageAndReload = () => {
-      common_vendor.index.__f__("log", "at pages/collection/syStatistics.vue:302", "重置页码和重新加载数据");
+      common_vendor.index.__f__("log", "at pages/collection/syStatistics.vue:331", "重置页码和重新加载数据");
       allOrderList.value = [];
       pageNum.value = 1;
       getNetwork();
@@ -204,16 +254,16 @@ const _sfc_main = {
         l: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.merchantName),
-            b: common_vendor.t(getStatusText(item.status)),
-            c: common_vendor.n(getStatusClass(item.status)),
-            d: common_vendor.t(item.appointmentTime ?? "暂无"),
-            e: common_vendor.t(item.arrivalTime ?? "暂无"),
-            f: common_vendor.t(item.estimateWeight ? item.estimateWeight + "kg" : "暂无"),
-            g: common_vendor.t(item.weight ? item.weight + "kg" : "暂无"),
-            h: common_vendor.t(item.estimateBucketNum ? item.estimateBucketNum + "个" : "暂无"),
-            i: common_vendor.t(item.bucketNum ? item.bucketNum + "个" : "暂无"),
-            j: common_vendor.t(item.address ?? "暂无"),
-            k: index
+            b: "4e0aa4c3-3-" + i0,
+            c: common_vendor.p({
+              status: item.status
+            }),
+            d: "4e0aa4c3-4-" + i0,
+            e: common_vendor.p({
+              fields: getInfoFields(item),
+              ["show-bottom-border"]: false
+            }),
+            f: index
           };
         }),
         m: common_vendor.p({

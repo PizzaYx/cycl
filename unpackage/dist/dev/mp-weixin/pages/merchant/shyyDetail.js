@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
+const utils_orderUtils = require("../../utils/orderUtils.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   _easycom_uni_nav_bar2();
@@ -46,11 +47,11 @@ const _sfc_main = {
       },
       {
         label: "预估重量:",
-        value: pageData.value.estimateWeight ? pageData.value.estimateWeight + " kg" : "暂无"
+        value: utils_orderUtils.formatWeight(pageData.value.estimateWeight)
       },
       {
         label: "预估桶数:",
-        value: pageData.value.estimateBucketNum ? pageData.value.estimateBucketNum + " 个" : "暂无"
+        value: utils_orderUtils.formatNum(pageData.value.estimateBucketNum)
       },
       {
         label: "收运地址:",
@@ -95,7 +96,7 @@ const _sfc_main = {
           address: data.address ?? "",
           explain: data.explain ?? "暂无"
         };
-        common_vendor.index.__f__("log", "at pages/merchant/shyyDetail.vue:139", "获取收运记录详情成功", pageData.value);
+        common_vendor.index.__f__("log", "at pages/merchant/shyyDetail.vue:133", "获取收运记录详情成功", pageData.value);
       }
     };
     const back = () => {

@@ -154,12 +154,6 @@ function apiGetnoNeedCollect(data = {}) {
     data
   });
 }
-function apiGetdriverConfirmPlan(data = {}) {
-  return utils_request.request({
-    url: "/api/driver/driverConfirmPlan",
-    data
-  });
-}
 function apiPostreportWeight(data = {}) {
   return utils_request.request({
     url: "/api/driver/reportWeight",
@@ -170,12 +164,6 @@ function apiPostreportWeight(data = {}) {
 function apiGetDriverPlanById(data = {}) {
   return utils_request.request({
     url: "/api/driver/getDriverPlanById",
-    data
-  });
-}
-function apiAddCarWeight(data = {}) {
-  return utils_request.request({
-    url: "/api/driver/addCarWeight",
     data
   });
 }
@@ -203,8 +191,34 @@ function apiGetDriverNotConfirmNum(data = {}) {
     data
   });
 }
-exports.apiAddCarWeight = apiAddCarWeight;
+function apiGetCarWeight(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getCarWeight",
+    data
+  });
+}
+function apiGetAbnormalPlan(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getAbnormalPlan",
+    data
+  });
+}
+function apiGetMerchantBucke(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getMerchantBucke",
+    data
+  });
+}
+function apiGetBackfillBuckeWeight(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/getBackfillBuckeWeight",
+    data
+  });
+}
 exports.apiAddMerchantCovenant = apiAddMerchantCovenant;
+exports.apiGetAbnormalPlan = apiGetAbnormalPlan;
+exports.apiGetBackfillBuckeWeight = apiGetBackfillBuckeWeight;
+exports.apiGetCarWeight = apiGetCarWeight;
 exports.apiGetCovenantTemplat = apiGetCovenantTemplat;
 exports.apiGetDriverInfo = apiGetDriverInfo;
 exports.apiGetDriverNotConfirmNum = apiGetDriverNotConfirmNum;
@@ -215,6 +229,7 @@ exports.apiGetDriverPlanStatisticsPage = apiGetDriverPlanStatisticsPage;
 exports.apiGetDriverTodayPlan = apiGetDriverTodayPlan;
 exports.apiGetDriverTodayStatistics = apiGetDriverTodayStatistics;
 exports.apiGetInfo = apiGetInfo;
+exports.apiGetMerchantBucke = apiGetMerchantBucke;
 exports.apiGetMerchantCheck = apiGetMerchantCheck;
 exports.apiGetMerchantCovenant = apiGetMerchantCovenant;
 exports.apiGetMerchantNotConfirmNum = apiGetMerchantNotConfirmNum;
@@ -227,7 +242,6 @@ exports.apiGetPlanStatisticsPage = apiGetPlanStatisticsPage;
 exports.apiGetPlanTemporaryById = apiGetPlanTemporaryById;
 exports.apiGetcancelPlanById = apiGetcancelPlanById;
 exports.apiGetconfirmPlanById = apiGetconfirmPlanById;
-exports.apiGetdriverConfirmPlan = apiGetdriverConfirmPlan;
 exports.apiGetnoNeedCollect = apiGetnoNeedCollect;
 exports.apiPostEditMerchantCheck = apiPostEditMerchantCheck;
 exports.apiPostLogin = apiPostLogin;

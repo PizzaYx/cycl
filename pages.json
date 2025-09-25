@@ -162,7 +162,7 @@
             "style": {
                 "navigationBarTitleText": "合同签名",
                 "navigationStyle": "custom",
-				"pageOrientation": "landscape"
+                "pageOrientation": "landscape"
             }
         }
     ],

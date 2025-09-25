@@ -7,7 +7,7 @@
         <view class="store-info">
             <view class="store-name">商店名称: {{ merchantName }}</view>
             <view class="bin-info">
-                <text>垃圾桶个数: {{ ljNum }}个</text>
+                <text>垃圾桶: <text class="bin-count">{{ ljNum ?? 0 }}</text> 个</text>
                 <uni-icons type="scan" size="30" color="#07C160" class="scan-icon" @click="handleScan" />
             </view>
         </view>
@@ -15,46 +15,23 @@
             <view class="record-list">
                 <!-- 当没有数据时显示提示 -->
                 <view v-if="records.length === 0" class="empty-tip">
-                    <text>请点击扫码按钮添加垃圾桶数据</text>
+                    <text>请点击扫码按钮获取数据</text>
                 </view>
 
                 <!-- 有数据时显示记录列表 -->
-                <view v-for="(item, index) in records" :key="index" class="record-card">
-                    <view class="input-group">
-                        <view class="input-item">
-                            <!-- <text class="label"><text class="required">*</text>垃圾桶数（个）</text> -->
-                            <input type="number" v-model="item.binCount" class="input underline-input readonly" disabled
-                                placeholder="1" />
-                        </view>
-                        <view class="input-item">
-                            <text class="label"><text class="required">*</text>厨余垃圾重量（kg）</text>
-                            <view class="weight-input-container">
-                                <input type="number" v-model="item.weight" class="input underline-input"
-                                    :class="{ 'readonly-input': item.isConfirmed }" :disabled="item.isConfirmed"
-                                    placeholder="请输入垃圾重量" />
-                                <button class="get-weight-btn" @tap="handleGetWeight(index)"
-                                    :disabled="item.isConfirmed">获取重量</button>
-                            </view>
+                <view v-for="(item, index) in records" :key="index" class="record-item">
+                    <view class="record-header">
+                        <text class="bucket-number">桶 {{ index + 1 }} 重量: </text>
+                        <view class="weight-display">
+                            <text class="weight-value">{{ item.weight }}</text>
+                            <text class="weight-unit"> kg</text>
                         </view>
                     </view>
+                </view>
 
-                    <view class="upload-section">
-                        <text class="label"><text class="required">*</text>厨余垃圾照片</text>
-                        <view class="upload-area">
-                            <uni-file-picker v-model="item.images" file-mediatype="image" :limit="maxImageCount"
-                                :upload-url="uploadUrl" :header="uploadHeaders" :disabled="item.isConfirmed"
-                                :readonly="item.isConfirmed" return-type="array"
-                                @select="(e) => handleFileSelect(e, index)">
-                            </uni-file-picker>
-                            <text class="upload-tip">最多可上传{{ maxImageCount }}张图片，每张图片不超过3M</text>
-                        </view>
-                    </view>
-
-                    <view class="button-group">
-                        <button v-if="!item.isConfirmed" class="btn btn-cancel" @click="handleCancel(index)">取消</button>
-                        <button v-if="!item.isConfirmed" class="btn btn-confirm"
-                            @click="handleConfirm(index)">确认</button>
-                    </view>
+                <!-- 刷新按钮 -->
+                <view v-if="showRefreshButton" class="refresh-button" @click="handleRefresh">
+                    <uni-icons type="reload" size="45" color="#07C160"></uni-icons>
                 </view>
             </view>
         </scroll-view>
@@ -71,8 +48,9 @@
 import { ref } from 'vue';
 import { onLoad, onUnload } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
 import { uploadUrl, createUploadHeaders } from '@/utils/config.js';
-import { apiPostreportWeight, apiGetDriverPlanById, apiGetdriverConfirmPlan } from '@/api/apis.js'
+import { apiPostreportWeight, apiGetDriverPlanById, apiGetdriverConfirmPlan, apiGetMerchantBucke, apiGetBackfillBuckeWeight, apiGetPlanBuckeWeight } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
+import uniFilePicker from '@/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue'
 
 // 返回上一页
 const back = () => {
@@ -81,9 +59,63 @@ const back = () => {
     uni.navigateBack();
 };
 
+// 刷新按钮处理
+const handleRefresh = async () => {
+    try {
+        // 显示加载提示
+        uni.showLoading({
+            title: '刷新中...'
+        });
+
+        // 调用 apiGetBackfillBuckeWeight 获取回填重量
+        const weightRes = await apiGetBackfillBuckeWeight({
+            id: planId.value,           // 收运单ID
+            merchantId: merchantId.value, // 商户ID
+            driverId: driverId.value,   // 司机ID
+            registrationNumber: registrationNumber.value // 车牌号
+        });
+
+        if (weightRes.code === 200) {
+            console.log('刷新获取的重量信息:', weightRes.data);
+
+            // 清空当前记录
+            records.value = [];
+            submitData.value = [];
+            ljNum.value = 0;
+
+            // 重新添加记录
+            if (weightRes.data && (Array.isArray(weightRes.data) ? weightRes.data.length > 0 : true)) {
+                addRecordsFromBucketData([], weightRes.data);
+
+                uni.showToast({
+                    title: '刷新成功',
+                    icon: 'success'
+                });
+            } else {
+                uni.showToast({
+                    title: '暂无重量数据',
+                    icon: 'none'
+                });
+            }
+        } else {
+            uni.showToast({
+                title: weightRes.msg || '刷新失败',
+                icon: 'none'
+            });
+        }
+    } catch (error) {
+        console.error('刷新重量数据异常:', error);
+        uni.showToast({
+            title: '刷新异常',
+            icon: 'none'
+        });
+    } finally {
+        uni.hideLoading();
+    }
+};
+
 const ljNum = ref(0); // 垃圾桶数量
-const maxImageCount = 3; // 最大上传图片数量
-const maxImageSize = 3 * 1024 * 1024; // 每张图片最大大小 3M
+const showRefreshButton = ref(false); // 控制刷新按钮显示
 
 // 新增接收页面参数的变量
 const carId = ref(''); // 车辆ID
@@ -91,175 +123,71 @@ const driverId = ref(''); // 司机ID
 const merchantId = ref(''); // 商户ID
 const planId = ref(''); // 收运单ID
 const merchantName = ref('')//商家名称
+const registrationNumber = ref('')//车牌号
 
-// 文件上传配置
-const uploadHeaders = createUploadHeaders().value // 添加 .value 获取实际值
 const userStore = useUserStore()
-
 const records = ref([]);
+// 新增提交数据存储
+const submitData = ref([]);
 
 // 页面加载时获取传入的参数
-onLoad((options) => {
+onLoad(async (options) => {
     if (options.carId) carId.value = options.carId;
     if (options.driverId) driverId.value = options.driverId;
     if (options.merchantId) merchantId.value = options.merchantId;
     if (options.planId) planId.value = options.planId;
     if (options.merchantName) merchantName.value = options.merchantName;
+    registrationNumber.value = userStore.sfmerchant?.registrationNumber;
+    // if (options.registrationNumber) registrationNumber.value = options.registrationNumber;
     console.log('接收到的参数:', options);
+
 });
 
-// 文件选择事件处理
-const handleFileSelect = (event, index) => {
-    console.log('选择了图片')
-    console.log('uploadUrl:', uploadUrl)
-    console.log('uploadHeaders:', uploadHeaders)
-    console.log('event:', event)
-
-    // 手动更新对应记录的images数据
-    if (event.tempFiles && event.tempFiles.length > 0) {
-        const newImages = [...(records.value[index].images || []), ...event.tempFiles];
-        records.value[index].images = newImages;
-
-        // 手动上传文件
-        uploadFileManually(event.tempFiles[0], index)
-    }
-};
-
-// 手动上传文件
-const uploadFileManually = (file, index) => {
-    console.log('开始手动上传文件:', file)
-    console.log('文件路径:', file.tempFilePath || file.path)
-    console.log('上传URL:', uploadUrl)
-    console.log('请求头:', uploadHeaders)
-
-    uni.uploadFile({
-        url: uploadUrl,
-        filePath: file.tempFilePath || file.path,
-        name: 'file',
-        header: uploadHeaders,
-        success: (res) => {
-            console.log('手动上传成功:', res)
-            // 处理上传成功
-            const response = JSON.parse(res.data)
-            console.log('服务器响应:', response)
-
-            if (response.code === 200 && response.url) {
-                // 更新文件信息
-                records.value[index].images[records.value[index].images.length - 1] = {
-                    ...file,
-                    url: response.url,
-                    fileName: response.fileName,
-                    newFileName: response.newFileName,
-                    originalFilename: response.originalFilename,
-                    response: response
-                }
-                console.log('文件上传成功，URL:', response.url)
-            } else {
-                console.log('上传失败，服务器返回:', response)
-            }
-        },
-        fail: (err) => {
-            console.log('手动上传失败:', err)
-            console.log('错误详情:', JSON.stringify(err))
-        }
-    })
-};
-
-// 获取重量按钮点击事件
-const handleGetWeight = (index) => {
-    console.log('获取重量按钮点击', { index, record: records.value[index] });
-    // TODO: 在这里添加获取重量的具体逻辑
-};
-
-// 获取收运详情
-const getSyCheckDetail = async () => {
-    // 先检查本地是否有已确认的记录
-    const confirmedRecords = records.value.filter(record => record.isConfirmed === true);
-
-    if (confirmedRecords.length === 0) {
+// 收运完成
+const getSyCheckDetail = () => {
+    // 检查提交数据是否为空
+    if (!submitData.value || submitData.value.length === 0) {
         uni.showToast({
-            title: '请先进行收运上报操作并确认数据',
+            title: '没有收运数据，请先进行扫码上报操作',
             icon: 'none'
         });
         return;
     }
 
-    try {
-        const res = await apiGetDriverPlanById({
-            driverId: driverId.value,
-            id: planId.value
-        })
+    // 确认收运完成
+    uni.showModal({
+        title: '确认收运完成',
+        content: '是否确认收运完成？',
+        success: async (res) => {
+            if (res.confirm) {
+                try {
+                    const confirmRes = await apiPostreportWeight(submitData.value);
 
-        if (res.code === 200) {
-            const data = res.data;
-            collectTask(data);
-            console.log('详情', data);
-        } else {
-            uni.showToast({
-                title: res.msg || '获取详情失败',
-                icon: 'none'
-            });
-        }
-    } catch (error) {
-        console.error('获取详情异常:', error);
-        uni.showToast({
-            title: '获取详情异常',
-            icon: 'none'
-        });
-    }
-}
-
-// 收运完成
-const collectTask = (task) => {
-    console.log('收运:', task.id);
-
-    // 检查服务器返回的数据，判断是否有上报数据
-    if (task.weight > 0 && task.bucketNum > 0) {
-        //确认收运完成
-        uni.showModal({
-            title: '确认收运完成',
-            content: '是否确认收运完成？',
-            success: async (res) => {
-                if (res.confirm) {
-                    try {
-                        const confirmRes = await apiGetdriverConfirmPlan({
-                            id: task.id,
-                            driverId: userStore.sfmerchant?.id,
-                        });
-
-                        if (confirmRes.code === 200) {
-                            uni.showToast({
-                                title: confirmRes.msg || '操作成功',
-                                icon: 'success'
-                            });
-                            // 返回上一页
-                            setTimeout(() => {
-                                back();
-                            }, 1500);
-                        } else {
-                            uni.showToast({
-                                title: confirmRes.msg || '操作失败',
-                                icon: 'error'
-                            });
-                        }
-                    } catch (error) {
-                        console.error('确认收运异常:', error);
+                    if (confirmRes.code === 200) {
                         uni.showToast({
-                            title: '操作异常',
-                            icon: 'none'
+                            title: confirmRes.msg || '操作成功',
+                            icon: 'success'
+                        });
+                        // 返回上一页
+                        setTimeout(() => {
+                            back();
+                        }, 1500);
+                    } else {
+                        uni.showToast({
+                            title: confirmRes.msg || '操作失败',
+                            icon: 'error'
                         });
                     }
+                } catch (error) {
+                    console.error('确认收运异常:', error);
+                    uni.showToast({
+                        title: '操作异常',
+                        icon: 'none'
+                    });
                 }
             }
-        })
-    }
-    else {
-        uni.showToast({
-            title: '服务器未检测到上报数据，请先进行收运上报操作',
-            icon: 'none'
-        });
-        return;
-    }
+        }
+    });
 };
 
 // 验证扫码结果格式
@@ -304,9 +232,10 @@ const validateScanResult = (scanResult) => {
 };
 
 const handleScan = () => {
+    // 先进行扫码
     // @ts-ignore
     uni.scanCode({
-        success: (res) => {
+        success: async (res) => {
             console.log('扫码结果', res);
 
             // 验证扫码结果格式
@@ -345,21 +274,57 @@ const handleScan = () => {
                 return;
             }
 
-            // 扫描成功后添加一条新记录
-            records.value.push({
-                binCount: '',
-                weight: '',
-                images: [],
-                isConfirmed: false, // 添加确认状态
-                bucketCode: res.result // 添加桶编码
-            });
-            // 增加垃圾桶数量
-            ljNum.value++;
+            try {
+                // 调用 apiGetMerchantBucke 获取商家所有桶信息
+                const bucketRes = await apiGetMerchantBucke({
+                    id: planId.value,           // 收运单ID
+                    merchantId: merchantId.value, // 商户ID
+                    driverId: driverId.value,   // 司机ID
+                    registrationNumber: registrationNumber.value // 车牌号
+                });
 
-            uni.showToast({
-                title: '扫码成功',
-                icon: 'success'
-            });
+                if (bucketRes.code !== 200) {
+                    uni.showToast({
+                        title: bucketRes.msg || '获取桶信息失败',
+                        icon: 'none'
+                    });
+                    return;
+                }
+
+                console.log('获取到的桶信息:', bucketRes.data);
+
+                // 调用 apiGetBackfillBuckeWeight 回填重量
+                const weightRes = await apiGetBackfillBuckeWeight({
+                    id: planId.value,           // 收运单ID
+                    merchantId: merchantId.value, // 商户ID
+                    driverId: driverId.value,   // 司机ID
+                    registrationNumber: registrationNumber.value // 车牌号
+                });
+
+                if (weightRes.code !== 200) {
+                    console.log('回填重量失败:', weightRes.msg);
+                    // 重量回填失败不影响主流程，继续执行
+                } else {
+                    console.log('回填的重量信息:', weightRes.data);
+                }
+
+                // 根据API返回的桶数据添加记录
+                addRecordsFromBucketData(bucketRes.data, weightRes.data);
+
+                // 扫码成功后显示刷新按钮
+                showRefreshButton.value = true;
+
+                uni.showToast({
+                    title: '扫码成功',
+                    icon: 'success'
+                });
+            } catch (error) {
+                console.error('获取桶信息异常:', error);
+                uni.showToast({
+                    title: '获取桶信息异常',
+                    icon: 'none'
+                });
+            }
         },
         fail: (err) => {
             console.log('扫码失败', err);
@@ -371,179 +336,85 @@ const handleScan = () => {
     });
 };
 
-const handleCancel = (index) => {
-    // 弹出确认对话框
-    uni.showModal({
-        title: '确认删除',
-        content: '是否确认删除当前数据？',
-        success: (res) => {
-            if (res.confirm) {
-                // 用户点击确定，删除当前记录
-                records.value.splice(index, 1);
-                // 减少垃圾桶数量
-                ljNum.value--;
+// 根据API返回的桶数据添加记录
+const addRecordsFromBucketData = (bucketData, weightData) => {
+    // 清空之前的提交数据
+    submitData.value = [];
+
+    // 根据 apiGetBackfillBuckeWeight 的数据来添加记录，使用 apiGetMerchantBucke 里面的编号
+    if (Array.isArray(weightData)) {
+        // 如果重量数据是数组，按重量数据的数量来添加记录
+        weightData.forEach((weightItem, index) => {
+            // 从桶数据中获取对应的编号信息
+            let bucketInfo = null;
+            if (Array.isArray(bucketData) && bucketData.length > index) {
+                bucketInfo = bucketData[index];
             }
-        }
-    });
-};
 
-//验证
-const handleConfirm = (index) => {
-    const record = records.value[index];
-
-    // 验证重量是否输入
-    if (!record.weight || record.weight.trim() === '') {
-        uni.showToast({
-            title: '请输入垃圾重量',
-            icon: 'none'
-        });
-        return;
-    }
-
-    // 验证是否至少上传了一张图片
-    // 1. 检查数据是否存在
-    if (record.images === undefined || record.images === null) {
-        uni.showToast({
-            title: '请至少上传1张图片',
-            icon: 'none'
-        });
-        return;
-    }
-
-    // 2. 检查是否为数组
-    if (!Array.isArray(record.images)) {
-        uni.showToast({
-            title: '请至少上传1张图片',
-            icon: 'none'
-        });
-        return;
-    }
-
-    // 3. 检查数组是否为空
-    if (record.images.length === 0) {
-        uni.showToast({
-            title: '请至少上传1张图片',
-            icon: 'none'
-        });
-        return;
-    }
-
-    // 4. 检查是否有有效的文件
-    const validFiles = record.images.filter((file) => {
-        if (!file) {
-            return false;
-        }
-
-        // 检查各种可能的文件格式
-        const hasUrl = file.url && file.url.trim();
-        const hasPath = file.path && file.path.trim();
-        const hasResponse = file.response && file.response.url;
-        const isString = typeof file === 'string' && file.trim();
-        const hasFileId = file.fileID || file.id;
-        const hasName = file.name;
-        const hasSize = file.size;
-        const hasTempFilePath = file.tempFilePath;
-        const hasFile = file.file;
-
-        const isValid = hasUrl || hasPath || hasResponse || isString || hasFileId || hasName || hasSize || hasTempFilePath || hasFile;
-        return isValid;
-    });
-
-    if (validFiles.length === 0) {
-        uni.showToast({
-            title: '请至少上传1张图片',
-            icon: 'none'
-        });
-        return;
-    }
-
-    // 检查文件数量限制
-    if (validFiles.length > maxImageCount) {
-        uni.showToast({
-            title: `最多只能上传${maxImageCount}张图片`,
-            icon: 'none'
-        });
-        return;
-    }
-
-
-    confirmReport(index);
-
-};
-
-//确认收运上报
-const confirmReport = async (index) => {
-    const record = records.value[index];
-    // 从扫码结果中获取桶编码数据，如果没有则使用默认值
-    const bucketCode = record.bucketCode || ('BC' + new Date().getTime());
-
-    // 构造上报数据
-    const reportData = {
-        bucketCode: bucketCode, // 桶编码
-        weight: parseFloat(record.weight), // 垃圾重量改为小数类型
-        carId: carId.value, // 车辆ID
-        driverId: driverId.value, // 司机ID
-        merchantId: merchantId.value, // 商户ID
-        planId: planId.value, // 收运单ID
-        img: record.images.map(image => {
-            console.log('处理图片数据:', image);
-            console.log('图片URL:', image.url);
-            console.log('图片路径:', image.path);
-            console.log('图片响应:', image.response);
-
-            // 根据不同情况获取图片URL
-            if (image.url) {
-                console.log('使用image.url:', image.url);
-                return image.url;
-            }
-            if (image.path) {
-                console.log('使用image.path:', image.path);
-                return image.path;
-            }
-            if (image.response && image.response.url) {
-                console.log('使用image.response.url:', image.response.url);
-                return image.response.url;
-            }
-            if (typeof image === 'string') {
-                console.log('使用字符串:', image);
-                return image;
-            }
-            console.log('没有找到有效的URL');
-            return '';
-        }).filter(url => url !== '') // 过滤掉空的URL
-    };
-
-    // 将过滤后的URL用逗号连接
-    reportData.img = reportData.img.join(',');
-
-    console.log('最终上报的图片URLs:', reportData.img);
-    console.log('完整上报数据:', reportData);
-
-    try {
-        const res = await apiPostreportWeight(reportData);
-        if (res.code === 200) {
-            uni.showToast({
-                title: '上报成功',
-                icon: 'success'
+            // 添加显示记录
+            records.value.push({
+                binCount: 1, // 默认垃圾桶数量为1
+                weight: weightItem.weight || '', // 使用回填的重量数据
+                images: [],
+                isConfirmed: false, // 新添加的记录标记为未确认
+                bucketCode: bucketInfo ? bucketInfo.bucketCode : '', // 桶编码，有就给，没有就空着
+                bucketType: bucketInfo ? bucketInfo.bucketType : '', // 桶类型
+                bucketName: bucketInfo ? bucketInfo.bucketName : '', // 桶名称
+                id: `temp_${Date.now()}_${index}` // 临时ID
             });
 
-            // 设置为已确认状态
-            record.isConfirmed = true;
-        } else {
-
-            uni.showToast({
-                title: res.msg || '上报失败',
-                icon: 'none'
+            // 添加提交数据
+            submitData.value.push({
+                thirdpartyId: weightItem.id, // 第三方垃圾桶称重记录id
+                bucketCode: bucketInfo ? bucketInfo.bucketCode : '', // 桶编码
+                weight: parseFloat(weightItem.weight || 0), // 垃圾重量改为小数类型
+                carId: carId.value, // 车辆ID
+                driverId: driverId.value, // 司机ID
+                merchantId: merchantId.value, // 商户ID
+                planId: planId.value, // 收运单ID
             });
-        }
-    } catch (error) {
-        uni.showToast({
-            title: '上报异常',
-            icon: 'none'
+
+            ljNum.value++;
         });
-        console.error('上报异常:', error);
+    } else if (weightData && typeof weightData === 'object') {
+        // 如果重量数据是单个对象
+        // 从桶数据中获取第一个编号信息
+        let bucketInfo = null;
+        if (Array.isArray(bucketData) && bucketData.length > 0) {
+            bucketInfo = bucketData[0];
+        }
+
+        // 添加显示记录
+        records.value.push({
+            binCount: 1, // 默认垃圾桶数量为1
+            weight: weightData.weight || '', // 使用回填的重量数据
+            images: [],
+            isConfirmed: false, // 新添加的记录标记为未确认
+            bucketCode: bucketInfo ? bucketInfo.bucketCode : '', // 桶编码，有就给，没有就空着
+            bucketType: bucketInfo ? bucketInfo.bucketType : '', // 桶类型
+            bucketName: bucketInfo ? bucketInfo.bucketName : '', // 桶名称
+            id: `temp_${Date.now()}_0` // 临时ID
+        });
+
+        // 添加提交数据
+        submitData.value.push({
+            thirdpartyId: weightData.id, // 第三方垃圾桶称重记录id
+            bucketCode: bucketInfo ? bucketInfo.bucketCode : '', // 桶编码
+            weight: parseFloat(weightData.weight || 0), // 垃圾重量改为小数类型
+            carId: carId.value, // 车辆ID
+            driverId: driverId.value, // 司机ID
+            merchantId: merchantId.value, // 商户ID
+            planId: planId.value, // 收运单ID
+        });
+
+        ljNum.value++;
+    } else {
+        console.log('重量数据格式不正确');
     }
+
+    console.log('提交数据:', submitData.value);
 };
+
 
 </script>
 
@@ -557,16 +428,18 @@ const confirmReport = async (index) => {
 
 // 添加商店信息样式
 .store-info {
-    padding: 24rpx;
-    background-color: #FFFFFF;
+    padding: 32rpx;
+    background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
     margin: 20rpx;
-    border-radius: 20rpx;
+    border-radius: 24rpx;
+    box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(7, 193, 96, 0.1);
 
     .store-name {
-        font-size: 30rpx;
-        font-weight: 500;
+        font-size: 32rpx;
+        font-weight: 600;
         color: #333333;
-        margin-bottom: 16rpx;
+        margin-bottom: 20rpx;
     }
 
     .bin-info {
@@ -575,9 +448,31 @@ const confirmReport = async (index) => {
         align-items: center;
         font-size: 28rpx;
         color: #666666;
+        background: rgba(7, 193, 96, 0.05);
+        padding: 16rpx 20rpx;
+        border-radius: 16rpx;
+        border: 1px solid rgba(7, 193, 96, 0.1);
+
+        .bin-count {
+            font-size: 36rpx;
+            font-weight: bold;
+            color: #07C160;
+            display: inline-block;
+            vertical-align: text-bottom;
+            line-height: 1;
+        }
 
         .scan-icon {
             cursor: pointer;
+            padding: 8rpx;
+            border-radius: 50%;
+            background: rgba(7, 193, 96, 0.1);
+            transition: all 0.3s ease;
+
+            &:hover {
+                background: rgba(7, 193, 96, 0.2);
+                transform: scale(1.1);
+            }
         }
     }
 }
@@ -592,9 +487,98 @@ const confirmReport = async (index) => {
 
         .empty-tip {
             text-align: center;
-            padding: 120rpx 0;
+            padding: 120rpx 40rpx;
             color: #999999;
-            font-size: 34rpx;
+            font-size: 32rpx;
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+            border-radius: 20rpx;
+            margin: 20rpx;
+            box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(7, 193, 96, 0.1);
+            position: relative;
+        }
+
+        .record-item {
+            background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
+            border-radius: 20rpx;
+            padding: 32rpx;
+            margin-bottom: 20rpx;
+            box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(7, 193, 96, 0.1);
+            transition: all 0.3s ease;
+
+            &:hover {
+                transform: translateY(-2rpx);
+                box-shadow: 0 8rpx 30rpx rgba(0, 0, 0, 0.12);
+            }
+
+            .record-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12rpx;
+                height: 35rpx;
+
+                .bucket-number {
+                    font-size: 28rpx;
+                    font-weight: 600;
+                    color: #333333;
+                    line-height: 35rpx;
+                    margin-top: 10rpx;
+                }
+
+                .weight-display {
+                    display: flex;
+                    align-items: center;
+                    margin-top: 10rpx;
+
+                    .weight-value {
+                        font-size: 36rpx;
+                        color: #07C160;
+                        font-weight: 700;
+                        line-height: 35rpx;
+                    }
+
+                    .weight-unit {
+                        font-size: 24rpx;
+                        color: #666666;
+                        margin-left: 8rpx;
+                        line-height: 35rpx;
+                    }
+                }
+            }
+
+            .record-details {
+                .detail-item {
+                    display: flex;
+                    align-items: center;
+                    margin-bottom: 12rpx;
+
+                    &:last-child {
+                        margin-bottom: 0;
+                    }
+
+                    .detail-label {
+                        font-size: 26rpx;
+                        color: #666666;
+                        min-width: 120rpx;
+                    }
+
+                    .detail-value {
+                        font-size: 26rpx;
+                        color: #333333;
+                        font-weight: 500;
+                        flex: 1;
+                    }
+                }
+            }
+        }
+
+        .refresh-button {
+            position: fixed;
+            right: 30rpx;
+            bottom: 300rpx;
+            z-index: 999;
         }
 
         .record-card {
@@ -720,6 +704,17 @@ const confirmReport = async (index) => {
                 .upload-area {
                     margin-top: 16rpx;
 
+                    .test-upload-btn {
+                        width: 200rpx;
+                        height: 60rpx;
+                        background-color: #07C160;
+                        color: #FFFFFF;
+                        border: none;
+                        border-radius: 8rpx;
+                        font-size: 28rpx;
+                        margin-bottom: 16rpx;
+                    }
+
                     .upload-tip {
                         font-size: 24rpx;
                         color: #999999;
@@ -729,35 +724,6 @@ const confirmReport = async (index) => {
                 }
             }
 
-            .button-group {
-                position: relative;
-                height: 48rpx;
-                margin-top: 32rpx;
-
-                .btn {
-                    position: absolute;
-                    right: 0;
-                    width: 144rpx;
-                    height: 48rpx;
-                    line-height: 48rpx;
-                    text-align: center;
-                    border-radius: 100rpx;
-                    font-size: 14px;
-
-                    &.btn-cancel {
-                        right: 164rpx;
-                        /* 144rpx宽度 + 20rpx间距 */
-                        background-color: #F5F5F5;
-                        color: #666666;
-                    }
-
-                    &.btn-confirm {
-                        right: 0;
-                        background-color: #07C160;
-                        color: #FFFFFF;
-                    }
-                }
-            }
         }
     }
 }
@@ -768,25 +734,52 @@ const confirmReport = async (index) => {
     bottom: 0;
     left: 0;
     right: 0;
-    background-color: #FFFFFF;
-    padding: 24rpx;
-    border-top: 1px solid #E5E5E5;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, #FFFFFF 100%);
+    padding: 24rpx 32rpx 40rpx;
+    border-top: 1px solid rgba(7, 193, 96, 0.1);
     z-index: 999;
+    backdrop-filter: blur(10rpx);
 
     .btn-complete {
         width: 100%;
-        height: 88rpx;
-        background-color: #07C160;
+        height: 96rpx;
+        background: linear-gradient(135deg, #07C160 0%, #06AD56 100%);
         color: #FFFFFF;
         border: none;
-        border-radius: 44rpx;
+        border-radius: 48rpx;
         font-size: 32rpx;
-        font-weight: 500;
-        line-height: 88rpx;
+        font-weight: 600;
+        line-height: 96rpx;
         text-align: center;
+        box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+
+
+        &:hover {
+            transform: translateY(-2rpx);
+            box-shadow: 0 12rpx 32rpx rgba(7, 193, 96, 0.4);
+        }
 
         &:active {
-            background-color: #06AD56;
+            transform: translateY(0);
+            background: linear-gradient(135deg, #06AD56 0%, #059B4A 100%);
+        }
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        &:hover::after {
+            left: 100%;
         }
     }
 }

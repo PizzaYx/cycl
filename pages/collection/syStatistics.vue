@@ -34,42 +34,12 @@
                         <view class="order-header">
                             <view class="shop-info">
                                 <text class="shop-name">{{ item.merchantName }}</text>
-                                <text class="status-tag" :class="getStatusClass(item.status)">
-                                    {{ getStatusText(item.status) }}
-                                </text>
+                                <DriverStatusTag :status="item.status" />
                             </view>
 
                         </view>
                         <view class="order-content">
-                            <view class="info-item">
-                                <text class="label">预估时间:</text>
-                                <text class="value">{{ item.appointmentTime ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运时间:</text>
-                                <text class="value">{{ item.arrivalTime ?? '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估重量:</text>
-                                <text class="value">{{ item.estimateWeight ? (item.estimateWeight + 'kg') : '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运重量:</text>
-                                <text class="value">{{ item.weight ? (item.weight + 'kg') : '暂无' }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">预估桶数:</text>
-                                <text class="value">{{ item.estimateBucketNum ? (item.estimateBucketNum + '个') : '暂无'
-                                }}</text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">收运桶数:</text>
-                                <text class="value">{{ item.bucketNum ? (item.bucketNum + '个') : '暂无' }} </text>
-                            </view>
-                            <view class="info-item">
-                                <text class="label">地址:</text>
-                                <text class="value">{{ item.address ?? '暂无' }} </text>
-                            </view>
+                            <InfoDisplay :fields="getInfoFields(item)" :show-bottom-border="false" />
                         </view>
                     </view>
 
@@ -108,6 +78,9 @@ import {
 } from '@/api/apis.js';
 
 import { useUserStore } from '@/stores/user.js'
+import DriverStatusTag from '@/components/DriverStatusTag/DriverStatusTag.vue'
+import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
+import { formatWeight, formatNum } from '@/utils/orderUtils'
 
 
 const userStore = useUserStore();
@@ -141,35 +114,91 @@ const statisticsConfig = [
     }
 ];
 
-// 获取状态样式类名
-const getStatusClass = (status) => {
-    switch (status) {
-        case 0: return 'processing';
-        case 1: return 'completed';
-        case 2: return 'cancelled';
-    }
-};
-
-// 状态转换函数
-const getStatusText = (status) => {
-    switch (status) {
-        case 0:
-        case '0':
-            return '进行中';
-        case 1:
-        case '1':
-            return '已完成';
-        case 2:
-        case '2':
-            return '无法收运';
-        default:
-            return '无法收运';
-    }
-};
 
 
 // 筛选相关状态
 const searchKeyword = ref(''); // 搜索关键词
+
+// 根据状态获取信息字段
+const getInfoFields = (item) => {
+    const status = item.status;
+
+    // 状态为 0（进行中）或 2（无法收运）时显示预估信息
+    if (status === 0 || status === '0' || status === 2 || status === '2') {
+        return [
+            {
+                key: 'appointmentTime',
+                label: '预估时间',
+                value: item.appointmentTime
+            },
+            {
+                key: 'estimateWeight',
+                label: '预估重量',
+                value: item.estimateWeight
+            },
+            {
+                key: 'estimateBucketNum',
+                label: '预估桶数',
+                value: item.estimateBucketNum
+            },
+            {
+                key: 'address',
+                label: '地址',
+                value: item.address
+            }
+        ];
+    }
+
+    // 状态为 1（已完成）时显示收运信息
+    if (status === 1 || status === '1') {
+        return [
+            {
+                key: 'arrivalTime',
+                label: '收运时间',
+                value: item.arrivalTime
+            },
+            {
+                key: 'weight',
+                label: '收运重量',
+                value: item.weight
+            },
+            {
+                key: 'bucketNum',
+                label: '收运桶数',
+                value: item.bucketNum
+            },
+            {
+                key: 'address',
+                label: '地址',
+                value: item.address
+            }
+        ];
+    }
+
+    // 默认返回预估信息
+    return [
+        {
+            key: 'appointmentTime',
+            label: '预估时间',
+            value: item.appointmentTime
+        },
+        {
+            key: 'estimateWeight',
+            label: '预估重量',
+            value: item.estimateWeight
+        },
+        {
+            key: 'estimateBucketNum',
+            label: '预估桶数',
+            value: item.estimateBucketNum
+        },
+        {
+            key: 'address',
+            label: '地址',
+            value: item.address
+        }
+    ];
+};
 
 
 // 返回上一页方法
@@ -189,7 +218,7 @@ const getToStatistics = async () => {
     // 添加搜索关键词
     const res = await apiGetDriverPlanStatistics({
         title: searchKeyword.value ?? '',
-        driverId: userStore.sfmerchant?.id, 
+        driverId: userStore.sfmerchant?.id,
     });
 
     if (res.code === 200) {
@@ -416,7 +445,7 @@ onMounted(() => {
                 padding: 30rpx;
                 background-color: #fff;
                 border-radius: 12rpx;
-                height: 462rpx;
+                height: 330rpx;
                 box-sizing: border-box;
 
                 .order-header {
@@ -433,66 +462,11 @@ onMounted(() => {
                             color: rgba(61, 61, 61, 1);
                         }
 
-                        .status-tag {
-                            font-size: 24rpx;
-                            width: 120rpx;
-                            height: 40rpx;
-                            border-radius: 8rpx;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            text-align: center;
-
-
-                            &.processing {
-                                //进行中 待完成
-                                color: rgba(0, 170, 255, 1);
-                                background: rgba(0, 170, 255, 0.10);
-                            }
-
-                            &.completed {
-                                //已完成
-                                color: rgba(61, 61, 61, 0.50);
-                                background: rgba(153, 153, 153, 0.1);
-                            }
-
-                            &.cancelled {
-                                //无法收运
-                                color: rgba(255, 161, 0, 1);
-                                background: rgba(255, 161, 0, 0.10);
-
-                            }
-                        }
                     }
 
 
                 }
 
-                .order-content {
-                    padding: 20rpx 0;
-                    border-top: 1px solid #f0f0f0;
-                    border-bottom: 1px solid #f0f0f0;
-
-                    .info-item {
-                        display: flex;
-                        margin-bottom: 16rpx;
-
-                        &:last-child {
-                            margin-bottom: 0;
-                        }
-
-                        .label {
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 0.50);
-                        }
-
-                        .value {
-                            margin-left: 30rpx;
-                            font-size: 26rpx;
-                            color: rgba(61, 61, 61, 1);
-                        }
-                    }
-                }
 
                 .order-footer {
                     display: flex;

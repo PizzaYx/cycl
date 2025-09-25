@@ -2,6 +2,10 @@
   "navigationBarTitleText": "收运端",
   "navigationStyle": "custom",
   "usingComponents": {
-    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons"
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
+    "info-display": "../../components/InfoDisplay/InfoDisplay",
+    "driver-status-tag": "../../components/DriverStatusTag/DriverStatusTag",
+    "driver-order-actions": "../../components/DriverOrderActions/DriverOrderActions",
+    "abnormal-report-modal": "../../components/AbnormalReportModal/AbnormalReportModal"
   }
 }
