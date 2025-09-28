@@ -2,17 +2,26 @@
 const common_vendor = require("../common/vendor.js");
 const BASE_URL = "http://192.168.0.118:8080";
 let refreshingPromise = null;
+let currentRequestInfo = null;
 common_vendor.index.addInterceptor("request", {
   invoke(args) {
     if (args.url != null && !args.url.startsWith("http")) {
       args.url = BASE_URL + args.url;
     }
     const accessToken = common_vendor.index.getStorageSync("access_token");
-    common_vendor.index.__f__("log", "at utils/request.js:19", "Access Token:", accessToken);
-    common_vendor.index.__f__("log", "at utils/request.js:22", "【Request】", args.url, args.method || "GET", args.data || {});
+    common_vendor.index.__f__("log", "at utils/request.js:22", "Access Token:", accessToken);
+    common_vendor.index.__f__("log", "at utils/request.js:25", "【Request】", args.url, args.method || "GET", args.data || {});
     if (accessToken) {
       args.header = args.header || {};
       args.header["authorization"] = `Bearer ${accessToken}`;
+    }
+    if (!args.url.includes("/api/apiRefresh")) {
+      currentRequestInfo = {
+        url: args.url,
+        method: args.method || "GET",
+        data: args.data || {},
+        header: { ...args.header }
+      };
     }
     return args;
   }
@@ -20,23 +29,30 @@ common_vendor.index.addInterceptor("request", {
 common_vendor.index.addInterceptor("request", {
   success: async (res) => {
     var _a;
-    common_vendor.index.__f__("log", "at utils/request.js:37", "【Response】", (_a = res.config) == null ? void 0 : _a.url, res.statusCode, res.data);
+    common_vendor.index.__f__("log", "at utils/request.js:51", "【Response】", (_a = res.config) == null ? void 0 : _a.url, res.statusCode, res.data);
     if (res.statusCode === 200) {
       if (res.data.code === 401) {
         try {
           await handleUnauthorized();
           const newToken = common_vendor.index.getStorageSync("access_token");
-          if (newToken) {
-            const originalRequest = res.config || {};
-            originalRequest.header = originalRequest.header || {};
-            originalRequest.header["authorization"] = `Bearer ${newToken}`;
-            return common_vendor.index.request(originalRequest);
+          if (newToken && currentRequestInfo) {
+            const retryRequest = {
+              url: currentRequestInfo.url,
+              method: currentRequestInfo.method,
+              data: currentRequestInfo.data,
+              header: {
+                ...currentRequestInfo.header,
+                "authorization": `Bearer ${newToken}`
+              }
+            };
+            common_vendor.index.__f__("log", "at utils/request.js:72", "【Retry Request】", retryRequest.url, retryRequest.method, retryRequest.data);
+            return common_vendor.index.request(retryRequest);
           } else {
             logout();
             return Promise.resolve({ data: { code: 401, msg: "登录已过期" } });
           }
         } catch (error) {
-          common_vendor.index.__f__("log", "at utils/request.js:61", "Token刷新失败:", error.message);
+          common_vendor.index.__f__("log", "at utils/request.js:82", "Token刷新失败:", error.message);
           logout();
           return Promise.resolve({ data: { code: 401, msg: "登录已过期" } });
         }
@@ -73,18 +89,18 @@ async function handleUnauthorized() {
     return refreshingPromise;
   }
   try {
-    common_vendor.index.__f__("log", "at utils/request.js:111", "未授权，正在处理...");
+    common_vendor.index.__f__("log", "at utils/request.js:132", "未授权，正在处理...");
     const refreshTokenStr = common_vendor.index.getStorageSync("refresh_token");
     const refreshExpireTime = common_vendor.index.getStorageSync("refresh_expire_time");
-    common_vendor.index.__f__("log", "at utils/request.js:114", "检查refresh token:", refreshTokenStr ? "存在" : "不存在", refreshExpireTime);
+    common_vendor.index.__f__("log", "at utils/request.js:135", "检查refresh token:", refreshTokenStr ? "存在" : "不存在", refreshExpireTime);
     if (!refreshTokenStr || !refreshExpireTime) {
-      common_vendor.index.__f__("log", "at utils/request.js:118", "refresh token不存在，跳转登录");
+      common_vendor.index.__f__("log", "at utils/request.js:139", "refresh token不存在，跳转登录");
       logout();
       return Promise.resolve(false);
     }
     const now = Date.now();
     if (now > refreshExpireTime) {
-      common_vendor.index.__f__("log", "at utils/request.js:128", "refresh token已过期，跳转登录");
+      common_vendor.index.__f__("log", "at utils/request.js:149", "refresh token已过期，跳转登录");
       logout();
       return Promise.resolve(false);
     }
@@ -92,7 +108,7 @@ async function handleUnauthorized() {
     const result = await refreshingPromise;
     return result;
   } catch (error) {
-    common_vendor.index.__f__("log", "at utils/request.js:139", "处理未授权异常:", error.message);
+    common_vendor.index.__f__("log", "at utils/request.js:160", "处理未授权异常:", error.message);
     logout();
     return Promise.resolve(false);
   } finally {
@@ -106,16 +122,16 @@ async function refreshAccessToken(refreshTokenStr) {
     });
     if (res.code === 200) {
       saveToken(res.data);
-      common_vendor.index.__f__("log", "at utils/request.js:160", "Token刷新成功");
+      common_vendor.index.__f__("log", "at utils/request.js:181", "Token刷新成功");
       return true;
     } else {
-      common_vendor.index.__f__("log", "at utils/request.js:164", "Token刷新失败:", res.msg || "未知错误");
+      common_vendor.index.__f__("log", "at utils/request.js:185", "Token刷新失败:", res.msg || "未知错误");
       clearToken();
       logout();
       return false;
     }
   } catch (error) {
-    common_vendor.index.__f__("log", "at utils/request.js:171", "Token刷新网络异常:", error.message || "未知错误");
+    common_vendor.index.__f__("log", "at utils/request.js:192", "Token刷新网络异常:", error.message || "未知错误");
     clearToken();
     logout();
     return false;

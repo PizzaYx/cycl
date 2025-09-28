@@ -3,7 +3,7 @@
   "navigationStyle": "custom",
   "pageOrientation": "landscape",
   "usingComponents": {
-    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
+    "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
     "l-signature": "../../uni_modules/lime-signature/components/l-signature/l-signature"
   }
 }

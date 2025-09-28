@@ -3,19 +3,19 @@ const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
-  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _easycom_uni_load_more2)();
+  (_easycom_uni_icons2 + _easycom_uni_load_more2)();
 }
-const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons + DriverStatusTag + InfoDisplay + _easycom_uni_load_more)();
+  (PageHeader + _easycom_uni_icons + DriverStatusTag + InfoDisplay + DriverOrderActions + _easycom_uni_load_more)();
 }
 const DriverStatusTag = () => "../../components/DriverStatusTag/DriverStatusTag.js";
+const DriverOrderActions = () => "../../components/DriverOrderActions/DriverOrderActions.js";
 const InfoDisplay = () => "../../components/InfoDisplay/InfoDisplay.js";
+const PageHeader = () => "../../components/PageHeader/PageHeader.js";
 const _sfc_main = {
   __name: "syStatistics",
   setup(__props) {
@@ -27,22 +27,22 @@ const _sfc_main = {
     const statisticsConfig = [
       {
         image: "/static/ssd/sytj2.png",
-        number: merchantCount,
+        number: () => merchantCount.value + " 个",
         title: "商家数量"
       },
       {
         image: "/static/shd/tjright.png",
-        number: totalWeight,
+        number: () => totalWeight.value + " kg",
         title: "总重量"
       },
       {
         image: "/static/ssd/sytj1.png",
-        number: syount,
+        number: () => syount.value + " 个",
         title: "已收运"
       },
       {
         image: "/static/shd/tjleft.png",
-        number: nosyount,
+        number: () => nosyount.value + " 个",
         title: "未收运"
       }
     ];
@@ -165,7 +165,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/syStatistics.vue:273", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/syStatistics.vue:276", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {
@@ -201,7 +201,7 @@ const _sfc_main = {
       resetPageAndReload();
     };
     const resetPageAndReload = () => {
-      common_vendor.index.__f__("log", "at pages/collection/syStatistics.vue:331", "重置页码和重新加载数据");
+      common_vendor.index.__f__("log", "at pages/collection/syStatistics.vue:334", "重置页码和重新加载数据");
       allOrderList.value = [];
       pageNum.value = 1;
       getNetwork();
@@ -216,12 +216,6 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_vendor.o(back),
         b: common_vendor.p({
-          dark: true,
-          fixed: true,
-          ["background-color"]: "#fff",
-          ["status-bar"]: true,
-          ["left-icon"]: "left",
-          color: "#000",
           title: "收运端统计"
         }),
         c: common_vendor.p({
@@ -244,7 +238,7 @@ const _sfc_main = {
         j: common_vendor.f(statisticsConfig, (item, index, i0) => {
           return {
             a: item.image,
-            b: common_vendor.t(item.number),
+            b: common_vendor.t(item.number()),
             c: common_vendor.t(item.title),
             d: index
           };
@@ -260,10 +254,15 @@ const _sfc_main = {
             }),
             d: "4e0aa4c3-4-" + i0,
             e: common_vendor.p({
-              fields: getInfoFields(item),
-              ["show-bottom-border"]: false
+              fields: getInfoFields(item)
             }),
-            f: index
+            f: "4e0aa4c3-5-" + i0,
+            g: common_vendor.p({
+              status: item.status,
+              ["order-data"]: item,
+              ["view-only"]: true
+            }),
+            h: index
           };
         }),
         m: common_vendor.p({

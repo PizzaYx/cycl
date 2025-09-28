@@ -485,9 +485,3 @@
 .auth-container .submit-section .submit-btn.data-v-9b099ba5:active:not(:disabled) {
   transform: scale(0.98);
 }
-.auth-container.data-v-9b099ba5 .uni-navbar__content-title {
-  font-size: 34rpx !important;
-}
-.auth-container.data-v-9b099ba5 .uni-nav-bar-text {
-  font-size: 34rpx !important;
-}

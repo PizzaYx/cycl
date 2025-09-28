@@ -1,8 +1,7 @@
 <!-- 收运记录-->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运记录"
-            @clickLeft="back" />
+        <PageHeader title="收运记录" @back="back" />
         <view class="menu">
             <view class="search-container">
                 <view class="search-box">
@@ -88,13 +87,14 @@ import DriverStatusTag from '@/components/DriverStatusTag/DriverStatusTag.vue'
 import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
 import DriverOrderActions from '@/components/DriverOrderActions/DriverOrderActions.vue'
 import AbnormalReportModal from '@/components/AbnormalReportModal/AbnormalReportModal.vue'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 import { formatWeight, formatNum } from '@/utils/orderUtils'
 import { useUserStore } from '@/stores/user.js'
 
 
 const tabs = [{ key: "3", value: "历史记录" }, { key: "0", value: "待处理" }, { key: "1", value: "已完成" }];
 //下标
-const currentTab = ref(0);
+const currentTab = ref(1);
 
 // 当前选中tab的status值（转换为整数）
 const currentStatusKey = computed(() => parseInt(tabs[currentTab.value].key));
@@ -531,14 +531,6 @@ onMounted(() => {
             }
         }
 
-        // 自定义导航栏字体大小为34rpx
-        :deep(.uni-navbar__content-title) {
-            font-size: 34rpx !important;
-        }
-
-        :deep(.uni-nav-bar-text) {
-            font-size: 34rpx !important;
-        }
     }
 }
 </style>

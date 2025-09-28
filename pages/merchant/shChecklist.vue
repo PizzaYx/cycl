@@ -1,8 +1,7 @@
 <!-- 收运清单 -->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运清单"
-            @clickLeft="back" />
+        <PageHeader title="收运清单" @back="back" />
         <view class="menu">
             <view class="tab-bar">
                 <view v-for="(tab, index) in tabs" :key="index" class="tab-item"
@@ -105,6 +104,7 @@ import {
 
 import { useUserStore } from '@/stores/user.js'
 import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 
 //3 预约中 0 待收运 1 已完成
 const tabs = [{ key: "3", value: "预约中" }, { key: "0", value: "进行中" }, { key: "1", value: "已完成" }];
@@ -601,13 +601,5 @@ onMounted(() => {
         }
     }
 
-    // 自定义导航栏字体大小为34rpx
-    :deep(.uni-navbar__content-title) {
-        font-size: 34rpx !important;
-    }
-
-    :deep(.uni-nav-bar-text) {
-        font-size: 34rpx !important;
-    }
 }
 </style>

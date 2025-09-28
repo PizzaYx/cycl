@@ -21,6 +21,7 @@
     "pages/user/privacyPolicy",
     "pages/user/register",
     "pages/syContract/syContract",
+    "pages/syContract/syContractFromAuth",
     "pages/syContract/syPreview",
     "pages/syContract/shSignature"
   ],

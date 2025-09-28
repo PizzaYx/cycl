@@ -175,9 +175,3 @@
   color: rgba(61, 61, 61, 0.4);
   line-height: 1.5;
 }
-.container.data-v-31e4eb43 .uni-navbar__content-title {
-  font-size: 34rpx !important;
-}
-.container.data-v-31e4eb43 .uni-nav-bar-text {
-  font-size: 34rpx !important;
-}

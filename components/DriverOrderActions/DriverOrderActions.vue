@@ -1,8 +1,15 @@
 <!-- 收运端订单操作按钮组件 -->
 <template>
     <view class="order-footer">
+        <!-- 只显示查看按钮模式 -->
+        <template v-if="viewOnly">
+            <uni-button size="mini" type="default" class="view-btn" @tap="handleView">
+                查看
+            </uni-button>
+        </template>
+
         <!-- 进行中状态：显示取消、收运上报、查看详情按钮 -->
-        <template v-if="status === 0 || status === '0'">
+        <template v-else-if="status === 0 || status === '0'">
             <uni-button size="mini" type="primary" class="report-btn" @tap="handleReport">
                 收运上报
             </uni-button>
@@ -75,6 +82,17 @@ const props = defineProps({
     orderData: {
         type: Object,
         required: true
+    },
+
+    /**
+     * 是否只显示查看按钮
+     * @type {Boolean}
+     * @description true-只显示查看按钮, false-根据状态显示所有按钮
+     * @default false
+     */
+    viewOnly: {
+        type: Boolean,
+        default: false
     }
 })
 

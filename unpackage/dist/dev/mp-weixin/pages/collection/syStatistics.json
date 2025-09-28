@@ -2,10 +2,11 @@
   "navigationBarTitleText": "收运统计",
   "navigationStyle": "custom",
   "usingComponents": {
-    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
     "uni-icons": "../../uni_modules/uni-icons/components/uni-icons/uni-icons",
     "uni-load-more": "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more",
     "driver-status-tag": "../../components/DriverStatusTag/DriverStatusTag",
-    "info-display": "../../components/InfoDisplay/InfoDisplay"
+    "driver-order-actions": "../../components/DriverOrderActions/DriverOrderActions",
+    "info-display": "../../components/InfoDisplay/InfoDisplay",
+    "page-header": "../../components/PageHeader/PageHeader"
   }
 }

@@ -3,25 +3,22 @@ const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
-  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_mp_html2 = common_vendor.resolveComponent("mp-html");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _easycom_mp_html2)();
+  (_easycom_uni_icons2 + _easycom_mp_html2)();
 }
-const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_mp_html = () => "../../uni_modules/mp-html/components/mp-html/mp-html.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_mp_html)();
+  (PageHeader + _easycom_uni_icons + _easycom_mp_html)();
 }
+const PageHeader = () => "../../components/PageHeader/PageHeader.js";
 const _sfc_main = {
   __name: "syContract",
   setup(__props) {
     const tempId = common_vendor.ref("");
     const contractData = common_vendor.ref({});
     const isReadOnly = common_vendor.ref(false);
-    const needReturnData = common_vendor.ref(false);
-    const fromMerchant = common_vendor.ref(false);
     const contractExpired = common_vendor.ref(false);
     const userStore = stores_user.useUserStore();
     const signatures = common_vendor.ref({
@@ -49,14 +46,14 @@ const _sfc_main = {
           endDate = new Date(endTime);
         }
         if (!endDate || isNaN(endDate.getTime())) {
-          common_vendor.index.__f__("warn", "at pages/syContract/syContract.vue:89", "无法解析合同结束时间:", endTime);
+          common_vendor.index.__f__("warn", "at pages/syContract/syContract.vue:95", "无法解析合同结束时间:", endTime);
           return false;
         }
         const currentDate = /* @__PURE__ */ new Date();
         currentDate.setHours(0, 0, 0, 0);
         endDate.setHours(23, 59, 59, 999);
         const isExpired = currentDate > endDate;
-        common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:98", "合同过期检查:", {
+        common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:104", "合同过期检查:", {
           endTime,
           endDate: endDate.toISOString(),
           currentDate: currentDate.toISOString(),
@@ -64,7 +61,7 @@ const _sfc_main = {
         });
         return isExpired;
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:107", "检查合同过期时间失败:", error);
+        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:113", "检查合同过期时间失败:", error);
         return false;
       }
     };
@@ -74,44 +71,14 @@ const _sfc_main = {
     common_vendor.onLoad((options) => {
       tempId.value = options.tempId || "";
       isReadOnly.value = options.isReadOnly === "true";
-      needReturnData.value = options.needReturn === "true";
-      fromMerchant.value = !options.isReadOnly && !options.needReturn;
-      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:124", "接收到的状态参数:", {
+      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:128", "===== syContract.vue 页面加载 =====");
+      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:129", "接收到的状态参数:", {
         isReadOnly: isReadOnly.value,
-        needReturnData: needReturnData.value,
-        tempId: tempId.value,
-        fromMerchant: fromMerchant.value
+        tempId: tempId.value
       });
-      if (fromMerchant.value) {
-        loadContractForMerchant();
-      } else if (isReadOnly.value) {
-        loadMerchantCovenant();
-      } else {
-        loadCovenantTemplate();
-      }
+      loadContractForMerchant();
       loadSignatures();
     });
-    const loadMerchantCovenant = async () => {
-      var _a, _b;
-      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:146", "加载商户合同（只读模式）", tempId.value, (_a = userStore.merchant) == null ? void 0 : _a.id);
-      try {
-        const result = await api_apis.apiGetMerchantCovenant({
-          tempId: tempId.value,
-          merchantId: (_b = userStore.merchant) == null ? void 0 : _b.id
-        });
-        if (result.code === 200 && result.data) {
-          contractContent.value = decodeHtmlEntities(result.data.content || "");
-        } else {
-          contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">暂无合同数据</div>';
-        }
-      } catch (error) {
-        common_vendor.index.showToast({
-          title: "加载合同失败",
-          icon: "none"
-        });
-        contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">加载合同失败</div>';
-      }
-    };
     const loadCovenantTemplate = async () => {
       try {
         const result = await api_apis.apiGetCovenantTemplat();
@@ -122,37 +89,38 @@ const _sfc_main = {
           contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">暂无合同模板</div>';
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:179", "加载合同模板失败:", error);
+        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:153", "加载合同模板失败:", error);
         contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">加载合同模板失败</div>';
       }
     };
     const loadContractForMerchant = async () => {
       var _a;
       try {
-        common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:187", "从merchant页面进入，先尝试获取商户合同");
+        common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:161", "从merchant页面进入，先尝试获取商户合同");
         const merchantResult = await api_apis.apiGetMerchantCovenant({
           merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
         });
         if (merchantResult.code === 200 && merchantResult.data && merchantResult.data.content) {
-          const contractData2 = merchantResult.data;
-          const isExpired = checkContractExpiry(contractData2.endTime);
+          const merchantContractData = merchantResult.data;
+          const isExpired = checkContractExpiry(merchantContractData.endTime);
           if (isExpired) {
-            common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:200", "合同已过期，需要重新编辑");
+            common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:174", "合同已过期，需要重新编辑");
             contractExpired.value = true;
             await loadCovenantTemplate();
             isReadOnly.value = false;
           } else {
-            common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:206", "合同未过期，只读显示");
-            contractContent.value = decodeHtmlEntities(contractData2.content);
+            common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:180", "合同未过期，只读显示");
+            contractContent.value = decodeHtmlEntities(merchantContractData.content);
+            contractData.value = merchantContractData;
             isReadOnly.value = true;
           }
         } else {
-          common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:212", "未找到商户合同，获取模板进入编辑模式");
+          common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:187", "未找到商户合同，获取模板进入编辑模式");
           await loadCovenantTemplate();
           isReadOnly.value = false;
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:217", "加载商户合同失败，尝试获取模板:", error);
+        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:192", "加载商户合同失败，尝试获取模板:", error);
         await loadCovenantTemplate();
         isReadOnly.value = false;
       }
@@ -173,18 +141,23 @@ const _sfc_main = {
       if (signatures.value.partyB) {
         const signatureHtml = `<img src="${signatures.value.partyB}" style="max-width: 270px; max-height: 80px; vertical-align: middle; cursor: pointer;" alt="乙方签名" />`;
         contractContent.value = contractContent.value.replace(
-          '<span id="signature-btn" style="display: inline-block; width: 270px; height: 80px; border: 2px dashed #ccc; border-radius: 8px; margin-left: 10px; text-align: center; line-height: 76px; color: #999; font-size: 16px; cursor: pointer; background: #fafafa; transition: all 0.3s ease;">点击此处签名</span>',
+          /<span id="signature-btn"[^>]*>点击此处签名<\/span>/g,
+          signatureHtml
+        );
+        contractContent.value = contractContent.value.replace(
+          /<img[^>]*alt="乙方签名"[^>]*>/g,
           signatureHtml
         );
         const currentDate = getCurrentDate();
         contractContent.value = contractContent.value.replace(
-          '<span id="start-date">________________</span>',
+          /<span id="start-date">[^<]*<\/span>/g,
           `<span id="start-date">${currentDate}</span>`
         );
+        contractData.value.createTime = currentDate;
       }
     };
     const onRichTextTap = (e) => {
-      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:264", "富文本点击事件触发:", e);
+      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:249", "富文本点击事件触发:", e);
       if (!isReadOnly.value) {
         goToSignature();
       }
@@ -244,7 +217,7 @@ const _sfc_main = {
             tempId: contractData.value.id
             // 合同模板ID
           };
-          common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:338", "提交合同数据:", submitData);
+          common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:321", "提交合同数据:", submitData);
           const response = await api_apis.apiAddMerchantCovenant(submitData);
           if (response.code === 200) {
             common_vendor.index.hideLoading();
@@ -263,7 +236,7 @@ const _sfc_main = {
           }
         } catch (error) {
           common_vendor.index.hideLoading();
-          common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:364", "提交合同失败:", error);
+          common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:347", "提交合同失败:", error);
           common_vendor.index.showToast({
             title: "提交失败，请重试",
             icon: "none"
@@ -271,7 +244,7 @@ const _sfc_main = {
         }
       } catch (error) {
         common_vendor.index.hideLoading();
-        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:373", "提交合同失败:", error);
+        common_vendor.index.__f__("error", "at pages/syContract/syContract.vue:356", "提交合同失败:", error);
         common_vendor.index.showToast({
           title: "提交失败，请重试",
           icon: "none"
@@ -279,70 +252,41 @@ const _sfc_main = {
       }
     };
     const back = () => {
-      if (needReturnData.value && !signatures.value.partyB) {
-        common_vendor.index.showToast({
-          title: "请先完成签名",
-          icon: "none"
-        });
-      }
       common_vendor.index.navigateBack();
     };
     common_vendor.onMounted(() => {
       common_vendor.index.$on("signatureUpdated", (signatureData) => {
         signatures.value = signatureData;
         updateContractWithSignature();
-        if (needReturnData.value && signatures.value.partyB) {
-          prepareReturnData();
-        }
       });
     });
-    const prepareReturnData = () => {
-      const currentDate = /* @__PURE__ */ new Date();
-      const year = currentDate.getFullYear();
-      const month = String(currentDate.getMonth() + 1).padStart(2, "0");
-      const day = String(currentDate.getDate()).padStart(2, "0");
-      const createTime = `${year}-${month}-${day}`;
-      const returnData = {
-        content: contractContent.value,
-        // 修改后的富文本内容
-        createTime,
-        // 回显的开始日期
-        endTime: contractData.value.endTime,
-        // 从result.data获取的结束日期
-        id: contractData.value.id
-        // 从result.data获取的合同ID
-      };
-      common_vendor.index.__f__("log", "at pages/syContract/syContract.vue:425", "准备返回给上级页面的数据:", returnData);
-      common_vendor.index.$emit("contractUpdated", returnData);
-    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.o(back),
         b: common_vendor.p({
-          dark: true,
-          fixed: true,
-          ["background-color"]: "#fff",
-          ["status-bar"]: true,
-          ["left-icon"]: "left",
-          color: "#000",
           title: "合同详情"
         }),
-        c: contractExpired.value && fromMerchant.value
-      }, contractExpired.value && fromMerchant.value ? {
+        c: contractData.value.endTime
+      }, contractData.value.endTime ? {
         d: common_vendor.p({
-          type: "info",
+          type: contractExpired.value ? "info" : "calendar",
           size: "16",
-          color: "#ff9500"
-        })
+          color: contractExpired.value ? "#ff9500" : "rgba(7, 193, 96, 1)"
+        }),
+        e: common_vendor.t(contractExpired.value ? "您的合同已过期，请重新签署合同" : `您的合同截止到 ${contractData.value.endTime} 到期`),
+        f: contractExpired.value ? 1 : ""
       } : {}, {
-        e: common_vendor.o(onRichTextTap),
-        f: common_vendor.p({
+        g: common_vendor.p({
           content: contractContent.value
         }),
-        g: fromMerchant.value && !isReadOnly.value
-      }, fromMerchant.value && !isReadOnly.value ? {
-        h: common_vendor.o(submitContract),
-        i: !canSubmit.value
+        h: !isReadOnly.value
+      }, !isReadOnly.value ? {
+        i: common_vendor.o(onRichTextTap)
+      } : {}, {
+        j: !isReadOnly.value
+      }, !isReadOnly.value ? {
+        k: common_vendor.o(submitContract),
+        l: !canSubmit.value
       } : {});
     };
   }

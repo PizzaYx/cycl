@@ -59,7 +59,6 @@
   font-weight: bold;
   color: #07C160;
   display: inline-block;
-  vertical-align: text-bottom;
   line-height: 1;
 }
 .store-info .bin-info .scan-icon.data-v-e09b3d48 {
@@ -161,6 +160,15 @@
   right: 30rpx;
   bottom: 300rpx;
   z-index: 999;
+  width: 100rpx;
+  height: 100rpx;
+  background-color: #FFFFFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(7, 193, 96, 0.2);
 }
 .content .record-list .record-card.data-v-e09b3d48 {
   background-color: #FFFFFF;

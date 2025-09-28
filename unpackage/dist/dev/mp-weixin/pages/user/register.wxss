@@ -77,9 +77,9 @@
 .register-form .register-button .register-btn.data-v-fd534bf9 {
   width: 690rpx;
   height: 80rpx;
-  background: rgba(7, 193, 96, 0.1);
+  background: #07c160;
   border-radius: 40rpx;
-  color: #07c160;
+  color: #fff;
   font-size: 32rpx;
   font-weight: 400;
 }

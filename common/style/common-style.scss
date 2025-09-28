@@ -3,3 +3,12 @@ swiper,
 swiper-item {
     box-sizing: border-box;
 }
+
+/* 全局设置 uni-nav-bar 字体大小 */
+.uni-navbar__content-title {
+    font-size: 34rpx !important;
+}
+
+.uni-nav-bar-text {
+    font-size: 34rpx !important;
+}

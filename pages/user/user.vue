@@ -1,7 +1,6 @@
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="个人信息"
-            @clickLeft="back" />
+        <PageHeader title="个人信息" @back="back" />
         <view class="content">
             <view class="avatar-section">
                 <view class="avatar-container" @tap="handleAvatarClick">
@@ -49,6 +48,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/stores/user.js'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 
 
 // 使用用户 store

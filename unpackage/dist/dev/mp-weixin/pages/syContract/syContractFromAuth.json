@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "电子合同",
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "mp-html": "../../uni_modules/mp-html/components/mp-html/mp-html",
+    "page-header": "../../components/PageHeader/PageHeader"
+  }
+}

@@ -2,8 +2,7 @@
 <template>
     <view class="container">
         <!-- 头部导航 -->
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="预约详细"
-            @clickLeft="back" />
+        <PageHeader title="预约详细" @back="back" />
 
         <!-- 用户信息 -->
         <view class="user-info">
@@ -27,6 +26,7 @@
 import { onMounted, ref, computed } from 'vue';
 import { apiGetPlanTemporaryById } from '@/api/apis.js'
 import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 import { formatWeight, formatNum } from '@/utils/orderUtils'
 
 // 页面参数

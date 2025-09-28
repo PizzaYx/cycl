@@ -1,8 +1,7 @@
 <!-- 认证界面 -->
 <template>
     <view class="auth-container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="商户认证"
-            @clickLeft="back" />
+        <PageHeader title="商户认证" @back="back" />
         <!-- 步骤条 -->
         <view class="step-container">
             <view class="step-item" :class="{ active: currentStep >= 1, completed: currentStep > 1 }">
@@ -93,7 +92,7 @@
                             <view class="location-display" @click="isReadOnly ? viewLocation() : openLocationPicker()">
                                 <text v-if="getLocationText()" class="location-text">{{ getLocationText() }}</text>
                                 <text v-else class="location-placeholder">{{ isReadOnly ? '点击查看位置' : '点击选择商户位置'
-                                    }}</text>
+                                }}</text>
                             </view>
                             <image src="/static/logo.png" class="select-icon"
                                 @click="isReadOnly ? viewLocation() : openLocationPicker()" />
@@ -129,14 +128,13 @@
                         <text class="upload-tip" v-if="!isReadOnly">最多上传3张图片，每张图片不超过20MB，支持jpg、png格式</text>
                     </uni-forms-item>
 
-                    <uni-forms-item label="电子合同" name="contractData" :required="!isReadOnly">
+                    <uni-forms-item label="电子合同" name="content" :required="!isReadOnly">
                         <view class="contract-field">
                             <view class="contract-display" @click="goToContract()">
-                                <text v-if="formData.contractData" class="contract-text">已签名</text>
+                                <text v-if="isContractSigned" class="contract-text">已签名</text>
                                 <text v-else
                                     :class="isReadOnly ? 'contract-placeholder-readonly' : 'contract-placeholder'">{{
-                                        isReadOnly ?
-                                            '已签电子合同' : '请点击查看电子合同并签名'
+                                        contractDisplayText
                                     }}</text>
                             </view>
                             <image src="/static/logo.png" class="select-icon" @click="goToContract()" />
@@ -183,6 +181,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { apiPostMerchantCheck, apiPostEditMerchantCheck, apiGetMerchantCheck, apiSelectMerchantList } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
 import { uploadUrl, createUploadHeaders } from '@/utils/config.js'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 
 //返回上一页
 const back = () => {
@@ -233,6 +232,30 @@ const isReadOnly = computed(() => {
     return authStatus.value === 'pending' || authStatus.value === 'approved'
 })
 
+// 判断合同是否已签名
+const isContractSigned = computed(() => {
+    // 如果有content，表示已签名（第一次提交或修改了合同）
+    if (formData.content) {
+        return true
+    }
+    // 如果有covenantId，表示已签名（服务器返回的合同ID，修改状态但未修改合同）
+    if (formData.covenantId) {
+        return true
+    }
+    return false
+})
+
+// 合同显示文本
+const contractDisplayText = computed(() => {
+    if (isContractSigned.value) {
+        // 已签名状态：已签名
+        return '已签名'
+    } else {
+        // 未签名状态：请点击查看电子合同并签名
+        return '请点击查看电子合同并签名'
+    }
+})
+
 // // 是否显示商户选择器（只有需要认证的状态才显示）
 // const showMerchantSelector = computed(() => {
 //     return authStatus.value === 'none' || authStatus.value === 'rejected'
@@ -251,8 +274,11 @@ const formData = reactive({
     longitude: '', // 经度
     locationName: '', // 选择的位置名称（用于显示）
     licenseImages: [], // 改为数组支持多图上传
-    contractData: null, // 合同回传的数据，null表示未签名，有值表示已签名
-    tempId: null // 合同模板ID（最外层）
+    content: '', // 合同内容
+    startTime: '', // 合同开始时间
+    endTime: '', // 合同结束时间
+    tempId: null, // 合同模板ID
+    covenantId: null // 合同ID
 })
 
 // 区域选择数据
@@ -450,7 +476,7 @@ const formRules = {
             }
         ]
     },
-    contractData: {
+    content: {
         rules: [
             {
                 required: true,
@@ -513,19 +539,67 @@ const getLocationText = () => {
 
 
 
-// 获取电子合同状态文本
-// const getContractStatusText = () => {
-//     return formData.contractStatus === 'signed' ? '已签名' : '请点击查看电子合同并签名'
-// }
-
 // 跳转到电子合同页面
 const goToContract = () => {
     // 根据认证状态决定页面参数
     const isReadOnly = authStatus.value === 'pending' || authStatus.value === 'approved'
-    const needReturn = authStatus.value === 'none' || authStatus.value === 'rejected'
 
-    // 构建URL参数
-    let url = `/pages/syContract/syContract?isReadOnly=${isReadOnly}&needReturn=${needReturn}`
+    console.log('===== shCertification.vue 准备跳转到合同页面 =====')
+    console.log('当前状态:', {
+        isReadOnly: isReadOnly,
+        hasContent: !!formData.content,
+        content: formData.content
+    })
+
+    // 如果有合同内容，传递合同数据用于回显
+    if (formData.content) {
+        console.log('===== 传递已签名的合同内容 =====')
+        const contractContent = encodeURIComponent(formData.content)
+        const startTime = formData.startTime
+        const endTime = formData.endTime
+
+        let url = `/pages/syContract/syContractFromAuth?isReadOnly=${isReadOnly}&hasContract=true&content=${contractContent}&startTime=${startTime}&endTime=${endTime}`
+
+        uni.navigateTo({
+            url: url,
+            success: () => {
+                console.log('跳转到合同页面成功，显示已签名合同')
+            },
+            fail: (err) => {
+                console.error('跳转失败:', err)
+                uni.showToast({
+                    title: '页面跳转失败',
+                    icon: 'none'
+                })
+            }
+        })
+        return
+    }
+
+    // 如果有covenantId但没有content，直接跳转到合同页面（合同页面会用商户ID获取）
+    if (formData.covenantId) {
+        console.log('===== 跳转到合同页面，合同页面会用商户ID获取合同 =====')
+        let url = `/pages/syContract/syContractFromAuth?isReadOnly=${isReadOnly}`
+
+        uni.navigateTo({
+            url: url,
+            success: () => {
+                console.log('跳转到合同页面成功，合同页面会用商户ID获取合同')
+            },
+            fail: (err) => {
+                console.error('跳转失败:', err)
+                uni.showToast({
+                    title: '页面跳转失败',
+                    icon: 'none'
+                })
+            }
+        })
+        return
+    }
+
+    // 如果都没有，跳转到合同页面进行签名
+    console.log('===== 跳转到合同页面进行签名 =====')
+    let url = `/pages/syContract/syContractFromAuth?isReadOnly=${isReadOnly}`
 
     // 如果是只读模式且有tempId，传入tempId
     if (isReadOnly && formData.tempId) {
@@ -535,11 +609,7 @@ const goToContract = () => {
     uni.navigateTo({
         url: url,
         success: () => {
-            console.log('跳转到电子合同页面，传递参数:', {
-                isReadOnly: isReadOnly,
-                needReturn: needReturn,
-                tempId: formData.tempId
-            })
+            console.log('跳转到电子合同页面成功，进行签名')
         },
         fail: (err) => {
             console.error('跳转失败:', err)
@@ -593,14 +663,17 @@ onMounted(() => {
 
     // 监听合同页面返回的数据
     uni.$on('contractUpdated', (contractData) => {
-        console.log('收到合同页面返回的数据:', contractData)
         // 判断返回的数据是否有值，有值才更新合同状态
         if (contractData && contractData.content) {
-            formData.contractData = contractData // 保存合同回传的数据
+            formData.content = contractData.content
+            formData.startTime = contractData.createTime
+            formData.endTime = contractData.endTime
             uni.showToast({
                 title: '合同签名成功',
                 icon: 'success'
             })
+        } else {
+            console.log('合同数据无效，不更新')
         }
     })
 })
@@ -681,20 +754,22 @@ const fillFormData = (data) => {
         console.log('===== 图片回显完成 =====')
     }
 
-    // 电子合同状态回显（如果有合同数据则回显）
-    if (data.contractStatus === 'signed') {
-        formData.contractData = {
-            content: data.contractContent || '',
-            createTime: data.contractCreateTime || '',
-            endTime: data.contractEndTime || '',
-            id: data.contractId || ''
-        }
+    // 电子合同状态回显（如果有合同内容则回显）
+    if (data.content) {
+        formData.content = data.content || ''
+        formData.startTime = data.createTime || ''
+        formData.endTime = data.endTime || ''
     }
+
+    // 回显covenantId（合同ID）
+    formData.covenantId = data.covenantId || null
+    console.log('回显covenantId:', formData.covenantId, '原始数据:', data.covenantId)
 
     // 回显tempId（最外层）
     formData.tempId = data.tempId || ''
 
     console.log('数据回显完成:', formData)
+    console.log('isContractSigned:', isContractSigned.value)
 }
 
 // 加载商户列表
@@ -858,7 +933,6 @@ const onFileSelect = (res) => {
         }, 100)
     }
 
-    console.log('===== 文件选择事件结束 =====')
 }
 
 
@@ -940,7 +1014,6 @@ const submitAuth = async () => {
             console.log('===== 图片数据处理完成 =====')
         }
 
-        console.log('123', userStore.merchant);
         // 准备提交数据 - 只包含API需要的字段
         const submitData = {
             userid: userStore.userId,
@@ -956,9 +1029,10 @@ const submitAuth = async () => {
             trashWeight: parseFloat(formData.estimatedWeight), // 预估垃圾重量
             img: imageUrls.join(','), // 多张图片用逗号分隔
             tempId: formData.tempId, // 合同模板ID
-            content: formData.contractData?.content, // 合同内容
-            startTime: formData.contractData?.createTime, // 合同开始时间
-            endTime: formData.contractData?.endTime // 合同结束时间
+            content: formData.content, // 合同内容
+            startTime: formData.startTime, // 合同开始时间
+            endTime: formData.endTime, // 合同结束时间
+            covenantId: formData.covenantId // 合同ID
         }
 
         console.log('提交修改认证数据:', submitData)
@@ -978,7 +1052,7 @@ const submitAuth = async () => {
             result = await apiPostMerchantCheck(submitData)
             console.log('认证提交API返回:', result)
             uni.showToast({
-                title: '认证申请提交成功',
+                title: '认证提交成功',
                 icon: 'success'
             })
         }
@@ -998,7 +1072,6 @@ const submitAuth = async () => {
         }
 
     } catch (error) {
-        console.error('提交认证失败:', error)
         uni.showToast({
             title: '提交失败，请重试',
             icon: 'none'

@@ -2,14 +2,10 @@
 const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
 const utils_orderUtils = require("../../utils/orderUtils.js");
-if (!Array) {
-  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
-  _easycom_uni_nav_bar2();
-}
-const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 if (!Math) {
-  _easycom_uni_nav_bar();
+  PageHeader();
 }
+const PageHeader = () => "../../components/PageHeader/PageHeader.js";
 const _sfc_main = {
   __name: "shyyDetail",
   setup(__props) {
@@ -106,12 +102,6 @@ const _sfc_main = {
       return {
         a: common_vendor.o(back),
         b: common_vendor.p({
-          dark: true,
-          fixed: true,
-          ["background-color"]: "#fff",
-          ["status-bar"]: true,
-          ["left-icon"]: "left",
-          color: "#000",
           title: "预约详细"
         }),
         c: common_vendor.t(pageData.value.merchantName),

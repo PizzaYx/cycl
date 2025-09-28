@@ -1,7 +1,6 @@
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="注册"
-            @clickLeft="back" />
+        <PageHeader title="注册" @back="back" />
 
         <view class="register-form">
             <view class="inputInfo">
@@ -19,13 +18,13 @@
 
                 <view class="input-group">
                     <view class="zh mm">密码:</view>
-                    <input class="account password" placeholder="请输入密码(至少6位)" type="safe-password"
+                    <input class="account password" placeholder="请输入密码(至少6位)" type="password"
                         placeholder-class="input-placeholder" v-model="formData.password" />
                 </view>
 
                 <view class="input-group">
                     <view class="zh mm">确认密码:</view>
-                    <input class="account password" placeholder="请再次输入密码" type="safe-password"
+                    <input class="account password" placeholder="请再次输入密码" type="password"
                         placeholder-class="input-placeholder" v-model="formData.confirmPassword" />
                 </view>
             </view>
@@ -42,6 +41,7 @@ import { ref } from 'vue'
 import {
     apiPostRegister
 } from '@/api/apis.js'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 
 // 表单数据
 const formData = ref({
@@ -217,9 +217,9 @@ const handleRegister = () => {
         .register-btn {
             width: 690rpx;
             height: 80rpx;
-            background: rgba(7, 193, 96, 0.1); // 浅绿色背景
+            background: #07c160; // 浅绿色背景
             border-radius: 40rpx;
-            color: #07c160; // 绿色文字
+            color: #fff; // 绿色文字
             font-size: 32rpx;
             font-weight: 400;
 

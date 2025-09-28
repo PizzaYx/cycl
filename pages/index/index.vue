@@ -358,8 +358,8 @@ const fetchUserInfo = async () => {
         flex: 1;
 
         .logo {
-            width: 200rpx;
-            height: 200rpx;
+            width: 230rpx;
+            height: 230rpx;
 
             image {
                 width: 100%;
@@ -392,6 +392,7 @@ const fetchUserInfo = async () => {
 
                 &.active {
                     color: rgba(19, 19, 19, 1); // 选中黑色
+                    font-size: 31rpx; // 选中时字号大3rpx
                 }
 
                 .indicator {

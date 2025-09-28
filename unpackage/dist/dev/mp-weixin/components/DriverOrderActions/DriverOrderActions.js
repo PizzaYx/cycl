@@ -26,6 +26,16 @@ const _sfc_main = {
     orderData: {
       type: Object,
       required: true
+    },
+    /**
+     * 是否只显示查看按钮
+     * @type {Boolean}
+     * @description true-只显示查看按钮, false-根据状态显示所有按钮
+     * @default false
+     */
+    viewOnly: {
+      type: Boolean,
+      default: false
     }
   },
   emits: ["refresh", "abnormalReport"],
@@ -49,29 +59,37 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: __props.status === 0 || __props.status === "0"
-      }, __props.status === 0 || __props.status === "0" ? {
-        b: common_vendor.o(handleReport),
+        a: __props.viewOnly
+      }, __props.viewOnly ? {
+        b: common_vendor.o(handleView),
         c: common_vendor.p({
+          size: "mini",
+          type: "default"
+        })
+      } : __props.status === 0 || __props.status === "0" ? {
+        e: common_vendor.o(handleReport),
+        f: common_vendor.p({
           size: "mini",
           type: "primary"
         }),
-        d: common_vendor.o(handleCancel),
-        e: common_vendor.p({
+        g: common_vendor.o(handleCancel),
+        h: common_vendor.p({
           size: "mini",
           type: "default"
         }),
-        f: common_vendor.o(handleView),
-        g: common_vendor.p({
+        i: common_vendor.o(handleView),
+        j: common_vendor.p({
           size: "mini",
           type: "default"
         })
       } : {
-        h: common_vendor.o(handleView),
-        i: common_vendor.p({
+        k: common_vendor.o(handleView),
+        l: common_vendor.p({
           size: "mini",
           type: "default"
         })
+      }, {
+        d: __props.status === 0 || __props.status === "0"
       });
     };
   }

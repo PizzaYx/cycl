@@ -38,12 +38,10 @@ const _sfc_main = {
       });
     }, { immediate: false });
     common_vendor.onShow(async () => {
-      common_vendor.index.__f__("log", "at pages/collection/collection.vue:132", "页面显示时刷新数据");
+      await userStore.fetchUserInfo();
       await getMerchantStatistics();
       await getMerchantSydList();
-      setTimeout(() => {
-        drawProgressArc();
-      }, 300);
+      drawProgressArc();
     });
     const getMerchantStatistics = async () => {
       var _a;
@@ -153,7 +151,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/collection/collection.vue:274", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/collection/collection.vue:270", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"
@@ -173,11 +171,9 @@ const _sfc_main = {
         await userStore.fetchUserInfo();
         await getMerchantStatistics();
         await getMerchantSydList();
-        setTimeout(() => {
-          drawProgressArc();
-        }, 300);
+        drawProgressArc();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:303", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:295", "刷新失败:", error);
         common_vendor.index.showToast({
           title: "刷新失败",
           icon: "none"
@@ -190,11 +186,9 @@ const _sfc_main = {
       try {
         await getMerchantStatistics();
         await getMerchantSydList();
-        setTimeout(() => {
-          drawProgressArc();
-        }, 300);
+        drawProgressArc();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:325", "刷新数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:315", "刷新数据失败:", error);
       }
     };
     const handleAbnormalReport = (orderData) => {
@@ -214,42 +208,49 @@ const _sfc_main = {
       });
     };
     const drawProgressArc = () => {
-      const ctx = common_vendor.index.createCanvasContext("progressArc");
       const query = common_vendor.index.createSelectorQuery();
-      query.select(".arc-canvas").boundingClientRect((rect) => {
-        if (rect) {
-          const width = rect.width;
-          const height = rect.height;
+      query.select("#progressArc").fields({ node: true, size: true }).exec((res) => {
+        if (res[0]) {
+          const canvas = res[0].node;
+          const ctx = canvas.getContext("2d");
+          const dpr = common_vendor.index.getSystemInfoSync().pixelRatio;
+          const width = res[0].width;
+          const height = res[0].height;
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+          ctx.scale(dpr, dpr);
           const centerX = width / 2;
-          const centerY = height * 0.75;
-          const radius = width / 4.8;
+          const centerY = height * 0.73;
+          const radius = Math.min(width, height) / 2;
+          ctx.clearRect(0, 0, width, height);
           ctx.beginPath();
           ctx.arc(centerX, centerY, radius, Math.PI, 0, false);
-          ctx.setStrokeStyle("rgba(7, 193, 96, 0.10)");
-          ctx.setLineWidth(10);
-          ctx.setLineCap("round");
+          ctx.strokeStyle = "rgba(7, 193, 96, 0.10)";
+          ctx.lineWidth = 10;
+          ctx.lineCap = "round";
           ctx.stroke();
           const progressAngle = Math.PI * (progressPercentage.value / 100);
           if (progressPercentage.value > 0) {
             ctx.beginPath();
             ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + progressAngle, false);
-            ctx.setStrokeStyle("rgba(7, 193, 96, 1)");
-            ctx.setLineWidth(10);
-            ctx.setLineCap("round");
+            ctx.strokeStyle = "rgba(7, 193, 96, 1)";
+            ctx.lineWidth = 10;
+            ctx.lineCap = "round";
             ctx.stroke();
             const endAngle = Math.PI + progressAngle;
             const endX = centerX + radius * Math.cos(endAngle);
             const endY = centerY + radius * Math.sin(endAngle);
             ctx.beginPath();
             ctx.arc(endX, endY, 10, 0, 2 * Math.PI, false);
-            ctx.setFillStyle("rgba(7, 193, 96, 1)");
+            ctx.fillStyle = "rgba(7, 193, 96, 1)";
             ctx.fill();
           }
-          ctx.draw();
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/collection.vue:406", "无法获取Canvas尺寸");
+          setTimeout(() => {
+            drawProgressArc();
+          }, 100);
         }
-      }).exec();
+      });
     };
     return (_ctx, _cache) => {
       var _a;
@@ -260,7 +261,7 @@ const _sfc_main = {
         d: common_vendor.t(((_a = common_vendor.unref(userStore).sfmerchant) == null ? void 0 : _a.registrationNumber) || "未设置车牌"),
         e: common_vendor.p({
           type: "right",
-          size: "30rpx"
+          size: "35rpx"
         }),
         f: common_vendor.o(getUserInfo),
         g: common_vendor.t(syNum.value),

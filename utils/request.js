@@ -1,10 +1,13 @@
 // utils/request.js
 
-//const BASE_URL = 'http://183.223.252.50:18080'
-const BASE_URL = 'http://192.168.0.118:8080'
+const BASE_URL = 'https://demo.vps4cloud.com'
+//const BASE_URL = 'http://192.168.0.118:8080'
 
 // 存储刷新token的Promise，避免并发请求时重复刷新
 let refreshingPromise = null
+
+// 存储当前请求信息，用于token刷新后重新发起请求
+let currentRequestInfo = null
 
 // 请求拦截器
 uni.addInterceptor('request', {
@@ -26,6 +29,17 @@ uni.addInterceptor('request', {
             args.header['authorization'] = `Bearer ${accessToken}`
         }
 
+        // 保存原始请求信息到全局变量，用于token刷新后重新发起请求
+        // 只保存非刷新token的请求，避免刷新请求覆盖原始请求信息
+        if (!args.url.includes('/api/apiRefresh')) {
+            currentRequestInfo = {
+                url: args.url,
+                method: args.method || 'GET',
+                data: args.data || {},
+                header: { ...args.header }
+            }
+        }
+
         return args
     },
 })
@@ -43,13 +57,20 @@ uni.addInterceptor('request', {
                     await handleUnauthorized()
                     // 刷新token后重新发起请求
                     const newToken = uni.getStorageSync('access_token')
-                    if (newToken) {
-                        // 重新发起请求
-                        const originalRequest = res.config || {}
-                        originalRequest.header = originalRequest.header || {}
-                        originalRequest.header['authorization'] = `Bearer ${newToken}`
+                    if (newToken && currentRequestInfo) {
+                        // 重新发起请求，使用全局变量中保存的请求信息
+                        const retryRequest = {
+                            url: currentRequestInfo.url,
+                            method: currentRequestInfo.method,
+                            data: currentRequestInfo.data,
+                            header: {
+                                ...currentRequestInfo.header,
+                                'authorization': `Bearer ${newToken}`
+                            }
+                        }
 
-                        return uni.request(originalRequest)
+                        console.log('【Retry Request】', retryRequest.url, retryRequest.method, retryRequest.data)
+                        return uni.request(retryRequest)
                     } else {
                         // 刷新失败，跳转登录，但不抛出异常
                         logout()

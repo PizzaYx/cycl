@@ -1,7 +1,6 @@
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运地图详情"
-            @clickLeft="back" />
+        <PageHeader title="收运地图详情" @back="back" />
 
         <view class="map-container">
             <map id="navigationMap" class="navigation-map" :scale="mapScale" :markers="mapMarkers"
@@ -9,10 +8,11 @@
                 :latitude="mapCenter.latitude" :longitude="mapCenter.longitude"></map>
 
             <!-- 定位状态提示 -->
-            <view class="location-status" v-if="isLocating">
+            <view class="location-status" v-if="isLocating && isFirstLocation">
                 <uni-icons type="spinner-cycle" size="20" color="#07C160"></uni-icons>
                 <text class="status-text">正在定位和规划路线...</text>
             </view>
+
         </view>
 
         <view class="bottom-section">
@@ -25,7 +25,6 @@
                         <text class="label">司机姓名：</text>
                         <text class="value">{{ driverName }}</text>
                     </view>
-                    <uni-icons type="location" size="16" color="#00B578"></uni-icons>
                 </view>
 
                 <view class="divider"></view>
@@ -36,12 +35,12 @@
                         <text class="value">{{ registrationNumber }}</text>
                     </view>
                     <view class="detail-item">
-                        <text class="label">预估总重量：</text>
+                        <text class="label">收运总重量：</text>
                         <text class="value">{{ totalEstimateWeight }}kg</text>
                     </view>
                     <view class="detail-item">
                         <text class="label">垃圾桶数：</text>
-                        <text class="value">{{ bucketNum }}个</text>
+                        <text class="value">{{ totalBucketNum }}个</text>
                     </view>
                     <view class="detail-item">
                         <text class="label">收运日期：</text>
@@ -55,11 +54,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useUserStore } from '@/stores/user.js'
 import { onLoad } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
 import { TIANDITU_CONFIG } from '@/utils/config.js' // 导入天地图配置
 import gcoord from 'gcoord' // 导入坐标转换库
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 const userStore = useUserStore()
 
 // 地图相关数据
@@ -86,14 +86,26 @@ const currentLocation = ref({
     accuracy: 0
 })
 
+// 持续定位相关
+const locationTimer = ref(null)
+const isContinuousLocation = ref(false)
+const isFirstLocation = ref(true) // 标记是否为第一次定位
+
 // 添加一个标志位，表示数据是否已接收
 const isDataReceived = ref(false)
 
-// 计算总预估重量
+// 计算总重量
 const totalEstimateWeight = computed(() => {
     return taskList.value.reduce((total, task) => {
-        return total + (parseFloat(task.estimateWeight) || 0)
+        return total + (parseFloat(task.weight) || 0)
     }, 0).toFixed(1)
+})
+
+//计算已收垃圾桶数
+const totalBucketNum = computed(() => {
+    return taskList.value.reduce((total, task) => {
+        return total + (parseFloat(task.bucketNum) || 0)
+    }, 0)
 })
 
 
@@ -104,6 +116,34 @@ const useUniAppLocation = () => {
 
     // 先检查定位权限
     checkLocationPermission()
+}
+
+// 开始持续定位
+const startContinuousLocation = () => {
+    console.log('开始持续定位，间隔20秒')
+    isContinuousLocation.value = true
+
+    // 立即执行一次定位
+    useUniAppLocation()
+
+    // 设置定时器，每20秒定位一次
+    locationTimer.value = setInterval(() => {
+        if (isContinuousLocation.value) {
+            console.log('定时定位触发')
+            useUniAppLocation()
+        }
+    }, 20000) // 20秒 = 20000毫秒
+}
+
+// 停止持续定位
+const stopContinuousLocation = () => {
+    console.log('停止持续定位')
+    isContinuousLocation.value = false
+
+    if (locationTimer.value) {
+        clearInterval(locationTimer.value)
+        locationTimer.value = null
+    }
 }
 
 // 检查定位权限
@@ -185,10 +225,16 @@ const startUniAppLocation = () => {
 
                 isLocating.value = false
 
-                uni.showToast({
-                    title: '定位成功，路线规划完成',
-                    icon: 'success'
-                })
+                // 只在第一次定位成功时显示提示
+                if (isFirstLocation.value) {
+                    uni.showToast({
+                        title: '定位成功，路线规划完成',
+                        icon: 'success'
+                    })
+                    isFirstLocation.value = false // 标记第一次定位完成
+                } else {
+                    console.log('持续定位更新成功，路线已重新规划')
+                }
             }, 100)
         },
         fail: (error) => {
@@ -257,10 +303,10 @@ const useDefaultLocation = () => {
         // 绘制路线和规划路径
         planRoute()
 
-        uni.showToast({
-            title: '使用默认位置，路线规划完成',
-            icon: 'none'
-        })
+        // uni.showToast({
+        //     title: '使用默认位置，路线规划完成',
+        //     icon: 'none'
+        // })
     }, 100)
 }
 
@@ -379,9 +425,9 @@ const planRoute = async () => {
             `规划多点路线：起点 → ${taskPoints.slice(0, -1).map(p => p.title).join(' → ')} → ${taskPoints[taskPoints.length - 1].title}`
 
         console.log(routeInfo)
-        uni.showLoading({
-            title: '正在规划路线...'
-        })
+        // uni.showLoading({
+        //     title: '正在规划路线...'
+        // })
 
         // 调用天地图路径规划API
         const routeData = await callTiandituRouteAPI(startWgs84Coord, endWgs84Coord, midWgs84Coords)
@@ -540,11 +586,11 @@ const parseRouteXML = (xmlData) => {
                 const taskPoints = mapMarkers.value.filter(marker => marker.id !== 0)
                 const routeType = taskPoints.length === 1 ? '直达路线' : `途经${taskPoints.length - 1}个点的路线`
 
-                uni.showToast({
-                    title: `${routeType}规划成功\n距离:${distance} 时间:${duration}`,
-                    icon: 'success',
-                    duration: 3000
-                })
+                // uni.showToast({
+                //     title: `${routeType}规划成功\n距离:${distance} 时间:${duration}`,
+                //     icon: 'success',
+                //     duration: 3000
+                // })
 
             } else {
                 throw new Error('坐标数组为空')
@@ -632,7 +678,8 @@ onMounted(() => {
 
             // 🔥 修复：直接使用setTimeout，不用nextTick
             setTimeout(() => {
-                useUniAppLocation()
+                // 开始持续定位
+                startContinuousLocation()
             }, 500) // 减少延迟时间
         } else {
             // 数据还没接收完成，继续等待
@@ -644,9 +691,16 @@ onMounted(() => {
     waitForDataAndInitMap()
 })
 
+// 页面卸载时清理定时器
+onUnmounted(() => {
+    stopContinuousLocation()
+})
+
 // 设置地图数据的通用方法
 const setMapData = (data) => {
-    taskList.value = data.taskList || []
+    // 筛选出status == 0的任务数据
+    const filteredTaskList = (data.taskList || []).filter(task => task.status == 0)
+    taskList.value = filteredTaskList
     driverName.value = data.driverName || ''
     registrationNumber.value = data.registrationNumber || ''
     bucketNum.value = data.bucketNum || 0
@@ -656,6 +710,8 @@ const setMapData = (data) => {
 
 // 返回上一页
 const back = () => {
+    // 停止持续定位
+    stopContinuousLocation()
     uni.navigateBack()
 }
 
@@ -700,6 +756,7 @@ const back = () => {
                 font-weight: 500;
             }
         }
+
     }
 
     .bottom-section {

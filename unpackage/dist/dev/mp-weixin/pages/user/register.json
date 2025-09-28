@@ -2,6 +2,6 @@
   "navigationBarTitleText": "注册",
   "navigationStyle": "custom",
   "usingComponents": {
-    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar"
+    "page-header": "../../components/PageHeader/PageHeader"
   }
 }

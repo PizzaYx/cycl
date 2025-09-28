@@ -1,17 +1,16 @@
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="隐私服务"
-            @clickLeft="back" />
+        <PageHeader title="隐私服务" @back="back" />
         <view class="agreement-content">
             <view class="title">隐私政策</view>
-            
+
             <view class="section">
                 <view class="section-title">一、引言</view>
                 <view class="section-content">
                     <text>本政策旨在向您说明我们如何收集、使用、存储和共享您的个人信息，以及我们为您提供的访问、更新和保护这些信息的方式。请在使用我们的服务前，仔细阅读并理解本政策。</text>
                 </view>
             </view>
-            
+
             <view class="section">
                 <view class="section-title">二、我们收集的信息</view>
                 <view class="section-content">
@@ -25,7 +24,7 @@
                     </view>
                 </view>
             </view>
-            
+
             <view class="section">
                 <view class="section-title">三、权限使用说明</view>
                 <view class="section-content">
@@ -37,47 +36,51 @@
                         <text class="bold">2. 存储权限：</text>
                         <text>当您上传照片时，我们需要获取存储权限以访问您的相册或拍摄照片。这些照片仅用于您使用服务所需，不会被用于其他目的。</text>
                     </view>
+                    <view class="permission-item">
+                        <text class="bold">3. 定位权限：</text>
+                        <text>当您使用基于位置的服务时，我们需要获取定位权限以提供更精准的服务和内容推荐。我们仅会收集必要的位置信息，不会追踪您的具体行踪。</text>
+                    </view>
                     <view class="section-desc">
                         <text>您可以在手机系统设置中随时关闭以上权限，但可能会影响您使用相关功能。</text>
                     </view>
                 </view>
             </view>
-            
+
             <view class="section">
                 <view class="section-title">四、信息使用</view>
                 <view class="section-content">
                     <text>我们仅在必要范围内使用您的个人信息，用于提供、维护和改进我们的服务，并保证服务的安全性。</text>
                 </view>
             </view>
-            
+
             <view class="section">
                 <view class="section-title">五、信息共享</view>
                 <view class="section-content">
                     <text>我们不会向任何无关第三方出售、交易或转让您的个人信息。在获得您的明确同意后，我们可能会与合作伙伴共享必要信息。</text>
                 </view>
             </view>
-            
+
             <view class="section">
                 <view class="section-title">六、信息安全</view>
                 <view class="section-content">
                     <text>我们采取合理措施保护您的信息安全，防止信息泄露、损毁或丢失。</text>
                 </view>
             </view>
-            
+
             <view class="section">
                 <view class="section-title">七、您的权利</view>
                 <view class="section-content">
                     <text>您有权访问、更新和删除您的个人信息，也可随时撤回已同意的授权。</text>
                 </view>
             </view>
-            
+
             <view class="section">
                 <view class="section-title">八、政策变更</view>
                 <view class="section-content">
                     <text>我们可能会适时修订本政策内容，变更后的政策会通过适当方式向您提示。</text>
                 </view>
             </view>
-            
+
             <view class="section">
                 <view class="section-title">九、联系我们</view>
                 <view class="section-content">
@@ -89,6 +92,8 @@
 </template>
 
 <script setup>
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
+
 // 返回上一页
 const back = () => {
     uni.navigateBack()
@@ -104,7 +109,7 @@ const back = () => {
 
 .agreement-content {
     padding: 30rpx;
-    
+
     .title {
         font-size: 36rpx;
         font-weight: bold;
@@ -112,34 +117,34 @@ const back = () => {
         margin-bottom: 40rpx;
         color: $text-font-color-1;
     }
-    
+
     .section {
         margin-bottom: 30rpx;
-        
+
         .section-title {
             font-size: 30rpx;
             font-weight: bold;
             margin-bottom: 20rpx;
             color: $text-font-color-1;
         }
-        
+
         .section-content {
             font-size: 26rpx;
             color: $text-font-color-1;
             line-height: 42rpx;
-            
+
             .subsection {
                 margin-bottom: 15rpx;
             }
-            
+
             .permission-item {
                 margin-bottom: 15rpx;
             }
-            
+
             .bold {
                 font-weight: bold;
             }
-            
+
             .section-desc {
                 margin-top: 15rpx;
                 padding: 15rpx;

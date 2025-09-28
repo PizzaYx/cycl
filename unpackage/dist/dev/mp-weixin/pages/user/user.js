@@ -1,14 +1,10 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const stores_user = require("../../stores/user.js");
-if (!Array) {
-  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
-  _easycom_uni_nav_bar2();
-}
-const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 if (!Math) {
-  _easycom_uni_nav_bar();
+  PageHeader();
 }
+const PageHeader = () => "../../components/PageHeader/PageHeader.js";
 const _sfc_main = {
   __name: "user",
   setup(__props) {
@@ -44,12 +40,6 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_vendor.o(back),
         b: common_vendor.p({
-          dark: true,
-          fixed: true,
-          ["background-color"]: "#fff",
-          ["status-bar"]: true,
-          ["left-icon"]: "left",
-          color: "#000",
           title: "个人信息"
         }),
         c: avatarUrl.value

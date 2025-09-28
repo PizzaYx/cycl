@@ -3,11 +3,18 @@
     "miniprogram": {
       "list": [
         {
-          "name": "商户认证",
-          "pathName": "pages/merchant/shCertification",
+          "name": "手签页面",
+          "pathName": "pages/syContract/shSignature",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "商户认证",
+          "pathName": "pages/merchant/shCertification",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "商户签名",

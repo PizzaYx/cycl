@@ -1,8 +1,7 @@
 <!-- 收运上报 -->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运上报"
-            @clickLeft="back" />
+        <PageHeader title="收运上报" @back="back" />
         <!-- 添加商店信息和扫码区域 -->
         <view class="store-info">
             <view class="store-name">商店名称: {{ merchantName }}</view>
@@ -15,7 +14,7 @@
             <view class="record-list">
                 <!-- 当没有数据时显示提示 -->
                 <view v-if="records.length === 0" class="empty-tip">
-                    <text>请点击扫码按钮获取数据</text>
+                    <text>请点击右上扫码按钮获进行收运</text>
                 </view>
 
                 <!-- 有数据时显示记录列表 -->
@@ -29,9 +28,9 @@
                     </view>
                 </view>
 
-                <!-- 刷新按钮 -->
+                <!-- 刷新按钮  -->
                 <view v-if="showRefreshButton" class="refresh-button" @click="handleRefresh">
-                    <uni-icons type="reload" size="45" color="#07C160"></uni-icons>
+                    <uni-icons type="reload" size="40" color="#07C160"></uni-icons>
                 </view>
             </view>
         </scroll-view>
@@ -51,6 +50,7 @@ import { uploadUrl, createUploadHeaders } from '@/utils/config.js';
 import { apiPostreportWeight, apiGetDriverPlanById, apiGetdriverConfirmPlan, apiGetMerchantBucke, apiGetBackfillBuckeWeight, apiGetPlanBuckeWeight } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
 import uniFilePicker from '@/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 
 // 返回上一页
 const back = () => {
@@ -62,10 +62,10 @@ const back = () => {
 // 刷新按钮处理
 const handleRefresh = async () => {
     try {
-        // 显示加载提示
-        uni.showLoading({
-            title: '刷新中...'
-        });
+        // // 显示加载提示
+        // uni.showLoading({
+        //     title: '刷新中...'
+        // });
 
         // 调用 apiGetBackfillBuckeWeight 获取回填重量
         const weightRes = await apiGetBackfillBuckeWeight({
@@ -93,8 +93,9 @@ const handleRefresh = async () => {
                 });
             } else {
                 uni.showToast({
-                    title: '暂无重量数据',
-                    icon: 'none'
+                    title: '未获取到数据，请稍后点击刷新按钮',
+                    icon: 'none',
+                    duration: 2000
                 });
             }
         } else {
@@ -110,7 +111,7 @@ const handleRefresh = async () => {
             icon: 'none'
         });
     } finally {
-        uni.hideLoading();
+        // uni.hideLoading();
     }
 };
 
@@ -302,10 +303,8 @@ const handleScan = () => {
                 });
 
                 if (weightRes.code !== 200) {
-                    console.log('回填重量失败:', weightRes.msg);
                     // 重量回填失败不影响主流程，继续执行
                 } else {
-                    console.log('回填的重量信息:', weightRes.data);
                 }
 
                 // 根据API返回的桶数据添加记录
@@ -314,12 +313,24 @@ const handleScan = () => {
                 // 扫码成功后显示刷新按钮
                 showRefreshButton.value = true;
 
-                uni.showToast({
-                    title: '扫码成功',
-                    icon: 'success'
-                });
+                // 根据weightRes.data情况显示不同提示
+                if (weightRes.code === 200 && weightRes.data && (Array.isArray(weightRes.data) ? weightRes.data.length > 0 : true)) {
+                    // 有数据时显示获取数据中提示
+                    uni.showToast({
+                        title: '获取数据成功',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                } else {
+                    // 未获取到数据时显示提示
+                    uni.showToast({
+                        title: '未获取到数据，请稍后点击右下刷新按钮',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
             } catch (error) {
-                console.error('获取桶信息异常:', error);
+
                 uni.showToast({
                     title: '获取桶信息异常',
                     icon: 'none'
@@ -458,7 +469,6 @@ const addRecordsFromBucketData = (bucketData, weightData) => {
             font-weight: bold;
             color: #07C160;
             display: inline-block;
-            vertical-align: text-bottom;
             line-height: 1;
         }
 
@@ -579,6 +589,15 @@ const addRecordsFromBucketData = (bucketData, weightData) => {
             right: 30rpx;
             bottom: 300rpx;
             z-index: 999;
+            width: 100rpx;
+            height: 100rpx;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(7, 193, 96, 0.2);
         }
 
         .record-card {

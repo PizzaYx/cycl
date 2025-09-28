@@ -146,7 +146,14 @@
         {
             "path": "pages/syContract/syContract",
             "style": {
-                "navigationBarTitleText": "签名合同",
+                "navigationBarTitleText": "合同续签",
+                "navigationStyle": "custom"
+            }
+        },
+        {
+            "path": "pages/syContract/syContractFromAuth",
+            "style": {
+                "navigationBarTitleText": "电子合同",
                 "navigationStyle": "custom"
             }
         },

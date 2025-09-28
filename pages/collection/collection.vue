@@ -17,12 +17,12 @@
                     <view class="sub-name">{{ userStore.sfmerchant?.registrationNumber || '未设置车牌' }}</view>
                     <view class="auth-tag">工作中</view>
                 </view>
-                <uni-icons type="right" size="30rpx"></uni-icons>
+                <uni-icons type="right" size="35rpx"></uni-icons>
             </view>
-
 
             <!-- 数据统计 -->
             <view class="statistics">
+
                 <view class="stat-item">
                     <view class="number">{{ syNum }} 个</view>
                     <view class="label">未收运商家</view>
@@ -37,7 +37,7 @@
                 </view>
                 <!-- 上半圆弧形进度条 -->
                 <view class="progress-arc">
-                    <canvas canvas-id="progressArc" class="arc-canvas"></canvas>
+                    <canvas type="2d" id="progressArc" class="arc-canvas" style="width: 100%; height: 100%;"></canvas>
                 </view>
             </view>
 
@@ -129,14 +129,14 @@ watch(progressPercentage, () => {
 
 
 onShow(async () => {
-    console.log('页面显示时刷新数据')
+    await userStore.fetchUserInfo()
     await getMerchantStatistics()
     await getMerchantSydList()
-    // 数据加载完成后再绘制canvas，增加延迟确保DOM渲染完成
-    setTimeout(() => {
-        drawProgressArc()
-    }, 300)
+    // 数据加载完成后再绘制canvas
+    drawProgressArc()
+
 })
+
 
 //获取商户首页数据统计
 const getMerchantStatistics = async () => {
@@ -243,10 +243,6 @@ const getUserInfo = () => {
 
 }
 
-
-// 按钮点击事件处理函数已封装到 DriverOrderActions 组件中
-
-
 // 快捷操作配置
 const quickActions = ref([
     {
@@ -294,11 +290,7 @@ const onRefresh = async () => {
         await userStore.fetchUserInfo()
         await getMerchantStatistics()
         await getMerchantSydList()
-        // 数据加载完成后再绘制canvas，增加延迟确保DOM渲染完成
-        setTimeout(() => {
-            drawProgressArc()
-        }, 300)
-
+        drawProgressArc()
     } catch (error) {
         console.error('刷新失败:', error)
         uni.showToast({
@@ -318,9 +310,7 @@ const handleRefresh = async () => {
         // 重新获取收运列表
         await getMerchantSydList()
         // 数据更新后重新绘制canvas
-        setTimeout(() => {
-            drawProgressArc()
-        }, 300)
+        drawProgressArc()
     } catch (error) {
         console.error('刷新数据失败:', error)
     }
@@ -352,60 +342,66 @@ const goToSydAllList = () => {
     })
 }
 
-// 绘制进度弧形 - 微信小程序专用
+// 绘制进度弧形 - 使用Canvas 2D API
 const drawProgressArc = () => {
-
-
-    const ctx = uni.createCanvasContext('progressArc')
-
-    // 获取canvas尺寸
     const query = uni.createSelectorQuery()
-    query.select('.arc-canvas').boundingClientRect((rect) => {
+    query.select('#progressArc')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+            if (res[0]) {
+                const canvas = res[0].node
+                const ctx = canvas.getContext('2d')
 
-        if (rect) {
-            const width = rect.width
-            const height = rect.height
+                const dpr = uni.getSystemInfoSync().pixelRatio
+                const width = res[0].width
+                const height = res[0].height
 
-            const centerX = width / 2  // 圆心在中央
-            const centerY = height * 0.75 // 圆心在canvas上方
-            const radius = width / 4.8  // 半径调整，让弧形更合适
+                canvas.width = width * dpr
+                canvas.height = height * dpr
+                ctx.scale(dpr, dpr)
 
-            // 绘制底色弧形（完整弧形）
-            ctx.beginPath()
-            ctx.arc(centerX, centerY, radius, Math.PI, 0, false)
-            ctx.setStrokeStyle('rgba(7, 193, 96, 0.10)')
-            ctx.setLineWidth(10)
-            ctx.setLineCap('round')
-            ctx.stroke()
+                const centerX = width / 2  // 圆心在中央
+                const centerY = height * 0.73 // 圆心在canvas上方
+                const radius = Math.min(width, height) / 2  // 半径调整，让弧形更合适
 
-            // 绘制进度弧形（根据百分比）
-            const progressAngle = Math.PI * (progressPercentage.value / 100)
+                // 清除画布
+                ctx.clearRect(0, 0, width, height)
 
-
-            if (progressPercentage.value > 0) {
+                // 绘制底色弧形（完整弧形）
                 ctx.beginPath()
-                ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + progressAngle, false)
-                ctx.setStrokeStyle('rgba(7, 193, 96, 1)')
-                ctx.setLineWidth(10)
-                ctx.setLineCap('round')
+                ctx.arc(centerX, centerY, radius, Math.PI, 0, false)
+                ctx.strokeStyle = 'rgba(7, 193, 96, 0.10)'
+                ctx.lineWidth = 10
+                ctx.lineCap = 'round'
                 ctx.stroke()
 
-                // 绘制进度弧形终点圆点
-                const endAngle = Math.PI + progressAngle
-                const endX = centerX + radius * Math.cos(endAngle)
-                const endY = centerY + radius * Math.sin(endAngle)
-                ctx.beginPath()
-                ctx.arc(endX, endY, 10, 0, 2 * Math.PI, false)
-                ctx.setFillStyle('rgba(7, 193, 96, 1)')
-                ctx.fill()
+                // 绘制进度弧形（根据百分比）
+                const progressAngle = Math.PI * (progressPercentage.value / 100)
+
+                if (progressPercentage.value > 0) {
+                    ctx.beginPath()
+                    ctx.arc(centerX, centerY, radius, Math.PI, Math.PI + progressAngle, false)
+                    ctx.strokeStyle = 'rgba(7, 193, 96, 1)'
+                    ctx.lineWidth = 10
+                    ctx.lineCap = 'round'
+                    ctx.stroke()
+
+                    // 绘制进度弧形终点圆点
+                    const endAngle = Math.PI + progressAngle
+                    const endX = centerX + radius * Math.cos(endAngle)
+                    const endY = centerY + radius * Math.sin(endAngle)
+                    ctx.beginPath()
+                    ctx.arc(endX, endY, 10, 0, 2 * Math.PI, false)
+                    ctx.fillStyle = 'rgba(7, 193, 96, 1)'
+                    ctx.fill()
+                }
+            } else {
+                // 如果获取不到尺寸，延迟重试
+                setTimeout(() => {
+                    drawProgressArc()
+                }, 100)
             }
-
-            ctx.draw()
-
-        } else {
-            console.error('无法获取Canvas尺寸')
-        }
-    }).exec()
+        })
 }
 </script>
 
@@ -443,6 +439,7 @@ const drawProgressArc = () => {
         padding: 214rpx 30rpx 26rpx;
         width: 100%;
         display: flex;
+        align-items: center;
 
         .avatar {
             width: 120rpx;
@@ -507,7 +504,7 @@ const drawProgressArc = () => {
 
     .statistics {
         position: relative;
-        height: 300rpx;
+        height: 280rpx;
         display: flex;
         justify-content: space-around;
         background-color: #fff;
@@ -517,6 +514,8 @@ const drawProgressArc = () => {
         padding: 0 28rpx;
         gap: 80rpx;
         z-index: 1;
+        overflow: hidden;
+        transform: translateZ(0);
 
         .stat-item {
             position: relative;
@@ -527,6 +526,7 @@ const drawProgressArc = () => {
             justify-content: flex-end;
             text-align: center;
             padding: 0 0rpx 65rpx;
+            z-index: 2;
 
             .number {
                 font-size: 32rpx;
@@ -549,10 +549,10 @@ const drawProgressArc = () => {
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            height: 300rpx;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
-            z-index: 10;
+            z-index: 0;
             overflow: hidden;
 
             .arc-canvas {

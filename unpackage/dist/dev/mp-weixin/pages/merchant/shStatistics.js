@@ -3,20 +3,19 @@ const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
-  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _component_uni_button = common_vendor.resolveComponent("uni-button");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_nav_bar2 + _component_uni_button + _easycom_uni_load_more2)();
+  (_component_uni_button + _easycom_uni_load_more2)();
 }
-const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + StatusPicker + TimeRangePicker + StatusTag + InfoDisplay + _easycom_uni_load_more)();
+  (PageHeader + StatusPicker + TimeRangePicker + StatusTag + InfoDisplay + _easycom_uni_load_more)();
 }
 const TimeRangePicker = () => "../../components/TimeRangePicker/TimeRangePicker.js";
 const StatusPicker = () => "../../components/StatusPicker/StatusPicker.js";
 const StatusTag = () => "../../components/StatusTag/StatusTag.js";
 const InfoDisplay = () => "../../components/InfoDisplay/InfoDisplay.js";
+const PageHeader = () => "../../components/PageHeader/PageHeader.js";
 const _sfc_main = {
   __name: "shStatistics",
   setup(__props) {
@@ -26,12 +25,12 @@ const _sfc_main = {
     const statisticsConfig = [
       {
         image: "/static/shd/tjleft.png",
-        number: bucketCount,
+        number: () => bucketCount.value + " 个",
         title: "垃圾桶数"
       },
       {
         image: "/static/shd/tjright.png",
-        number: totalWeight,
+        number: () => totalWeight.value + " kg",
         title: "总重量"
       }
     ];
@@ -164,12 +163,6 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_vendor.o(back),
         b: common_vendor.p({
-          dark: true,
-          fixed: true,
-          ["background-color"]: "#fff",
-          ["status-bar"]: true,
-          ["left-icon"]: "left",
-          color: "#000",
           title: "商户收运统计"
         }),
         c: common_vendor.o(onStatusChange),

@@ -13,10 +13,10 @@
                 </view>
                 <view class="info">
                     <view class="name">{{ userStore.nickName || '昵称未设置' }}</view>
-                    <view class="sub-name">{{ userStore.userName || '账号未设置' }}</view>
+                    <!-- <view class="sub-name">{{ userStore.userName || '账号未设置' }}</view> -->
                     <view class="auth-tag" :class="getAuthTagClass()">{{ getAuthStatusText() }}</view>
                 </view>
-                <uni-icons type="right" size="30rpx"></uni-icons>
+                <uni-icons type="right" size="35rpx"></uni-icons>
             </view>
 
             <!-- 数据统计 -->
@@ -109,7 +109,7 @@ const syNum = ref(0) // 收运中
 const wcNum = ref(0) // 已完成
 
 // 待确认数量（用于badge显示）
-const processingBadgeText = ref(0)
+// const processingBadgeText = ref(0)
 
 // 下拉刷新状态
 const refreshing = ref(false)
@@ -118,22 +118,22 @@ const refreshing = ref(false)
 const showAuthModal = ref(false)
 
 // 页面加载时确保用户信息存在
-onMounted(async () => {
-    try {
-        const userInfo = await userStore.ensureUserInfo()
-        if (userInfo === null) {
-            // 用户未登录，已跳转到登录页，不需要继续执行
-            console.log('用户未登录，已跳转到登录页')
-            return
-        }
+// onMounted(async () => {
+//     try {
+//         const userInfo = await userStore.ensureUserInfo()
+//         if (userInfo === null) {
+//             // 用户未登录，已跳转到登录页，不需要继续执行
+//             console.log('用户未登录，已跳转到登录页')
+//             return
+//         }
 
-        // 检查认证状态，只有未认证（status为null或2）才显示弹窗
-        checkUserAuthStatus()
-    } catch (error) {
-        // 其他非401错误的处理
-        console.error('页面初始化失败:', error)
-    }
-})
+//         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
+//         checkUserAuthStatus()
+//     } catch (error) {
+//         // 其他非401错误的处理
+//         console.error('页面初始化失败:', error)
+//     }
+// })
 
 onShow(async () => {
     // 确保用户信息已加载完成
@@ -143,7 +143,9 @@ onShow(async () => {
         return
     }
     if (checkUserAuthStatus()) {
-        getMerchantNotConfirmNum();
+        // getMerchantNotConfirmNum();
+        getMerchantStatistics();
+        getMerchantSydList();
     }
 })
 
@@ -184,14 +186,14 @@ const getMerchantSydList = async () => {
 }
 
 // 获取待确认数量（用于badge显示）
-const getMerchantNotConfirmNum = async () => {
-    const res = await apiGetMerchantNotConfirmNum({
-        merchantId: userStore.merchant?.id
-    });
-    if (res.code === 200) {
-        processingBadgeText.value = res.data ?? 0;
-    }
-};
+// const getMerchantNotConfirmNum = async () => {
+//     const res = await apiGetMerchantNotConfirmNum({
+//         merchantId: userStore.merchant?.id
+//     });
+//     if (res.code === 200) {
+//         processingBadgeText.value = res.data ?? 0;
+//     }
+// };
 
 /**
  * 检查用户认证状态并显示相应提示
@@ -219,7 +221,6 @@ const checkUserAuthStatus = () => {
         showAuthModal.value = false;
         getMerchantStatistics();
         getMerchantSydList();
-        getMerchantNotConfirmNum(); // 获取待确认数量
         return true
     }
 }
@@ -239,7 +240,11 @@ const onRefresh = async () => {
         await userStore.fetchUserInfo()
 
         // 检查认证状态，只有未认证（status为null或2）才显示弹窗
-        checkUserAuthStatus()
+        if (checkUserAuthStatus()) {
+            // getMerchantNotConfirmNum();
+            getMerchantStatistics();
+            getMerchantSydList();
+        }
     } catch (error) {
         console.error('刷新失败:', error)
     } finally {
@@ -424,6 +429,7 @@ const goToSydAllList = () => {
         padding: 214rpx 30rpx 26rpx;
         width: 100%;
         display: flex;
+        align-items: center;
 
         .avatar {
             width: 120rpx;
@@ -461,7 +467,7 @@ const goToSydAllList = () => {
                 font-weight: 600;
                 font-size: 32rpx;
                 color: black;
-                line-height: 32rpx;
+                line-height: 40rpx;
                 max-width: 100%;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -607,7 +613,7 @@ const goToSydAllList = () => {
         }
 
         .more {
-            font-size: 24rpx;
+            font-size: 26rpx;
             font-weight: 400;
             color: rgba(19, 19, 19, 0.50);
             display: flex;

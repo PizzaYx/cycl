@@ -1,8 +1,7 @@
 <!-- 临时预约界面 -->
 <template>
     <view class="auth-container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="临时预约"
-            @clickLeft="back" />
+        <PageHeader title="临时预约" @back="back" />
         <!-- 步骤条 -->
         <!-- <view class="step-container">
             <view class="step-item" :class="{ active: currentStep >= 1, completed: currentStep > 1 }">
@@ -122,6 +121,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { apiPostaddPlanTemporary } from '@/api/apis.js'
 import { onLoad } from '@dcloudio/uni-app'
 import { useUserStore } from '@/stores/user.js'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 const userStore = useUserStore();
 //返回上一页
 const back = () => {
@@ -983,13 +983,5 @@ const submitAuth = async () => {
         }
     }
 
-    // 自定义导航栏字体大小为34rpx
-    :deep(.uni-navbar__content-title) {
-        font-size: 34rpx !important;
-    }
-
-    :deep(.uni-nav-bar-text) {
-        font-size: 34rpx !important;
-    }
 }
 </style>

@@ -1,8 +1,7 @@
 <!-- 收运端统计-->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运端统计"
-            @clickLeft="back" />
+        <PageHeader title="收运端统计" @back="back" />
 
         <view class="menu">
             <view class="search-container">
@@ -19,7 +18,7 @@
             <view class="tj-item" v-for="(item, index) in statisticsConfig" :key="index">
                 <image :src="item.image" mode="aspectFill"></image>
                 <view class="ljts">
-                    <view class="number">{{ item.number }}</view>
+                    <view class="number">{{ item.number() }}</view>
                     <view class="title">{{ item.title }}</view>
                 </view>
             </view>
@@ -39,8 +38,9 @@
 
                         </view>
                         <view class="order-content">
-                            <InfoDisplay :fields="getInfoFields(item)" :show-bottom-border="false" />
+                            <InfoDisplay :fields="getInfoFields(item)" />
                         </view>
+                        <DriverOrderActions :status="item.status" :order-data="item" :view-only="true" />
                     </view>
 
                     <!-- 加载更多组件 - 只在有数据时显示 -->
@@ -61,6 +61,7 @@
                 </view>
             </scroll-view>
         </view>
+
     </view>
 </template>
 <script setup>
@@ -79,7 +80,9 @@ import {
 
 import { useUserStore } from '@/stores/user.js'
 import DriverStatusTag from '@/components/DriverStatusTag/DriverStatusTag.vue'
+import DriverOrderActions from '@/components/DriverOrderActions/DriverOrderActions.vue'
 import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 import { formatWeight, formatNum } from '@/utils/orderUtils'
 
 
@@ -94,22 +97,22 @@ const nosyount = ref(0);///未收运
 const statisticsConfig = [
     {
         image: '/static/ssd/sytj2.png',
-        number: merchantCount,
+        number: () => merchantCount.value + ' 个',
         title: '商家数量'
     },
     {
         image: '/static/shd/tjright.png',
-        number: totalWeight,
+        number: () => totalWeight.value + ' kg',
         title: '总重量'
     },
     {
         image: '/static/ssd/sytj1.png',
-        number: syount,
+        number: () => syount.value + ' 个',
         title: '已收运'
     },
     {
         image: '/static/shd/tjleft.png',
-        number: nosyount,
+        number: () => nosyount.value + ' 个',
         title: '未收运'
     }
 ];
@@ -337,6 +340,8 @@ const resetPageAndReload = () => {
 
 
 
+
+
 // 组件挂载时初始化数据
 onMounted(() => {
     pageNum.value = 1;
@@ -445,7 +450,7 @@ onMounted(() => {
                 padding: 30rpx;
                 background-color: #fff;
                 border-radius: 12rpx;
-                height: 330rpx;
+                min-height: 400rpx;
                 box-sizing: border-box;
 
                 .order-header {
@@ -473,33 +478,18 @@ onMounted(() => {
                     justify-content: flex-end;
                     margin-top: 20rpx;
 
-                    .btn-cancel {
-                        margin-right: 20rpx;
-                        color: rgba(61, 61, 61, 1);
-                        background-color: #fff;
-                        border: 1px solid rgba(196, 196, 196, 1);
-                        font-size: 26rpx;
-                        width: 144rpx;
+                    .view-btn {
+                        color: #07C160;
+                        background-color: transparent;
+                        border: 1rpx solid #07C160;
+                        font-size: 24rpx;
+                        width: 120rpx;
                         height: 48rpx;
-                        border-radius: 20rpx;
+                        border-radius: 100rpx;
                         display: flex;
                         justify-content: center;
                         align-items: center;
-                        box-sizing: border-box; // 使用border-box盒模型
-
-                    }
-
-                    .btn-confirm {
-                        color: rgba(255, 255, 255, 1);
-                        background-color: rgba(7, 193, 96, 1);
-                        font-size: 26rpx;
-                        width: 144rpx;
-                        height: 48rpx;
-                        border-radius: 20rpx;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        box-sizing: border-box; // 使用border-box盒模型
+                        box-sizing: border-box;
                     }
                 }
             }
@@ -541,13 +531,5 @@ onMounted(() => {
         }
     }
 
-    // 自定义导航栏字体大小为34rpx
-    :deep(.uni-navbar__content-title) {
-        font-size: 34rpx !important;
-    }
-
-    :deep(.uni-nav-bar-text) {
-        font-size: 34rpx !important;
-    }
 }
 </style>

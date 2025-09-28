@@ -5,4 +5,11 @@ swiper,
 swiper-item {
     box-sizing: border-box;
 }
+	/* 全局设置 uni-nav-bar 字体大小 */
+.uni-navbar__content-title {
+    font-size: 34rpx !important;
+}
+.uni-nav-bar-text {
+    font-size: 34rpx !important;
+}
 page{--status-bar-height:25px;--top-window-height:0px;--window-top:0px;--window-bottom:0px;--window-left:0px;--window-right:0px;--window-magin:0px}[data-c-h="true"]{display: none !important;}

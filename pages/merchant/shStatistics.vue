@@ -1,8 +1,7 @@
 <!-- 收运统计-->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="商户收运统计"
-            @clickLeft="back" />
+        <PageHeader title="商户收运统计" @back="back" />
 
         <view class="menu">
 
@@ -89,6 +88,7 @@ import TimeRangePicker from '@/components/TimeRangePicker/TimeRangePicker.vue'
 import StatusPicker from '@/components/StatusPicker/StatusPicker.vue'
 import StatusTag from '@/components/StatusTag/StatusTag.vue'
 import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 
 
 const userStore = useUserStore();
@@ -103,12 +103,12 @@ const totalWeight = ref(0);
 const statisticsConfig = [
     {
         image: '/static/shd/tjleft.png',
-        number: bucketCount,
+        number: () => bucketCount.value + ' 个',
         title: '垃圾桶数'
     },
     {
         image: '/static/shd/tjright.png',
-        number: totalWeight,
+        number: () => totalWeight.value + ' kg',
         title: '总重量'
     }
 ];
@@ -488,13 +488,5 @@ onMounted(() => {
         }
     }
 
-    // 自定义导航栏字体大小为34rpx
-    :deep(.uni-navbar__content-title) {
-        font-size: 34rpx !important;
-    }
-
-    :deep(.uni-nav-bar-text) {
-        font-size: 34rpx !important;
-    }
 }
 </style>

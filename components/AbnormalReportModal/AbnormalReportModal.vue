@@ -28,8 +28,8 @@
                 <view class="other-reason">
                     <text class="section-title">其他原因：</text>
                     <textarea v-model="otherReason" class="other-input" placeholder="如果没有合适的选项，请在此输入具体原因..."
-                        maxlength="200" @input="onOtherReasonInput"></textarea>
-                    <text class="char-count">{{ otherReason.length }}/200</text>
+                        maxlength="50" @input="onOtherReasonInput"></textarea>
+                    <text class="char-count">{{ otherReason.length }}/50</text>
                 </view>
             </view>
 
@@ -193,7 +193,7 @@ const handleSubmit = async () => {
         position: relative;
 
         .modal-title {
-            font-size: 28rpx;
+            font-size: 30rpx;
             font-weight: 600;
             color: #2c3e50;
             text-align: center;

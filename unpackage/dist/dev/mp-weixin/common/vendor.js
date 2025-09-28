@@ -7426,9 +7426,9 @@ function isConsoleWritable() {
   return isWritable;
 }
 function initRuntimeSocketService() {
-  const hosts = "127.0.0.1,192.168.0.185";
+  const hosts = "127.0.0.1,192.168.0.184";
   const port = "8090";
-  const id = "mp-weixin_MGiQUe";
+  const id = "mp-weixin_iL9USJ";
   const lazy = typeof swan !== "undefined";
   let restoreError = lazy ? () => {
   } : initOnError();
@@ -9833,7 +9833,14 @@ const pages = [
   {
     path: "pages/syContract/syContract",
     style: {
-      navigationBarTitleText: "签名合同",
+      navigationBarTitleText: "合同续签",
+      navigationStyle: "custom"
+    }
+  },
+  {
+    path: "pages/syContract/syContractFromAuth",
+    style: {
+      navigationBarTitleText: "电子合同",
       navigationStyle: "custom"
     }
   },
@@ -12733,6 +12740,7 @@ exports.onPullDownRefresh = onPullDownRefresh;
 exports.onReachBottom = onReachBottom;
 exports.onShow = onShow;
 exports.onUnload = onUnload;
+exports.onUnmounted = onUnmounted;
 exports.p = p$1;
 exports.r = r$1;
 exports.reactive = reactive;

@@ -25,8 +25,65 @@
 /* 文章场景相关 */
 .signature-container.data-v-0634d544 {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   background: #f5f5f5;
+}
+.custom-nav-bar.data-v-0634d544 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  z-index: 999;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+}
+.status-bar.data-v-0634d544 {
+  width: 100%;
+  background-color: #fff;
+}
+.nav-content.data-v-0634d544 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 15px;
+  background-color: #fff;
+  height: 100%;
+}
+.nav-left.data-v-0634d544 {
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.nav-title.data-v-0634d544 {
+  flex: 1;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #000;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 10px;
+}
+.nav-right.data-v-0634d544 {
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* 横屏适配 */
+@media screen and (orientation: landscape) {
+.custom-nav-bar .nav-content.data-v-0634d544 {
+    padding: 0 20px;
+}
+}
+/* 微信小程序适配 */
+.custom-nav-bar .nav-content.data-v-0634d544 {
+  padding-right: calc(env(safe-area-inset-right) + 10px);
 }
 .signature-modal-native.data-v-0634d544 {
   width: 100vw;
@@ -38,11 +95,13 @@
   z-index: 2;
   top: 0;
   left: 0;
+  /* 为导航栏留出空间 */
+  padding-top: var(--nav-bar-height, 40px);
 }
 .signature-modal-native .signature-buttons-rotated.data-v-0634d544 {
   position: absolute;
   right: 20rpx;
-  top: 50%;
+  top: 50vh;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
@@ -52,10 +111,10 @@
   padding: 10rpx;
 }
 .signature-modal-native .signature-buttons-rotated .signature-btn.data-v-0634d544 {
-  height: 25rpx;
-  width: 70rpx;
+  height: 28rpx;
+  width: 80rpx;
   border-radius: 30rpx;
-  font-size: 12rpx;
+  font-size: 20rpx;
   border: none;
   line-height: 25rpx;
   text-align: center;

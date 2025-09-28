@@ -23,6 +23,7 @@ if (!Math) {
   "./pages/user/privacyPolicy.js";
   "./pages/user/register.js";
   "./pages/syContract/syContract.js";
+  "./pages/syContract/syContractFromAuth.js";
   "./pages/syContract/syPreview.js";
   "./pages/syContract/shSignature.js";
 }

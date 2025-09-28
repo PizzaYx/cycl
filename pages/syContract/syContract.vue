@@ -1,27 +1,34 @@
 <template>
     <view class="contract-container">
         <!-- 导航栏 -->
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="合同详情"
-            @clickLeft="back" />
+        <PageHeader title="合同详情" @back="back" />
 
-        <!-- 合同过期提示 -->
-        <view v-if="contractExpired && fromMerchant" class="expired-tip">
+        <!-- 合同状态提示 -->
+        <view v-if="contractData.endTime" class="contract-tip" :class="{ 'expired': contractExpired }">
             <view class="tip-content">
-                <uni-icons type="info" size="16" color="#ff9500"></uni-icons>
-                <text class="tip-text">您的合同已过期，请重新签署合同</text>
+                <uni-icons :type="contractExpired ? 'info' : 'calendar'" size="16"
+                    :color="contractExpired ? '#ff9500' : 'rgba(7, 193, 96, 1)'"></uni-icons>
+                <text class="tip-text">
+                    {{ contractExpired ? '您的合同已过期，请重新签署合同' : `您的合同截止到 ${contractData.endTime} 到期` }}
+                </text>
             </view>
         </view>
+
 
         <!-- 合同内容区域 -->
         <scroll-view class="contract-content" scroll-y>
             <!-- 富文本合同内容 -->
             <view class="contract-body">
-                <mp-html :content="contractContent" @tap="onRichTextTap"></mp-html>
+                <mp-html :content="contractContent"></mp-html>
+                <!-- 可编辑模式下的点击区域 -->
+                <view v-if="!isReadOnly" class="click-overlay" @tap="onRichTextTap">
+                    <view class="click-hint">点击此处修改签名</view>
+                </view>
             </view>
         </scroll-view>
 
-        <!-- 底部提交按钮（仅从merchant页面进入且可编辑时显示） -->
-        <view v-if="fromMerchant && !isReadOnly" class="bottom-actions">
+        <!-- 底部提交按钮（可编辑时显示） -->
+        <view v-if="!isReadOnly" class="bottom-actions">
             <button class="action-btn submit-btn" @tap="submitContract" :disabled="!canSubmit">
                 提交合同
             </button>
@@ -35,13 +42,12 @@ import { ref, computed, onMounted } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { apiGetMerchantCovenant, apiGetCovenantTemplat, apiAddMerchantCovenant } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 
 // 页面参数
-const tempId = ref('') // 合同模板ID（只读模式使用）
+const tempId = ref('') // 合同模板ID
 const contractData = ref({})
-const isReadOnly = ref(false) // 必传：是否为只读模式
-const needReturnData = ref(false) // 必传：是否需要返回数据给上级页面
-const fromMerchant = ref(false) // 是否从merchant页面进入
+const isReadOnly = ref(false) // 是否为只读模式
 const contractExpired = ref(false) // 合同是否过期
 
 // 用户信息
@@ -117,52 +123,20 @@ const canSubmit = computed(() => {
 // 页面加载
 onLoad((options) => {
     tempId.value = options.tempId || '' // 接收合同模板ID
-    isReadOnly.value = options.isReadOnly === 'true' // 必传：是否为只读模式
-    needReturnData.value = options.needReturn === 'true' // 必传：是否需要返回数据
-    fromMerchant.value = !options.isReadOnly && !options.needReturn // 判断是否从merchant页面进入
+    isReadOnly.value = options.isReadOnly === 'true' // 是否为只读模式
 
+    console.log('===== syContract.vue 页面加载 =====')
     console.log('接收到的状态参数:', {
         isReadOnly: isReadOnly.value,
-        needReturnData: needReturnData.value,
-        tempId: tempId.value,
-        fromMerchant: fromMerchant.value
+        tempId: tempId.value
     })
 
-    // 根据模式加载不同的数据
-    if (fromMerchant.value) {
-        // 从merchant页面进入，先尝试获取商户合同，没有则获取模板
-        loadContractForMerchant()
-    } else if (isReadOnly.value) {
-        loadMerchantCovenant()
-    } else {
-        loadCovenantTemplate()
-    }
-
+    // 先尝试获取商户合同，没有则获取模板
+    loadContractForMerchant()
     loadSignatures()
 })
 
-// 加载商户合同（只读模式）
-const loadMerchantCovenant = async () => {
-    console.log('加载商户合同（只读模式）', tempId.value, userStore.merchant?.id,)
-    try {
-        const result = await apiGetMerchantCovenant({
-            tempId: tempId.value,
-            merchantId: userStore.merchant?.id,
-        })
 
-        if (result.code === 200 && result.data) {
-            contractContent.value = decodeHtmlEntities(result.data.content || '')
-        } else {
-            contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">暂无合同数据</div>'
-        }
-    } catch (error) {
-        uni.showToast({
-            title: '加载合同失败',
-            icon: 'none'
-        })
-        contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">加载合同失败</div>'
-    }
-}
 
 // 加载合同模板（可编辑模式）
 const loadCovenantTemplate = async () => {
@@ -192,8 +166,8 @@ const loadContractForMerchant = async () => {
 
         if (merchantResult.code === 200 && merchantResult.data && merchantResult.data.content) {
             // 有商户合同，检查是否过期
-            const contractData = merchantResult.data
-            const isExpired = checkContractExpiry(contractData.endTime)
+            const merchantContractData = merchantResult.data
+            const isExpired = checkContractExpiry(merchantContractData.endTime)
 
             if (isExpired) {
                 // 合同已过期，需要重新编辑
@@ -204,7 +178,8 @@ const loadContractForMerchant = async () => {
             } else {
                 // 合同未过期，只读显示
                 console.log('合同未过期，只读显示')
-                contractContent.value = decodeHtmlEntities(contractData.content)
+                contractContent.value = decodeHtmlEntities(merchantContractData.content)
+                contractData.value = merchantContractData // 设置合同数据，包含endTime
                 isReadOnly.value = true // 设置为只读模式
             }
         } else {
@@ -239,22 +214,32 @@ const loadSignatures = () => {
     }
 }
 
-
 // 更新合同内容中的签名显示
 const updateContractWithSignature = () => {
     if (signatures.value.partyB) {
         const signatureHtml = `<img src="${signatures.value.partyB}" style="max-width: 270px; max-height: 80px; vertical-align: middle; cursor: pointer;" alt="乙方签名" />`
+
+        // 替换签名按钮或已存在的签名图片
         contractContent.value = contractContent.value.replace(
-            '<span id="signature-btn" style="display: inline-block; width: 270px; height: 80px; border: 2px dashed #ccc; border-radius: 8px; margin-left: 10px; text-align: center; line-height: 76px; color: #999; font-size: 16px; cursor: pointer; background: #fafafa; transition: all 0.3s ease;">点击此处签名</span>',
+            /<span id="signature-btn"[^>]*>点击此处签名<\/span>/g,
+            signatureHtml
+        )
+
+        // 如果已经有签名图片，替换它
+        contractContent.value = contractContent.value.replace(
+            /<img[^>]*alt="乙方签名"[^>]*>/g,
             signatureHtml
         )
 
         // 签名后自动回填开始日期
         const currentDate = getCurrentDate()
         contractContent.value = contractContent.value.replace(
-            '<span id="start-date">________________</span>',
+            /<span id="start-date">[^<]*<\/span>/g,
             `<span id="start-date">${currentDate}</span>`
         )
+
+        // 同时更新 contractData 中的时间
+        contractData.value.createTime = currentDate
     }
 }
 
@@ -274,8 +259,6 @@ const goToSignature = () => {
         url: `/pages/syContract/shSignature`
     })
 }
-
-
 
 // 提交合同
 const submitContract = () => {
@@ -380,14 +363,6 @@ const submitContractToServer = async () => {
 
 // 返回上一页
 const back = () => {
-    // 如果需要返回数据给上级页面，提示用户是否已签名
-    if (needReturnData.value && !signatures.value.partyB) {
-        uni.showToast({
-            title: '请先完成签名',
-            icon: 'none'
-        })
-    }
-
     uni.navigateBack()
 }
 
@@ -397,36 +372,9 @@ onMounted(() => {
     uni.$on('signatureUpdated', (signatureData) => {
         signatures.value = signatureData
         updateContractWithSignature()
-
-        // 如果需要返回数据给上级页面，且已签名，才准备返回数据
-        if (needReturnData.value && signatures.value.partyB) {
-            prepareReturnData()
-        }
     })
 })
 
-// 准备返回给上级页面的数据
-const prepareReturnData = () => {
-    // 获取当前日期作为开始日期（回显的开始日期）
-    const currentDate = new Date()
-    const year = currentDate.getFullYear()
-    const month = String(currentDate.getMonth() + 1).padStart(2, '0')
-    const day = String(currentDate.getDate()).padStart(2, '0')
-    const createTime = `${year}-${month}-${day}`
-
-    // 准备返回的4个值
-    const returnData = {
-        content: contractContent.value, // 修改后的富文本内容
-        createTime: createTime, // 回显的开始日期
-        endTime: contractData.value.endTime, // 从result.data获取的结束日期
-        id: contractData.value.id // 从result.data获取的合同ID
-    }
-
-    console.log('准备返回给上级页面的数据:', returnData)
-
-    // 通过事件传递数据给上级页面
-    uni.$emit('contractUpdated', returnData)
-}
 </script>
 
 <style lang="scss" scoped>
@@ -435,13 +383,13 @@ const prepareReturnData = () => {
     background-color: #f5f5f5;
 }
 
-// 合同过期提示样式
-.expired-tip {
+// 合同状态提示样式
+.contract-tip {
     background: #fff;
     margin: 20rpx;
     border-radius: 16rpx;
     padding: 20rpx;
-    border-left: 4rpx solid #ff9500;
+    border-left: 4rpx solid rgba(7, 193, 96, 1);
 
     .tip-content {
         display: flex;
@@ -450,8 +398,17 @@ const prepareReturnData = () => {
 
         .tip-text {
             font-size: 28rpx;
-            color: #ff9500;
+            color: rgba(7, 193, 96, 1);
             font-weight: 500;
+        }
+    }
+
+    // 过期状态样式
+    &.expired {
+        border-left-color: #ff9500;
+
+        .tip-text {
+            color: #ff9500;
         }
     }
 }
@@ -495,6 +452,7 @@ const prepareReturnData = () => {
     border-radius: 16rpx;
     margin-bottom: 20rpx;
     min-height: 800rpx;
+    position: relative;
 }
 
 .readonly-tip {
@@ -557,6 +515,34 @@ const prepareReturnData = () => {
     font-size: 28rpx;
     line-height: 1.6;
     color: #333;
+}
+
+// 点击覆盖层样式
+.click-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+
+    .click-hint {
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 20rpx 40rpx;
+        border-radius: 10rpx;
+        font-size: 28rpx;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    &:active .click-hint {
+        opacity: 1;
+    }
 }
 
 // 底部操作按钮样式

@@ -58,7 +58,7 @@
   position: relative;
 }
 .abnormal-modal .modal-header .modal-title.data-v-407f79fb {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: #2c3e50;
   text-align: center;

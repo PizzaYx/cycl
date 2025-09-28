@@ -3,28 +3,27 @@ const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
-  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   const _easycom_uni_badge2 = common_vendor.resolveComponent("uni-badge");
   const _easycom_uni_load_more2 = common_vendor.resolveComponent("uni-load-more");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2 + _easycom_uni_badge2 + _easycom_uni_load_more2)();
+  (_easycom_uni_icons2 + _easycom_uni_badge2 + _easycom_uni_load_more2)();
 }
-const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 const _easycom_uni_badge = () => "../../uni_modules/uni-badge/components/uni-badge/uni-badge.js";
 const _easycom_uni_load_more = () => "../../uni_modules/uni-load-more/components/uni-load-more/uni-load-more.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons + _easycom_uni_badge + DriverStatusTag + InfoDisplay + DriverOrderActions + _easycom_uni_load_more + AbnormalReportModal)();
+  (PageHeader + _easycom_uni_icons + _easycom_uni_badge + DriverStatusTag + InfoDisplay + DriverOrderActions + _easycom_uni_load_more + AbnormalReportModal)();
 }
 const DriverStatusTag = () => "../../components/DriverStatusTag/DriverStatusTag.js";
 const InfoDisplay = () => "../../components/InfoDisplay/InfoDisplay.js";
 const DriverOrderActions = () => "../../components/DriverOrderActions/DriverOrderActions.js";
 const AbnormalReportModal = () => "../../components/AbnormalReportModal/AbnormalReportModal.js";
+const PageHeader = () => "../../components/PageHeader/PageHeader.js";
 const _sfc_main = {
   __name: "sfsyRecord",
   setup(__props) {
     const tabs = [{ key: "3", value: "历史记录" }, { key: "0", value: "待处理" }, { key: "1", value: "已完成" }];
-    const currentTab = common_vendor.ref(0);
+    const currentTab = common_vendor.ref(1);
     const currentStatusKey = common_vendor.computed(() => parseInt(tabs[currentTab.value].key));
     const searchKeyword = common_vendor.ref("");
     const getInfoFields = (item) => {
@@ -230,12 +229,6 @@ const _sfc_main = {
       return common_vendor.e({
         a: common_vendor.o(back),
         b: common_vendor.p({
-          dark: true,
-          fixed: true,
-          ["background-color"]: "#fff",
-          ["status-bar"]: true,
-          ["left-icon"]: "left",
-          color: "#000",
           title: "收运记录"
         }),
         c: common_vendor.p({

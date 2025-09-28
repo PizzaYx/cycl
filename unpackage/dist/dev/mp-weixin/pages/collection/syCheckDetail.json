@@ -2,7 +2,7 @@
   "navigationBarTitleText": "收运详细",
   "navigationStyle": "custom",
   "usingComponents": {
-    "uni-nav-bar": "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar",
-    "driver-status-tag": "../../components/DriverStatusTag/DriverStatusTag"
+    "driver-status-tag": "../../components/DriverStatusTag/DriverStatusTag",
+    "page-header": "../../components/PageHeader/PageHeader"
   }
 }

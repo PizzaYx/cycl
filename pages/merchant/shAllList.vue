@@ -1,8 +1,7 @@
 <!-- 收运总记录-->
 <template>
     <view class="container">
-        <uni-nav-bar dark :fixed="true" background-color="#fff" status-bar left-icon="left" color="#000" title="收运记录"
-            @clickLeft="back" />
+        <PageHeader title="收运记录" @back="back" />
 
         <view class="menu">
 
@@ -80,6 +79,7 @@ import TimeRangePicker from '@/components/TimeRangePicker/TimeRangePicker.vue'
 import StatusPicker from '@/components/StatusPicker/StatusPicker.vue'
 import StatusTag from '@/components/StatusTag/StatusTag.vue'
 import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
+import PageHeader from '@/components/PageHeader/PageHeader.vue'
 const userStore = useUserStore();
 
 // 筛选相关状态
@@ -386,10 +386,6 @@ onMounted(() => {
 
                 }
 
-                .order-content {
-                    // 样式已移到 InfoDisplay 组件中
-                }
-
                 .order-footer {
                     display: flex;
                     justify-content: flex-end;
@@ -464,13 +460,5 @@ onMounted(() => {
         }
     }
 
-    // 自定义导航栏字体大小为34rpx
-    :deep(.uni-navbar__content-title) {
-        font-size: 34rpx !important;
-    }
-
-    :deep(.uni-nav-bar-text) {
-        font-size: 34rpx !important;
-    }
 }
 </style>

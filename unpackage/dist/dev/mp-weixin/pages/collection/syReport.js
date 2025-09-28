@@ -3,15 +3,14 @@ const common_vendor = require("../../common/vendor.js");
 const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
 if (!Array) {
-  const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
-  (_easycom_uni_nav_bar2 + _easycom_uni_icons2)();
+  _easycom_uni_icons2();
 }
-const _easycom_uni_nav_bar = () => "../../uni_modules/uni-nav-bar/components/uni-nav-bar/uni-nav-bar.js";
 const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  (_easycom_uni_nav_bar + _easycom_uni_icons)();
+  (PageHeader + _easycom_uni_icons)();
 }
+const PageHeader = () => "../../components/PageHeader/PageHeader.js";
 const _sfc_main = {
   __name: "syReport",
   setup(__props) {
@@ -21,9 +20,6 @@ const _sfc_main = {
     };
     const handleRefresh = async () => {
       try {
-        common_vendor.index.showLoading({
-          title: "刷新中..."
-        });
         const weightRes = await api_apis.apiGetBackfillBuckeWeight({
           id: planId.value,
           // 收运单ID
@@ -47,8 +43,9 @@ const _sfc_main = {
             });
           } else {
             common_vendor.index.showToast({
-              title: "暂无重量数据",
-              icon: "none"
+              title: "未获取到数据，请稍后点击刷新按钮",
+              icon: "none",
+              duration: 2e3
             });
           }
         } else {
@@ -58,13 +55,12 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:107", "刷新重量数据异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/syReport.vue:108", "刷新重量数据异常:", error);
         common_vendor.index.showToast({
           title: "刷新异常",
           icon: "none"
         });
       } finally {
-        common_vendor.index.hideLoading();
       }
     };
     const ljNum = common_vendor.ref(0);
@@ -91,7 +87,7 @@ const _sfc_main = {
       if (options.merchantName)
         merchantName.value = options.merchantName;
       registrationNumber.value = (_a = userStore.sfmerchant) == null ? void 0 : _a.registrationNumber;
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:142", "接收到的参数:", options);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:143", "接收到的参数:", options);
     });
     const getSyCheckDetail = () => {
       if (!submitData.value || submitData.value.length === 0) {
@@ -123,7 +119,7 @@ const _sfc_main = {
                 });
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/collection/syReport.vue:182", "确认收运异常:", error);
+              common_vendor.index.__f__("error", "at pages/collection/syReport.vue:183", "确认收运异常:", error);
               common_vendor.index.showToast({
                 title: "操作异常",
                 icon: "none"
@@ -160,7 +156,7 @@ const _sfc_main = {
     const handleScan = () => {
       common_vendor.index.scanCode({
         success: async (res) => {
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:239", "扫码结果", res);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:240", "扫码结果", res);
           if (!validateScanResult(res.result)) {
             common_vendor.index.showToast({
               title: "扫码格式不正确，请扫描正确的桶码",
@@ -171,9 +167,9 @@ const _sfc_main = {
           const scanResult = res.result;
           const parts = scanResult.split("_");
           const scannedMerchantId = parts[0];
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:255", "扫码结果:", scanResult);
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:256", "扫码中的商户ID:", scannedMerchantId);
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:257", "当前商户ID:", merchantId.value);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:256", "扫码结果:", scanResult);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:257", "扫码中的商户ID:", scannedMerchantId);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:258", "当前商户ID:", merchantId.value);
           if (scannedMerchantId !== merchantId.value) {
             common_vendor.index.showToast({
               title: "桶码不属于当前商户，请扫描正确的桶码",
@@ -207,7 +203,7 @@ const _sfc_main = {
               });
               return;
             }
-            common_vendor.index.__f__("log", "at pages/collection/syReport.vue:294", "获取到的桶信息:", bucketRes.data);
+            common_vendor.index.__f__("log", "at pages/collection/syReport.vue:295", "获取到的桶信息:", bucketRes.data);
             const weightRes = await api_apis.apiGetBackfillBuckeWeight({
               id: planId.value,
               // 收运单ID
@@ -219,18 +215,24 @@ const _sfc_main = {
               // 车牌号
             });
             if (weightRes.code !== 200) {
-              common_vendor.index.__f__("log", "at pages/collection/syReport.vue:305", "回填重量失败:", weightRes.msg);
             } else {
-              common_vendor.index.__f__("log", "at pages/collection/syReport.vue:308", "回填的重量信息:", weightRes.data);
             }
             addRecordsFromBucketData(bucketRes.data, weightRes.data);
             showRefreshButton.value = true;
-            common_vendor.index.showToast({
-              title: "扫码成功",
-              icon: "success"
-            });
+            if (weightRes.code === 200 && weightRes.data && (Array.isArray(weightRes.data) ? weightRes.data.length > 0 : true)) {
+              common_vendor.index.showToast({
+                title: "获取数据成功",
+                icon: "none",
+                duration: 2e3
+              });
+            } else {
+              common_vendor.index.showToast({
+                title: "未获取到数据，请稍后点击右下刷新按钮",
+                icon: "none",
+                duration: 2e3
+              });
+            }
           } catch (error) {
-            common_vendor.index.__f__("error", "at pages/collection/syReport.vue:322", "获取桶信息异常:", error);
             common_vendor.index.showToast({
               title: "获取桶信息异常",
               icon: "none"
@@ -238,7 +240,7 @@ const _sfc_main = {
           }
         },
         fail: (err) => {
-          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:330", "扫码失败", err);
+          common_vendor.index.__f__("log", "at pages/collection/syReport.vue:341", "扫码失败", err);
           common_vendor.index.showToast({
             title: "扫码失败,请重试!",
             icon: "none"
@@ -329,20 +331,14 @@ const _sfc_main = {
         });
         ljNum.value++;
       } else {
-        common_vendor.index.__f__("log", "at pages/collection/syReport.vue:412", "重量数据格式不正确");
+        common_vendor.index.__f__("log", "at pages/collection/syReport.vue:423", "重量数据格式不正确");
       }
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:415", "提交数据:", submitData.value);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:426", "提交数据:", submitData.value);
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.o(back),
         b: common_vendor.p({
-          dark: true,
-          fixed: true,
-          ["background-color"]: "#fff",
-          ["status-bar"]: true,
-          ["left-icon"]: "left",
-          color: "#000",
           title: "收运上报"
         }),
         c: common_vendor.t(merchantName.value),
@@ -366,7 +362,7 @@ const _sfc_main = {
       }, showRefreshButton.value ? {
         j: common_vendor.p({
           type: "reload",
-          size: "45",
+          size: "40",
           color: "#07C160"
         }),
         k: common_vendor.o(handleRefresh)
