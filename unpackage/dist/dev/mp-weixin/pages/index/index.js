@@ -3,6 +3,7 @@ const common_vendor = require("../../common/vendor.js");
 const common_assets = require("../../common/assets.js");
 const api_apis = require("../../api/apis.js");
 const stores_user = require("../../stores/user.js");
+const utils_network = require("../../utils/network.js");
 if (!Array) {
   const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
   _easycom_uni_icons2();
@@ -16,6 +17,7 @@ const _sfc_main = {
   setup(__props) {
     const activeTab = common_vendor.ref(0);
     const agreed = common_vendor.ref(false);
+    const isLoggingIn = common_vendor.ref(false);
     const userStore = stores_user.useUserStore();
     common_vendor.onMounted(async () => {
       await checkLoginStatus();
@@ -24,39 +26,39 @@ const _sfc_main = {
       try {
         const token = common_vendor.index.getStorageSync("access_token");
         if (!token) {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:91", "没有access_token，需要登录");
+          common_vendor.index.__f__("log", "at pages/index/index.vue:97", "没有access_token，需要登录");
           return;
         }
-        common_vendor.index.__f__("log", "at pages/index/index.vue:95", "检测到token，获取用户信息...");
+        common_vendor.index.__f__("log", "at pages/index/index.vue:101", "检测到token，获取用户信息...");
         const userInfo = await userStore.fetchUserInfo();
         if (!userInfo) {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:100", "获取用户信息失败，需要重新登录");
+          common_vendor.index.__f__("log", "at pages/index/index.vue:106", "获取用户信息失败，需要重新登录");
           return;
         }
         const userType = userInfo.type;
-        common_vendor.index.__f__("log", "at pages/index/index.vue:106", "用户类型:", userType);
+        common_vendor.index.__f__("log", "at pages/index/index.vue:112", "用户类型:", userType);
         if (userType === "1") {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:110", "跳转到商户端");
+          common_vendor.index.__f__("log", "at pages/index/index.vue:116", "跳转到商户端");
           common_vendor.index.reLaunch({
             url: "/pages/merchant/merchant"
           });
         } else if (userType === "2") {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:116", "跳转到收运端");
+          common_vendor.index.__f__("log", "at pages/index/index.vue:122", "跳转到收运端");
           common_vendor.index.reLaunch({
             url: "/pages/collection/collection"
           });
         } else {
-          common_vendor.index.__f__("log", "at pages/index/index.vue:121", "未知用户类型，需要重新登录");
+          common_vendor.index.__f__("log", "at pages/index/index.vue:127", "未知用户类型，需要重新登录");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/index/index.vue:124", "检查登录状态失败:", error);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:130", "检查登录状态失败:", error);
       }
     };
     const toggleAgreement = () => {
       agreed.value = !agreed.value;
     };
     const openAgreement = (type) => {
-      common_vendor.index.__f__("log", "at pages/index/index.vue:135", "打开协议:", type);
+      common_vendor.index.__f__("log", "at pages/index/index.vue:141", "打开协议:", type);
       if (type === "user") {
         common_vendor.index.navigateTo({
           url: "/pages/user/agreement"
@@ -81,6 +83,9 @@ const _sfc_main = {
       });
     };
     const handleLogin = () => {
+      if (isLoggingIn.value) {
+        return;
+      }
       if (!formData.account) {
         common_vendor.index.showToast({
           title: "请输入账号",
@@ -105,18 +110,42 @@ const _sfc_main = {
       loginRequest();
     };
     const loginRequest = async () => {
+      if (isLoggingIn.value) {
+        return;
+      }
+      isLoggingIn.value = true;
       common_vendor.index.showLoading({
         title: "登录中..."
       });
       try {
-        const res = await api_apis.apiPostLogin({
-          username: formData.account,
-          password: formData.password
-        });
+        const hasNetwork = await utils_network.checkNetworkStatus();
+        if (!hasNetwork) {
+          common_vendor.index.hideLoading();
+          common_vendor.index.showModal({
+            title: "网络错误",
+            content: "网络连接不可用，请检查网络设置后重试",
+            showCancel: true,
+            cancelText: "取消",
+            confirmText: "重试",
+            success: (res2) => {
+              if (res2.confirm) {
+                setTimeout(() => {
+                  loginRequest();
+                }, 500);
+              }
+            }
+          });
+          return;
+        }
+        const res = await utils_network.requestWithRetry(async () => {
+          return await api_apis.apiPostLogin({
+            username: formData.account,
+            password: formData.password
+          });
+        }, 2, 1e3);
         if (res.code === 200) {
           const userInfo = await fetchUserInfo();
           if (!userInfo) {
-            common_vendor.index.hideLoading();
             return;
           }
           common_vendor.index.hideLoading();
@@ -138,12 +167,46 @@ const _sfc_main = {
         }
       } catch (err) {
         common_vendor.index.hideLoading();
-        common_vendor.index.showToast({
-          title: "网络请求失败",
-          icon: "none"
-        });
-        common_vendor.index.__f__("error", "at pages/index/index.vue:275", "登录请求失败:", err);
+        let errorMessage = "登录失败";
+        let showRetry = false;
+        if (err.message === "网络连接不可用") {
+          errorMessage = "网络连接不可用，请检查网络设置";
+          showRetry = true;
+        } else if (err.message === "请求超时" || err.errMsg && err.errMsg.includes("timeout")) {
+          errorMessage = "网络连接超时，请检查网络后重试";
+          showRetry = true;
+        } else if (err.message && err.message.includes("network")) {
+          errorMessage = "网络连接失败，请检查网络设置";
+          showRetry = true;
+        } else if (err.message && err.message.includes("fail")) {
+          errorMessage = "网络请求失败，请重试";
+          showRetry = true;
+        }
+        if (showRetry) {
+          common_vendor.index.showModal({
+            title: "登录失败",
+            content: errorMessage,
+            showCancel: true,
+            cancelText: "取消",
+            confirmText: "重试",
+            success: (res) => {
+              if (res.confirm) {
+                setTimeout(() => {
+                  loginRequest();
+                }, 500);
+              }
+            }
+          });
+        } else {
+          common_vendor.index.showToast({
+            title: errorMessage,
+            icon: "none",
+            duration: 3e3
+          });
+        }
+        common_vendor.index.__f__("error", "at pages/index/index.vue:354", "登录请求失败:", err);
       } finally {
+        isLoggingIn.value = false;
       }
     };
     const fetchUserInfo = async () => {
@@ -165,8 +228,8 @@ const _sfc_main = {
               confirmText: "重新选择",
               success: () => {
                 activeTab.value = userType === "1" ? 0 : 1;
-                common_vendor.index.__f__("log", "at pages/index/index.vue:304", "切换后的activeTab:", activeTab.value);
-                common_vendor.index.__f__("log", "at pages/index/index.vue:307", "已切换到正确入口，请重新点击登录");
+                common_vendor.index.__f__("log", "at pages/index/index.vue:383", "切换后的activeTab:", activeTab.value);
+                common_vendor.index.__f__("log", "at pages/index/index.vue:386", "已切换到正确入口，请重新点击登录");
                 resolve(null);
               }
             });
@@ -183,7 +246,7 @@ const _sfc_main = {
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_assets._imports_0,
-        b: common_assets._imports_0$1,
+        b: common_assets._imports_1,
         c: activeTab.value === 0
       }, activeTab.value === 0 ? {} : {}, {
         d: activeTab.value === 0 ? 1 : "",
@@ -203,19 +266,22 @@ const _sfc_main = {
           size: "20",
           color: "rgba(61, 61, 61, 0.5)"
         }),
-        p: common_vendor.o(handleLogin),
-        q: activeTab.value === 0
+        p: common_vendor.t(isLoggingIn.value ? "登录中..." : "登录"),
+        q: common_vendor.o(handleLogin),
+        r: isLoggingIn.value,
+        s: isLoggingIn.value ? 1 : "",
+        t: activeTab.value === 0
       }, activeTab.value === 0 ? {
-        r: common_vendor.o(handleRegister)
+        v: common_vendor.o(handleRegister)
       } : {}, {
-        s: common_vendor.o(toggleAgreement),
-        t: common_vendor.p({
+        w: common_vendor.o(toggleAgreement),
+        x: common_vendor.p({
           type: agreed.value ? "circle-filled" : "circle",
           size: "22",
           color: agreed.value ? "rgba(7, 193, 96, 1)" : "rgba(19, 19, 19, 0.5)"
         }),
-        v: common_vendor.o(($event) => openAgreement("user")),
-        w: common_vendor.o(($event) => openAgreement("privacy"))
+        y: common_vendor.o(($event) => openAgreement("user")),
+        z: common_vendor.o(($event) => openAgreement("privacy"))
       });
     };
   }

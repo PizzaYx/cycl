@@ -297,7 +297,7 @@ const _sfc_main = {
           modelValue: formData.bucketCount
         }),
         v: common_vendor.p({
-          label: "需要垃圾桶数(个)",
+          label: "预估垃圾桶数(个)",
           name: "bucketCount",
           required: true
         }),

@@ -217,6 +217,7 @@ export default {
 
     .info-item {
         display: flex;
+        align-items: center;
         margin-bottom: 16rpx;
 
         &:last-child {
@@ -228,6 +229,7 @@ export default {
             color: rgba(61, 61, 61, 0.50);
             width: 180rpx;
             flex-shrink: 0;
+            line-height: 1.2;
         }
 
         .value-container {
@@ -239,11 +241,12 @@ export default {
         .value {
             font-size: 26rpx;
             color: rgba(61, 61, 61, 1);
-            flex-shrink: 0; // 不占据剩余空间，只占据内容宽度
+            flex-shrink: 0;
+            line-height: 1.2;
         }
 
         .location-icon {
-            margin-left: 6rpx; // 恢复左边距
+            margin-left: 6rpx;
             flex-shrink: 0;
         }
 

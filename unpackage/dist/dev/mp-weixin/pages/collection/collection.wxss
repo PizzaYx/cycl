@@ -210,14 +210,17 @@
   color: #131313;
 }
 .layout .records-header .more.data-v-cd17183b {
-  font-size: 24rpx;
+  font-size: 26rpx;
   font-weight: 400;
   color: rgba(19, 19, 19, 0.5);
   display: flex;
   align-items: center;
+  gap: 8rpx;
 }
 .layout .records-header .more text.data-v-cd17183b {
-  line-height: 1;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
 }
 .layout .records.data-v-cd17183b {
   position: relative;

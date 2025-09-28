@@ -18,7 +18,7 @@
             <view class="tj-item" v-for="(item, index) in statisticsConfig" :key="index">
                 <image :src="item.image" mode="aspectFill"></image>
                 <view class="ljts">
-                    <view class="number">{{ item.number }}</view>
+                    <view class="number">{{ item.number() }}</view>
                     <view class="title">{{ item.title }}</view>
                 </view>
             </view>

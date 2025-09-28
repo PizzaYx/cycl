@@ -295,7 +295,7 @@ const quickActions = ref([
     {
         id: 'certification',
         name: '合同续签',
-        icon: '/static/shd/shrz.png',
+        icon: '/static/shd/htxq.png',
         url: '/pages/syContract/syContract' // 商户认证页面
     }
 ])
@@ -618,9 +618,12 @@ const goToSydAllList = () => {
             color: rgba(19, 19, 19, 0.50);
             display: flex;
             align-items: center;
+            gap: 8rpx;
 
             text {
-                line-height: 1;
+                line-height: 1.2;
+                display: flex;
+                align-items: center;
             }
 
 

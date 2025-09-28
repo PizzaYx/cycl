@@ -143,7 +143,7 @@ const _sfc_main = {
       {
         id: "certification",
         name: "合同续签",
-        icon: "/static/shd/shrz.png",
+        icon: "/static/shd/htxq.png",
         url: "/pages/syContract/syContract"
         // 商户认证页面
       }
@@ -269,7 +269,7 @@ const _sfc_main = {
         q: common_vendor.o(onRefresh),
         r: showAuthModal.value
       }, showAuthModal.value ? {
-        s: common_assets._imports_1,
+        s: common_assets._imports_1$1,
         t: common_assets._imports_2,
         v: common_vendor.o(handleAuth),
         w: common_vendor.o(closeModal),

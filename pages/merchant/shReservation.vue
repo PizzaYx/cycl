@@ -69,7 +69,7 @@
                         </uni-easyinput>
                     </uni-forms-item>
 
-                    <uni-forms-item label="需要垃圾桶数(个)" name="bucketCount" required>
+                    <uni-forms-item label="预估垃圾桶数(个)" name="bucketCount" required>
                         <uni-easyinput v-model="formData.bucketCount" placeholder="请输入垃圾桶数量" type="number"
                             :clearable="false" :disabled="isReadOnly">
                         </uni-easyinput>

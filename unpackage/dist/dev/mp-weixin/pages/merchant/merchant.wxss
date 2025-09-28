@@ -217,9 +217,12 @@
   color: rgba(19, 19, 19, 0.5);
   display: flex;
   align-items: center;
+  gap: 8rpx;
 }
 .layout .records-header .more text.data-v-b35646dd {
-  line-height: 1;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
 }
 .layout .records.data-v-b35646dd {
   position: relative;

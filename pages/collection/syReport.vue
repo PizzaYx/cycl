@@ -13,14 +13,14 @@
         <scroll-view class="content" scroll-y>
             <view class="record-list">
                 <!-- 当没有数据时显示提示 -->
-                <view v-if="records.length === 0" class="empty-tip">
+                <view v-if="!showRefreshButton" class="empty-tip">
                     <text>请点击右上扫码按钮获进行收运</text>
                 </view>
 
                 <!-- 有数据时显示记录列表 -->
                 <view v-for="(item, index) in records" :key="index" class="record-item">
                     <view class="record-header">
-                        <text class="bucket-number">桶 {{ index + 1 }} 重量: </text>
+                        <text class="bucket-number">已收桶 {{ index + 1 }} 重量: </text>
                         <view class="weight-display">
                             <text class="weight-value">{{ item.weight }}</text>
                             <text class="weight-unit"> kg</text>

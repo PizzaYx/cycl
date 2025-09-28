@@ -188,6 +188,11 @@
 .loginLayout .loginInfo .loginBtn button.data-v-1cf27b2a::after {
   border: none;
 }
+.loginLayout .loginInfo .loginBtn button.disabled.data-v-1cf27b2a {
+  background: #ccc;
+  color: #999;
+  cursor: not-allowed;
+}
 .loginLayout .loginInfo .registerBtn.data-v-1cf27b2a {
   padding-top: 30rpx;
   width: 100%;

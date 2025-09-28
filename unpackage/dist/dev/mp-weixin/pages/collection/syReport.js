@@ -349,8 +349,8 @@ const _sfc_main = {
           size: "30",
           color: "#07C160"
         }),
-        g: records.value.length === 0
-      }, records.value.length === 0 ? {} : {}, {
+        g: !showRefreshButton.value
+      }, !showRefreshButton.value ? {} : {}, {
         h: common_vendor.f(records.value, (item, index, i0) => {
           return {
             a: common_vendor.t(index + 1),

@@ -57,7 +57,7 @@
                         <view class="merchant-name-input">
                             <input v-model="formData.merchantName" placeholder="请输入商户名称" :disabled="isReadOnly"
                                 class="input-field" placeholder-class="custom-placeholder" />
-                            <image v-if="!isReadOnly" src="/static/logo.png" class="select-icon"
+                            <image v-if="!isReadOnly" src="/static/shd/right.png" mode="aspectFit" class="arrow-icon"
                                 @click="showMerchantList" />
                         </view>
                     </uni-forms-item>
@@ -73,7 +73,7 @@
                         <!-- 可编辑模式：使用uni-data-select -->
                         <view v-else class="area-select-wrapper">
                             <uni-data-select v-model="formData.appcode" :localdata="appCodeOptions" mode="selector"
-                                :clear="false" class="area-select">
+                                :clear="false" :hideRight="true" class="area-select">
                                 <template v-slot:selected="{ selectedItems }">
                                     <view class="custom-selected">
                                         <text v-if="selectedItems.length > 0" class="selected-text">
@@ -83,6 +83,7 @@
                                     </view>
                                 </template>
                             </uni-data-select>
+                            <image src="/static/shd/right.png" mode="aspectFit" class="area-arrow-icon" />
                             <view class="area-underline"></view>
                         </view>
                     </uni-forms-item>
@@ -92,9 +93,10 @@
                             <view class="location-display" @click="isReadOnly ? viewLocation() : openLocationPicker()">
                                 <text v-if="getLocationText()" class="location-text">{{ getLocationText() }}</text>
                                 <text v-else class="location-placeholder">{{ isReadOnly ? '点击查看位置' : '点击选择商户位置'
-                                }}</text>
+                                    }}</text>
                             </view>
-                            <image src="/static/logo.png" class="select-icon"
+
+                            <image src="/static/shd/dw.png" mode="aspectFit" class="location-icon"
                                 @click="isReadOnly ? viewLocation() : openLocationPicker()" />
                         </view>
                     </uni-forms-item>
@@ -137,7 +139,7 @@
                                         contractDisplayText
                                     }}</text>
                             </view>
-                            <image src="/static/logo.png" class="select-icon" @click="goToContract()" />
+                            <image src="/static/shd/ht.png" class="logo-icon" @click="goToContract()" />
                         </view>
                     </uni-forms-item>
                 </uni-forms>
@@ -553,7 +555,7 @@ const goToContract = () => {
 
     // 如果有合同内容，传递合同数据用于回显
     if (formData.content) {
-        console.log('===== 传递已签名的合同内容 =====')
+
         const contractContent = encodeURIComponent(formData.content)
         const startTime = formData.startTime
         const endTime = formData.endTime
@@ -578,7 +580,6 @@ const goToContract = () => {
 
     // 如果有covenantId但没有content，直接跳转到合同页面（合同页面会用商户ID获取）
     if (formData.covenantId) {
-        console.log('===== 跳转到合同页面，合同页面会用商户ID获取合同 =====')
         let url = `/pages/syContract/syContractFromAuth?isReadOnly=${isReadOnly}`
 
         uni.navigateTo({
@@ -598,7 +599,6 @@ const goToContract = () => {
     }
 
     // 如果都没有，跳转到合同页面进行签名
-    console.log('===== 跳转到合同页面进行签名 =====')
     let url = `/pages/syContract/syContractFromAuth?isReadOnly=${isReadOnly}`
 
     // 如果是只读模式且有tempId，传入tempId
@@ -1216,6 +1216,11 @@ const submitAuth = async () => {
             :deep(.uni-forms-item) {
                 margin-bottom: 40rpx; // 增加表单项之间的间距
 
+                // 营业执照上传表单项增加下边距
+                &:has(.uni-file-picker) {
+                    margin-bottom: 45rpx; // 增加5rpx下边距
+                }
+
                 // 标签样式调整
                 .uni-forms-item__label {
                     font-size: 28rpx !important;
@@ -1293,15 +1298,50 @@ const submitAuth = async () => {
             display: flex;
             align-items: center;
             gap: 10rpx;
+            position: relative;
+            border-bottom: 2rpx solid #e5e5e5;
+            padding-bottom: 2rpx;
+            margin-left: 12rpx;
+            margin-right: 12rpx;
 
             .input-field {
                 flex: 1;
+                border: none;
+                border-bottom: none;
+                background: transparent;
+                margin: 0;
+                width: auto;
             }
 
-            .select-icon {
+            .arrow-icon {
                 width: 40rpx;
                 height: 40rpx;
                 cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .logo-icon {
+                width: 40rpx;
+                height: 40rpx;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .location-icon {
+                width: 32rpx;
+                height: 32rpx;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .select-icon {
+                cursor: pointer;
+                flex-shrink: 0;
+                justify-content: center;
+            }
+
+            &:focus-within {
+                border-bottom-color: #07c160;
             }
         }
 
@@ -1327,9 +1367,17 @@ const submitAuth = async () => {
 
         // 所属区域包装器样式
         .area-select-wrapper {
-
+            display: flex;
+            align-items: center;
             height: 55rpx;
             margin-top: -10rpx;
+        }
+
+        .area-arrow-icon {
+            width: 40rpx;
+            height: 40rpx;
+            margin-left: 10rpx;
+            flex-shrink: 0;
         }
 
         // uni-data-select 组件整体样式调整（微信小程序兼容）
@@ -1365,23 +1413,28 @@ const submitAuth = async () => {
             color: rgba(191, 191, 191, 1) !important;
         }
 
+
         // 位置字段样式
         .location-field {
             display: flex;
             align-items: center;
             gap: 10rpx;
+            position: relative;
+            border-bottom: 2rpx solid #e5e5e5;
+            padding-bottom: 2rpx;
+            margin-left: 12rpx;
+            margin-right: 12rpx;
 
             .location-display {
                 flex: 1;
                 height: 55rpx;
                 border: none;
-                border-bottom: 2rpx solid #e5e5e5;
+                border-bottom: none;
                 background: transparent;
                 padding: 0;
                 display: flex;
                 align-items: center;
-                margin-left: 12rpx;
-                margin-right: 12rpx; // 右边距12rpx，与下划线对齐
+                margin: 0;
                 cursor: pointer;
                 -webkit-tap-highlight-color: transparent; // 移除点击高亮效果
 
@@ -1398,16 +1451,41 @@ const submitAuth = async () => {
                 }
             }
 
-            // 只读状态：位置字段不偏移
-            &.readonly .location-display {
-                margin-left: 0;
-                margin-right: 0;
+            .arrow-icon {
+                width: 12rpx;
+                height: 23rpx;
+                cursor: pointer;
+                flex-shrink: 0;
             }
 
-            .select-icon {
+            .logo-icon {
                 width: 40rpx;
                 height: 40rpx;
                 cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .location-icon {
+                width: 32rpx;
+                height: 32rpx;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .select-icon {
+                cursor: pointer;
+                flex-shrink: 0;
+                justify-content: center;
+            }
+
+            &:focus-within {
+                border-bottom-color: #07c160;
+            }
+
+            // 只读状态：位置字段不偏移
+            &.readonly {
+                margin-left: 0;
+                margin-right: 0;
             }
         }
 
@@ -1416,12 +1494,12 @@ const submitAuth = async () => {
             display: flex;
             align-items: center;
             gap: 10rpx;
+            border-bottom: 2rpx solid #e5e5e5;
 
             .contract-display {
                 flex: 1;
                 height: 55rpx;
                 border: none;
-                border-bottom: 2rpx solid #e5e5e5;
                 background: transparent;
                 padding: 0;
                 display: flex;
@@ -1456,10 +1534,31 @@ const submitAuth = async () => {
                 margin-right: 0;
             }
 
-            .select-icon {
+            .arrow-icon {
+                width: 12rpx;
+                height: 23rpx;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .logo-icon {
                 width: 40rpx;
                 height: 40rpx;
                 cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .location-icon {
+                width: 32rpx;
+                height: 32rpx;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+
+            .select-icon {
+                cursor: pointer;
+                flex-shrink: 0;
+                justify-content: center;
             }
         }
 
@@ -1478,6 +1577,10 @@ const submitAuth = async () => {
                 color: rgba(38, 38, 38, 1);
             }
 
+            .merchant-name-input {
+                margin-left: 0;
+                margin-right: 0;
+            }
         }
     }
 

@@ -620,14 +620,17 @@ const drawProgressArc = () => {
         }
 
         .more {
-            font-size: 24rpx;
+            font-size: 26rpx;
             font-weight: 400;
             color: rgba(19, 19, 19, 0.50);
             display: flex;
             align-items: center;
+            gap: 8rpx;
 
             text {
-                line-height: 1;
+                line-height: 1.2;
+                display: flex;
+                align-items: center;
             }
 
 

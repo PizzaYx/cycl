@@ -179,7 +179,7 @@ const _sfc_main = {
         i: common_vendor.f(statisticsConfig, (item, index, i0) => {
           return {
             a: item.image,
-            b: common_vendor.t(item.number),
+            b: common_vendor.t(item.number()),
             c: common_vendor.t(item.title),
             d: index
           };

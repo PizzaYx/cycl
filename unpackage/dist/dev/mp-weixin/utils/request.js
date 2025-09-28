@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const BASE_URL = "http://192.168.0.118:8080";
+const BASE_URL = "https://demo.vps4cloud.com";
 let refreshingPromise = null;
 let currentRequestInfo = null;
 common_vendor.index.addInterceptor("request", {
@@ -71,16 +71,35 @@ common_vendor.index.addInterceptor("request", {
     }
   },
   fail: (err) => {
-    return Promise.reject(err);
+    common_vendor.index.__f__("error", "at utils/request.js:104", "【Request Fail】", err);
+    let errorMessage = "网络请求失败";
+    if (err.errMsg) {
+      if (err.errMsg.includes("timeout")) {
+        errorMessage = "网络连接超时，请检查网络后重试";
+      } else if (err.errMsg.includes("fail")) {
+        errorMessage = "网络连接失败，请检查网络设置";
+      } else if (err.errMsg.includes("abort")) {
+        errorMessage = "请求被取消";
+      }
+    }
+    const error = {
+      code: -1,
+      msg: errorMessage,
+      errMsg: err.errMsg || "网络请求失败",
+      originalError: err
+    };
+    return Promise.reject(error);
   }
 });
 function request(config = {}) {
-  const { url, data = {}, method = "GET", header = {}, ...rest } = config;
+  const { url, data = {}, method = "GET", header = {}, timeout = 3e4, ...rest } = config;
   return common_vendor.index.request({
     url,
     data,
     method,
     header,
+    timeout,
+    // 添加超时设置，默认30秒
     ...rest
   });
 }
@@ -89,18 +108,18 @@ async function handleUnauthorized() {
     return refreshingPromise;
   }
   try {
-    common_vendor.index.__f__("log", "at utils/request.js:132", "未授权，正在处理...");
+    common_vendor.index.__f__("log", "at utils/request.js:155", "未授权，正在处理...");
     const refreshTokenStr = common_vendor.index.getStorageSync("refresh_token");
     const refreshExpireTime = common_vendor.index.getStorageSync("refresh_expire_time");
-    common_vendor.index.__f__("log", "at utils/request.js:135", "检查refresh token:", refreshTokenStr ? "存在" : "不存在", refreshExpireTime);
+    common_vendor.index.__f__("log", "at utils/request.js:158", "检查refresh token:", refreshTokenStr ? "存在" : "不存在", refreshExpireTime);
     if (!refreshTokenStr || !refreshExpireTime) {
-      common_vendor.index.__f__("log", "at utils/request.js:139", "refresh token不存在，跳转登录");
+      common_vendor.index.__f__("log", "at utils/request.js:162", "refresh token不存在，跳转登录");
       logout();
       return Promise.resolve(false);
     }
     const now = Date.now();
     if (now > refreshExpireTime) {
-      common_vendor.index.__f__("log", "at utils/request.js:149", "refresh token已过期，跳转登录");
+      common_vendor.index.__f__("log", "at utils/request.js:172", "refresh token已过期，跳转登录");
       logout();
       return Promise.resolve(false);
     }
@@ -108,7 +127,7 @@ async function handleUnauthorized() {
     const result = await refreshingPromise;
     return result;
   } catch (error) {
-    common_vendor.index.__f__("log", "at utils/request.js:160", "处理未授权异常:", error.message);
+    common_vendor.index.__f__("log", "at utils/request.js:183", "处理未授权异常:", error.message);
     logout();
     return Promise.resolve(false);
   } finally {
@@ -122,16 +141,16 @@ async function refreshAccessToken(refreshTokenStr) {
     });
     if (res.code === 200) {
       saveToken(res.data);
-      common_vendor.index.__f__("log", "at utils/request.js:181", "Token刷新成功");
+      common_vendor.index.__f__("log", "at utils/request.js:204", "Token刷新成功");
       return true;
     } else {
-      common_vendor.index.__f__("log", "at utils/request.js:185", "Token刷新失败:", res.msg || "未知错误");
+      common_vendor.index.__f__("log", "at utils/request.js:208", "Token刷新失败:", res.msg || "未知错误");
       clearToken();
       logout();
       return false;
     }
   } catch (error) {
-    common_vendor.index.__f__("log", "at utils/request.js:192", "Token刷新网络异常:", error.message || "未知错误");
+    common_vendor.index.__f__("log", "at utils/request.js:215", "Token刷新网络异常:", error.message || "未知错误");
     clearToken();
     logout();
     return false;

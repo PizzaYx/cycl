@@ -35,7 +35,9 @@
                 <!-- <text class="forgot-password" @click="handleForgotPassword" v-if="activeTab === 0">忘记密码？</text> -->
             </view>
             <view class="loginBtn">
-                <button type="button" @click="handleLogin">登录</button>
+                <button type="button" @click="handleLogin" :disabled="isLoggingIn" :class="{ disabled: isLoggingIn }">
+                    {{ isLoggingIn ? '登录中...' : '登录' }}
+                </button>
             </view>
             <view class="registerBtn" v-if="activeTab === 0">
                 <button type="button" @click="handleRegister">注册</button>
@@ -67,12 +69,16 @@ import {
     apiGetInfo
 } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
+import { checkNetworkStatus, requestWithRetry } from '@/utils/network.js'
 
 //商户端/收运端
 const activeTab = ref(0)
 
 //是否同意
 const agreed = ref(false)
+
+// 登录状态，防止重复点击
+const isLoggingIn = ref(false)
 
 // 使用用户 store
 const userStore = useUserStore()
@@ -178,6 +184,11 @@ const handleForgotPassword = () => {
 
 // 登录处理
 const handleLogin = () => {
+    // 防止重复点击
+    if (isLoggingIn.value) {
+        return
+    }
+
     // 表单验证
     if (!formData.account) {
         uni.showToast({
@@ -225,16 +236,46 @@ const handleLogin = () => {
 
 // 登录请求
 const loginRequest = async () => {
+    // 防止重复点击
+    if (isLoggingIn.value) {
+        return
+    }
+
+    isLoggingIn.value = true
     uni.showLoading({
         title: '登录中...',
     })
 
     try {
-        // 使用封装好的API方法
-        const res = await apiPostLogin({
-            username: formData.account,
-            password: formData.password,
-        })
+        // 先检查网络状态
+        const hasNetwork = await checkNetworkStatus()
+        if (!hasNetwork) {
+            uni.hideLoading()
+            uni.showModal({
+                title: '网络错误',
+                content: '网络连接不可用，请检查网络设置后重试',
+                showCancel: true,
+                cancelText: '取消',
+                confirmText: '重试',
+                success: (res) => {
+                    if (res.confirm) {
+                        // 用户选择重试，重新发起登录
+                        setTimeout(() => {
+                            loginRequest()
+                        }, 500)
+                    }
+                }
+            })
+            return
+        }
+
+        // 使用重试机制进行登录请求
+        const res = await requestWithRetry(async () => {
+            return await apiPostLogin({
+                username: formData.account,
+                password: formData.password,
+            })
+        }, 2, 1000) // 最多重试2次，每次间隔1秒
 
         if (res.code === 200) {
             // 先获取用户信息并验证类型
@@ -242,7 +283,6 @@ const loginRequest = async () => {
 
             // 如果用户类型不匹配，fetchUserInfo会显示提示并返回null
             if (!userInfo) {
-                uni.hideLoading()
                 return // 直接返回，不继续执行登录成功逻辑
             }
 
@@ -268,13 +308,52 @@ const loginRequest = async () => {
         }
     } catch (err) {
         uni.hideLoading() // 隐藏loading
-        uni.showToast({
-            title: '网络请求失败',
-            icon: 'none',
-        })
+
+        // 根据错误类型显示不同的提示
+        let errorMessage = '登录失败'
+        let showRetry = false
+
+        if (err.message === '网络连接不可用') {
+            errorMessage = '网络连接不可用，请检查网络设置'
+            showRetry = true
+        } else if (err.message === '请求超时' || (err.errMsg && err.errMsg.includes('timeout'))) {
+            errorMessage = '网络连接超时，请检查网络后重试'
+            showRetry = true
+        } else if (err.message && err.message.includes('network')) {
+            errorMessage = '网络连接失败，请检查网络设置'
+            showRetry = true
+        } else if (err.message && err.message.includes('fail')) {
+            errorMessage = '网络请求失败，请重试'
+            showRetry = true
+        }
+
+        if (showRetry) {
+            uni.showModal({
+                title: '登录失败',
+                content: errorMessage,
+                showCancel: true,
+                cancelText: '取消',
+                confirmText: '重试',
+                success: (res) => {
+                    if (res.confirm) {
+                        // 用户选择重试，重新发起登录
+                        setTimeout(() => {
+                            loginRequest()
+                        }, 500)
+                    }
+                }
+            })
+        } else {
+            uni.showToast({
+                title: errorMessage,
+                icon: 'none',
+                duration: 3000
+            })
+        }
+
         console.error('登录请求失败:', err)
     } finally {
-
+        isLoggingIn.value = false
     }
 }
 
@@ -512,6 +591,12 @@ const fetchUserInfo = async () => {
 
                 &::after {
                     border: none; // 去除button默认边框
+                }
+
+                &.disabled {
+                    background: #ccc;
+                    color: #999;
+                    cursor: not-allowed;
                 }
             }
         }

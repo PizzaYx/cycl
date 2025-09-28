@@ -36,6 +36,7 @@
 }
 .info-content .info-item.data-v-e3352e09 {
   display: flex;
+  align-items: center;
   margin-bottom: 16rpx;
 }
 .info-content .info-item.data-v-e3352e09:last-child {
@@ -46,6 +47,7 @@
   color: rgba(61, 61, 61, 0.5);
   width: 180rpx;
   flex-shrink: 0;
+  line-height: 1.2;
 }
 .info-content .info-item .value-container.data-v-e3352e09 {
   display: flex;
@@ -56,6 +58,7 @@
   font-size: 26rpx;
   color: #3d3d3d;
   flex-shrink: 0;
+  line-height: 1.2;
 }
 .info-content .info-item .location-icon.data-v-e3352e09 {
   margin-left: 6rpx;

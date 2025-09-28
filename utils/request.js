@@ -101,19 +101,42 @@ uni.addInterceptor('request', {
         }
     },
     fail: (err) => {
-        return Promise.reject(err)
+        console.error('【Request Fail】', err)
+
+        // 处理不同类型的网络错误
+        let errorMessage = '网络请求失败'
+        if (err.errMsg) {
+            if (err.errMsg.includes('timeout')) {
+                errorMessage = '网络连接超时，请检查网络后重试'
+            } else if (err.errMsg.includes('fail')) {
+                errorMessage = '网络连接失败，请检查网络设置'
+            } else if (err.errMsg.includes('abort')) {
+                errorMessage = '请求被取消'
+            }
+        }
+
+        // 创建一个统一的错误对象
+        const error = {
+            code: -1,
+            msg: errorMessage,
+            errMsg: err.errMsg || '网络请求失败',
+            originalError: err
+        }
+
+        return Promise.reject(error)
     },
 })
 
 // 简化的请求函数
 export function request(config = {}) {
-    const { url, data = {}, method = 'GET', header = {}, ...rest } = config
+    const { url, data = {}, method = 'GET', header = {}, timeout = 30000, ...rest } = config
 
     return uni.request({
         url,
         data,
         method,
         header,
+        timeout, // 添加超时设置，默认30秒
         ...rest,
     })
 }
