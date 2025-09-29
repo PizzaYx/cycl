@@ -814,8 +814,7 @@ const back = () => {
             .weight-input {
                 margin: 0 10rpx;
                 padding: 10rpx 20rpx;
-                border: 1rpx solid #ddd;
-                border-radius: 10rpx;
+                border-bottom: 1rpx solid #ddd;
                 font-size: 14px;
                 width: 120rpx;
                 text-align: center;

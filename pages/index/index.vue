@@ -242,15 +242,18 @@ const loginRequest = async () => {
     }
 
     isLoggingIn.value = true
-    uni.showLoading({
+    uni.showToast({
         title: '登录中...',
+        icon: 'loading',
+        duration: 10000,  // 3秒后自动关闭
+        mask: true
     })
 
     try {
         // 先检查网络状态
         const hasNetwork = await checkNetworkStatus()
         if (!hasNetwork) {
-            uni.hideLoading()
+            uni.hideToast()
             uni.showModal({
                 title: '网络错误',
                 content: '网络连接不可用，请检查网络设置后重试',
@@ -286,7 +289,7 @@ const loginRequest = async () => {
                 return // 直接返回，不继续执行登录成功逻辑
             }
 
-            uni.hideLoading() // 隐藏loading
+            uni.hideToast() // 隐藏loading
             uni.showToast({
                 title: '登录成功',
                 icon: 'success',
@@ -300,14 +303,14 @@ const loginRequest = async () => {
                 })
             }, 100)
         } else {
-            uni.hideLoading() // 隐藏loading
+            uni.hideToast() // 隐藏loading
             uni.showToast({
                 title: res.msg || '登录失败',
                 icon: 'none',
             })
         }
     } catch (err) {
-        uni.hideLoading() // 隐藏loading
+        uni.hideToast() // 隐藏loading
 
         // 根据错误类型显示不同的提示
         let errorMessage = '登录失败'
@@ -372,6 +375,7 @@ const fetchUserInfo = async () => {
             const actualTypeText = userType === '1' ? '商户端' : '收运端'
             // 使用Promise来处理异步弹窗
             return new Promise((resolve) => {
+                uni.hideLoading();
                 uni.showModal({
                     title: '用户类型不匹配',
                     content: `您当前选择的是${currentTypeText}，但该账号是${actualTypeText}用户，请重新选择正确的入口`,

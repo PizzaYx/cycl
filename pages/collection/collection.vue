@@ -230,7 +230,7 @@ const getMerchantSydList = async () => {
         allOrderList.value = res.data.list;
 
     } else {
-        console.error('收运端首页收运明细失败', res.msg)
+        // console.error('收运端首页收运明细失败', res.msg)
     }
 }
 
@@ -281,6 +281,7 @@ const handleQuickAction = (action) => {
         })
     }
 }
+
 
 // 下拉刷新处理
 const onRefresh = async () => {
@@ -571,6 +572,7 @@ const drawProgressArc = () => {
         margin-bottom: 10rpx;
         color: rgba(19, 19, 19, 1);
     }
+
 
     .quick-actions {
         position: relative;

@@ -80,6 +80,36 @@
 .content .record-list.data-v-e09b3d48 {
   padding: 24rpx;
 }
+.content .record-list .auto-refresh-tip.data-v-e09b3d48 {
+  background: linear-gradient(135deg, #E8F5E8 0%, #F0F9F0 100%);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  border: 1px solid rgba(7, 193, 96, 0.2);
+  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.1);
+}
+.content .record-list .auto-refresh-tip .tip-text.data-v-e09b3d48 {
+  font-size: 28rpx;
+  color: #07C160;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.content .record-list .timeout-tip.data-v-e09b3d48 {
+  background: linear-gradient(135deg, #FFF2E8 0%, #FFF7F0 100%);
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  border: 1px solid rgba(255, 152, 0, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(255, 152, 0, 0.1);
+}
+.content .record-list .timeout-tip .tip-text.data-v-e09b3d48 {
+  font-size: 28rpx;
+  color: #FF9800;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.5;
+}
 .content .record-list .empty-tip.data-v-e09b3d48 {
   text-align: center;
   padding: 120rpx 40rpx;

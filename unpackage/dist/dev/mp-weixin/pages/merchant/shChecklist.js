@@ -123,18 +123,81 @@ const _sfc_main = {
       }
     };
     const getInfoFields = (item) => {
+      const status = item.status;
+      if (status === 0 || status === "0" || status === 2 || status === "2") {
+        return [
+          {
+            key: "appointmentTime",
+            label: "预估时间",
+            value: item.appointmentTime
+          },
+          {
+            key: "estimateWeight",
+            label: "预估重量",
+            value: item.estimateWeight
+          },
+          {
+            key: "estimateBucketNum",
+            label: "预估桶数",
+            value: item.estimateBucketNum
+          },
+          {
+            key: "registrationNumber",
+            label: "车辆信息",
+            value: item.registrationNumber
+          }
+        ];
+      }
+      if (status === 1 || status === "1") {
+        return [
+          {
+            key: "arrivalTime",
+            label: "收运时间",
+            value: item.arrivalTime
+          },
+          {
+            key: "weight",
+            label: "收运重量",
+            value: item.weight
+          },
+          {
+            key: "bucketNum",
+            label: "收运桶数",
+            value: item.bucketNum
+          },
+          {
+            key: "registrationNumber",
+            label: "车辆信息",
+            value: item.registrationNumber
+          }
+        ];
+      }
       return [
-        { key: "estimateBucketNum", label: "预估收运", value: item.estimateBucketNum },
-        { key: "bucketNum", label: "今日收运", value: item.bucketNum },
-        { key: "estimateWeight", label: "预估重量", value: item.estimateWeight },
-        { key: "weight", label: "收运重量", value: item.weight },
-        { key: "registrationNumber", label: "车辆信息", value: item.registrationNumber },
-        { key: "arrivalTime", label: "收运时间", value: item.arrivalTime }
+        {
+          key: "appointmentTime",
+          label: "预估时间",
+          value: item.appointmentTime
+        },
+        {
+          key: "estimateWeight",
+          label: "预估重量",
+          value: item.estimateWeight
+        },
+        {
+          key: "estimateBucketNum",
+          label: "预估桶数",
+          value: item.estimateBucketNum
+        },
+        {
+          key: "registrationNumber",
+          label: "车辆信息",
+          value: item.registrationNumber
+        }
       ];
     };
     const handleConfirmTransport = async (item) => {
       var _a;
-      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:244", "确认收运按钮被点击", item);
+      common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:314", "确认收运按钮被点击", item);
       if (item.arrivalTime == null) {
         common_vendor.index.showToast({
           title: "请等待师傅确认收运完成!",
@@ -168,7 +231,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:284", "确认收运失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:354", "确认收运失败:", error);
         common_vendor.index.showToast({
           title: "网络错误，请重试",
           icon: "none"
@@ -212,7 +275,7 @@ const _sfc_main = {
           loadingStatus.value = "more";
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:347", "获取数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shChecklist.vue:417", "获取数据失败:", error);
         common_vendor.index.stopPullDownRefresh();
         loadingStatus.value = "more";
         if (pageNum.value === 1) {

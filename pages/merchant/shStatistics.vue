@@ -124,13 +124,93 @@ const handleViewDetails = (item) => {
 
 // 生成信息字段配置
 const getInfoFields = (item) => {
+
+    const status = item.status;
+
+    // 状态为 0（进行中）或 2（无法收运）时显示预估信息
+    if (status === 0 || status === '0' || status === 2 || status === '2') {
+        return [
+            {
+                key: 'appointmentTime',
+                label: '预估时间',
+                value: item.appointmentTime
+            },
+            {
+                key: 'estimateWeight',
+                label: '预估重量',
+                value: item.estimateWeight
+            },
+            {
+                key: 'estimateBucketNum',
+                label: '预估桶数',
+                value: item.estimateBucketNum
+            },
+            {
+                key: 'registrationNumber',
+                label: '车辆信息',
+                value: item.registrationNumber
+            },
+            {
+                key: 'address',
+                label: '地址',
+                value: item.address
+            }
+        ];
+    }
+
+    // 状态为 1（已完成）时显示收运信息
+    if (status === 1 || status === '1') {
+        return [
+            {
+                key: 'arrivalTime',
+                label: '收运时间',
+                value: item.arrivalTime
+            },
+            {
+                key: 'weight',
+                label: '收运重量',
+                value: item.weight
+            },
+            {
+                key: 'bucketNum',
+                label: '收运桶数',
+                value: item.bucketNum
+            },
+            {
+                key: 'registrationNumber',
+                label: '车辆信息',
+                value: item.registrationNumber
+            },
+            {
+                key: 'address',
+                label: '地址',
+                value: item.address
+            }
+        ];
+    }
+
+    // 默认返回预估信息
     return [
-        { key: 'appointmentTime', label: '预估时间', value: item.appointmentTime },
-        { key: 'arrivalTime', label: '收运时间', value: item.arrivalTime },
-        { key: 'estimateWeight', label: '预估重量', value: item.estimateWeight },
-        { key: 'weight', label: '收运重量', value: item.weight },
-        { key: 'estimateBucketNum', label: '预估桶数', value: item.estimateBucketNum },
-        { key: 'bucketNum', label: '收运桶数', value: item.bucketNum }
+        {
+            key: 'appointmentTime',
+            label: '预估时间',
+            value: item.appointmentTime
+        },
+        {
+            key: 'estimateWeight',
+            label: '预估重量',
+            value: item.estimateWeight
+        },
+        {
+            key: 'estimateBucketNum',
+            label: '预估桶数',
+            value: item.estimateBucketNum
+        },
+        {
+            key: 'registrationNumber',
+            label: '车辆信息',
+            value: item.registrationNumber
+        }
     ];
 };
 

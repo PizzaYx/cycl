@@ -6,12 +6,29 @@
         <view class="store-info">
             <view class="store-name">商店名称: {{ merchantName }}</view>
             <view class="bin-info">
-                <text>垃圾桶: <text class="bin-count">{{ ljNum ?? 0 }}</text> 个</text>
+                <text>已收垃圾桶: <text class="bin-count">{{ ljNum ?? 0 }}</text> 个</text>
                 <uni-icons type="scan" size="30" color="#07C160" class="scan-icon" @click="handleScan" />
             </view>
         </view>
         <scroll-view class="content" scroll-y>
             <view class="record-list">
+                <!-- 自动刷新提示区域 -->
+                <view v-if="isAutoRefreshing" class="auto-refresh-tip">
+                    <view v-if="records.length === 0" class="tip-text">
+                        正在自动获取称重数据...
+                    </view>
+                    <view v-else class="tip-text">
+                        已获取 {{ records.length }} 条称重数据，系统继续等待更多称重数据，全部称重完成后请点击收运完成按钮
+                    </view>
+                </view>
+
+                <!-- 自动刷新超时提示区域 -->
+                <view v-if="isAutoRefreshTimeout" class="timeout-tip">
+                    <view class="tip-text">
+                        自动获取称重数据已超时，请手动点击刷新按钮获取最新数据
+                    </view>
+                </view>
+
                 <!-- 当没有数据时显示提示 -->
                 <view v-if="!showRefreshButton" class="empty-tip">
                     <text>请点击右上扫码按钮获进行收运</text>
@@ -20,7 +37,7 @@
                 <!-- 有数据时显示记录列表 -->
                 <view v-for="(item, index) in records" :key="index" class="record-item">
                     <view class="record-header">
-                        <text class="bucket-number">已收桶 {{ index + 1 }} 重量: </text>
+                        <text class="bucket-number">桶 {{ index + 1 }} 重量: </text>
                         <view class="weight-display">
                             <text class="weight-value">{{ item.weight }}</text>
                             <text class="weight-unit"> kg</text>
@@ -59,14 +76,53 @@ const back = () => {
     uni.navigateBack();
 };
 
+// 开始自动刷新
+const startAutoRefresh = () => {
+    if (isAutoRefreshing.value) return; // 防止重复启动
+
+    isAutoRefreshing.value = true;
+    autoRefreshCount.value = 0;
+    isAutoRefreshTimeout.value = false;
+
+    // 设置超时定时器
+    autoRefreshTimeout.value = setTimeout(() => {
+        if (isAutoRefreshing.value && records.value.length === 0) {
+            isAutoRefreshTimeout.value = true;
+            stopAutoRefresh();
+        }
+    }, maxAutoRefreshTime);
+
+    autoRefreshTimer.value = setInterval(async () => {
+        autoRefreshCount.value++;
+
+        // 检查结束条件
+        if (autoRefreshCount.value >= maxAutoRefreshCount) {
+            stopAutoRefresh();
+            return;
+        }
+
+        // 调用刷新
+        await handleRefresh();
+
+    }, refreshInterval);
+};
+
+// 停止自动刷新
+const stopAutoRefresh = () => {
+    isAutoRefreshing.value = false;
+    if (autoRefreshTimer.value) {
+        clearInterval(autoRefreshTimer.value);
+        autoRefreshTimer.value = null;
+    }
+    if (autoRefreshTimeout.value) {
+        clearTimeout(autoRefreshTimeout.value);
+        autoRefreshTimeout.value = null;
+    }
+};
+
 // 刷新按钮处理
 const handleRefresh = async () => {
     try {
-        // // 显示加载提示
-        // uni.showLoading({
-        //     title: '刷新中...'
-        // });
-
         // 调用 apiGetBackfillBuckeWeight 获取回填重量
         const weightRes = await apiGetBackfillBuckeWeight({
             id: planId.value,           // 收运单ID
@@ -78,45 +134,43 @@ const handleRefresh = async () => {
         if (weightRes.code === 200) {
             console.log('刷新获取的重量信息:', weightRes.data);
 
-            // 清空当前记录
-            records.value = [];
-            submitData.value = [];
-            ljNum.value = 0;
+            // 获取当前已存在的 thirdpartyId 列表，用于去重
+            const existingThirdpartyIds = new Set(
+                submitData.value.map(item => item.thirdpartyId)
+            );
 
-            // 重新添加记录
+            // 处理新的重量数据
             if (weightRes.data && (Array.isArray(weightRes.data) ? weightRes.data.length > 0 : true)) {
-                addRecordsFromBucketData([], weightRes.data);
+                const newWeightData = Array.isArray(weightRes.data) ? weightRes.data : [weightRes.data];
 
-                uni.showToast({
-                    title: '刷新成功',
-                    icon: 'success'
-                });
-            } else {
-                uni.showToast({
-                    title: '未获取到数据，请稍后点击刷新按钮',
-                    icon: 'none',
-                    duration: 2000
-                });
+                // 过滤出新的数据（去重）
+                const newData = newWeightData.filter(weightItem =>
+                    !existingThirdpartyIds.has(weightItem.id)
+                );
+
+                if (newData.length > 0) {
+                    // 只添加新数据，不清空现有数据
+                    addNewRecordsFromWeightData(newData);
+                }
             }
-        } else {
-            uni.showToast({
-                title: weightRes.msg || '刷新失败',
-                icon: 'none'
-            });
         }
     } catch (error) {
         console.error('刷新重量数据异常:', error);
-        uni.showToast({
-            title: '刷新异常',
-            icon: 'none'
-        });
-    } finally {
-        // uni.hideLoading();
     }
 };
 
 const ljNum = ref(0); // 垃圾桶数量
 const showRefreshButton = ref(false); // 控制刷新按钮显示
+
+// 自动刷新相关状态
+const isAutoRefreshing = ref(false); // 是否正在自动刷新
+const autoRefreshTimer = ref(null); // 自动刷新定时器
+const autoRefreshCount = ref(0); // 自动刷新次数
+const maxAutoRefreshTime = 900000; // 最大自动刷新时间（15分钟）
+const maxAutoRefreshCount = 180; // 最大重试次数（180次）
+const refreshInterval = 5000; // 刷新间隔（5秒）
+const autoRefreshTimeout = ref(null); // 超时定时器
+const isAutoRefreshTimeout = ref(false); // 是否自动刷新超时
 
 // 新增接收页面参数的变量
 const carId = ref(''); // 车辆ID
@@ -144,8 +198,16 @@ onLoad(async (options) => {
 
 });
 
+// 页面卸载时清理定时器
+onUnload(() => {
+    stopAutoRefresh();
+});
+
 // 收运完成
 const getSyCheckDetail = () => {
+    // 停止自动刷新
+    stopAutoRefresh();
+
     // 检查提交数据是否为空
     if (!submitData.value || submitData.value.length === 0) {
         uni.showToast({
@@ -312,6 +374,8 @@ const handleScan = () => {
 
                 // 扫码成功后显示刷新按钮
                 showRefreshButton.value = true;
+                // 开始自动刷新
+                startAutoRefresh();
 
                 // 根据weightRes.data情况显示不同提示
                 if (weightRes.code === 200 && weightRes.data && (Array.isArray(weightRes.data) ? weightRes.data.length > 0 : true)) {
@@ -345,6 +409,39 @@ const handleScan = () => {
             });
         }
     });
+};
+
+// 添加新的重量数据记录（用于自动刷新时的增量添加）
+const addNewRecordsFromWeightData = (newWeightData) => {
+    newWeightData.forEach((weightItem, index) => {
+        // 添加显示记录
+        records.value.push({
+            binCount: 1, // 默认垃圾桶数量为1
+            weight: weightItem.weight || '', // 使用回填的重量数据
+            images: [],
+            isConfirmed: false, // 新添加的记录标记为未确认
+            bucketCode: '', // 桶编码，自动刷新时可能没有桶信息
+            bucketType: '', // 桶类型
+            bucketName: '', // 桶名称
+            id: `temp_${Date.now()}_${index}` // 临时ID
+        });
+
+        // 添加提交数据
+        submitData.value.push({
+            thirdpartyId: weightItem.id, // 第三方垃圾桶称重记录id
+            bucketCode: '', // 桶编码
+            weight: parseFloat(weightItem.weight || 0), // 垃圾重量改为小数类型
+            carId: carId.value, // 车辆ID
+            driverId: driverId.value, // 司机ID
+            merchantId: merchantId.value, // 商户ID
+            planId: planId.value, // 收运单ID
+        });
+
+        ljNum.value++;
+    });
+
+    console.log('新增记录数据:', newWeightData);
+    console.log('当前提交数据:', submitData.value);
 };
 
 // 根据API返回的桶数据添加记录
@@ -494,6 +591,40 @@ const addRecordsFromBucketData = (bucketData, weightData) => {
 
     .record-list {
         padding: 24rpx;
+
+        .auto-refresh-tip {
+            background: linear-gradient(135deg, #E8F5E8 0%, #F0F9F0 100%);
+            border-radius: 16rpx;
+            padding: 24rpx;
+            margin-bottom: 20rpx;
+            border: 1px solid rgba(7, 193, 96, 0.2);
+            box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.1);
+
+            .tip-text {
+                font-size: 28rpx;
+                color: #07C160;
+                text-align: center;
+                font-weight: 500;
+                line-height: 1.5;
+            }
+        }
+
+        .timeout-tip {
+            background: linear-gradient(135deg, #FFF2E8 0%, #FFF7F0 100%);
+            border-radius: 16rpx;
+            padding: 24rpx;
+            margin-bottom: 20rpx;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+            box-shadow: 0 4rpx 12rpx rgba(255, 152, 0, 0.1);
+
+            .tip-text {
+                font-size: 28rpx;
+                color: #FF9800;
+                text-align: center;
+                font-weight: 500;
+                line-height: 1.5;
+            }
+        }
 
         .empty-tip {
             text-align: center;

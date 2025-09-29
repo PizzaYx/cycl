@@ -114,13 +114,17 @@ const _sfc_main = {
         return;
       }
       isLoggingIn.value = true;
-      common_vendor.index.showLoading({
-        title: "登录中..."
+      common_vendor.index.showToast({
+        title: "登录中...",
+        icon: "loading",
+        duration: 1e4,
+        // 3秒后自动关闭
+        mask: true
       });
       try {
         const hasNetwork = await utils_network.checkNetworkStatus();
         if (!hasNetwork) {
-          common_vendor.index.hideLoading();
+          common_vendor.index.hideToast();
           common_vendor.index.showModal({
             title: "网络错误",
             content: "网络连接不可用，请检查网络设置后重试",
@@ -148,7 +152,7 @@ const _sfc_main = {
           if (!userInfo) {
             return;
           }
-          common_vendor.index.hideLoading();
+          common_vendor.index.hideToast();
           common_vendor.index.showToast({
             title: "登录成功",
             icon: "success"
@@ -159,14 +163,14 @@ const _sfc_main = {
             });
           }, 100);
         } else {
-          common_vendor.index.hideLoading();
+          common_vendor.index.hideToast();
           common_vendor.index.showToast({
             title: res.msg || "登录失败",
             icon: "none"
           });
         }
       } catch (err) {
-        common_vendor.index.hideLoading();
+        common_vendor.index.hideToast();
         let errorMessage = "登录失败";
         let showRetry = false;
         if (err.message === "网络连接不可用") {
@@ -204,7 +208,7 @@ const _sfc_main = {
             duration: 3e3
           });
         }
-        common_vendor.index.__f__("error", "at pages/index/index.vue:354", "登录请求失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:357", "登录请求失败:", err);
       } finally {
         isLoggingIn.value = false;
       }
@@ -221,6 +225,7 @@ const _sfc_main = {
           const currentTypeText = activeTab.value === 0 ? "商户端" : "收运端";
           const actualTypeText = userType === "1" ? "商户端" : "收运端";
           return new Promise((resolve) => {
+            common_vendor.index.hideLoading();
             common_vendor.index.showModal({
               title: "用户类型不匹配",
               content: `您当前选择的是${currentTypeText}，但该账号是${actualTypeText}用户，请重新选择正确的入口`,
@@ -228,8 +233,8 @@ const _sfc_main = {
               confirmText: "重新选择",
               success: () => {
                 activeTab.value = userType === "1" ? 0 : 1;
-                common_vendor.index.__f__("log", "at pages/index/index.vue:383", "切换后的activeTab:", activeTab.value);
-                common_vendor.index.__f__("log", "at pages/index/index.vue:386", "已切换到正确入口，请重新点击登录");
+                common_vendor.index.__f__("log", "at pages/index/index.vue:387", "切换后的activeTab:", activeTab.value);
+                common_vendor.index.__f__("log", "at pages/index/index.vue:390", "已切换到正确入口，请重新点击登录");
                 resolve(null);
               }
             });

@@ -121,8 +121,6 @@ const _sfc_main = {
       });
       if (res.code === 200) {
         allOrderList.value = res.data.list;
-      } else {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:233", "收运端首页收运明细失败", res.msg);
       }
     };
     const getUserInfo = () => {
@@ -173,7 +171,7 @@ const _sfc_main = {
         await getMerchantSydList();
         drawProgressArc();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:295", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:296", "刷新失败:", error);
         common_vendor.index.showToast({
           title: "刷新失败",
           icon: "none"
@@ -188,7 +186,7 @@ const _sfc_main = {
         await getMerchantSydList();
         drawProgressArc();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:315", "刷新数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:316", "刷新数据失败:", error);
       }
     };
     const handleAbnormalReport = (orderData) => {
