@@ -73,7 +73,7 @@
                 <uni-text class="weight-title">重量：</uni-text>
                 <input class="weight-input" type="number" v-model="weightInput" placeholder="0" disabled />
                 <uni-text class="weight-unit">kg</uni-text>
-                <uni-button size="mini" type="primary" class="tj-btn" @tap="handleSubmitWeight()">获取重量</uni-button>
+                <uni-button size="mini" type="primary" class="tj-btn" @tap="handleSubmitWeight()">刷新重量</uni-button>
             </view>
         </view>
 

@@ -1,4 +1,4 @@
-<!-- 收运端首页 -->
+<!-- 商户端首页 -->
 <template>
     <view class="layout">
         <scroll-view scroll-y refresher-enabled :refresher-triggered="refreshing" @refresherrefresh="onRefresh"
@@ -471,7 +471,10 @@ const goToSydAllList = () => {
                 max-width: 100%;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                white-space: nowrap;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
             }
 
             .sub-name {

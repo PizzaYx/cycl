@@ -236,13 +236,18 @@ export default {
             display: flex;
             align-items: center;
             flex: 1;
+            min-width: 0;
         }
 
         .value {
             font-size: 26rpx;
             color: rgba(61, 61, 61, 1);
-            flex-shrink: 0;
+            flex: 1;
             line-height: 1.2;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 0;
         }
 
         .location-icon {

@@ -93,7 +93,7 @@
                             <view class="location-display" @click="isReadOnly ? viewLocation() : openLocationPicker()">
                                 <text v-if="getLocationText()" class="location-text">{{ getLocationText() }}</text>
                                 <text v-else class="location-placeholder">{{ isReadOnly ? '点击查看位置' : '点击选择商户位置'
-                                    }}</text>
+                                }}</text>
                             </view>
 
                             <image src="/static/shd/dw.png" mode="aspectFit" class="location-icon"
@@ -121,11 +121,11 @@
                             :disabled="isReadOnly" class="input-field" placeholder-class="custom-placeholder" />
                     </uni-forms-item>
 
-                    <uni-forms-item label="营业执照上传" name="licenseImages" :required="!isReadOnly">
-                        <uni-file-picker v-model="formData.licenseImages" file-mediatype="image" mode="grid" :limit="3"
+                    <uni-forms-item label="营业执照和法人身份证上传" name="licenseImages" :required="!isReadOnly">
+                        <uni-file-picker :value="formData.licenseImages" file-mediatype="image" mode="grid" :limit="3"
                             :auto-upload="false" :upload-url="uploadUrl" :header="uploadHeaders" @select="onFileSelect"
                             :readonly="isReadOnly" :del-icon="!isReadOnly" file-extname="jpg,jpeg,png"
-                            :max-size="20971520" return-type="array">
+                            :max-size="20971520" return-type="array" @delete="onFileDelete">
                         </uni-file-picker>
                         <text class="upload-tip" v-if="!isReadOnly">最多上传3张图片，每张图片不超过20MB，支持jpg、png格式</text>
                     </uni-forms-item>
@@ -420,37 +420,49 @@ const formRules = {
                         return false
                     }
 
-                    // 检查是否有有效的文件（更全面的检查）
+                    // 检查是否有有效的文件（更宽松的检查）
                     const validFiles = value.filter((file, index) => {
-                        console.log(`检查文件${index}:`, JSON.stringify(file))
+                        console.log(`===== 检查文件${index} =====`)
+                        console.log(`文件${index}完整对象:`, file)
+
                         if (!file) {
                             console.log(`文件${index}: 文件对象为空`)
                             return false
                         }
 
-                        // 检查各种可能的文件格式
+                        // 更宽松的检查逻辑：只要有任何一个有效属性就认为是有效文件
                         const hasUrl = file.url && file.url.trim()
                         const hasPath = file.path && file.path.trim()
                         const hasResponse = file.response && file.response.url
                         const isString = typeof file === 'string' && file.trim()
                         const hasFileId = file.fileID || file.id
                         const hasName = file.name
-                        const hasSize = file.size
+                        const hasSize = file.size > 0
                         const hasTempFilePath = file.tempFilePath // uni-file-picker 的临时文件路径
                         const hasFile = file.file // 原始文件对象
 
+                        // 新增：检查是否有任何图片相关的属性
+                        const hasImageProps = file.type && file.type.includes('image')
+                        const hasExtension = file.name && /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name)
+
                         console.log(`文件${index}检查结果:`, {
-                            hasUrl, hasPath, hasResponse, isString, hasFileId, hasName, hasSize, hasTempFilePath, hasFile,
+                            hasUrl, hasPath, hasResponse, isString, hasFileId, hasName, hasSize,
+                            hasTempFilePath, hasFile, hasImageProps, hasExtension,
                             url: file.url,
                             path: file.path,
                             name: file.name,
                             size: file.size,
                             tempFilePath: file.tempFilePath,
-                            file: file.file
+                            type: file.type
                         })
 
-                        const isValid = hasUrl || hasPath || hasResponse || isString || hasFileId || hasName || hasTempFilePath || hasFile
+                        // 更宽松的判断：只要有基本文件属性就认为有效
+                        const isValid = hasUrl || hasPath || hasResponse || isString || hasFileId ||
+                            hasName || hasTempFilePath || hasFile || hasImageProps || hasExtension ||
+                            (hasSize && file.name) // 有大小和名称就认为是有效文件
+
                         console.log(`文件${index}是否有效:`, isValid)
+                        console.log(`===== 文件${index}检查完成 =====`)
                         return isValid
                     })
 
@@ -828,6 +840,11 @@ const selectMerchant = (merchant) => {
 
 // 手动上传文件
 const uploadFileManually = (file, fileIndex = null) => {
+    console.log('===== uploadFileManually 开始 =====')
+    console.log('上传文件:', file)
+    console.log('目标索引:', fileIndex)
+    console.log('当前数组状态:', formData.licenseImages)
+
     uni.uploadFile({
         url: uploadUrl,
         filePath: file.tempFilePath || file.path,
@@ -835,68 +852,63 @@ const uploadFileManually = (file, fileIndex = null) => {
         header: uploadHeaders,
         success: (res) => {
             console.log('手动上传成功:', res)
-            // 处理上传成功
             const response = JSON.parse(res.data)
             if (response.code === 200 && response.url) {
-                // 优先使用传入的文件索引，否则尝试匹配
-                let targetIndex = fileIndex
-                if (targetIndex === null || targetIndex === undefined) {
-                    targetIndex = formData.licenseImages.findIndex(f => {
-                        // 尝试多种匹配方式
-                        return f === file ||
-                            (f.name && file.name && f.name === file.name) ||
-                            (f.uuid && file.uuid && f.uuid === file.uuid) ||
-                            (f.tempFilePath && file.tempFilePath && f.tempFilePath === file.tempFilePath)
-                    })
+                console.log('上传响应:', response)
+
+                console.log('当前数组状态:', formData.licenseImages)
+                console.log('数组类型:', Array.isArray(formData.licenseImages))
+                console.log('数组长度:', formData.licenseImages.length)
+
+                // 确保数组存在且有效
+                if (!Array.isArray(formData.licenseImages)) {
+                    console.log('数组类型异常，重新初始化')
+                    formData.licenseImages = []
                 }
 
-                if (targetIndex !== -1 && targetIndex < formData.licenseImages.length) {
-                    const oldFile = formData.licenseImages[targetIndex]
+                // 直接使用传入的索引更新文件
+                if (fileIndex !== null && fileIndex !== undefined && fileIndex >= 0 && fileIndex < formData.licenseImages.length) {
+                    const oldFile = formData.licenseImages[fileIndex]
                     console.log('更新前的文件:', oldFile)
 
-                    formData.licenseImages[targetIndex] = {
-                        ...file,
+                    // 更新文件信息
+                    formData.licenseImages[fileIndex] = {
+                        ...oldFile,
                         url: response.url,
+                        path: response.url,
                         fileName: response.fileName,
                         newFileName: response.newFileName,
                         originalFilename: response.originalFilename,
-                        response: response
+                        response: response,
+                        progress: 100,
+                        uploading: false // 标记上传完成
                     }
-                } else {
-                    // 如果找不到有效的索引，替换数组中的最后一个文件（通常是新选择的文件）
-                    const lastIndex = formData.licenseImages.length - 1
-                    if (lastIndex >= 0) {
-                        formData.licenseImages[lastIndex] = {
-                            ...file,
-                            url: response.url,
-                            fileName: response.fileName,
-                            newFileName: response.newFileName,
-                            originalFilename: response.originalFilename,
-                            response: response
+
+                    console.log('更新后的文件:', formData.licenseImages[fileIndex])
+                    console.log('更新后的完整数组:', formData.licenseImages)
+
+                    // 触发表单验证
+                    setTimeout(() => {
+                        if (formRef.value) {
+                            console.log('===== 准备触发表单验证 =====')
+                            console.log('验证时数组状态:', formData.licenseImages)
+                            console.log('验证时数组长度:', formData.licenseImages.length)
+                            console.log('验证时数组类型:', Array.isArray(formData.licenseImages))
+
+                            formRef.value.validateField('licenseImages')
+                            console.log('===== 表单验证触发完成 =====')
                         }
-                        console.log('替换最后一个文件后的formData.licenseImages:', formData.licenseImages)
-                    } else {
-                        console.log('数组为空，添加新文件')
-                        formData.licenseImages.push({
-                            ...file,
-                            url: response.url,
-                            fileName: response.fileName,
-                            newFileName: response.newFileName,
-                            originalFilename: response.originalFilename,
-                            response: response
-                        })
-                        console.log('添加后的formData.licenseImages:', formData.licenseImages)
-                    }
+                    }, 300)
+
+                } else {
+                    console.error('无效的文件索引:', fileIndex, '数组长度:', formData.licenseImages.length)
                 }
+
                 console.log('===== 文件上传成功处理完成 =====')
 
-                // 触发表单验证
-                setTimeout(() => {
-                    if (formRef.value) {
-                        formRef.value.validateField('licenseImages')
-                    }
-                }, 100)
+
             } else {
+                console.error('上传失败:', response)
                 uni.showToast({
                     title: '文件上传失败',
                     icon: 'none'
@@ -904,6 +916,7 @@ const uploadFileManually = (file, fileIndex = null) => {
             }
         },
         fail: (err) => {
+            console.error('上传请求失败:', err)
             uni.showToast({
                 title: '文件上传失败',
                 icon: 'none'
@@ -914,16 +927,50 @@ const uploadFileManually = (file, fileIndex = null) => {
 
 // 文件选择事件
 const onFileSelect = (res) => {
+    console.log('===== onFileSelect 开始 =====')
+    console.log('选择文件事件:', res)
+    console.log('当前formData.licenseImages:', formData.licenseImages)
+    console.log('数组类型检查:', Array.isArray(formData.licenseImages))
 
-    // 手动更新表单数据，因为 v-model 可能要等上传完成后才更新
     if (res.tempFiles && res.tempFiles.length > 0) {
-        // 将选择的文件添加到表单数据中
-        formData.licenseImages = [...formData.licenseImages, ...res.tempFiles]
-        console.log('手动更新后formData.licenseImages:', formData.licenseImages)
+        const selectedFile = res.tempFiles[0]
+        console.log('准备上传的文件:', selectedFile)
 
-        // 手动上传文件 - 传递新文件的索引
+        // 确保 licenseImages 是数组
+        if (!Array.isArray(formData.licenseImages)) {
+            console.log('修复数组类型问题')
+            formData.licenseImages = []
+        }
+
+        // 手动添加文件到数组（因为 v-model 可能有问题）
+        const fileToAdd = {
+            ...selectedFile,
+            progress: 0, // 初始进度
+            uploading: true // 标记正在上传
+        }
+
+        formData.licenseImages.push(fileToAdd)
+        console.log('手动添加文件后的数组:', formData.licenseImages)
+
+        // 计算新文件的索引
         const newFileIndex = formData.licenseImages.length - 1
-        uploadFileManually(res.tempFiles[0], newFileIndex)
+        console.log('新文件索引:', newFileIndex)
+
+        // 手动上传文件
+        uploadFileManually(selectedFile, newFileIndex)
+    }
+    console.log('===== onFileSelect 结束 =====')
+}
+
+// 文件删除事件
+const onFileDelete = (res) => {
+    console.log('===== onFileDelete 开始 =====')
+    console.log('删除文件事件:', res)
+
+    if (res.index !== undefined && res.index >= 0 && res.index < formData.licenseImages.length) {
+        // 手动删除文件
+        formData.licenseImages.splice(res.index, 1)
+        console.log('删除后的数组:', formData.licenseImages)
 
         // 触发表单验证
         setTimeout(() => {
@@ -933,8 +980,8 @@ const onFileSelect = (res) => {
         }, 100)
     }
 
+    console.log('===== onFileDelete 结束 =====')
 }
-
 
 // 打开地图选择器
 const openLocationPicker = () => {
@@ -964,13 +1011,41 @@ const openLocationPicker = () => {
     })
 }
 
+// 调试函数：检查当前文件状态
+const debugLicenseImages = () => {
+    console.log('===== 调试营业执照文件状态 =====')
+    console.log('formData.licenseImages:', formData.licenseImages)
+    console.log('数组长度:', formData.licenseImages.length)
+    console.log('数组类型:', Array.isArray(formData.licenseImages))
+
+    if (formData.licenseImages && formData.licenseImages.length > 0) {
+        formData.licenseImages.forEach((file, index) => {
+            console.log(`文件${index}详情:`, {
+                name: file.name,
+                url: file.url,
+                path: file.path,
+                size: file.size,
+                type: file.type,
+                tempFilePath: file.tempFilePath,
+                response: file.response,
+                完整对象: file
+            })
+        })
+    }
+    console.log('===== 调试完成 =====')
+}
+
 // 表单验证（使用uni-forms的验证方式）
 const validateForm = async () => {
     try {
+        // 验证前先调试一下文件状态
+        debugLicenseImages()
         const result = await formRef.value.validate()
         return true
     } catch (error) {
         console.log('表单验证失败:', error)
+        // 验证失败时也调试一下
+        debugLicenseImages()
         return false
     }
 }

@@ -7,7 +7,7 @@
             <view class="store-name">商店名称: {{ merchantName }}</view>
             <view class="bin-info">
                 <text>已收垃圾桶: <text class="bin-count">{{ ljNum ?? 0 }}</text> 个</text>
-                <uni-icons type="scan" size="30" color="#07C160" class="scan-icon" @click="handleScan" />
+                <!-- <uni-icons type="scan" size="30" color="#07C160" class="scan-icon" @click="handleScan" /> -->
             </view>
         </view>
         <scroll-view class="content" scroll-y>
@@ -29,10 +29,6 @@
                     </view>
                 </view>
 
-                <!-- 当没有数据时显示提示 -->
-                <view v-if="!showRefreshButton" class="empty-tip">
-                    <text>请点击右上扫码按钮获进行收运</text>
-                </view>
 
                 <!-- 有数据时显示记录列表 -->
                 <view v-for="(item, index) in records" :key="index" class="record-item">
@@ -45,16 +41,16 @@
                     </view>
                 </view>
 
-                <!-- 刷新按钮  -->
-                <view v-if="showRefreshButton" class="refresh-button" @click="handleRefresh">
-                    <uni-icons type="reload" size="40" color="#07C160"></uni-icons>
-                </view>
             </view>
         </scroll-view>
 
         <!-- 固定底部按钮 -->
         <view class="bottom-button">
-            <button class="btn-complete" @click="getSyCheckDetail">收运完成</button>
+            <button class="btn-complete" :class="{ 'btn-loading': isSubmitting }" :disabled="isSubmitting"
+                @click="getSyCheckDetail">
+                <text v-if="isSubmitting">提交中...</text>
+                <text v-else>收运完成</text>
+            </button>
         </view>
     </view>
 </template>
@@ -64,7 +60,7 @@
 import { ref } from 'vue';
 import { onLoad, onUnload } from '@dcloudio/uni-app'; // 正确导入onLoad生命周期
 import { uploadUrl, createUploadHeaders } from '@/utils/config.js';
-import { apiPostreportWeight, apiGetDriverPlanById, apiGetdriverConfirmPlan, apiGetMerchantBucke, apiGetBackfillBuckeWeight, apiGetPlanBuckeWeight } from '@/api/apis.js'
+import { apiPostreportWeight, apiGetDriverPlanById, apiGetdriverConfirmPlan, apiGetBackfillBuckeWeight, apiGetPlanBuckeWeight } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
 import uniFilePicker from '@/uni_modules/uni-file-picker/components/uni-file-picker/uni-file-picker.vue'
 import PageHeader from '@/components/PageHeader/PageHeader.vue'
@@ -94,12 +90,6 @@ const startAutoRefresh = () => {
 
     autoRefreshTimer.value = setInterval(async () => {
         autoRefreshCount.value++;
-
-        // 检查结束条件
-        if (autoRefreshCount.value >= maxAutoRefreshCount) {
-            stopAutoRefresh();
-            return;
-        }
 
         // 调用刷新
         await handleRefresh();
@@ -160,14 +150,13 @@ const handleRefresh = async () => {
 };
 
 const ljNum = ref(0); // 垃圾桶数量
-const showRefreshButton = ref(false); // 控制刷新按钮显示
 
 // 自动刷新相关状态
 const isAutoRefreshing = ref(false); // 是否正在自动刷新
 const autoRefreshTimer = ref(null); // 自动刷新定时器
 const autoRefreshCount = ref(0); // 自动刷新次数
 const maxAutoRefreshTime = 900000; // 最大自动刷新时间（15分钟）
-const maxAutoRefreshCount = 180; // 最大重试次数（180次）
+const maxAutoRefreshCount = Infinity; // 无限次重试
 const refreshInterval = 5000; // 刷新间隔（5秒）
 const autoRefreshTimeout = ref(null); // 超时定时器
 const isAutoRefreshTimeout = ref(false); // 是否自动刷新超时
@@ -185,6 +174,9 @@ const records = ref([]);
 // 新增提交数据存储
 const submitData = ref([]);
 
+// 添加按钮状态管理
+const isSubmitting = ref(false); // 是否正在提交
+
 // 页面加载时获取传入的参数
 onLoad(async (options) => {
     if (options.carId) carId.value = options.carId;
@@ -196,6 +188,8 @@ onLoad(async (options) => {
     // if (options.registrationNumber) registrationNumber.value = options.registrationNumber;
     console.log('接收到的参数:', options);
 
+    // 页面进入就开始自动刷新获取数据
+    startAutoRefresh();
 });
 
 // 页面卸载时清理定时器
@@ -205,8 +199,10 @@ onUnload(() => {
 
 // 收运完成
 const getSyCheckDetail = () => {
-    // 停止自动刷新
-    stopAutoRefresh();
+    // 防止重复点击
+    if (isSubmitting.value) {
+        return;
+    }
 
     // 检查提交数据是否为空
     if (!submitData.value || submitData.value.length === 0) {
@@ -223,6 +219,12 @@ const getSyCheckDetail = () => {
         content: '是否确认收运完成？',
         success: async (res) => {
             if (res.confirm) {
+                // 设置提交状态，防止重复点击
+                isSubmitting.value = true;
+
+                // 停止自动刷新（在确认后停止）
+                stopAutoRefresh();
+
                 try {
                     const confirmRes = await apiPostreportWeight(submitData.value);
 
@@ -231,15 +233,19 @@ const getSyCheckDetail = () => {
                             title: confirmRes.msg || '操作成功',
                             icon: 'success'
                         });
+
+
                         // 返回上一页
                         setTimeout(() => {
                             back();
-                        }, 1500);
+                        }, 500);
                     } else {
                         uni.showToast({
                             title: confirmRes.msg || '操作失败',
                             icon: 'error'
                         });
+                        // 操作失败时重置提交状态
+                        isSubmitting.value = false;
                     }
                 } catch (error) {
                     console.error('确认收运异常:', error);
@@ -247,169 +253,15 @@ const getSyCheckDetail = () => {
                         title: '操作异常',
                         icon: 'none'
                     });
+                    // 异常时重置提交状态
+                    isSubmitting.value = false;
                 }
             }
         }
     });
 };
 
-// 验证扫码结果格式
-const validateScanResult = (scanResult) => {
-    if (!scanResult || typeof scanResult !== 'string') {
-        return false;
-    }
 
-    // 检查是否包含下划线
-    if (!scanResult.includes('_')) {
-        return false;
-    }
-
-    // 检查是否可以用下划线分割成2段
-    const parts = scanResult.split('_');
-    if (parts.length !== 2) {
-        return false;
-    }
-
-    // 检查两段都不为空
-    if (!parts[0] || !parts[1]) {
-        return false;
-    }
-
-    // 可以添加更多验证规则，比如：
-    // - 第一段是否为数字（桶编号）
-    // - 第二段是否为时间格式（20250913145507）
-    const bucketId = parts[0];
-    const timestamp = parts[1];
-
-    // 验证桶编号是否为数字
-    if (!/^\d+$/.test(bucketId)) {
-        return false;
-    }
-
-    // 验证时间戳格式（14位数字）
-    if (!/^\d{14}$/.test(timestamp)) {
-        return false;
-    }
-
-    return true;
-};
-
-const handleScan = () => {
-    // 先进行扫码
-    // @ts-ignore
-    uni.scanCode({
-        success: async (res) => {
-            console.log('扫码结果', res);
-
-            // 验证扫码结果格式
-            if (!validateScanResult(res.result)) {
-                uni.showToast({
-                    title: '扫码格式不正确，请扫描正确的桶码',
-                    icon: 'none'
-                });
-                return;
-            }
-
-            // 验证商户ID是否匹配
-            const scanResult = res.result;
-            const parts = scanResult.split('_');
-            const scannedMerchantId = parts[0]; // 下划线前面的是商户ID
-
-            console.log('扫码结果:', scanResult);
-            console.log('扫码中的商户ID:', scannedMerchantId);
-            console.log('当前商户ID:', merchantId.value);
-
-            if (scannedMerchantId !== merchantId.value) {
-                uni.showToast({
-                    title: '桶码不属于当前商户，请扫描正确的桶码',
-                    icon: 'none'
-                });
-                return;
-            }
-
-            // 检查是否已经扫描过相同的桶码
-            const existingRecord = records.value.find(record => record.bucketCode === res.result);
-            if (existingRecord) {
-                uni.showToast({
-                    title: '该桶码已扫描，请勿重复扫描',
-                    icon: 'none'
-                });
-                return;
-            }
-
-            try {
-                // 调用 apiGetMerchantBucke 获取商家所有桶信息
-                const bucketRes = await apiGetMerchantBucke({
-                    id: planId.value,           // 收运单ID
-                    merchantId: merchantId.value, // 商户ID
-                    driverId: driverId.value,   // 司机ID
-                    registrationNumber: registrationNumber.value // 车牌号
-                });
-
-                if (bucketRes.code !== 200) {
-                    uni.showToast({
-                        title: bucketRes.msg || '获取桶信息失败',
-                        icon: 'none'
-                    });
-                    return;
-                }
-
-                console.log('获取到的桶信息:', bucketRes.data);
-
-                // 调用 apiGetBackfillBuckeWeight 回填重量
-                const weightRes = await apiGetBackfillBuckeWeight({
-                    id: planId.value,           // 收运单ID
-                    merchantId: merchantId.value, // 商户ID
-                    driverId: driverId.value,   // 司机ID
-                    registrationNumber: registrationNumber.value // 车牌号
-                });
-
-                if (weightRes.code !== 200) {
-                    // 重量回填失败不影响主流程，继续执行
-                } else {
-                }
-
-                // 根据API返回的桶数据添加记录
-                addRecordsFromBucketData(bucketRes.data, weightRes.data);
-
-                // 扫码成功后显示刷新按钮
-                showRefreshButton.value = true;
-                // 开始自动刷新
-                startAutoRefresh();
-
-                // 根据weightRes.data情况显示不同提示
-                if (weightRes.code === 200 && weightRes.data && (Array.isArray(weightRes.data) ? weightRes.data.length > 0 : true)) {
-                    // 有数据时显示获取数据中提示
-                    uni.showToast({
-                        title: '获取数据成功',
-                        icon: 'none',
-                        duration: 2000
-                    });
-                } else {
-                    // 未获取到数据时显示提示
-                    uni.showToast({
-                        title: '未获取到数据，请稍后点击右下刷新按钮',
-                        icon: 'none',
-                        duration: 2000
-                    });
-                }
-            } catch (error) {
-
-                uni.showToast({
-                    title: '获取桶信息异常',
-                    icon: 'none'
-                });
-            }
-        },
-        fail: (err) => {
-            console.log('扫码失败', err);
-            uni.showToast({
-                title: '扫码失败,请重试!',
-                icon: 'none'
-            });
-        }
-    });
-};
 
 // 添加新的重量数据记录（用于自动刷新时的增量添加）
 const addNewRecordsFromWeightData = (newWeightData) => {
@@ -444,84 +296,6 @@ const addNewRecordsFromWeightData = (newWeightData) => {
     console.log('当前提交数据:', submitData.value);
 };
 
-// 根据API返回的桶数据添加记录
-const addRecordsFromBucketData = (bucketData, weightData) => {
-    // 清空之前的提交数据
-    submitData.value = [];
-
-    // 根据 apiGetBackfillBuckeWeight 的数据来添加记录，使用 apiGetMerchantBucke 里面的编号
-    if (Array.isArray(weightData)) {
-        // 如果重量数据是数组，按重量数据的数量来添加记录
-        weightData.forEach((weightItem, index) => {
-            // 从桶数据中获取对应的编号信息
-            let bucketInfo = null;
-            if (Array.isArray(bucketData) && bucketData.length > index) {
-                bucketInfo = bucketData[index];
-            }
-
-            // 添加显示记录
-            records.value.push({
-                binCount: 1, // 默认垃圾桶数量为1
-                weight: weightItem.weight || '', // 使用回填的重量数据
-                images: [],
-                isConfirmed: false, // 新添加的记录标记为未确认
-                bucketCode: bucketInfo ? bucketInfo.bucketCode : '', // 桶编码，有就给，没有就空着
-                bucketType: bucketInfo ? bucketInfo.bucketType : '', // 桶类型
-                bucketName: bucketInfo ? bucketInfo.bucketName : '', // 桶名称
-                id: `temp_${Date.now()}_${index}` // 临时ID
-            });
-
-            // 添加提交数据
-            submitData.value.push({
-                thirdpartyId: weightItem.id, // 第三方垃圾桶称重记录id
-                bucketCode: bucketInfo ? bucketInfo.bucketCode : '', // 桶编码
-                weight: parseFloat(weightItem.weight || 0), // 垃圾重量改为小数类型
-                carId: carId.value, // 车辆ID
-                driverId: driverId.value, // 司机ID
-                merchantId: merchantId.value, // 商户ID
-                planId: planId.value, // 收运单ID
-            });
-
-            ljNum.value++;
-        });
-    } else if (weightData && typeof weightData === 'object') {
-        // 如果重量数据是单个对象
-        // 从桶数据中获取第一个编号信息
-        let bucketInfo = null;
-        if (Array.isArray(bucketData) && bucketData.length > 0) {
-            bucketInfo = bucketData[0];
-        }
-
-        // 添加显示记录
-        records.value.push({
-            binCount: 1, // 默认垃圾桶数量为1
-            weight: weightData.weight || '', // 使用回填的重量数据
-            images: [],
-            isConfirmed: false, // 新添加的记录标记为未确认
-            bucketCode: bucketInfo ? bucketInfo.bucketCode : '', // 桶编码，有就给，没有就空着
-            bucketType: bucketInfo ? bucketInfo.bucketType : '', // 桶类型
-            bucketName: bucketInfo ? bucketInfo.bucketName : '', // 桶名称
-            id: `temp_${Date.now()}_0` // 临时ID
-        });
-
-        // 添加提交数据
-        submitData.value.push({
-            thirdpartyId: weightData.id, // 第三方垃圾桶称重记录id
-            bucketCode: bucketInfo ? bucketInfo.bucketCode : '', // 桶编码
-            weight: parseFloat(weightData.weight || 0), // 垃圾重量改为小数类型
-            carId: carId.value, // 车辆ID
-            driverId: driverId.value, // 司机ID
-            merchantId: merchantId.value, // 商户ID
-            planId: planId.value, // 收运单ID
-        });
-
-        ljNum.value++;
-    } else {
-        console.log('重量数据格式不正确');
-    }
-
-    console.log('提交数据:', submitData.value);
-};
 
 
 </script>
@@ -565,7 +339,8 @@ const addRecordsFromBucketData = (bucketData, weightData) => {
             font-size: 36rpx;
             font-weight: bold;
             color: #07C160;
-            display: inline-block;
+            display: inline;
+            vertical-align: -1rpx;
             line-height: 1;
         }
 
@@ -626,18 +401,6 @@ const addRecordsFromBucketData = (bucketData, weightData) => {
             }
         }
 
-        .empty-tip {
-            text-align: center;
-            padding: 120rpx 40rpx;
-            color: #999999;
-            font-size: 32rpx;
-            background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
-            border-radius: 20rpx;
-            margin: 20rpx;
-            box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(7, 193, 96, 0.1);
-            position: relative;
-        }
 
         .record-item {
             background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
@@ -715,21 +478,6 @@ const addRecordsFromBucketData = (bucketData, weightData) => {
             }
         }
 
-        .refresh-button {
-            position: fixed;
-            right: 30rpx;
-            bottom: 300rpx;
-            z-index: 999;
-            width: 100rpx;
-            height: 100rpx;
-            background-color: #FFFFFF;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(7, 193, 96, 0.2);
-        }
 
         .record-card {
             background-color: #FFFFFF;
@@ -917,6 +665,31 @@ const addRecordsFromBucketData = (bucketData, weightData) => {
             background: linear-gradient(135deg, #06AD56 0%, #059B4A 100%);
         }
 
+        // 禁用状态样式
+        &[disabled] {
+            background: linear-gradient(135deg, #CCCCCC 0%, #BBBBBB 100%);
+            color: #FFFFFF;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+
+            &:hover {
+                transform: none;
+                box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+            }
+        }
+
+        // loading状态样式
+        &.btn-loading {
+            background: linear-gradient(135deg, #CCCCCC 0%, #BBBBBB 100%);
+            cursor: not-allowed;
+
+            &:hover {
+                transform: none;
+                box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+            }
+        }
+
         &::after {
             content: '';
             position: absolute;
@@ -930,6 +703,12 @@ const addRecordsFromBucketData = (bucketData, weightData) => {
 
         &:hover::after {
             left: 100%;
+        }
+
+        // 禁用状态时不显示光效
+        &[disabled]::after,
+        &.btn-loading::after {
+            display: none;
         }
     }
 }

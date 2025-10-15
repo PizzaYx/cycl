@@ -58,7 +58,8 @@
   font-size: 36rpx;
   font-weight: bold;
   color: #07C160;
-  display: inline-block;
+  display: inline;
+  vertical-align: -1rpx;
   line-height: 1;
 }
 .store-info .bin-info .scan-icon.data-v-e09b3d48 {
@@ -109,18 +110,6 @@
   text-align: center;
   font-weight: 500;
   line-height: 1.5;
-}
-.content .record-list .empty-tip.data-v-e09b3d48 {
-  text-align: center;
-  padding: 120rpx 40rpx;
-  color: #999999;
-  font-size: 32rpx;
-  background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
-  border-radius: 20rpx;
-  margin: 20rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(7, 193, 96, 0.1);
-  position: relative;
 }
 .content .record-list .record-item.data-v-e09b3d48 {
   background: linear-gradient(135deg, #FFFFFF 0%, #F8F9FA 100%);
@@ -184,21 +173,6 @@
   color: #333333;
   font-weight: 500;
   flex: 1;
-}
-.content .record-list .refresh-button.data-v-e09b3d48 {
-  position: fixed;
-  right: 30rpx;
-  bottom: 300rpx;
-  z-index: 999;
-  width: 100rpx;
-  height: 100rpx;
-  background-color: #FFFFFF;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(7, 193, 96, 0.2);
 }
 .content .record-list .record-card.data-v-e09b3d48 {
   background-color: #FFFFFF;
@@ -355,6 +329,25 @@
   transform: translateY(0);
   background: linear-gradient(135deg, #06AD56 0%, #059B4A 100%);
 }
+.bottom-button .btn-complete[disabled].data-v-e09b3d48 {
+  background: linear-gradient(135deg, #CCCCCC 0%, #BBBBBB 100%);
+  color: #FFFFFF;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+.bottom-button .btn-complete[disabled].data-v-e09b3d48:hover {
+  transform: none;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
+.bottom-button .btn-complete.btn-loading.data-v-e09b3d48 {
+  background: linear-gradient(135deg, #CCCCCC 0%, #BBBBBB 100%);
+  cursor: not-allowed;
+}
+.bottom-button .btn-complete.btn-loading.data-v-e09b3d48:hover {
+  transform: none;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+}
 .bottom-button .btn-complete.data-v-e09b3d48::after {
   content: "";
   position: absolute;
@@ -367,4 +360,7 @@
 }
 .bottom-button .btn-complete.data-v-e09b3d48:hover::after {
   left: 100%;
+}
+.bottom-button .btn-complete[disabled].data-v-e09b3d48::after, .bottom-button .btn-complete.btn-loading.data-v-e09b3d48::after {
+  display: none;
 }

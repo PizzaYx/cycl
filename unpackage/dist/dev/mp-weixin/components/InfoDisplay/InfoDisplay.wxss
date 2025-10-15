@@ -53,12 +53,17 @@
   display: flex;
   align-items: center;
   flex: 1;
+  min-width: 0;
 }
 .info-content .info-item .value.data-v-e3352e09 {
   font-size: 26rpx;
   color: #3d3d3d;
-  flex-shrink: 0;
+  flex: 1;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 .info-content .info-item .location-icon.data-v-e3352e09 {
   margin-left: 6rpx;

@@ -71,6 +71,7 @@ const mapCenter = ref({
     longitude: 104.0647
 })
 
+
 // 接收的参数数据
 const taskList = ref([])
 const driverName = ref('')
@@ -194,28 +195,28 @@ const startUniAppLocation = () => {
         type: 'gcj02', // 直接获取GCJ02坐标系的位置
         altitude: false, // 不需要高度信息
         success: (res) => {
-            const lat = res.latitude
-            const lng = res.longitude
+            const gcj02Lat = res.latitude
+            const gcj02Lng = res.longitude
 
-            console.log('定位成功(GCJ02):', lat, lng)
+            console.log('定位成功(GCJ02):', gcj02Lat, gcj02Lng)
+
 
             // 更新当前位置
             currentLocation.value = {
-                latitude: lat,
-                longitude: lng,
+                latitude: gcj02Lat,
+                longitude: gcj02Lng,
                 accuracy: res.accuracy || 100
             }
 
             // 更新地图中心点
-            mapCenter.value.latitude = lat
-            mapCenter.value.longitude = lng
+            mapCenter.value.latitude = gcj02Lat
+            mapCenter.value.longitude = gcj02Lng
 
-            console.log('地图中心点已更新为:', lat, lng)
 
             // 直接执行，不使用nextTick
             setTimeout(() => {
                 // 添加当前位置标记
-                addCurrentLocationMarker(lat, lng)
+                addCurrentLocationMarker(gcj02Lat, gcj02Lng)
 
                 // 添加任务地点标记
                 addTaskMarkers()
@@ -337,15 +338,21 @@ const addCurrentLocationMarker = (lat, lng) => {
 // 添加任务地点标记
 const addTaskMarkers = () => {
     taskList.value.forEach((task, index) => {
-        // 使用任务数据中的真实经纬度
-        const taskLat = parseFloat(task.lat)
-        const taskLon = parseFloat(task.lon)
+        // 使用任务数据中的真实经纬度（天地图CGCS2000坐标系）
+        const cgcs2000Lat = parseFloat(task.lat)
+        const cgcs2000Lon = parseFloat(task.lon)
 
         // 验证经纬度是否有效
-        if (isNaN(taskLat) || isNaN(taskLon)) {
+        if (isNaN(cgcs2000Lat) || isNaN(cgcs2000Lon)) {
             console.warn(`任务 ${task.merchantName} 的经纬度无效:`, task.lat, task.lon)
             return
         }
+
+        // 将天地图CGCS2000坐标转换为腾讯地图GCJ02坐标
+        const gcj02Coord = gcoord.transform([cgcs2000Lon, cgcs2000Lat], gcoord.WGS84, gcoord.GCJ02)
+        const taskLon = gcj02Coord[0]
+        const taskLat = gcj02Coord[1]
+
 
         const marker = {
             id: index + 1, // 使用数字ID，从1开始（0已被当前位置使用）
@@ -397,22 +404,23 @@ const planRoute = async () => {
 
         console.log('开始路线规划 - 任务点数量:', taskPoints.length)
 
-        // 将GCJ02坐标转换为WGS84坐标（天地图使用WGS84）
-        const startWgs84Coord = gcoord.transform([startPoint.longitude, startPoint.latitude], gcoord.GCJ02, gcoord.WGS84)
+        // 将起始点从GCJ02转换为CGCS2000（天地图API需要统一坐标系）
+        const startCgcs2000Coord = gcoord.transform([startPoint.longitude, startPoint.latitude], gcoord.GCJ02, gcoord.WGS84)
 
-        let midWgs84Coords = []
-        let endWgs84Coord = null
+        let midCgcs2000Coords = []
+        let endCgcs2000Coord = null
 
         if (taskPoints.length === 1) {
-            // 只有1个任务点：直接作为终点
-            endWgs84Coord = gcoord.transform([taskPoints[0].longitude, taskPoints[0].latitude], gcoord.GCJ02, gcoord.WGS84)
+            // 只有1个任务点：从GCJ02转换为CGCS2000
+            const taskPoint = taskPoints[0]
+            endCgcs2000Coord = gcoord.transform([taskPoint.longitude, taskPoint.latitude], gcoord.GCJ02, gcoord.WGS84)
         } else {
-            // 多个任务点：最后一个作为终点，其他作为途经点
+            // 多个任务点：都从GCJ02转换为CGCS2000
             const endPoint = taskPoints[taskPoints.length - 1]
             const midPoints = taskPoints.slice(0, -1)
 
-            endWgs84Coord = gcoord.transform([endPoint.longitude, endPoint.latitude], gcoord.GCJ02, gcoord.WGS84)
-            midWgs84Coords = midPoints.map(point =>
+            endCgcs2000Coord = gcoord.transform([endPoint.longitude, endPoint.latitude], gcoord.GCJ02, gcoord.WGS84)
+            midCgcs2000Coords = midPoints.map(point =>
                 gcoord.transform([point.longitude, point.latitude], gcoord.GCJ02, gcoord.WGS84)
             )
 
@@ -430,7 +438,7 @@ const planRoute = async () => {
         // })
 
         // 调用天地图路径规划API
-        const routeData = await callTiandituRouteAPI(startWgs84Coord, endWgs84Coord, midWgs84Coords)
+        const routeData = await callTiandituRouteAPI(startCgcs2000Coord, endCgcs2000Coord, midCgcs2000Coords)
 
         if (routeData && typeof routeData === 'string' && routeData.includes('<result')) {
             // 天地图返回XML格式，需要解析
@@ -465,6 +473,7 @@ const coordinateValidator = {
         return lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90
     }
 }
+
 
 // 天地图Web API请求函数
 const requestTiandituApi = (endpoint, params) => {
@@ -503,19 +512,19 @@ const requestTiandituApi = (endpoint, params) => {
 }
 
 // 调用天地图路径规划API
-const callTiandituRouteAPI = async (startWgs84Coord, endWgs84Coord, midWgs84Coords = []) => {
+const callTiandituRouteAPI = async (startCgcs2000Coord, endCgcs2000Coord, midCgcs2000Coords = []) => {
 
-    // 构建天地图路线规划请求参数（使用WGS84坐标）
+    // 构建天地图路线规划请求参数（使用CGCS2000坐标）
     const routeParams = {
-        orig: `${startWgs84Coord[0]},${startWgs84Coord[1]}`, // 起点经纬度
-        dest: `${endWgs84Coord[0]},${endWgs84Coord[1]}`,     // 终点经纬度
+        orig: `${startCgcs2000Coord[0]},${startCgcs2000Coord[1]}`, // 起点经纬度
+        dest: `${endCgcs2000Coord[0]},${endCgcs2000Coord[1]}`,     // 终点经纬度
         style: '0' // 0: 最快路线, 1: 最短路线, 2: 避开高速, 3: 步行
     }
 
     // 如果有途经点，添加mid参数
-    if (midWgs84Coords && midWgs84Coords.length > 0) {
+    if (midCgcs2000Coords && midCgcs2000Coords.length > 0) {
         // 途经点格式：116.35506,39.92277;116.35506,39.92277
-        const midPointsStr = midWgs84Coords.map(coord =>
+        const midPointsStr = midCgcs2000Coords.map(coord =>
             `${coord[0]},${coord[1]}`
         ).join(';')
         routeParams.mid = midPointsStr
@@ -560,43 +569,20 @@ const parseRouteXML = (xmlData) => {
         if (routeLatLonMatch) {
             const routeCoords = routeLatLonMatch[1]
 
-            // 解析坐标字符串，格式：116.35506,39.92277;116.35506,39.92277
-            const coordinates = routeCoords.split(';').map(coord => {
-                const [lng, lat] = coord.split(',').map(Number)
+            // 使用正确的坐标转换方案：WGS84 → GCJ02
+            drawCorrectRoute(routeCoords)
 
-                // 检查坐标有效性
-                if (!coordinateValidator.isValidCoordinate(lng, lat)) {
-                    console.warn('无效坐标:', coord)
-                    return null
-                }
+            // 计算途经点信息
+            const taskPoints = mapMarkers.value.filter(marker => marker.id !== 0)
+            const routeType = taskPoints.length === 1 ? '直达路线' : `途经${taskPoints.length - 1}个点的路线`
 
-                // 天地图返回的是WGS84坐标，需要转换为GCJ02坐标（地图组件使用）
-                const gcj02Coord = gcoord.transform([lng, lat], gcoord.WGS84, gcoord.GCJ02)
-                const gcj02Lng = gcj02Coord[0]
-                const gcj02Lat = gcj02Coord[1]
+            // uni.showToast({
+            //     title: `${routeType}规划成功\n距离:${distance} 时间:${duration}`,
+            //     icon: 'success',
+            //     duration: 3000
+            // })
 
-                return { latitude: gcj02Lat, longitude: gcj02Lng }
-            }).filter(coord => coord !== null) // 过滤掉无效坐标
-
-            if (coordinates.length > 0) {
-                // 绘制路线
-                drawRouteFromCoordinates(coordinates)
-
-                // 计算途经点信息
-                const taskPoints = mapMarkers.value.filter(marker => marker.id !== 0)
-                const routeType = taskPoints.length === 1 ? '直达路线' : `途经${taskPoints.length - 1}个点的路线`
-
-                // uni.showToast({
-                //     title: `${routeType}规划成功\n距离:${distance} 时间:${duration}`,
-                //     icon: 'success',
-                //     duration: 3000
-                // })
-
-            } else {
-                throw new Error('坐标数组为空')
-            }
         } else {
-
             throw new Error('未找到路线坐标信息')
         }
 
@@ -605,7 +591,55 @@ const parseRouteXML = (xmlData) => {
     }
 }
 
-// 根据坐标数组绘制路线
+// 使用正确的坐标转换绘制单条路线
+const drawCorrectRoute = (routeCoordsString) => {
+    if (!routeCoordsString) {
+        console.log('路线坐标字符串为空')
+        return
+    }
+
+    // 解析原始坐标
+    const rawCoords = routeCoordsString.split(';').map(coord => {
+        const [lng, lat] = coord.split(',').map(Number)
+        if (!coordinateValidator.isValidCoordinate(lng, lat)) {
+            return null
+        }
+        return { lng, lat }
+    }).filter(coord => coord !== null)
+
+    if (rawCoords.length === 0) {
+        console.error('没有有效的原始坐标')
+        return
+    }
+
+
+    // 使用正确的转换方案：WGS84 → GCJ02
+    const routeCoords = rawCoords.map(coord => {
+        const gcj02Coord = gcoord.transform([coord.lng, coord.lat], gcoord.WGS84, gcoord.GCJ02)
+        return { latitude: gcj02Coord[1], longitude: gcj02Coord[0] }
+    })
+
+    const polyline = {
+        points: routeCoords,
+        color: '#07c160',
+        width: 4,
+        arrowLine: true,
+        borderColor: '#ffffff',
+        borderWidth: 2
+    }
+
+    // 先清空现有路线
+    mapPolyline.value = []
+
+    // 强制触发响应式更新
+    nextTick(() => {
+        mapPolyline.value = [polyline]
+        console.log('路线已绘制，坐标点数:', routeCoords.length)
+    })
+}
+
+
+// 根据坐标数组绘制路线（保留原函数作为备用）
 const drawRouteFromCoordinates = (coordinates) => {
     if (!coordinates || coordinates.length === 0) {
         console.log('坐标数组为空，无法绘制路线')

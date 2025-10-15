@@ -203,12 +203,6 @@ function apiGetAbnormalPlan(data = {}) {
     data
   });
 }
-function apiGetMerchantBucke(data = {}) {
-  return utils_request.request({
-    url: "/api/driver/getMerchantBucke",
-    data
-  });
-}
 function apiGetBackfillBuckeWeight(data = {}) {
   return utils_request.request({
     url: "/api/driver/getBackfillBuckeWeight",
@@ -229,7 +223,6 @@ exports.apiGetDriverPlanStatisticsPage = apiGetDriverPlanStatisticsPage;
 exports.apiGetDriverTodayPlan = apiGetDriverTodayPlan;
 exports.apiGetDriverTodayStatistics = apiGetDriverTodayStatistics;
 exports.apiGetInfo = apiGetInfo;
-exports.apiGetMerchantBucke = apiGetMerchantBucke;
 exports.apiGetMerchantCheck = apiGetMerchantCheck;
 exports.apiGetMerchantCovenant = apiGetMerchantCovenant;
 exports.apiGetMerchantNotConfirmNum = apiGetMerchantNotConfirmNum;

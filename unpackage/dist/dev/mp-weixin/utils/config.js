@@ -3,7 +3,7 @@ const common_vendor = require("../common/vendor.js");
 const uploadUrl = "https://demo.vps4cloud.com/api/merchantapi/webupload";
 const TIANDITU_CONFIG = {
   // 天地图API密钥
-  API_KEY: "1fea78f710be3a88282ab14019dd34c7",
+  API_KEY: "cd0affe367bfe3a6300580c3502b7f17",
   // 天地图路径规划API地址
   ROUTE_API_URL: "https://api.tianditu.gov.cn/v2/route",
   // 请求超时时间（毫秒）

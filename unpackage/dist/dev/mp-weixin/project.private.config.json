@@ -3,11 +3,18 @@
     "miniprogram": {
       "list": [
         {
-          "name": "手签页面",
-          "pathName": "pages/syContract/shSignature",
+          "name": "收运上报",
+          "pathName": "pages/collection/syReport",
           "query": "",
           "scene": null,
           "launchMode": "default"
+        },
+        {
+          "name": "手签页面",
+          "pathName": "pages/syContract/shSignature",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
         },
         {
           "name": "商户认证",
