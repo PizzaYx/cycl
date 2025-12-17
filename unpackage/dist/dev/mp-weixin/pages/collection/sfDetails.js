@@ -4,6 +4,7 @@ const common_assets = require("../../common/assets.js");
 const stores_user = require("../../stores/user.js");
 const api_apis = require("../../api/apis.js");
 const utils_orderUtils = require("../../utils/orderUtils.js");
+const utils_config = require("../../utils/config.js");
 if (!Array) {
   const _easycom_uni_nav_bar2 = common_vendor.resolveComponent("uni-nav-bar");
   const _component_uni_text = common_vendor.resolveComponent("uni-text");
@@ -23,6 +24,7 @@ const AbnormalReportModal = () => "../../components/AbnormalReportModal/Abnormal
 const _sfc_main = {
   __name: "sfDetails",
   setup(__props) {
+    const uploadHeaders = utils_config.createUploadHeaders();
     const getCurrentDate = () => {
       const date = /* @__PURE__ */ new Date();
       const year = date.getFullYear();
@@ -43,7 +45,9 @@ const _sfc_main = {
     const allRecordNo = common_vendor.ref("");
     const navBarBgColor = common_vendor.ref("transparent");
     const taskList = common_vendor.ref([]);
+    const originalTaskList = common_vendor.ref([]);
     const abnormalList = common_vendor.ref([]);
+    const searchKeyword = common_vendor.ref("");
     const currentLocation = common_vendor.ref({
       longitude: 104.066,
       // 默认经度
@@ -90,10 +94,10 @@ const _sfc_main = {
             width: 30,
             height: 30
           }];
-          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:240", "获取定位成功:", res);
+          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:260", "获取定位成功:", res);
         },
         fail: (err) => {
-          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:243", "获取定位失败:", err);
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:263", "获取定位失败:", err);
           common_vendor.index.showToast({
             title: "获取定位失败",
             icon: "none"
@@ -115,7 +119,7 @@ const _sfc_main = {
           getapiGetAbnormalPlan()
         ]);
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:271", "加载数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:291", "加载数据失败:", error);
       }
     };
     common_vendor.onMounted(async () => {
@@ -198,7 +202,7 @@ const _sfc_main = {
       ];
     };
     common_vendor.onShow(async () => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:377", "页面显示时刷新数据");
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:397", "页面显示时刷新数据");
       await loadAllData();
       getCurrentLocation();
     });
@@ -206,13 +210,13 @@ const _sfc_main = {
       try {
         await loadAllData();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:388", "刷新数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:408", "刷新数据失败:", error);
       }
     };
     const showAbnormalModal = common_vendor.ref(false);
     const currentOrderData = common_vendor.ref(null);
     const handleAbnormalReport = (orderData) => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:398", "异常上报事件", orderData);
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:418", "异常上报事件", orderData);
       currentOrderData.value = orderData;
       showAbnormalModal.value = true;
     };
@@ -222,6 +226,82 @@ const _sfc_main = {
     };
     const handleAbnormalSuccess = async () => {
       await handleRefresh();
+    };
+    const handleNewReport = async () => {
+      var _a;
+      try {
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:439", "开始静默拍照...");
+        const chooseMediaRes = await common_vendor.index.chooseMedia({
+          count: 1,
+          mediaType: ["image"],
+          sourceType: ["camera"],
+          camera: "back",
+          // 使用后置摄像头
+          sizeType: ["compressed"]
+        });
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:448", "拍照结果:", chooseMediaRes);
+        if (!chooseMediaRes.tempFiles || chooseMediaRes.tempFiles.length === 0) {
+          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:451", "拍照失败，没有获取到图片");
+          return;
+        }
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:455", "拍照成功，图片路径:", chooseMediaRes.tempFiles[0].tempFilePath);
+        let longitude = "";
+        let latitude = "";
+        try {
+          const locationRes = await common_vendor.index.getLocation({
+            type: "gcj02"
+          });
+          longitude = locationRes.longitude;
+          latitude = locationRes.latitude;
+          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:467", "当前经纬度 - 经度(lon):", longitude, "纬度(lat):", latitude);
+        } catch (locationError) {
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:469", "获取地理位置失败:", locationError);
+          return;
+        }
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:474", "开始上传图片...");
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:475", "上传URL:", utils_config.uploadUrl);
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:476", "文件路径:", chooseMediaRes.tempFiles[0].tempFilePath);
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:477", "请求头:", uploadHeaders.value);
+        const uploadRes = await common_vendor.index.uploadFile({
+          url: utils_config.uploadUrl,
+          filePath: chooseMediaRes.tempFiles[0].tempFilePath,
+          name: "file",
+          header: uploadHeaders.value
+        });
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:486", "上传响应状态码:", uploadRes.statusCode);
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:487", "上传响应数据:", uploadRes.data);
+        if (uploadRes.statusCode !== 200) {
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:490", "图片上传失败, statusCode:", uploadRes.statusCode);
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:491", "上传失败响应:", uploadRes);
+          return;
+        }
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:496", "开始解析上传返回数据...");
+        const uploadData = JSON.parse(uploadRes.data);
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:498", "解析后的上传数据:", uploadData);
+        if (uploadData.code !== 200) {
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:501", "图片上传失败:", uploadData.msg);
+          return;
+        }
+        const imageUrl = uploadData.url;
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:506", "上传成功的图片URL:", imageUrl);
+        const reportData = {
+          derverid: (_a = userStore.sfmerchant) == null ? void 0 : _a.id,
+          // 司机id
+          lon: longitude,
+          lat: latitude,
+          img: imageUrl
+          // 图片URL
+        };
+        common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:516", "新增上报提交数据:", reportData);
+        const submitRes = await api_apis.apiAddLonLatImg(reportData);
+        if (submitRes.code === 200) {
+          common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:521", "上报成功");
+        } else {
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:523", "上报失败:", submitRes.msg);
+        }
+      } catch (error) {
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:527", "新增上报异常:", error);
+      }
     };
     common_vendor.onPageScroll((e) => {
       const scrollTop = e.scrollTop;
@@ -249,10 +329,10 @@ const _sfc_main = {
           allCarId.value = res.data.carId;
           allRecordNo.value = res.data.crecordNo;
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:449", "获取司机信息失败:", res.message || "未知错误");
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:565", "获取司机信息失败:", res.message || "未知错误");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:452", "获取司机信息异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:568", "获取司机信息异常:", error);
       }
     };
     const getapiGetDriverTodayPlan = async () => {
@@ -263,12 +343,13 @@ const _sfc_main = {
           page: 1
         });
         if (res.code === 200) {
-          taskList.value = res.data;
+          originalTaskList.value = res.data || [];
+          taskList.value = [...originalTaskList.value];
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:467", "获取今日收运计划失败:", res.message || "未知错误");
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:584", "获取今日收运计划失败:", res.message || "未知错误");
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:470", "获取今日收运计划异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:587", "获取今日收运计划异常:", error);
       }
     };
     const getapiGetAbnormalPlan = async () => {
@@ -280,16 +361,16 @@ const _sfc_main = {
         if (res.code === 200) {
           abnormalList.value = res.data || [];
         } else {
-          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:483", "获取异常计划失败:", res.message || "未知错误");
+          common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:600", "获取异常计划失败:", res.message || "未知错误");
           abnormalList.value = [];
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:487", "获取异常计划异常:", error);
+        common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:604", "获取异常计划异常:", error);
         abnormalList.value = [];
       }
     };
     const contactLine = () => {
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:500", "查看线路");
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:617", "查看线路");
       const mapData = {
         taskList: taskList.value,
         driverName: name.value,
@@ -298,7 +379,7 @@ const _sfc_main = {
         currentDate
       };
       common_vendor.index.setStorageSync("mapData", mapData);
-      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:512", "数据已存储，跳转页面");
+      common_vendor.index.__f__("log", "at pages/collection/sfDetails.vue:629", "数据已存储，跳转页面");
       common_vendor.index.navigateTo({
         url: "/pages/collection/syAllMap"
       });
@@ -341,7 +422,7 @@ const _sfc_main = {
                 title: "获取重量失败，请确保车辆已过磅",
                 icon: "none"
               });
-              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:558", "获取重量失败:", error);
+              common_vendor.index.__f__("error", "at pages/collection/sfDetails.vue:675", "获取重量失败:", error);
             }
           }
         }
@@ -349,6 +430,26 @@ const _sfc_main = {
     };
     const back = () => {
       common_vendor.index.navigateBack();
+    };
+    const onSearch = () => {
+      filterTaskList();
+    };
+    const onSearchInput = () => {
+      filterTaskList();
+    };
+    const clearSearch = () => {
+      searchKeyword.value = "";
+      filterTaskList();
+    };
+    const filterTaskList = () => {
+      if (!searchKeyword.value.trim()) {
+        taskList.value = [...originalTaskList.value];
+      } else {
+        const keyword = searchKeyword.value.trim().toLowerCase();
+        taskList.value = originalTaskList.value.filter(
+          (task) => task.merchantName && task.merchantName.toLowerCase().includes(keyword)
+        );
+      }
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
@@ -399,24 +500,44 @@ const _sfc_main = {
           size: "mini",
           type: "primary"
         }),
-        z: currentLocation.value.longitude,
-        A: currentLocation.value.latitude,
-        B: markers.value,
-        C: common_vendor.f(taskList.value, (task, index, i0) => {
+        z: common_vendor.o(($event) => handleNewReport()),
+        A: common_vendor.p({
+          size: "mini",
+          type: "primary"
+        }),
+        B: common_vendor.o(onSearch),
+        C: common_vendor.p({
+          type: "search",
+          size: "24",
+          color: "#999"
+        }),
+        D: common_vendor.o(onSearch),
+        E: common_vendor.o([($event) => searchKeyword.value = $event.detail.value, onSearchInput]),
+        F: searchKeyword.value,
+        G: searchKeyword.value
+      }, searchKeyword.value ? {
+        H: common_vendor.o(clearSearch),
+        I: common_vendor.p({
+          type: "clear",
+          size: "20",
+          color: "#999"
+        })
+      } : {}, {
+        J: common_vendor.f(taskList.value, (task, index, i0) => {
           return {
-            a: "b624ea25-23-" + i0,
+            a: "b624ea25-26-" + i0,
             b: common_vendor.p({
               type: "circle-filled",
               color: index === 0 ? "rgba(7, 193, 96, 1)" : "rgba(61, 61, 61, 0.50)",
               size: index === 0 ? ICON_SIZE.first : ICON_SIZE.normal
             }),
             c: common_vendor.t(task.appointmentTime),
-            d: "b624ea25-24-" + i0,
-            e: "b624ea25-25-" + i0,
+            d: "b624ea25-27-" + i0,
+            e: "b624ea25-28-" + i0,
             f: common_vendor.p({
               status: task.status
             }),
-            g: "b624ea25-26-" + i0,
+            g: "b624ea25-29-" + i0,
             h: common_vendor.p({
               fields: getInfoFields(task),
               ["show-bottom-border"]: false,
@@ -425,7 +546,7 @@ const _sfc_main = {
             }),
             i: common_vendor.o(handleRefresh, task.id),
             j: common_vendor.o(handleAbnormalReport, task.id),
-            k: "b624ea25-27-" + i0,
+            k: "b624ea25-30-" + i0,
             l: common_vendor.p({
               status: task.status,
               ["order-data"]: task
@@ -435,10 +556,10 @@ const _sfc_main = {
             o: getLinePositions(index).bottomTop + "rpx"
           };
         }),
-        D: common_assets._imports_0,
-        E: common_vendor.o(closeAbnormalModal),
-        F: common_vendor.o(handleAbnormalSuccess),
-        G: common_vendor.p({
+        K: common_assets._imports_0,
+        L: common_vendor.o(closeAbnormalModal),
+        M: common_vendor.o(handleAbnormalSuccess),
+        N: common_vendor.p({
           show: showAbnormalModal.value,
           ["order-data"]: currentOrderData.value
         })

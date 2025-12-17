@@ -10,6 +10,7 @@ if (!Math) {
   "./pages/merchant/shAllList.js";
   "./pages/merchant/shStatistics.js";
   "./pages/user/user.js";
+  "./pages/user/changePassword.js";
   "./pages/merchant/shReservation.js";
   "./pages/collection/sfDetails.js";
   "./pages/collection/syReport.js";

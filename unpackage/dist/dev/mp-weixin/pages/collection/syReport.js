@@ -113,13 +113,6 @@ const _sfc_main = {
       if (isSubmitting.value) {
         return;
       }
-      if (!submitData.value || submitData.value.length === 0) {
-        common_vendor.index.showToast({
-          title: "没有收运数据，请先进行扫码上报操作",
-          icon: "none"
-        });
-        return;
-      }
       common_vendor.index.showModal({
         title: "确认收运完成",
         content: "是否确认收运完成？",
@@ -128,7 +121,31 @@ const _sfc_main = {
             isSubmitting.value = true;
             stopAutoRefresh();
             try {
-              const confirmRes = await api_apis.apiPostreportWeight(submitData.value);
+              let longitude = "";
+              let latitude = "";
+              try {
+                const locationRes = await common_vendor.index.getLocation({
+                  type: "gcj02"
+                });
+                longitude = locationRes.longitude;
+                latitude = locationRes.latitude;
+                common_vendor.index.__f__("log", "at pages/collection/syReport.vue:239", "当前经纬度 - 经度(lon):", longitude, "纬度(lat):", latitude);
+              } catch (locationError) {
+                common_vendor.index.__f__("error", "at pages/collection/syReport.vue:241", "获取地理位置失败:", locationError);
+                common_vendor.index.showToast({
+                  title: "获取位置失败，将继续提交",
+                  icon: "none"
+                });
+              }
+              const bodyData = JSON.parse(JSON.stringify(submitData.value));
+              const queryParams = {
+                planId: planId.value,
+                lon: longitude,
+                lat: latitude
+              };
+              common_vendor.index.__f__("log", "at pages/collection/syReport.vue:256", "提交的 body 数据:", bodyData);
+              common_vendor.index.__f__("log", "at pages/collection/syReport.vue:257", "提交的查询参数:", queryParams);
+              const confirmRes = await api_apis.apiPostreportWeight(bodyData, queryParams);
               if (confirmRes.code === 200) {
                 common_vendor.index.showToast({
                   title: confirmRes.msg || "操作成功",
@@ -145,7 +162,7 @@ const _sfc_main = {
                 isSubmitting.value = false;
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/collection/syReport.vue:251", "确认收运异常:", error);
+              common_vendor.index.__f__("error", "at pages/collection/syReport.vue:281", "确认收运异常:", error);
               common_vendor.index.showToast({
                 title: "操作异常",
                 icon: "none"
@@ -193,8 +210,8 @@ const _sfc_main = {
         });
         ljNum.value++;
       });
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:295", "新增记录数据:", newWeightData);
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:296", "当前提交数据:", submitData.value);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:325", "新增记录数据:", newWeightData);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:326", "当前提交数据:", submitData.value);
     };
     return (_ctx, _cache) => {
       return common_vendor.e({

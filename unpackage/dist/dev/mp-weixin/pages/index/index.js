@@ -82,6 +82,12 @@ const _sfc_main = {
         url: "/pages/user/register"
       });
     };
+    const handleForgotPassword = () => {
+      common_vendor.index.showToast({
+        title: "请联系管理人员重置密码!",
+        icon: "none"
+      });
+    };
     const handleLogin = () => {
       if (isLoggingIn.value) {
         return;
@@ -208,7 +214,7 @@ const _sfc_main = {
             duration: 3e3
           });
         }
-        common_vendor.index.__f__("error", "at pages/index/index.vue:357", "登录请求失败:", err);
+        common_vendor.index.__f__("error", "at pages/index/index.vue:356", "登录请求失败:", err);
       } finally {
         isLoggingIn.value = false;
       }
@@ -233,8 +239,8 @@ const _sfc_main = {
               confirmText: "重新选择",
               success: () => {
                 activeTab.value = userType === "1" ? 0 : 1;
-                common_vendor.index.__f__("log", "at pages/index/index.vue:387", "切换后的activeTab:", activeTab.value);
-                common_vendor.index.__f__("log", "at pages/index/index.vue:390", "已切换到正确入口，请重新点击登录");
+                common_vendor.index.__f__("log", "at pages/index/index.vue:386", "切换后的activeTab:", activeTab.value);
+                common_vendor.index.__f__("log", "at pages/index/index.vue:389", "已切换到正确入口，请重新点击登录");
                 resolve(null);
               }
             });
@@ -271,26 +277,28 @@ const _sfc_main = {
           size: "20",
           color: "rgba(61, 61, 61, 0.5)"
         }),
-        p: common_vendor.t(isLoggingIn.value ? "登录中..." : "登录"),
-        q: common_vendor.o(handleLogin),
-        r: isLoggingIn.value,
-        s: isLoggingIn.value ? 1 : "",
-        t: activeTab.value === 0
+        p: common_vendor.o(handleForgotPassword),
+        q: common_vendor.t(isLoggingIn.value ? "登录中..." : "登录"),
+        r: common_vendor.o(handleLogin),
+        s: isLoggingIn.value,
+        t: isLoggingIn.value ? 1 : "",
+        v: activeTab.value === 0
       }, activeTab.value === 0 ? {
-        v: common_vendor.o(handleRegister)
+        w: common_vendor.o(handleRegister)
       } : {}, {
-        w: common_vendor.o(toggleAgreement),
-        x: common_vendor.p({
+        x: common_vendor.o(toggleAgreement),
+        y: common_vendor.p({
           type: agreed.value ? "circle-filled" : "circle",
           size: "22",
           color: agreed.value ? "rgba(7, 193, 96, 1)" : "rgba(19, 19, 19, 0.5)"
         }),
-        y: common_vendor.o(($event) => openAgreement("user")),
-        z: common_vendor.o(($event) => openAgreement("privacy"))
+        z: common_vendor.o(($event) => openAgreement("user")),
+        A: common_vendor.o(($event) => openAgreement("privacy"))
       });
     };
   }
 };
 const MiniProgramPage = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["__scopeId", "data-v-1cf27b2a"]]);
+_sfc_main.__runtimeHooks = 6;
 wx.createPage(MiniProgramPage);
 //# sourceMappingURL=../../../.sourcemap/mp-weixin/pages/index/index.js.map

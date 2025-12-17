@@ -42,6 +42,14 @@
                     </view>
                 </view>
 
+                <!-- 已认证但数据不完整提示 -->
+                <view class="status-tip" v-if="authStatus === 'approved' && needsSupplement">
+                    <view class="tip-content warning">
+                        <uni-icons type="info" size="16" color="#ff9500"></uni-icons>
+                        <text class="tip-text">您的认证资料不完整，请补充营业执照、法人身份证和电子合同信息</text>
+                    </view>
+                </view>
+
                 <!-- 审核不通过提示 -->
                 <view class="status-tip" v-if="authStatus === 'rejected'">
                     <view class="tip-content rejected">
@@ -93,7 +101,7 @@
                             <view class="location-display" @click="isReadOnly ? viewLocation() : openLocationPicker()">
                                 <text v-if="getLocationText()" class="location-text">{{ getLocationText() }}</text>
                                 <text v-else class="location-placeholder">{{ isReadOnly ? '点击查看位置' : '点击选择商户位置'
-                                }}</text>
+                                    }}</text>
                             </view>
 
                             <image src="/static/shd/dw.png" mode="aspectFit" class="location-icon"
@@ -122,7 +130,7 @@
                     </uni-forms-item>
 
                     <uni-forms-item label="营业执照和法人身份证上传" name="licenseImages" :required="!isReadOnly">
-                        <uni-file-picker :value="formData.licenseImages" file-mediatype="image" mode="grid" :limit="3"
+                        <uni-file-picker v-model="formData.licenseImages" file-mediatype="image" mode="grid" :limit="3"
                             :auto-upload="false" :upload-url="uploadUrl" :header="uploadHeaders" @select="onFileSelect"
                             :readonly="isReadOnly" :del-icon="!isReadOnly" file-extname="jpg,jpeg,png"
                             :max-size="20971520" return-type="array" @delete="onFileDelete">
@@ -146,9 +154,9 @@
             </view>
 
             <!-- 提交按钮 -->
-            <view class="submit-section" v-if="authStatus === 'none' || authStatus === 'rejected'">
+            <view class="submit-section" v-if="!isReadOnly">
                 <button class="submit-btn" @click="submitAuth" :loading="submitting">
-                    {{ authStatus === 'rejected' ? '重新提交' : '提交认证' }}
+                    {{ authStatus === 'rejected' ? '重新提交' : (authStatus === 'approved' ? '更新资料' : '提交认证') }}
                 </button>
             </view>
         </view>
@@ -229,11 +237,29 @@ const authStatus = computed(() => {
 })
 
 
-// 是否为只读状态 - 只有待审核和已通过状态才是只读
+// 是否为只读状态（资料完整且已认证时只读）
 const isReadOnly = computed(() => {
-    return authStatus.value === 'pending' || authStatus.value === 'approved'
+    if (authStatus.value === 'pending') {
+        return true
+    }
+    if (authStatus.value === 'approved') {
+        if (editInProgress.value) return false
+        const hasLicenseImages = Array.isArray(formData.licenseImages) && formData.licenseImages.length === 3
+        const hasContract = !!formData.content
+        return hasLicenseImages && hasContract
+    }
+    return false
 })
 
+// 是否需要补充资料（用于展示提示）
+const needsSupplement = computed(() => {
+    const hasLicenseImages = Array.isArray(formData.licenseImages) && formData.licenseImages.length === 3
+    const hasContract = !!formData.content
+    return !hasLicenseImages || !hasContract
+})
+
+// 编辑进行中，避免在资料补齐后自动进入只读，需要用户手动点击更新完成
+const editInProgress = ref(false)
 // 判断合同是否已签名
 const isContractSigned = computed(() => {
     // 如果有content，表示已签名（第一次提交或修改了合同）
@@ -291,7 +317,8 @@ const appCodeOptions = [
     { value: 4, text: '五津' },
     { value: 5, text: '花桥' },
     { value: 6, text: '永商' },
-    { value: 7, text: '花源' }
+    { value: 7, text: '花源' },
+    { value: 8, text: '宝墩' }
 ]
 
 // //商户名称选择
@@ -398,95 +425,28 @@ const formRules = {
             {
                 required: true,
                 validateFunction: function (rule, value, data, callback) {
-
-                    // 特殊处理：如果是 undefined 或 null，直接失败
-                    if (value === undefined || value === null) {
-                        console.log('验证失败: 值为 undefined 或 null')
-                        callback('请至少上传1张营业执照')
-                        return false
-                    }
-
-                    // 检查是否为数组
                     if (!Array.isArray(value)) {
-                        console.log('验证失败: 不是数组，类型为:', typeof value)
-                        callback('请至少上传1张营业执照')
+                        callback('请上传3张图片：营业执照、身份证正反面')
                         return false
                     }
-
-                    // 检查数组长度
-                    if (value.length === 0) {
-                        console.log('验证失败: 数组为空')
-                        callback('请至少上传1张营业执照')
+                    if (value.length !== 3) {
+                        callback('请上传3张图片：营业执照、身份证正反面')
                         return false
                     }
-
-                    // 检查是否有有效的文件（更宽松的检查）
-                    const validFiles = value.filter((file, index) => {
-                        console.log(`===== 检查文件${index} =====`)
-                        console.log(`文件${index}完整对象:`, file)
-
-                        if (!file) {
-                            console.log(`文件${index}: 文件对象为空`)
-                            return false
-                        }
-
-                        // 更宽松的检查逻辑：只要有任何一个有效属性就认为是有效文件
-                        const hasUrl = file.url && file.url.trim()
-                        const hasPath = file.path && file.path.trim()
-                        const hasResponse = file.response && file.response.url
-                        const isString = typeof file === 'string' && file.trim()
-                        const hasFileId = file.fileID || file.id
-                        const hasName = file.name
-                        const hasSize = file.size > 0
-                        const hasTempFilePath = file.tempFilePath // uni-file-picker 的临时文件路径
-                        const hasFile = file.file // 原始文件对象
-
-                        // 新增：检查是否有任何图片相关的属性
-                        const hasImageProps = file.type && file.type.includes('image')
-                        const hasExtension = file.name && /\.(jpg|jpeg|png|gif|webp)$/i.test(file.name)
-
-                        console.log(`文件${index}检查结果:`, {
-                            hasUrl, hasPath, hasResponse, isString, hasFileId, hasName, hasSize,
-                            hasTempFilePath, hasFile, hasImageProps, hasExtension,
-                            url: file.url,
-                            path: file.path,
-                            name: file.name,
-                            size: file.size,
-                            tempFilePath: file.tempFilePath,
-                            type: file.type
-                        })
-
-                        // 更宽松的判断：只要有基本文件属性就认为有效
-                        const isValid = hasUrl || hasPath || hasResponse || isString || hasFileId ||
-                            hasName || hasTempFilePath || hasFile || hasImageProps || hasExtension ||
-                            (hasSize && file.name) // 有大小和名称就认为是有效文件
-
-                        console.log(`文件${index}是否有效:`, isValid)
-                        console.log(`===== 文件${index}检查完成 =====`)
-                        return isValid
+                    const allValid = value.every((file) => {
+                        if (!file) return false
+                        const url = (file.url && file.url.trim()) || (file.path && file.path.trim()) || (file.response && file.response.url)
+                        const nameOk = file.name && /\.(jpg|jpeg|png)$/i.test(file.name)
+                        const sizeOk = !file.size || file.size <= 20971520
+                        return !!url && nameOk && sizeOk
                     })
-
-                    console.log('有效文件数量:', validFiles.length)
-                    console.log('有效文件详情:', validFiles.map(f => ({ url: f.url, path: f.path, name: f.name })))
-
-                    if (validFiles.length === 0) {
-                        console.log('验证失败: 没有有效文件')
-                        callback('请至少上传1张营业执照')
+                    if (!allValid) {
+                        callback('图片无效或格式错误，请重新上传')
                         return false
                     }
-
-                    // 检查文件数量限制
-                    if (validFiles.length > 3) {
-                        console.log('验证失败: 文件数量超过限制')
-                        callback('最多只能上传3张图片')
-                        return false
-                    }
-
-                    console.log('验证成功: 有效文件数量', validFiles.length)
-                    console.log('===== 验证营业执照结束 =====')
                     return true
                 },
-                errorMessage: '请至少上传1张营业执照'
+                errorMessage: '请上传3张图片：营业执照、身份证正反面'
             }
         ]
     },
@@ -555,15 +515,29 @@ const getLocationText = () => {
 
 // 跳转到电子合同页面
 const goToContract = () => {
+    // 验证商户名称是否填写
+    if (!formData.merchantName || formData.merchantName.trim() === '') {
+        uni.showToast({
+            title: '请先填写商户名称',
+            icon: 'none',
+            duration: 2000
+        })
+        return
+    }
+
     // 根据认证状态决定页面参数
-    const isReadOnly = authStatus.value === 'pending' || authStatus.value === 'approved'
+    const readonly = isReadOnly.value
 
     console.log('===== shCertification.vue 准备跳转到合同页面 =====')
     console.log('当前状态:', {
-        isReadOnly: isReadOnly,
+        isReadOnly: readonly,
         hasContent: !!formData.content,
-        content: formData.content
+        content: formData.content,
+        merchantName: formData.merchantName
     })
+
+    // 对商户名称进行URL编码
+    const merchantName = encodeURIComponent(formData.merchantName)
 
     // 如果有合同内容，传递合同数据用于回显
     if (formData.content) {
@@ -572,7 +546,7 @@ const goToContract = () => {
         const startTime = formData.startTime
         const endTime = formData.endTime
 
-        let url = `/pages/syContract/syContractFromAuth?isReadOnly=${isReadOnly}&hasContract=true&content=${contractContent}&startTime=${startTime}&endTime=${endTime}`
+        let url = `/pages/syContract/syContractFromAuth?isReadOnly=${readonly}&hasContract=true&content=${contractContent}&startTime=${startTime}&endTime=${endTime}&merchantName=${merchantName}`
 
         uni.navigateTo({
             url: url,
@@ -592,7 +566,7 @@ const goToContract = () => {
 
     // 如果有covenantId但没有content，直接跳转到合同页面（合同页面会用商户ID获取）
     if (formData.covenantId) {
-        let url = `/pages/syContract/syContractFromAuth?isReadOnly=${isReadOnly}`
+        let url = `/pages/syContract/syContractFromAuth?isReadOnly=${readonly}&merchantName=${merchantName}`
 
         uni.navigateTo({
             url: url,
@@ -611,10 +585,10 @@ const goToContract = () => {
     }
 
     // 如果都没有，跳转到合同页面进行签名
-    let url = `/pages/syContract/syContractFromAuth?isReadOnly=${isReadOnly}`
+    let url = `/pages/syContract/syContractFromAuth?isReadOnly=${readonly}&merchantName=${merchantName}`
 
     // 如果是只读模式且有tempId，传入tempId
-    if (isReadOnly && formData.tempId) {
+    if (readonly && formData.tempId) {
         url += `&tempId=${formData.tempId}`
     }
 
@@ -782,6 +756,15 @@ const fillFormData = (data) => {
 
     console.log('数据回显完成:', formData)
     console.log('isContractSigned:', isContractSigned.value)
+
+    // 初始化编辑状态：已认证且资料不完整时，进入编辑进行中
+    if (authStatus.value === 'approved') {
+        const hasLicenseImages = Array.isArray(formData.licenseImages) && formData.licenseImages.length === 3
+        const hasContract = !!formData.content
+        editInProgress.value = !hasLicenseImages || !hasContract
+    } else {
+        editInProgress.value = false
+    }
 }
 
 // 加载商户列表
@@ -926,6 +909,7 @@ const uploadFileManually = (file, fileIndex = null) => {
 }
 
 // 文件选择事件
+// 文件选择事件 - 修复：处理所有选中的文件
 const onFileSelect = (res) => {
     console.log('===== onFileSelect 开始 =====')
     console.log('选择文件事件:', res)
@@ -933,8 +917,7 @@ const onFileSelect = (res) => {
     console.log('数组类型检查:', Array.isArray(formData.licenseImages))
 
     if (res.tempFiles && res.tempFiles.length > 0) {
-        const selectedFile = res.tempFiles[0]
-        console.log('准备上传的文件:', selectedFile)
+        console.log(`选择了 ${res.tempFiles.length} 个文件`)
 
         // 确保 licenseImages 是数组
         if (!Array.isArray(formData.licenseImages)) {
@@ -942,22 +925,27 @@ const onFileSelect = (res) => {
             formData.licenseImages = []
         }
 
-        // 手动添加文件到数组（因为 v-model 可能有问题）
-        const fileToAdd = {
-            ...selectedFile,
-            progress: 0, // 初始进度
-            uploading: true // 标记正在上传
-        }
+        // 遍历所有选中的文件
+        res.tempFiles.forEach((selectedFile, index) => {
+            console.log(`处理第 ${index + 1} 个文件:`, selectedFile)
 
-        formData.licenseImages.push(fileToAdd)
-        console.log('手动添加文件后的数组:', formData.licenseImages)
+            // 手动添加文件到数组
+            const fileToAdd = {
+                ...selectedFile,
+                progress: 0, // 初始进度
+                uploading: true // 标记正在上传
+            }
 
-        // 计算新文件的索引
-        const newFileIndex = formData.licenseImages.length - 1
-        console.log('新文件索引:', newFileIndex)
+            formData.licenseImages.push(fileToAdd)
+            console.log(`文件 ${index + 1} 添加后的数组:`, formData.licenseImages)
 
-        // 手动上传文件
-        uploadFileManually(selectedFile, newFileIndex)
+            // 计算新文件的索引
+            const newFileIndex = formData.licenseImages.length - 1
+            console.log(`文件 ${index + 1} 的索引:`, newFileIndex)
+
+            // 手动上传文件
+            uploadFileManually(selectedFile, newFileIndex)
+        })
     }
     console.log('===== onFileSelect 结束 =====')
 }
@@ -1107,21 +1095,24 @@ const submitAuth = async () => {
             content: formData.content, // 合同内容
             startTime: formData.startTime, // 合同开始时间
             endTime: formData.endTime, // 合同结束时间
-            covenantId: formData.covenantId // 合同ID
+            covenantId: formData.covenantId, // 合同ID
+            //如果merchantData.value?.status  = 2 则 status = 0 ，其他状态保持不变
+            status: merchantData.value?.status === 2 ? 0 : merchantData.value?.status
         }
 
         console.log('提交修改认证数据:', submitData)
 
         // 根据认证状态选择不同的API
         let result
-        if (authStatus.value === 'rejected') {
-            // 审核不通过，使用修改接口
+        if (authStatus.value === 'rejected' || authStatus.value === 'approved') {
+            // 审核不通过 或 已认证但数据不完整，使用修改接口
             result = await apiPostEditMerchantCheck(submitData)
             console.log('修改认证API返回:', result)
             uni.showToast({
-                title: '修改提交成功',
+                title: authStatus.value === 'approved' ? '资料更新成功' : '修改提交成功',
                 icon: 'success'
             })
+            editInProgress.value = false
         } else {
             // 首次提交，使用新增接口
             result = await apiPostMerchantCheck(submitData)
@@ -1132,10 +1123,11 @@ const submitAuth = async () => {
             })
         }
 
-        // 更新认证状态 - 提交成功后状态为待审核(0)
+        // 更新认证状态
+        // 如果是已认证状态补充资料，保持已认证状态；否则改为待审核状态
         merchantData.value = {
             ...submitData,
-            status: 0, // 待审核状态
+            status: authStatus.value === 'approved' ? 1 : 0, // 已认证补充资料保持状态1，其他情况为待审核状态0
             updateTime: new Date().toLocaleString()
         }
 
@@ -1270,6 +1262,10 @@ const submitAuth = async () => {
 
                     &.rejected {
                         border-left-color: #ff4444;
+                    }
+
+                    &.warning {
+                        border-left-color: #ff9500;
                     }
 
                     .tip-text {

@@ -97,12 +97,26 @@
         <view class="collection-info-section">
             <view class="collection-info">
                 <uni-text class="info-title">收运信息</uni-text>
-                <uni-button size="mini" type="primary" class="contact-btn" @tap="contactLine()">查看线路</uni-button>
+                <view class="button-group">
+                    <uni-button size="mini" type="primary" class="contact-btn" @tap="contactLine()">查看线路</uni-button>
+                    <uni-button size="mini" type="primary" class="report-btn" @tap="handleNewReport()">新增上报</uni-button>
+                </view>
             </view>
-            <view class="map-container">
+            <!-- <view class="map-container">
                 <map class="location-map" :longitude="currentLocation.longitude" :latitude="currentLocation.latitude"
                     :markers="markers" :show-location="true" :enable-zoom="true" :enable-scroll="true">
                 </map>
+            </view> -->
+        </view>
+
+        <!-- 搜索框 根据内容搜索merchantName -->
+        <view class="search-container">
+            <view class="search-box">
+                <uni-icons type="search" size="24" color="#999" class="search-icon" @click="onSearch"></uni-icons>
+                <input class="search-input" placeholder="搜索店铺/商铺关键词" v-model="searchKeyword" @confirm="onSearch"
+                    @input="onSearchInput" />
+                <uni-icons v-if="searchKeyword" type="clear" size="20" color="#999" class="clear-icon"
+                    @click="clearSearch"></uni-icons>
             </view>
         </view>
 
@@ -146,12 +160,16 @@
 import { ref, computed, onMounted } from 'vue'
 import { onShow, onPageScroll } from '@dcloudio/uni-app' // 导入onShow和onPageScroll生命周期
 import { useUserStore } from '@/stores/user.js'
-import { apiGetDriverInfo, apiGetDriverTodayPlan, apiGetnoNeedCollect, apiGetCarWeight, apiGetAbnormalPlan } from '@/api/apis.js'
+import { apiGetDriverInfo, apiGetDriverTodayPlan, apiGetnoNeedCollect, apiGetCarWeight, apiGetAbnormalPlan, apiAddLonLatImg } from '@/api/apis.js'
 import DriverStatusTag from '@/components/DriverStatusTag/DriverStatusTag.vue'
 import DriverOrderActions from '@/components/DriverOrderActions/DriverOrderActions.vue'
 import InfoDisplay from '@/components/InfoDisplay/InfoDisplay.vue'
 import AbnormalReportModal from '@/components/AbnormalReportModal/AbnormalReportModal.vue'
 import { formatWeight, formatNum } from '@/utils/orderUtils'
+import { uploadUrl, createUploadHeaders } from '@/utils/config.js'
+
+// 创建上传请求头
+const uploadHeaders = createUploadHeaders()
 
 // 获取当前日期并格式化为 YYYY-MM-DD 格式
 const getCurrentDate = () => {
@@ -176,7 +194,9 @@ const allRecordNo = ref('')//运单号
 const navBarBgColor = ref('transparent') // 导航栏背景色
 
 const taskList = ref([]) // 任务列表
+const originalTaskList = ref([]) // 原始任务列表（用于搜索过滤）
 const abnormalList = ref([]) // 异常列表
+const searchKeyword = ref('') // 搜索关键词
 
 // 地图相关数据
 const currentLocation = ref({
@@ -412,6 +432,102 @@ const handleAbnormalSuccess = async () => {
     await handleRefresh()
 }
 
+// 新增上报功能（静默操作）
+const handleNewReport = async () => {
+    try {
+        // 1. 静默拍照
+        console.log('开始静默拍照...');
+        const chooseMediaRes = await uni.chooseMedia({
+            count: 1,
+            mediaType: ['image'],
+            sourceType: ['camera'],
+            camera: 'back', // 使用后置摄像头
+            sizeType: ['compressed']
+        });
+
+        console.log('拍照结果:', chooseMediaRes);
+
+        if (!chooseMediaRes.tempFiles || chooseMediaRes.tempFiles.length === 0) {
+            console.log('拍照失败，没有获取到图片');
+            return;
+        }
+
+        console.log('拍照成功，图片路径:', chooseMediaRes.tempFiles[0].tempFilePath);
+
+        // 2. 获取当前经纬度
+        let longitude = '';
+        let latitude = '';
+
+        try {
+            const locationRes = await uni.getLocation({
+                type: 'gcj02'
+            });
+            longitude = locationRes.longitude;
+            latitude = locationRes.latitude;
+            console.log('当前经纬度 - 经度(lon):', longitude, '纬度(lat):', latitude);
+        } catch (locationError) {
+            console.error('获取地理位置失败:', locationError);
+            return;
+        }
+
+        // 3. 上传图片
+        console.log('开始上传图片...');
+        console.log('上传URL:', uploadUrl);
+        console.log('文件路径:', chooseMediaRes.tempFiles[0].tempFilePath);
+        console.log('请求头:', uploadHeaders.value);
+
+        const uploadRes = await uni.uploadFile({
+            url: uploadUrl,
+            filePath: chooseMediaRes.tempFiles[0].tempFilePath,
+            name: 'file',
+            header: uploadHeaders.value,
+        });
+
+        console.log('上传响应状态码:', uploadRes.statusCode);
+        console.log('上传响应数据:', uploadRes.data);
+
+        if (uploadRes.statusCode !== 200) {
+            console.error('图片上传失败, statusCode:', uploadRes.statusCode);
+            console.error('上传失败响应:', uploadRes);
+            return;
+        }
+
+        // 解析上传返回的数据
+        console.log('开始解析上传返回数据...');
+        const uploadData = JSON.parse(uploadRes.data);
+        console.log('解析后的上传数据:', uploadData);
+
+        if (uploadData.code !== 200) {
+            console.error('图片上传失败:', uploadData.msg);
+            return;
+        }
+
+        const imageUrl = uploadData.url; // 获取图片URL（从url字段获取）
+        console.log('上传成功的图片URL:', imageUrl);
+
+        // 4. 提交数据到服务器
+        const reportData = {
+            derverid: userStore.sfmerchant?.id, // 司机id
+            lon: longitude,
+            lat: latitude,
+            img: imageUrl // 图片URL
+        };
+
+        console.log('新增上报提交数据:', reportData);
+
+        const submitRes = await apiAddLonLatImg(reportData);
+
+        if (submitRes.code === 200) {
+            console.log('上报成功');
+        } else {
+            console.error('上报失败:', submitRes.msg);
+        }
+
+    } catch (error) {
+        console.error('新增上报异常:', error);
+    }
+};
+
 // 任务操作逻辑已完全封装到 DriverOrderActions 组件中
 
 // 注册页面滚动监听
@@ -462,7 +578,8 @@ const getapiGetDriverTodayPlan = async () => {
         })
         // status  0进行中  1已完成  2无需收运
         if (res.code === 200) {
-            taskList.value = res.data;
+            originalTaskList.value = res.data || [];
+            taskList.value = [...originalTaskList.value]; // 复制原始数据
         } else {
             console.error('获取今日收运计划失败:', res.message || '未知错误');
         }
@@ -567,6 +684,35 @@ const back = () => {
     uni.navigateBack();
 };
 
+// 搜索方法
+const onSearch = () => {
+    filterTaskList();
+};
+
+// 输入时实时搜索
+const onSearchInput = () => {
+    filterTaskList();
+};
+
+// 清空搜索关键词
+const clearSearch = () => {
+    searchKeyword.value = '';
+    filterTaskList();
+};
+
+// 根据搜索关键词过滤任务列表
+const filterTaskList = () => {
+    if (!searchKeyword.value.trim()) {
+        // 如果搜索关键词为空，显示所有任务
+        taskList.value = [...originalTaskList.value];
+    } else {
+        // 根据商户名称进行模糊搜索
+        const keyword = searchKeyword.value.trim().toLowerCase();
+        taskList.value = originalTaskList.value.filter(task =>
+            task.merchantName && task.merchantName.toLowerCase().includes(keyword)
+        );
+    }
+};
 
 // 组件逻辑
 </script>
@@ -896,6 +1042,47 @@ const back = () => {
         }
     }
 
+    .search-container {
+        position: relative;
+        z-index: 1;
+        background: #FFFFFF;
+        padding: 0 20rpx;
+        height: 100rpx;
+        display: flex;
+        align-items: center;
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background-color: #f5f5f5;
+            border-radius: 45rpx;
+            height: 64rpx;
+            padding: 0 20rpx;
+            width: 100%;
+            flex: 1;
+
+            .search-icon {
+                margin-right: 10rpx;
+                width: 48rpx;
+                height: 48rpx;
+                cursor: pointer;
+            }
+
+            .search-input {
+                flex: 1;
+                font-size: 28rpx;
+                background-color: transparent;
+                border: none;
+                outline: none;
+            }
+
+            .clear-icon {
+                margin-left: 10rpx;
+                cursor: pointer;
+            }
+        }
+    }
+
     .collection-info-section {
         background: #FFFFFF;
         border-radius: 20rpx 20rpx 0 0;
@@ -907,7 +1094,7 @@ const back = () => {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20rpx;
+
 
             .info-title {
                 font-size: 28rpx;
@@ -915,7 +1102,14 @@ const back = () => {
                 font-weight: 500;
             }
 
-            .contact-btn {
+            .button-group {
+                display: flex;
+                gap: 20rpx;
+                align-items: center;
+            }
+
+            .contact-btn,
+            .report-btn {
                 color: #07C160;
                 border-radius: 100rpx;
                 padding: 6rpx 20rpx;

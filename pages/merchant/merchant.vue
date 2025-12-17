@@ -393,6 +393,24 @@ const goToSydAllList = () => {
         url: '/pages/merchant/shAllList'
     })
 }
+
+// 分享给朋友
+const onShareAppMessage = () => {
+    return {
+        title: '厨余处理小程序 - 智能收运·绿色环保',
+        path: '/pages/merchant/merchant',
+        imageUrl: '/static/logo.png'
+    }
+}
+
+// 分享到朋友圈
+const onShareTimeline = () => {
+    return {
+        title: '厨余处理小程序 - 智能收运·绿色环保',
+        query: '',
+        imageUrl: '/static/logo.png'
+    }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -19,10 +19,19 @@ export function apiGetInfo() {
 }
 
 
-////api/apiRegister 注册
+/// /api/apiRegister 注册
 export function apiPostRegister(data = {}) {
     return request({
         url: "/api/apiRegister",
+        data,
+        method: "POST"
+    })
+}
+
+/// 修改密码
+export function apiEditPassword(data = {}) {
+    return request({
+        url: "/api/apiEditPassword",
         data,
         method: "POST"
     })
@@ -232,9 +241,27 @@ export function apiGetdriverConfirmPlan(data = {}) {
 }
 
 //api/driver/reportWeight 收运上报每个接口
-export function apiPostreportWeight(data = {}) {
+export function apiPostreportWeight(data = {}, params = {}) {
+    // 手动构建 URL 查询参数（兼容小程序环境）
+    const queryParts = [];
+    if (params.lon !== undefined && params.lon !== '') {
+        queryParts.push(`lon=${encodeURIComponent(params.lon)}`);
+    }
+    if (params.lat !== undefined && params.lat !== '') {
+        queryParts.push(`lat=${encodeURIComponent(params.lat)}`);
+    }
+    if (params.planId !== undefined && params.planId !== '') {
+        queryParts.push(`planId=${encodeURIComponent(params.planId)}`);
+    }
+    if (params.imageUrl !== undefined && params.imageUrl !== '') {
+        queryParts.push(`imageUrl=${encodeURIComponent(params.imageUrl)}`);
+    }
+
+    const queryString = queryParts.join('&');
+    const url = queryString ? `/api/driver/reportWeight?${queryString}` : '/api/driver/reportWeight';
+
     return request({
-        url: '/api/driver/reportWeight',
+        url,
         data,
         method: 'POST',
     })
@@ -327,6 +354,14 @@ export function apiGetBackfillBuckeWeight(data = {}) {
 export function apiGetPlanBuckeWeight(data = {}) {
     return request({
         url: '/api/driver/getPlanBuckeWeight',
+        data,
+    })
+}
+
+////api/driver/addLonLatImg 新增图片上报
+export function apiAddLonLatImg(data = {}) {
+    return request({
+        url: '/api/driver/addLonLatImg',
         data,
     })
 }

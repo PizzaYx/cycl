@@ -130,7 +130,7 @@ const handleView = () => {
         color: #07C160;
         border-radius: 100rpx;
         border: 2rpx solid #07C160;
-        font-size: 24rpx;
+        font-size: 28rpx;
         display: flex;
         align-items: center;
         justify-content: center;

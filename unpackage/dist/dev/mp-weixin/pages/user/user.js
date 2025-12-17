@@ -1,8 +1,13 @@
 "use strict";
 const common_vendor = require("../../common/vendor.js");
 const stores_user = require("../../stores/user.js");
+if (!Array) {
+  const _easycom_uni_icons2 = common_vendor.resolveComponent("uni-icons");
+  _easycom_uni_icons2();
+}
+const _easycom_uni_icons = () => "../../uni_modules/uni-icons/components/uni-icons/uni-icons.js";
 if (!Math) {
-  PageHeader();
+  (PageHeader + _easycom_uni_icons)();
 }
 const PageHeader = () => "../../components/PageHeader/PageHeader.js";
 const _sfc_main = {
@@ -36,6 +41,11 @@ const _sfc_main = {
         }
       });
     };
+    const navigateToChangePassword = () => {
+      common_vendor.index.navigateTo({
+        url: "/pages/user/changePassword"
+      });
+    };
     return (_ctx, _cache) => {
       return common_vendor.e({
         a: common_vendor.o(back),
@@ -52,7 +62,13 @@ const _sfc_main = {
         g: common_vendor.t(common_vendor.unref(userStore).nickName || "未设置"),
         h: common_vendor.t(common_vendor.unref(userStore).userName || "未设置"),
         i: common_vendor.t(common_vendor.unref(userStore).userTypeText),
-        j: common_vendor.o(handleLogout)
+        j: common_vendor.p({
+          type: "right",
+          size: "16",
+          color: "#999"
+        }),
+        k: common_vendor.o(navigateToChangePassword),
+        l: common_vendor.o(handleLogout)
       });
     };
   }

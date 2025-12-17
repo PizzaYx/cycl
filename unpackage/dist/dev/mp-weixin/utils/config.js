@@ -1,6 +1,6 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
-const uploadUrl = "https://demo.vps4cloud.com/api/merchantapi/webupload";
+const uploadUrl = "https://cc.cdlians.tech:8883/backend/api/merchantapi/webupload";
 const TIANDITU_CONFIG = {
   // 天地图API密钥
   API_KEY: "cd0affe367bfe3a6300580c3502b7f17",

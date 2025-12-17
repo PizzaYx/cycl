@@ -1,6 +1,6 @@
 // 公共配置文件上传
 
-export const uploadUrl = 'https://demo.vps4cloud.com/api/merchantapi/webupload'
+export const uploadUrl = 'https://cc.cdlians.tech:8883/backend/api/merchantapi/webupload'
 //export const uploadUrl = 'http://192.168.0.118:8080/api/merchantapi/webupload'
 // 天地图API配置
 export const TIANDITU_CONFIG = {

@@ -1,6 +1,6 @@
 // utils/request.js
 
-const BASE_URL = 'https://demo.vps4cloud.com'
+const BASE_URL = 'https://cc.cdlians.tech:8883/backend'
 //const BASE_URL = 'http://192.168.0.118:8080'
 
 // 存储刷新token的Promise，避免并发请求时重复刷新

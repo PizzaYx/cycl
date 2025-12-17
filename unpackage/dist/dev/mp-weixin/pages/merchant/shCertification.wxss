@@ -117,6 +117,9 @@
 .auth-container .auth-form .form-section .status-tip .tip-content.rejected.data-v-edea1fd9 {
   border-left-color: #ff4444;
 }
+.auth-container .auth-form .form-section .status-tip .tip-content.warning.data-v-edea1fd9 {
+  border-left-color: #ff9500;
+}
 .auth-container .auth-form .form-section .status-tip .tip-content .tip-text.data-v-edea1fd9 {
   font-size: 26rpx;
   color: #666666;

@@ -34,7 +34,12 @@
                     <text class="value">{{ userStore.userTypeText }}</text>
                 </view>
 
-
+                <view class="info-item" @tap="navigateToChangePassword">
+                    <text class="label">修改密码</text>
+                    <view class="value-container">
+                        <uni-icons type="right" size="16" color="#999"></uni-icons>
+                    </view>
+                </view>
             </view>
         </view>
 
@@ -135,6 +140,13 @@ const handleLogout = () => {
                 userStore.logout()
             }
         }
+    })
+}
+
+// 跳转修改密码
+const navigateToChangePassword = () => {
+    uni.navigateTo({
+        url: '/pages/user/changePassword'
     })
 }
 </script>

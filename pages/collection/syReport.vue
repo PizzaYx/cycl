@@ -205,13 +205,13 @@ const getSyCheckDetail = () => {
     }
 
     // 检查提交数据是否为空
-    if (!submitData.value || submitData.value.length === 0) {
-        uni.showToast({
-            title: '没有收运数据，请先进行扫码上报操作',
-            icon: 'none'
-        });
-        return;
-    }
+    // if (!submitData.value || submitData.value.length === 0) {
+    //     uni.showToast({
+    //         title: '没有收运数据，请先进行扫码上报操作',
+    //         icon: 'none'
+    //     });
+    //     return;
+    // }
 
     // 确认收运完成
     uni.showModal({
@@ -226,7 +226,37 @@ const getSyCheckDetail = () => {
                 stopAutoRefresh();
 
                 try {
-                    const confirmRes = await apiPostreportWeight(submitData.value);
+                    // 获取当前经纬度
+                    let longitude = '';
+                    let latitude = '';
+
+                    try {
+                        const locationRes = await uni.getLocation({
+                            type: 'gcj02'
+                        });
+                        longitude = locationRes.longitude;
+                        latitude = locationRes.latitude;
+                        console.log('当前经纬度 - 经度(lon):', longitude, '纬度(lat):', latitude);
+                    } catch (locationError) {
+                        console.error('获取地理位置失败:', locationError);
+                        uni.showToast({
+                            title: '获取位置失败，将继续提交',
+                            icon: 'none'
+                        });
+                    }
+
+                    // 构造提交数据：data 数组放在 body 中，其他参数放在 URL 查询参数中
+                    const bodyData = JSON.parse(JSON.stringify(submitData.value)); // 转换为普通对象，避免Proxy问题
+                    const queryParams = {
+                        planId: planId.value,
+                        lon: longitude,
+                        lat: latitude
+                    };
+
+                    console.log('提交的 body 数据:', bodyData);
+                    console.log('提交的查询参数:', queryParams);
+
+                    const confirmRes = await apiPostreportWeight(bodyData, queryParams);
 
                     if (confirmRes.code === 200) {
                         uni.showToast({

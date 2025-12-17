@@ -19,6 +19,13 @@ function apiPostRegister(data = {}) {
     method: "POST"
   });
 }
+function apiEditPassword(data = {}) {
+  return utils_request.request({
+    url: "/api/apiEditPassword",
+    data,
+    method: "POST"
+  });
+}
 function apiGetMerchantStatistics(data = {}) {
   return utils_request.request({
     url: "/api/merchantapi/getMerchantStatistics",
@@ -154,9 +161,24 @@ function apiGetnoNeedCollect(data = {}) {
     data
   });
 }
-function apiPostreportWeight(data = {}) {
+function apiPostreportWeight(data = {}, params = {}) {
+  const queryParts = [];
+  if (params.lon !== void 0 && params.lon !== "") {
+    queryParts.push(`lon=${encodeURIComponent(params.lon)}`);
+  }
+  if (params.lat !== void 0 && params.lat !== "") {
+    queryParts.push(`lat=${encodeURIComponent(params.lat)}`);
+  }
+  if (params.planId !== void 0 && params.planId !== "") {
+    queryParts.push(`planId=${encodeURIComponent(params.planId)}`);
+  }
+  if (params.imageUrl !== void 0 && params.imageUrl !== "") {
+    queryParts.push(`imageUrl=${encodeURIComponent(params.imageUrl)}`);
+  }
+  const queryString = queryParts.join("&");
+  const url = queryString ? `/api/driver/reportWeight?${queryString}` : "/api/driver/reportWeight";
   return utils_request.request({
-    url: "/api/driver/reportWeight",
+    url,
     data,
     method: "POST"
   });
@@ -209,7 +231,15 @@ function apiGetBackfillBuckeWeight(data = {}) {
     data
   });
 }
+function apiAddLonLatImg(data = {}) {
+  return utils_request.request({
+    url: "/api/driver/addLonLatImg",
+    data
+  });
+}
+exports.apiAddLonLatImg = apiAddLonLatImg;
 exports.apiAddMerchantCovenant = apiAddMerchantCovenant;
+exports.apiEditPassword = apiEditPassword;
 exports.apiGetAbnormalPlan = apiGetAbnormalPlan;
 exports.apiGetBackfillBuckeWeight = apiGetBackfillBuckeWeight;
 exports.apiGetCarWeight = apiGetCarWeight;

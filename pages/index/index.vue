@@ -32,7 +32,7 @@
                         class="password-toggle" @tap="togglePasswordVisibility">
                     </uni-icons>
                 </view>
-                <!-- <text class="forgot-password" @click="handleForgotPassword" v-if="activeTab === 0">忘记密码？</text> -->
+                <text class="forgot-password" @click="handleForgotPassword">忘记密码?</text>
             </view>
             <view class="loginBtn">
                 <button type="button" @click="handleLogin" :disabled="isLoggingIn" :class="{ disabled: isLoggingIn }">
@@ -175,11 +175,10 @@ const handleRegister = () => {
 // 忘记密码处理
 const handleForgotPassword = () => {
     uni.showToast({
-        title: '忘记密码功能待实现',
+        title: '请联系管理人员重置密码!',
         icon: 'none',
     })
-    // 这里可以添加跳转到忘记密码页面的逻辑
-    // 例如: uni.navigateTo({ url: '/pages/forgotPassword/forgotPassword' })
+
 }
 
 // 登录处理
@@ -400,6 +399,24 @@ const fetchUserInfo = async () => {
             return null
         }
         return null
+    }
+}
+
+// 分享给朋友
+const onShareAppMessage = () => {
+    return {
+        title: '厨余处理小程序 - 智能收运·绿色环保',
+        path: '/pages/index/index',
+        imageUrl: '/static/logo.png'
+    }
+}
+
+// 分享到朋友圈
+const onShareTimeline = () => {
+    return {
+        title: '厨余处理小程序 - 智能收运·绿色环保',
+        query: '',
+        imageUrl: '/static/logo.png'
     }
 }
 

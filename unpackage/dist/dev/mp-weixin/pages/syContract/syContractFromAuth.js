@@ -21,6 +21,7 @@ const _sfc_main = {
     const existingStartTime = common_vendor.ref("");
     const existingEndTime = common_vendor.ref("");
     const isReadOnly = common_vendor.ref(false);
+    const merchantName = common_vendor.ref("");
     const userStore = stores_user.useUserStore();
     const signatures = common_vendor.ref({
       partyB: ""
@@ -39,6 +40,14 @@ const _sfc_main = {
       existingStartTime.value = options.startTime || "";
       existingEndTime.value = options.endTime || "";
       isReadOnly.value = options.isReadOnly === "true";
+      merchantName.value = options.merchantName ? decodeURIComponent(options.merchantName) : "";
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:68", "===== syContractFromAuth 接收到的参数 =====");
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:69", "商户名称:", merchantName.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:70", "是否只读:", isReadOnly.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:71", "是否有合同:", hasContract.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:72", "开始时间(existingStartTime):", existingStartTime.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:73", "结束时间(existingEndTime):", existingEndTime.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:74", "所有参数:", options);
       if (hasContract.value && existingContent.value) {
         loadExistingContract();
       } else {
@@ -47,7 +56,7 @@ const _sfc_main = {
       loadSignatures();
     });
     const loadExistingContract = () => {
-      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:78", "===== 加载已存在的合同内容 =====");
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:87", "===== 加载已存在的合同内容 =====");
       contractContent.value = decodeHtmlEntities(existingContent.value);
       contractData.value = {
         content: existingContent.value,
@@ -56,7 +65,8 @@ const _sfc_main = {
         id: ""
         // ID暂时为空
       };
-      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:89", "已存在合同内容加载完成:", contractContent.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:98", "已存在合同内容加载完成:", contractContent.value);
+      fillContractTemplate();
     };
     const loadContractForAuth = async () => {
       var _a;
@@ -65,15 +75,16 @@ const _sfc_main = {
           merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
         });
         if (merchantResult.code === 200 && merchantResult.data && merchantResult.data.content) {
-          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:103", "找到商户合同，直接显示");
+          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:115", "找到商户合同，直接显示");
           contractContent.value = decodeHtmlEntities(merchantResult.data.content);
           contractData.value = merchantResult.data;
+          fillContractTemplate();
         } else {
-          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:108", "未找到商户合同，获取模板进入编辑模式");
+          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:122", "未找到商户合同，获取模板进入编辑模式");
           await loadCovenantTemplate();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/syContract/syContractFromAuth.vue:112", "加载商户合同失败，尝试获取模板:", error);
+        common_vendor.index.__f__("error", "at pages/syContract/syContractFromAuth.vue:126", "加载商户合同失败，尝试获取模板:", error);
         await loadCovenantTemplate();
       }
     };
@@ -83,13 +94,78 @@ const _sfc_main = {
         if (result.code === 200 && result.data && result.data.content) {
           contractContent.value = decodeHtmlEntities(result.data.content);
           contractData.value = result.data;
+          fillContractTemplate();
         } else {
           contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">暂无合同模板</div>';
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/syContract/syContractFromAuth.vue:130", "加载合同模板失败:", error);
+        common_vendor.index.__f__("error", "at pages/syContract/syContractFromAuth.vue:146", "加载合同模板失败:", error);
         contractContent.value = '<div style="text-align: center; padding: 40px; color: #999;">加载合同模板失败</div>';
       }
+    };
+    const fillContractTemplate = () => {
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:153", "===== 开始填充合同模板 =====");
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:154", "商户名称:", merchantName.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:155", "开始时间:", existingStartTime.value || contractData.value.createTime);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:156", "结束时间:", existingEndTime.value || contractData.value.endTime);
+      let content = contractContent.value;
+      content = content.replace(
+        /(<div><span style="font-weight: bold; color: #000;">乙方\(餐厨单位\)：<\/span>\s*<div style="margin-top: 4px; border-bottom: 1px solid #333; height: 20px;">)[^<]*(<\/div>)/,
+        `$1${merchantName.value || "&nbsp;"}$2`
+      );
+      content = content.replace(
+        /(<div style="font-weight: bold; margin-bottom: 5px;">餐厨单位\(乙方\)：<\/div>\s*<div style="border-bottom: 1px solid #333; height: 30px;">)[^<]*(<\/div>)/,
+        `$1${merchantName.value || "&nbsp;"}$2`
+      );
+      let startTime = existingStartTime.value || contractData.value.createTime || "";
+      const endTime = existingEndTime.value || contractData.value.endTime || "";
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:179", "原始开始时间:", startTime);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:180", "原始结束时间:", endTime);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:181", "contractData.value:", contractData.value);
+      if (!startTime) {
+        startTime = getCurrentDate();
+        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:186", "使用当前日期作为开始时间:", startTime);
+      }
+      if (endTime) {
+        const startDate = new Date(startTime);
+        const startYear = startDate.getFullYear();
+        const startMonth = startDate.getMonth() + 1;
+        const startDay = startDate.getDate();
+        const endDate = new Date(endTime);
+        const endYear = endDate.getFullYear();
+        const endMonth = endDate.getMonth() + 1;
+        const endDay = endDate.getDate();
+        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:203", "解析后的日期:", {
+          startYear,
+          startMonth,
+          startDay,
+          endYear,
+          endMonth,
+          endDay
+        });
+        const beforeReplace = content;
+        let pattern1 = /本合同有效期自\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*40px;\s*text-align:\s*center;">[^<]*<\/span>\s*年\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*25px;\s*text-align:\s*center;">[^<]*<\/span>\s*月\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*25px;\s*text-align:\s*center;">[^<]*<\/span>\s*日至\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*40px;\s*text-align:\s*center;">[^<]*<\/span>\s*年\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*25px;\s*text-align:\s*center;">[^<]*<\/span>\s*月\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*25px;\s*text-align:\s*center;">[^<]*<\/span>\s*日止/;
+        content = content.replace(
+          pattern1,
+          `本合同有效期自 <span style="border-bottom: 1px solid #333; display: inline-block; width: 40px; text-align: center;">${startYear}</span>年 <span style="border-bottom: 1px solid #333; display: inline-block; width: 25px; text-align: center;">${startMonth}</span>月 <span style="border-bottom: 1px solid #333; display: inline-block; width: 25px; text-align: center;">${startDay}</span>日至 <span style="border-bottom: 1px solid #333; display: inline-block; width: 40px; text-align: center;">${endYear}</span>年 <span style="border-bottom: 1px solid #333; display: inline-block; width: 25px; text-align: center;">${endMonth}</span>月 <span style="border-bottom: 1px solid #333; display: inline-block; width: 25px; text-align: center;">${endDay}</span>日止`
+        );
+        if (beforeReplace === content) {
+          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:222", "警告：日期替换未生效，正在打印相关内容以便调试");
+          const hasText = content.includes("本合同有效期自");
+          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:225", '是否包含"本合同有效期自":', hasText);
+          if (hasText) {
+            const index = content.indexOf("本合同有效期自");
+            const excerpt = content.substring(index, index + 500);
+            common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:230", "相关HTML片段:", excerpt);
+          }
+        } else {
+          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:233", "日期替换成功");
+        }
+      } else {
+        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:236", "警告：没有结束时间，跳过日期填充");
+      }
+      contractContent.value = content;
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:240", "===== 合同模板填充完成 =====");
     };
     const getCurrentDate = () => {
       const currentDate = /* @__PURE__ */ new Date();
@@ -104,37 +180,55 @@ const _sfc_main = {
       };
     };
     const updateContractWithSignature = () => {
-      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:154", "===== 开始更新合同签名 =====");
-      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:155", "当前签名数据:", signatures.value);
-      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:156", "当前合同内容:", contractContent.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:262", "===== 开始更新合同签名 =====");
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:263", "当前签名数据:", signatures.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:264", "当前合同内容长度:", contractContent.value.length);
       if (signatures.value.partyB) {
         const signatureHtml = `<img src="${signatures.value.partyB}" style="max-width: 270px; max-height: 80px; vertical-align: middle; cursor: pointer;" alt="乙方签名" />`;
-        contractContent.value = contractContent.value.replace(
-          /<span id="signature-btn"[^>]*>点击此处签名<\/span>/g,
+        let content = contractContent.value;
+        const beforeReplace = content;
+        content = content.replace(
+          /<span id="signature-btn"[^>]*>[^<]*<\/span>/g,
           signatureHtml
         );
-        contractContent.value = contractContent.value.replace(
+        content = content.replace(
+          /<div id="signature-btn"[^>]*>[^<]*<\/div>/g,
+          signatureHtml
+        );
+        content = content.replace(
           /<img[^>]*alt="乙方签名"[^>]*>/g,
           signatureHtml
         );
+        if (beforeReplace !== content) {
+          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:291", "签名替换成功");
+        } else {
+          common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:293", "警告：签名替换未生效，查找签名按钮位置");
+          const signatureBtnIndex = content.indexOf("signature-btn");
+          if (signatureBtnIndex > -1) {
+            common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:297", "找到 signature-btn 位置:", signatureBtnIndex);
+            common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:298", "相关HTML片段:", content.substring(signatureBtnIndex - 50, signatureBtnIndex + 200));
+          } else {
+            common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:300", "未找到 signature-btn");
+          }
+        }
+        contractContent.value = content;
         const currentDate = getCurrentDate();
         contractContent.value = contractContent.value.replace(
           /<span id="start-date">[^<]*<\/span>/g,
           `<span id="start-date">${currentDate}</span>`
         );
         contractData.value.createTime = currentDate;
-        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:183", "更新后的合同内容:", contractContent.value);
-        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:184", "===== 合同签名更新完成 =====");
+        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:316", "===== 合同签名更新完成 =====");
       }
     };
     const onRichTextTap = (e) => {
-      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:190", "富文本点击事件触发:", e);
-      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:191", "isReadOnly:", isReadOnly.value);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:322", "富文本点击事件触发:", e);
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:323", "isReadOnly:", isReadOnly.value);
       if (isReadOnly.value) {
-        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:195", "只读模式，不跳转签名");
+        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:327", "只读模式，不跳转签名");
         return;
       }
-      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:200", "可编辑模式，跳转签名");
+      common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:332", "可编辑模式，跳转签名");
       goToSignature();
     };
     const goToSignature = () => {
@@ -151,8 +245,8 @@ const _sfc_main = {
     };
     common_vendor.onMounted(() => {
       common_vendor.index.$on("signatureUpdated", (signatureData) => {
-        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:226", "===== 收到签名更新事件 =====");
-        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:227", "签名数据:", signatureData);
+        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:358", "===== 收到签名更新事件 =====");
+        common_vendor.index.__f__("log", "at pages/syContract/syContractFromAuth.vue:359", "签名数据:", signatureData);
         signatures.value = signatureData;
         updateContractWithSignature();
       });

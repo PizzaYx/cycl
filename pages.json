@@ -60,6 +60,13 @@
             }
         },
         {
+            "path": "pages/user/changePassword",
+            "style": {
+                "navigationBarTitleText": "修改密码",
+                "navigationStyle": "custom"
+            }
+        },
+        {
             "path": "pages/merchant/shReservation",
             "style": {
                 "navigationBarTitleText": "临时预约",
