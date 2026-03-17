@@ -158,10 +158,10 @@ const loadCovenantTemplate = async () => {
 // 从merchant页面进入的合同加载逻辑
 const loadContractForMerchant = async () => {
     try {
-        console.log('从merchant页面进入，先尝试获取商户合同')
+        console.log('从merchant页面进入，先尝试获取商户合同', userStore.currentMerchant?.id)
         // 先尝试获取商户合同
         const merchantResult = await apiGetMerchantCovenant({
-            merchantId: userStore.merchant?.id
+            merchantId: userStore.currentMerchant?.id,
         })
 
         if (merchantResult.code === 200 && merchantResult.data && merchantResult.data.content) {
@@ -312,7 +312,7 @@ const submitContractToServer = async () => {
             // 准备提交数据
             const submitData = {
                 content: finalContractContent, // 富文本内容
-                merchantId: userStore.merchant?.id, // 商户ID
+                merchantId: userStore.currentMerchant?.id, // 商户ID
                 startTime: getCurrentDate(), // 开始日期
                 endTime: contractData.value.endTime, // 结束日期
                 tempId: contractData.value.id // 合同模板ID

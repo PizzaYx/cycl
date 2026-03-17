@@ -221,7 +221,7 @@ const getToStatistics = async () => {
     // 添加搜索关键词
     const res = await apiGetDriverPlanStatistics({
         title: searchKeyword.value ?? '',
-        driverId: userStore.sfmerchant?.id,
+        driverId: userStore.currentDriver?.id,
     });
 
     if (res.code === 200) {
@@ -243,7 +243,7 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            driverId: userStore.sfmerchant?.id,
+            driverId: userStore.currentDriver?.id,
         };
 
 

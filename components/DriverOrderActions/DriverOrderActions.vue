@@ -113,10 +113,10 @@ const handleCancel = () => {
  * 跳转到收运上报页面
  */
 const handleReport = () => {
-    const { carId, driverId, merchantId, id: planId, merchantName, registrationNumber } = props.orderData;
+    const { merchantId, id: planId, merchantName } = props.orderData;
 
     uni.navigateTo({
-        url: `/pages/collection/syReport?carId=${carId}&driverId=${driverId}&merchantId=${merchantId}&planId=${planId}&merchantName=${merchantName}&registrationNumber=${registrationNumber}`
+        url: `/pages/collection/syReport?merchantId=${merchantId}&planId=${planId}&merchantName=${merchantName}`
     });
 }
 

@@ -296,10 +296,11 @@ const fillFormData = (data) => {
     console.log('开始数据回显:', data, '用户信息:', userStore.userInfo)
 
     // 基本信息回显 - 从用户store获取
-    formData.merchantName = userStore.merchant?.name || userStore.userInfo?.name || ''
-    formData.address = userStore.merchant?.address || userStore.userInfo?.address || ''
-    formData.contactPerson = userStore.merchant?.contactTruename || userStore.userInfo?.contactTruename || ''
-    formData.contactPhone = userStore.merchant?.contactTel || userStore.userInfo?.contactTel || ''
+    const merchant = userStore.currentMerchant
+    formData.merchantName = merchant?.name || userStore.userInfo?.name || ''
+    formData.address = merchant?.address || userStore.userInfo?.address || ''
+    formData.contactPerson = merchant?.contactTruename || userStore.userInfo?.contactTruename || ''
+    formData.contactPhone = merchant?.contactTel || userStore.userInfo?.contactTel || ''
 
     // 如果有传入的预约数据，则回显预约相关信息
     if (data) {
@@ -334,7 +335,7 @@ const submitAuth = async () => {
     try {
         // 准备提交数据 - 只包含API需要的字段
         const submitData = {
-            merchantId: userStore.merchant?.id, // 用户ID
+            merchantId: userStore.currentMerchant?.id, // 用户ID
             name: formData.merchantName,              // 商户名称
             address: formData.address,                // 地址
             contactTruename: formData.contactPerson,  // 联系人姓名

@@ -218,7 +218,7 @@ const getInfoFields = (item) => {
 //搜索统计数据
 const getToStatistics = async () => {
     const params = {
-        merchantId: userStore.merchant?.id,
+        merchantId: userStore.currentMerchant?.id,
     };
 
     // 添加筛选条件
@@ -275,7 +275,7 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            merchantId: userStore.merchant?.id,
+            merchantId: userStore.currentMerchant?.id,
         };
 
         // 添加筛选条件

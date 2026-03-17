@@ -1,7 +1,7 @@
 <!-- 认证界面 -->
 <template>
     <view class="auth-container">
-        <PageHeader title="商户认证" @back="back" />
+        <PageHeader :title="isAddMode ? '新增商铺' : '商户认证'" @back="back" />
         <!-- 步骤条 -->
         <view class="step-container">
             <view class="step-item" :class="{ active: currentStep >= 1, completed: currentStep > 1 }">
@@ -63,7 +63,7 @@
                 <uni-forms ref="formRef" :modelValue="formData" :rules="formRules" label-position="top">
                     <uni-forms-item label="商户名称" name="merchantName" :required="!isReadOnly">
                         <view class="merchant-name-input">
-                            <input v-model="formData.merchantName" placeholder="请输入商户名称" :disabled="isReadOnly"
+                            <input v-model="formData.merchantName" placeholder="请输入商户名称或点击右侧箭头选择" :disabled="isReadOnly"
                                 class="input-field" placeholder-class="custom-placeholder" />
                             <image v-if="!isReadOnly" src="/static/shd/right.png" mode="aspectFit" class="arrow-icon"
                                 @click="showMerchantList" />
@@ -101,7 +101,7 @@
                             <view class="location-display" @click="isReadOnly ? viewLocation() : openLocationPicker()">
                                 <text v-if="getLocationText()" class="location-text">{{ getLocationText() }}</text>
                                 <text v-else class="location-placeholder">{{ isReadOnly ? '点击查看位置' : '点击选择商户位置'
-                                    }}</text>
+                                }}</text>
                             </view>
 
                             <image src="/static/shd/dw.png" mode="aspectFit" class="location-icon"
@@ -188,6 +188,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
+import { onLoad } from '@dcloudio/uni-app'
 import { apiPostMerchantCheck, apiPostEditMerchantCheck, apiGetMerchantCheck, apiSelectMerchantList } from '@/api/apis.js'
 import { useUserStore } from '@/stores/user.js'
 import { uploadUrl, createUploadHeaders } from '@/utils/config.js'
@@ -201,6 +202,15 @@ const back = () => {
 //商户信息
 const userStore = useUserStore();
 
+// 是否为新增模式
+const isAddMode = ref(false)
+
+onLoad((options) => {
+    if (options.type === 'add') {
+        isAddMode.value = true
+        console.log('当前为新增商铺模式')
+    }
+})
 
 // 商户认证数据 - 直接存储API返回的数据
 const merchantData = ref(null)
@@ -309,6 +319,26 @@ const formData = reactive({
     covenantId: null // 合同ID
 })
 
+// 重置表单数据
+const resetFormData = () => {
+    formData.merchantName = ''
+    formData.address = ''
+    formData.contactPerson = ''
+    formData.contactPhone = ''
+    formData.bucketCount = ''
+    formData.estimatedWeight = ''
+    formData.appcode = ''
+    formData.latitude = ''
+    formData.longitude = ''
+    formData.locationName = ''
+    formData.licenseImages = []
+    formData.content = ''
+    formData.startTime = ''
+    formData.endTime = ''
+    formData.covenantId = null
+    formData.tempId = null
+}
+
 // 区域选择数据
 const appCodeOptions = [
     { value: 1, text: '普兴' },
@@ -331,7 +361,7 @@ const formRef = ref()
 const formRules = {
     merchantName: {
         rules: [
-            { required: true, errorMessage: '请输入商户名称' }
+            { required: true, errorMessage: '请输入商户名称或点击右侧箭头选择' }
         ]
     },
     address: {
@@ -642,8 +672,17 @@ const viewLocation = () => {
 
 // 页面加载完成
 onMounted(() => {
-    // 这里可以调用接口获取认证状态
-    loadAuthStatus()
+    // 如果是新增模式，不加载原有认证状态，直接进入重新填写流程
+    if (!isAddMode.value) {
+        // 这里可以调用接口获取认证状态
+        loadAuthStatus()
+    } else {
+        // 新增模式，确保状态重置
+        merchantData.value = null
+        // 可以在这里重置表单数据，虽然reactive初始化已经是空的
+        resetFormData()
+    }
+
     // 加载商户列表
     loadMerchantList()
 
@@ -669,7 +708,8 @@ const loadAuthStatus = async () => {
     try {
         // 调用获取认证信息接口
         const result = await apiGetMerchantCheck({
-            userid: userStore.userId
+            userid: userStore.userId,
+            merchantId: userStore.currentMerchant?.id,
         })
 
         console.log('获取认证状态API返回:', result)
@@ -1080,7 +1120,7 @@ const submitAuth = async () => {
         // 准备提交数据 - 只包含API需要的字段
         const submitData = {
             userid: userStore.userId,
-            id: userStore.merchant?.id || '',
+            id: isAddMode.value ? '' : (userStore.merchant?.id || ''),
             name: formData.merchantName,              // 商户名称
             address: formData.address,                // 地址
             appcode: formData.appcode,                // 区域代码
@@ -1097,7 +1137,7 @@ const submitAuth = async () => {
             endTime: formData.endTime, // 合同结束时间
             covenantId: formData.covenantId, // 合同ID
             //如果merchantData.value?.status  = 2 则 status = 0 ，其他状态保持不变
-            status: merchantData.value?.status === 2 ? 0 : merchantData.value?.status
+            status: isAddMode.value ? 0 : (merchantData.value?.status === 2 ? 0 : merchantData.value?.status)
         }
 
         console.log('提交修改认证数据:', submitData)
@@ -1133,9 +1173,13 @@ const submitAuth = async () => {
 
         // 同时更新用户store中的merchant数据
         if (userStore.userInfo) {
-            userStore.updateUserInfo({
-                merchant: merchantData.value
-            })
+            if (isAddMode.value) {
+                // 新增模式，添加到列表
+                userStore.addMerchant(merchantData.value)
+            } else {
+                // 编辑模式，更新当前商户
+                userStore.updateCurrentMerchant(merchantData.value)
+            }
         }
 
     } catch (error) {

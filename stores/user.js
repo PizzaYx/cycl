@@ -6,6 +6,8 @@ export const useUserStore = defineStore('user', {
     state: () => ({
         userInfo: null,
         isLoggedIn: false,
+        currentMerchantIndex: 0, // 当前选中的商户索引
+        currentDriverIndex: 0, // 当前选中的司机索引
     }),
 
     getters: {
@@ -18,11 +20,83 @@ export const useUserStore = defineStore('user', {
         // 用户ID
         userId: (state) => state.userInfo?.userId || null,
 
-        //merchant 商户信息
-        merchant: (state) => state.userInfo?.merchant || null,
+        // 所有商户列表
+        merchants: (state) => {
+            const merchant = state.userInfo?.merchant
+            if (Array.isArray(merchant)) {
+                return merchant
+            } else if (merchant) {
+                // 兼容旧结构（如果后端返回单个对象）
+                return [merchant]
+            }
+            return []
+        },
 
-        //收运端--师傅信息
-        sfmerchant: (state) => state.userInfo?.driver || null,
+        // 当前选中的商户信息（单个对象）
+        currentMerchant: (state) => {
+            const list = state.userInfo?.merchant
+            // 处理数组情况
+            if (Array.isArray(list)) {
+                if (list.length > 0 && state.currentMerchantIndex < list.length) {
+                    return list[state.currentMerchantIndex]
+                }
+                return null
+            }
+            // 处理单个对象情况（兼容旧逻辑）
+            return list || null
+        },
+
+        // 兼容旧代码：merchant 指向 currentMerchant
+        merchant: (state) => {
+            // 复用 currentMerchant 的逻辑
+            const list = state.userInfo?.merchant
+            if (Array.isArray(list)) {
+                if (list.length > 0 && state.currentMerchantIndex < list.length) {
+                    return list[state.currentMerchantIndex]
+                }
+                return null
+            }
+            return list || null
+        },
+
+        // 所有司机列表
+        drivers: (state) => {
+            const driver = state.userInfo?.driver
+            if (Array.isArray(driver)) {
+                return driver
+            } else if (driver) {
+                // 兼容旧结构
+                return [driver]
+            }
+            return []
+        },
+
+        // 当前选中的司机信息
+        currentDriver: (state) => {
+            const list = state.userInfo?.driver
+            // 处理数组情况
+            if (Array.isArray(list)) {
+                if (list.length > 0 && state.currentDriverIndex < list.length) {
+                    return list[state.currentDriverIndex]
+                }
+                return null
+            }
+            // 处理单个对象情况
+            return list || null
+        },
+
+        //收运端--师傅信息 (兼容旧代码)
+        sfmerchant: (state) => {
+            const list = state.userInfo?.driver
+            // 处理数组情况
+            if (Array.isArray(list)) {
+                if (list.length > 0 && state.currentDriverIndex < list.length) {
+                    return list[state.currentDriverIndex]
+                }
+                return null
+            }
+            return list || null
+        },
 
         // 商户头像（使用昵称第一个字）
         userAvatar: (state) => {
@@ -39,19 +113,21 @@ export const useUserStore = defineStore('user', {
         },
 
         // 是否已认证（merchant不为null且status为1表示已认证）
-        isVerified: (state) => state.userInfo?.merchant !== null && state.userInfo?.merchant?.status === 1,
+        isVerified(state) {
+            return this.currentMerchant !== null && this.currentMerchant?.status === 1
+        },
 
         // 认证状态：0=未审核/待审核，1=认证成功，2=审核不通过
-        merchantStatus: (state) => {
-            if (!state.userInfo?.merchant) {
+        merchantStatus(state) {
+            if (!this.currentMerchant) {
                 return null // 未提交认证
             }
-            return state.userInfo.merchant.status
+            return this.currentMerchant.status
         },
 
         // 认证状态文字
-        merchantStatusText: (state) => {
-            const status = state.userInfo?.merchant?.status
+        merchantStatusText(state) {
+            const status = this.currentMerchant?.status
             switch (status) {
                 case 0:
                     return '待审核'
@@ -76,6 +152,30 @@ export const useUserStore = defineStore('user', {
     },
 
     actions: {
+        // 切换当前商户
+        switchMerchant(index) {
+            if (this.userInfo?.merchant && Array.isArray(this.userInfo.merchant)) {
+                if (index >= 0 && index < this.userInfo.merchant.length) {
+                    this.currentMerchantIndex = index
+                    console.log('已切换商户索引为:', index)
+                    return true
+                }
+            }
+            return false
+        },
+
+        // 切换当前司机
+        switchDriver(index) {
+            if (this.userInfo?.driver && Array.isArray(this.userInfo.driver)) {
+                if (index >= 0 && index < this.userInfo.driver.length) {
+                    this.currentDriverIndex = index
+                    console.log('已切换司机索引为:', index)
+                    return true
+                }
+            }
+            return false
+        },
+
         // 设置用户信息（仅存储在内存中）
         setUserInfo(userInfo) {
             this.userInfo = userInfo
@@ -128,6 +228,39 @@ export const useUserStore = defineStore('user', {
             if (this.userInfo) {
                 this.userInfo = { ...this.userInfo, ...updates }
                 console.log('用户信息已更新:', this.userInfo)
+            }
+        },
+
+        // 更新当前商户信息
+        updateCurrentMerchant(merchantData) {
+            if (this.userInfo?.merchant && Array.isArray(this.userInfo.merchant)) {
+                if (this.currentMerchantIndex >= 0 && this.currentMerchantIndex < this.userInfo.merchant.length) {
+                    // 使用 Vue 的响应式更新方式（虽然 Pinia 自动处理，但为了安全直接替换对象）
+                    this.userInfo.merchant[this.currentMerchantIndex] = merchantData
+                    console.log('当前商户信息已更新')
+                }
+            } else if (this.userInfo?.merchant) {
+                // 兼容非数组情况
+                this.userInfo.merchant = merchantData
+            }
+        },
+
+        // 添加新商户
+        addMerchant(merchantData) {
+            if (!this.userInfo) return
+
+            if (!this.userInfo.merchant) {
+                this.userInfo.merchant = [merchantData]
+            } else if (Array.isArray(this.userInfo.merchant)) {
+                this.userInfo.merchant.push(merchantData)
+            } else {
+                // 如果原来是单对象，转为数组
+                this.userInfo.merchant = [this.userInfo.merchant, merchantData]
+            }
+
+            // 切换到新添加的商户
+            if (Array.isArray(this.userInfo.merchant)) {
+                this.currentMerchantIndex = this.userInfo.merchant.length - 1
             }
         },
 

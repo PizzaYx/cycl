@@ -8,16 +8,36 @@
                 <image src="/static/headTopBg.png" mode="aspectFill"></image>
             </view>
 
-            <view class="header" @tap="getUserInfo">
-                <view class="avatar">
-                    <view class="avatar-text">{{ userStore.userSFAvatar }}</view>
+            <view class="header" @tap="closeMenu">
+                <view class="user-info-section" @tap="handleUserInfo">
+                    <view class="avatar">
+                        <view class="avatar-text">{{ userStore.userSFAvatar }}</view>
+                    </view>
+                    <view class="info">
+                        <view class="name">{{ userStore.nickName || '未登录' }}</view>
+                        <view class="sub-name">{{ userStore.currentDriver?.registrationNumber || '未设置车牌' }}</view>
+                        <view class="auth-tag">工作中</view>
+                    </view>
                 </view>
-                <view class="info">
-                    <view class="name">{{ userStore.nickName || '未登录' }}</view>
-                    <view class="sub-name">{{ userStore.sfmerchant?.registrationNumber || '未设置车牌' }}</view>
-                    <view class="auth-tag">工作中</view>
+
+                <view class="settings-section">
+                    <view class="settings-btn" @tap.stop="toggleMenu">
+                        <uni-icons type="gear-filled" size="20" color="#333"></uni-icons>
+                        <text>设置</text>
+                    </view>
+
+                    <!-- 下拉菜单 -->
+                    <view v-if="showMenu" class="dropdown-menu">
+                        <view class="menu-item" @tap.stop="handleSwitchVehicle">
+                            <uni-icons type="refreshempty" size="16" color="#333"></uni-icons>
+                            <text>切换车辆</text>
+                        </view>
+                        <view class="menu-item" @tap.stop="handleUserInfo">
+                            <uni-icons type="person" size="16" color="#333"></uni-icons>
+                            <text>个人信息</text>
+                        </view>
+                    </view>
                 </view>
-                <uni-icons type="right" size="35rpx"></uni-icons>
             </view>
 
             <!-- 数据统计 -->
@@ -141,7 +161,8 @@ onShow(async () => {
 //获取商户首页数据统计
 const getMerchantStatistics = async () => {
     const res = await apiGetDriverTodayStatistics({
-        driverId: userStore.sfmerchant?.id
+        driverId: userStore.currentDriver?.id,
+        carId: userStore.currentDriver?.carId
     })
 
     if (res.code === 200) {
@@ -224,7 +245,7 @@ const getMerchantSydList = async () => {
     const res = await apiGetDriverPlanPage({
         pageNum: 1,
         pageSize: 5,
-        driverId: userStore.sfmerchant?.id,
+        driverId: userStore.currentDriver?.id,
     })
     if (res.code === 200) {
         allOrderList.value = res.data.list;
@@ -234,13 +255,68 @@ const getMerchantSydList = async () => {
     }
 }
 
-const getUserInfo = () => {
+// 下拉菜单状态
+const showMenu = ref(false)
+
+// 切换菜单显示
+const toggleMenu = () => {
+    showMenu.value = !showMenu.value
+}
+
+// 关闭菜单
+const closeMenu = () => {
+    showMenu.value = false
+}
+
+// 切换车辆
+const handleSwitchVehicle = () => {
+    closeMenu()
+
+    const drivers = userStore.drivers
+    if (!drivers || drivers.length <= 1) {
+        uni.showToast({
+            title: '暂无其他车辆可切换',
+            icon: 'none'
+        })
+        return
+    }
+
+    const itemList = drivers.map(d => d.registrationNumber || '未设置车牌')
+
+    uni.showActionSheet({
+        itemList: itemList,
+        success: function (res) {
+            const index = res.tapIndex
+            userStore.switchDriver(index)
+
+            // 刷新数据
+            uni.showLoading({ title: '切换中...' })
+
+            // 重新获取统计和记录
+            Promise.all([
+                getMerchantStatistics(),
+                getMerchantSydList()
+            ]).finally(() => {
+                uni.hideLoading()
+                uni.showToast({
+                    title: '已切换',
+                    icon: 'success'
+                })
+            })
+        },
+        fail: function (res) {
+            console.log(res.errMsg)
+        }
+    })
+}
+
+const handleUserInfo = () => {
+    closeMenu()
     // 检查用户认证状态并执行相应操作
     // 已认证，跳转到用户页面
     uni.navigateTo({
         url: '/pages/user/user'
     })
-
 }
 
 // 快捷操作配置
@@ -459,64 +535,130 @@ const onShareTimeline = () => {
         width: 100%;
         display: flex;
         align-items: center;
+        justify-content: space-between;
 
-        .avatar {
-            width: 120rpx;
-            height: 120rpx;
-            margin-right: 24rpx;
-            background-color: rgba(7, 193, 96, 1);
-            border-radius: 60rpx;
+        .user-info-section {
+            flex: 1;
             display: flex;
             align-items: center;
-            justify-content: center;
 
-            .avatar-text {
-                font-size: 48rpx;
-                font-weight: 500;
-                color: #fff;
+            .avatar {
+                width: 120rpx;
+                height: 120rpx;
+                margin-right: 24rpx;
+                background-color: rgba(7, 193, 96, 1);
+                border-radius: 60rpx;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                .avatar-text {
+                    font-size: 48rpx;
+                    font-weight: 500;
+                    color: #fff;
+                }
+
+                image {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 60rpx;
+                }
             }
 
-            image {
-                width: 100%;
-                height: 100%;
-                border-radius: 60rpx;
+            .info {
+                flex: 1;
+                /* 占满剩余宽度 */
+                height: 120rpx;
+                /* 或 min-height: 120rpx; 与头像同高 */
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+
+                .name {
+                    font-weight: 600;
+                    font-size: 32rpx;
+                    color: black;
+                    line-height: 32rpx;
+                }
+
+                .sub-name {
+                    font-weight: 400;
+                    font-size: 24rpx;
+                    color: #131313;
+                }
+
+                .auth-tag {
+                    width: 120rpx;
+                    height: 40rpx;
+
+                    font-size: 22rpx;
+                    border-radius: 10px;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    background-color: rgba(7, 193, 96, 1); // 绿色 
+                    color: #fff;
+
+                }
             }
         }
 
-        .info {
-            flex: 1;
-            /* 占满剩余宽度 */
-            height: 120rpx;
-            /* 或 min-height: 120rpx; 与头像同高 */
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
+        .settings-section {
+            position: relative;
 
-            .name {
-                font-weight: 600;
-                font-size: 32rpx;
-                color: black;
-                line-height: 32rpx;
-            }
-
-            .sub-name {
-                font-weight: 400;
-                font-size: 24rpx;
-                color: #131313;
-            }
-
-            .auth-tag {
-                width: 120rpx;
-                height: 40rpx;
-
-                font-size: 22rpx;
-                border-radius: 10px;
-                display: inline-flex;
+            .settings-btn {
+                display: flex;
+                flex-direction: row;
                 align-items: center;
                 justify-content: center;
-                background-color: rgba(7, 193, 96, 1); // 绿色 
-                color: #fff;
+                padding: 10rpx;
 
+                text {
+                    font-size: 26rpx;
+                    color: #333;
+                    margin-left: 4rpx;
+                    margin-top: 0;
+                }
+            }
+
+            .dropdown-menu {
+                position: absolute;
+                top: 100%;
+                right: -10rpx;
+                width: 240rpx;
+                background-color: #fff;
+                border-radius: 12rpx;
+                box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.1);
+                z-index: 100;
+                padding: 10rpx 0;
+                margin-top: 10rpx;
+
+                // 小三角形
+                &::before {
+                    content: '';
+                    position: absolute;
+                    top: -12rpx;
+                    right: 30rpx;
+                    border-left: 12rpx solid transparent;
+                    border-right: 12rpx solid transparent;
+                    border-bottom: 12rpx solid #fff;
+                }
+
+                .menu-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 20rpx 30rpx;
+
+                    &:active {
+                        background-color: #f5f5f5;
+                    }
+
+                    text {
+                        margin-left: 16rpx;
+                        font-size: 28rpx;
+                        color: #333;
+                    }
+                }
             }
         }
     }

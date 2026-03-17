@@ -107,7 +107,7 @@ const loadContractForAuth = async () => {
     try {
         // 先尝试获取商户合同
         const merchantResult = await apiGetMerchantCovenant({
-            merchantId: userStore.merchant?.id
+            merchantId: userStore.contractContent?.id
         })
 
         if (merchantResult.code === 200 && merchantResult.data && merchantResult.data.content) {

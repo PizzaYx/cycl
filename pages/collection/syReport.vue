@@ -162,9 +162,8 @@ const autoRefreshTimeout = ref(null); // 超时定时器
 const isAutoRefreshTimeout = ref(false); // 是否自动刷新超时
 
 // 新增接收页面参数的变量
-const carId = ref(''); // 车辆ID
 const driverId = ref(''); // 司机ID
-const merchantId = ref(''); // 商户ID
+const merchantId = ref(''); // 商家ID
 const planId = ref(''); // 收运单ID
 const merchantName = ref('')//商家名称
 const registrationNumber = ref('')//车牌号
@@ -179,12 +178,11 @@ const isSubmitting = ref(false); // 是否正在提交
 
 // 页面加载时获取传入的参数
 onLoad(async (options) => {
-    if (options.carId) carId.value = options.carId;
-    if (options.driverId) driverId.value = options.driverId;
     if (options.merchantId) merchantId.value = options.merchantId;
     if (options.planId) planId.value = options.planId;
     if (options.merchantName) merchantName.value = options.merchantName;
-    registrationNumber.value = userStore.sfmerchant?.registrationNumber;
+    registrationNumber.value = userStore.currentDriver?.registrationNumber;
+    driverId.value = userStore.currentDriver?.id;
     // if (options.registrationNumber) registrationNumber.value = options.registrationNumber;
     console.log('接收到的参数:', options);
 

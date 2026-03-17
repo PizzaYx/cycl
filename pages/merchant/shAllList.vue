@@ -109,7 +109,7 @@ const allOrderList = ref([]);
 const handleViewDetails = (item) => {
     console.log('查看详情按钮被点击', item);
     uni.navigateTo({
-        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId=${item.merchantId}`
     });
 };
 
@@ -206,7 +206,7 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            merchantId: userStore.merchant?.id,
+            merchantId: userStore.currentMerchant?.id,
         };
 
         // 添加筛选条件

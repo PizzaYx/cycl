@@ -189,8 +189,6 @@ const registrationNumber = ref('') // 车牌号
 const name = ref('') // 司机名称
 const currentDate = getCurrentDate() // 当前日期
 const weightInput = ref('') // 重量输入框的值
-const allCarId = ref(0)//车辆Id
-const allRecordNo = ref('')//运单号
 const navBarBgColor = ref('transparent') // 导航栏背景色
 
 const taskList = ref([]) // 任务列表
@@ -507,7 +505,7 @@ const handleNewReport = async () => {
 
         // 4. 提交数据到服务器
         const reportData = {
-            derverid: userStore.sfmerchant?.id, // 司机id
+            derverid: userStore.currentDriver?.id, // 司机id
             lon: longitude,
             lat: latitude,
             img: imageUrl // 图片URL
@@ -546,7 +544,8 @@ onPageScroll((e) => {
 const getapiGetDriverInfo = async () => {
     try {
         const res = await apiGetDriverInfo({
-            driverId: userStore.sfmerchant?.id,
+            driverId: userStore.currentDriver?.id,
+            carId: userStore.currentDriver?.carId
         })
 
         if (res.code === 200) {
@@ -559,8 +558,6 @@ const getapiGetDriverInfo = async () => {
             bucketNum.value = res.data.bucketNum ?? 0;
             registrationNumber.value = res.data.registrationNumber;
             name.value = res.data.name;
-            allCarId.value = res.data.carId;
-            allRecordNo.value = res.data.crecordNo;
         } else {
             console.error('获取司机信息失败:', res.message || '未知错误');
         }
@@ -573,7 +570,8 @@ const getapiGetDriverInfo = async () => {
 const getapiGetDriverTodayPlan = async () => {
     try {
         const res = await apiGetDriverTodayPlan({
-            driverId: userStore.sfmerchant?.id,
+            driverId: userStore.currentDriver?.id,
+            carId: userStore.currentDriver?.carId,
             page: 1,
         })
         // status  0进行中  1已完成  2无需收运
@@ -592,7 +590,8 @@ const getapiGetDriverTodayPlan = async () => {
 const getapiGetAbnormalPlan = async () => {
     try {
         const res = await apiGetAbnormalPlan({
-            driverId: userStore.sfmerchant?.id,
+            driverId: userStore.currentDriver?.id,
+            carId: userStore.currentDriver?.id
         })
         if (res.code === 200) {
             abnormalList.value = res.data || [];
@@ -645,7 +644,7 @@ const handleSubmitWeight = async () => {
             if (res.confirm) {
                 try {
                     const result = await apiGetCarWeight({
-                        driverId: userStore.sfmerchant?.id
+                        driverId: userStore.currentDriver?.id
                     });
 
                     if (result.code === 200) {

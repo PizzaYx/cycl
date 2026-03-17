@@ -250,7 +250,7 @@ const bookingBadgeText = ref(0);
 
 const getDriverNotConfirmNum = async () => {
     const res = await apiGetDriverNotConfirmNum({
-        driverId: userStore.sfmerchant?.id
+        driverId: userStore.currentDriver?.id
     });
     if (res.code === 200) {
         bookingBadgeText.value = res.data ?? 0;
@@ -276,7 +276,7 @@ const getNetwork = async () => {
         // 构建请求参数
         const params = {
             pageNum: pageNum.value,
-            driverId: userStore.sfmerchant?.id,
+            driverId: userStore.currentDriver?.id,
             status: currentStatusKey.value // 使用当前选中tab对应的整数类型
         };
 
