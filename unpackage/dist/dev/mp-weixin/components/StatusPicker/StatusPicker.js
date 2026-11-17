@@ -80,7 +80,7 @@ const _sfc_main = {
           size: "12",
           color: "#666"
         }),
-        b: common_vendor.o(showStatusPicker)
+        b: common_vendor.o(showStatusPicker, "85")
       };
     };
   }

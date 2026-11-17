@@ -30,7 +30,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(handleBack),
+        a: common_vendor.o(handleBack, "1f"),
         b: common_vendor.p({
           dark: true,
           fixed: true,

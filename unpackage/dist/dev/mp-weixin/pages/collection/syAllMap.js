@@ -459,7 +459,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "67"),
         b: common_vendor.p({
           title: "收运地图详情"
         }),

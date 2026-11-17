@@ -14,6 +14,13 @@
                 </view>
             </view>
         </scroll-view>
+
+        <!-- 底部按钮（只读模式且审核通过时显示） -->
+        <view v-if="isReadOnly" class="bottom-actions">
+            <button class="action-btn submit-btn" @tap="downloadContract">
+                保存合同
+            </button>
+        </view>
     </view>
 </template>
 
@@ -41,6 +48,28 @@ const userStore = useUserStore()
 const signatures = ref({
     partyB: ''  // 乙方签名
 })
+
+// 甲方公章URL
+const COMPANY_SEAL_URL = 'https://cc.cdlians.tech:8883/upload/2026/08/04/a8NNtrGaRQh882f35874f5fb7a67edfda697970f9c2c_20260804104234A162.png'
+
+// 添加甲方公章（只读模式时显示）
+const addCompanySeal = () => {
+    if (!isReadOnly.value) return
+
+    let content = contractContent.value
+
+    // 先移除已有公章（避免重复）
+    content = content.replace(/<img[^>]*alt="甲方公章"[^>]*\/?>/g, '')
+
+    // 在收运单位(甲方)后面的公司名称上覆盖公章
+    const sealImg = `<img src="${COMPANY_SEAL_URL}" style="position: absolute; left: 60%; top: 30%; transform: translate(-50%, -50%); max-width: 120px; max-height: 120px; opacity: 0.85; pointer-events: none;" alt="甲方公章" />`
+    content = content.replace(
+        /(收运单位\(甲方\)[\s\S]*?<div[^>]*>)(成都市新津蓉澄净环保科技有限公司)/,
+        `$1<span style="position: relative; display: inline-block;">$2${sealImg}</span>`
+    )
+
+    contractContent.value = content
+}
 
 // 富文本合同内容（HTML格式）
 const contractContent = ref('')
@@ -238,6 +267,8 @@ const fillContractTemplate = () => {
 
     contractContent.value = content
     console.log('===== 合同模板填充完成 =====')
+    // 审核通过后显示甲方公章
+    addCompanySeal()
 }
 
 // 获取当前日期
@@ -340,6 +371,16 @@ const goToSignature = () => {
     })
 }
 
+// 下载合同
+const downloadContract = () => {
+    const merchantId = userStore.currentMerchant?.id || ''
+    const url = `/pages/syContract/contractWebview/contractWebview?merchantId=${encodeURIComponent(merchantId)}`
+    console.log('跳转webview URL:', url)
+    uni.navigateTo({
+        url
+    })
+}
+
 // 返回上一页
 const back = () => {
     // 如果没有签名，直接返回
@@ -418,9 +459,23 @@ const prepareReturnData = () => {
     padding: 20rpx 30rpx;
     padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
     border-top: 1rpx solid #eee;
+    display: flex;
+    gap: 20rpx;
     z-index: 100;
 
+    .action-btn {
+        flex: 1;
+        height: 80rpx;
+        border-radius: 40rpx;
+        font-size: 32rpx;
+        font-weight: bold;
+        border: none;
 
+        &.submit-btn {
+            background: linear-gradient(135deg, #07c160 0%, #10ad6a 100%);
+            color: #fff;
+        }
+    }
 }
 
 // 富文本样式调整

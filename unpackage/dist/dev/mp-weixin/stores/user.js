@@ -4,7 +4,11 @@ const api_apis = require("../api/apis.js");
 const useUserStore = common_vendor.defineStore("user", {
   state: () => ({
     userInfo: null,
-    isLoggedIn: false
+    isLoggedIn: false,
+    currentMerchantIndex: 0,
+    // 当前选中的商户索引
+    currentDriverIndex: 0
+    // 当前选中的司机索引
   }),
   getters: {
     // 用户昵称
@@ -22,15 +26,75 @@ const useUserStore = common_vendor.defineStore("user", {
       var _a;
       return ((_a = state.userInfo) == null ? void 0 : _a.userId) || null;
     },
-    //merchant 商户信息
+    // 所有商户列表
+    merchants: (state) => {
+      var _a;
+      const merchant = (_a = state.userInfo) == null ? void 0 : _a.merchant;
+      if (Array.isArray(merchant)) {
+        return merchant;
+      } else if (merchant) {
+        return [merchant];
+      }
+      return [];
+    },
+    // 当前选中的商户信息（单个对象）
+    currentMerchant: (state) => {
+      var _a;
+      const list = (_a = state.userInfo) == null ? void 0 : _a.merchant;
+      if (Array.isArray(list)) {
+        if (list.length > 0 && state.currentMerchantIndex < list.length) {
+          return list[state.currentMerchantIndex];
+        }
+        return null;
+      }
+      return list || null;
+    },
+    // 兼容旧代码：merchant 指向 currentMerchant
     merchant: (state) => {
       var _a;
-      return ((_a = state.userInfo) == null ? void 0 : _a.merchant) || null;
+      const list = (_a = state.userInfo) == null ? void 0 : _a.merchant;
+      if (Array.isArray(list)) {
+        if (list.length > 0 && state.currentMerchantIndex < list.length) {
+          return list[state.currentMerchantIndex];
+        }
+        return null;
+      }
+      return list || null;
     },
-    //收运端--师傅信息
+    // 所有司机列表
+    drivers: (state) => {
+      var _a;
+      const driver = (_a = state.userInfo) == null ? void 0 : _a.driver;
+      if (Array.isArray(driver)) {
+        return driver;
+      } else if (driver) {
+        return [driver];
+      }
+      return [];
+    },
+    // 当前选中的司机信息
+    currentDriver: (state) => {
+      var _a;
+      const list = (_a = state.userInfo) == null ? void 0 : _a.driver;
+      if (Array.isArray(list)) {
+        if (list.length > 0 && state.currentDriverIndex < list.length) {
+          return list[state.currentDriverIndex];
+        }
+        return null;
+      }
+      return list || null;
+    },
+    //收运端--师傅信息 (兼容旧代码)
     sfmerchant: (state) => {
       var _a;
-      return ((_a = state.userInfo) == null ? void 0 : _a.driver) || null;
+      const list = (_a = state.userInfo) == null ? void 0 : _a.driver;
+      if (Array.isArray(list)) {
+        if (list.length > 0 && state.currentDriverIndex < list.length) {
+          return list[state.currentDriverIndex];
+        }
+        return null;
+      }
+      return list || null;
     },
     // 商户头像（使用昵称第一个字）
     userAvatar: (state) => {
@@ -45,22 +109,21 @@ const useUserStore = common_vendor.defineStore("user", {
       return name ? name.charAt(0) : "收";
     },
     // 是否已认证（merchant不为null且status为1表示已认证）
-    isVerified: (state) => {
-      var _a, _b, _c;
-      return ((_a = state.userInfo) == null ? void 0 : _a.merchant) !== null && ((_c = (_b = state.userInfo) == null ? void 0 : _b.merchant) == null ? void 0 : _c.status) === 1;
+    isVerified(state) {
+      var _a;
+      return this.currentMerchant !== null && ((_a = this.currentMerchant) == null ? void 0 : _a.status) === 1;
     },
     // 认证状态：0=未审核/待审核，1=认证成功，2=审核不通过
-    merchantStatus: (state) => {
-      var _a;
-      if (!((_a = state.userInfo) == null ? void 0 : _a.merchant)) {
+    merchantStatus(state) {
+      if (!this.currentMerchant) {
         return null;
       }
-      return state.userInfo.merchant.status;
+      return this.currentMerchant.status;
     },
     // 认证状态文字
-    merchantStatusText: (state) => {
-      var _a, _b;
-      const status = (_b = (_a = state.userInfo) == null ? void 0 : _a.merchant) == null ? void 0 : _b.status;
+    merchantStatusText(state) {
+      var _a;
+      const status = (_a = this.currentMerchant) == null ? void 0 : _a.status;
       switch (status) {
         case 0:
           return "待审核";
@@ -85,6 +148,30 @@ const useUserStore = common_vendor.defineStore("user", {
     }
   },
   actions: {
+    // 切换当前商户
+    switchMerchant(index) {
+      var _a;
+      if (((_a = this.userInfo) == null ? void 0 : _a.merchant) && Array.isArray(this.userInfo.merchant)) {
+        if (index >= 0 && index < this.userInfo.merchant.length) {
+          this.currentMerchantIndex = index;
+          common_vendor.index.__f__("log", "at stores/user.js:160", "已切换商户索引为:", index);
+          return true;
+        }
+      }
+      return false;
+    },
+    // 切换当前司机
+    switchDriver(index) {
+      var _a;
+      if (((_a = this.userInfo) == null ? void 0 : _a.driver) && Array.isArray(this.userInfo.driver)) {
+        if (index >= 0 && index < this.userInfo.driver.length) {
+          this.currentDriverIndex = index;
+          common_vendor.index.__f__("log", "at stores/user.js:172", "已切换司机索引为:", index);
+          return true;
+        }
+      }
+      return false;
+    },
     // 设置用户信息（仅存储在内存中）
     setUserInfo(userInfo) {
       this.userInfo = userInfo;
@@ -95,7 +182,7 @@ const useUserStore = common_vendor.defineStore("user", {
       try {
         const res = await api_apis.apiGetInfo();
         if (!res) {
-          common_vendor.index.__f__("log", "at stores/user.js:91", "响应为空，可能是401跳转情况");
+          common_vendor.index.__f__("log", "at stores/user.js:191", "响应为空，可能是401跳转情况");
           return null;
         }
         const responseData = res.data || res;
@@ -111,14 +198,14 @@ const useUserStore = common_vendor.defineStore("user", {
           }
           return userInfo;
         } else if (code === 401) {
-          common_vendor.index.__f__("log", "at stores/user.js:112", "用户未登录，已跳转到登录页");
+          common_vendor.index.__f__("log", "at stores/user.js:212", "用户未登录，已跳转到登录页");
           return null;
         } else {
-          common_vendor.index.__f__("log", "at stores/user.js:115", "获取用户信息失败，code:", code, "msg:", responseData.msg);
+          common_vendor.index.__f__("log", "at stores/user.js:215", "获取用户信息失败，code:", code, "msg:", responseData.msg);
           return null;
         }
       } catch (error) {
-        common_vendor.index.__f__("log", "at stores/user.js:120", "获取用户信息异常:", error.message || error);
+        common_vendor.index.__f__("log", "at stores/user.js:220", "获取用户信息异常:", error.message || error);
         return null;
       }
     },
@@ -126,14 +213,41 @@ const useUserStore = common_vendor.defineStore("user", {
     updateUserInfo(updates) {
       if (this.userInfo) {
         this.userInfo = { ...this.userInfo, ...updates };
-        common_vendor.index.__f__("log", "at stores/user.js:130", "用户信息已更新:", this.userInfo);
+        common_vendor.index.__f__("log", "at stores/user.js:230", "用户信息已更新:", this.userInfo);
+      }
+    },
+    // 更新当前商户信息
+    updateCurrentMerchant(merchantData) {
+      var _a, _b;
+      if (((_a = this.userInfo) == null ? void 0 : _a.merchant) && Array.isArray(this.userInfo.merchant)) {
+        if (this.currentMerchantIndex >= 0 && this.currentMerchantIndex < this.userInfo.merchant.length) {
+          this.userInfo.merchant[this.currentMerchantIndex] = merchantData;
+          common_vendor.index.__f__("log", "at stores/user.js:240", "当前商户信息已更新");
+        }
+      } else if ((_b = this.userInfo) == null ? void 0 : _b.merchant) {
+        this.userInfo.merchant = merchantData;
+      }
+    },
+    // 添加新商户
+    addMerchant(merchantData) {
+      if (!this.userInfo)
+        return;
+      if (!this.userInfo.merchant) {
+        this.userInfo.merchant = [merchantData];
+      } else if (Array.isArray(this.userInfo.merchant)) {
+        this.userInfo.merchant.push(merchantData);
+      } else {
+        this.userInfo.merchant = [this.userInfo.merchant, merchantData];
+      }
+      if (Array.isArray(this.userInfo.merchant)) {
+        this.currentMerchantIndex = this.userInfo.merchant.length - 1;
       }
     },
     // 检查是否有用户信息，没有则自动获取
     async ensureUserInfo() {
       const result = await this.fetchUserInfo();
       if (result === null) {
-        common_vendor.index.__f__("log", "at stores/user.js:141", "用户信息获取失败，可能未登录或网络异常");
+        common_vendor.index.__f__("log", "at stores/user.js:274", "用户信息获取失败，可能未登录或网络异常");
         return null;
       }
       return this.userInfo;
@@ -142,7 +256,7 @@ const useUserStore = common_vendor.defineStore("user", {
     clearUserInfo() {
       this.userInfo = null;
       this.isLoggedIn = false;
-      common_vendor.index.__f__("log", "at stores/user.js:151", "用户信息已清除");
+      common_vendor.index.__f__("log", "at stores/user.js:284", "用户信息已清除");
     },
     // 退出登录
     logout() {
@@ -151,7 +265,7 @@ const useUserStore = common_vendor.defineStore("user", {
       common_vendor.index.removeStorageSync("access_expire_time");
       common_vendor.index.removeStorageSync("refresh_token");
       common_vendor.index.removeStorageSync("refresh_expire_time");
-      common_vendor.index.__f__("log", "at stores/user.js:165", "用户已退出登录");
+      common_vendor.index.__f__("log", "at stores/user.js:298", "用户已退出登录");
       common_vendor.index.redirectTo({
         url: "/pages/index/index"
       });

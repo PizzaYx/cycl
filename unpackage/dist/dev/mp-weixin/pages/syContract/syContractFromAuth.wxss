@@ -49,7 +49,21 @@
   padding: 20rpx 30rpx;
   padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
   border-top: 1rpx solid #eee;
+  display: flex;
+  gap: 20rpx;
   z-index: 100;
+}
+.bottom-actions .action-btn.data-v-bc950cb2 {
+  flex: 1;
+  height: 80rpx;
+  border-radius: 40rpx;
+  font-size: 32rpx;
+  font-weight: bold;
+  border: none;
+}
+.bottom-actions .action-btn.submit-btn.data-v-bc950cb2 {
+  background: linear-gradient(135deg, #07c160 0%, #10ad6a 100%);
+  color: #fff;
 }
 .data-v-bc950cb2 .rich-text {
   font-size: 28rpx;

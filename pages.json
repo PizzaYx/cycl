@@ -178,6 +178,13 @@
                 "navigationStyle": "custom",
                 "pageOrientation": "landscape"
             }
+        },
+        {
+            "path": "pages/syContract/contractWebview/contractWebview",
+            "style": {
+                "navigationBarTitleText": "保存合同",
+                "navigationStyle": "custom"
+            }
         }
     ],
     "globalStyle": {

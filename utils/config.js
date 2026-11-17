@@ -2,6 +2,10 @@
 
 export const uploadUrl = 'https://cc.cdlians.tech:8883/backend/api/merchantapi/webupload'
 //export const uploadUrl = 'http://192.168.0.118:8080/api/merchantapi/webupload'
+
+// 合同下载H5地址（webview预览，长按保存图片）
+export const CONTRACT_DOWNLOAD_URL = 'https://cc.cdlians.tech:8883/upload/img'
+
 // 天地图API配置
 export const TIANDITU_CONFIG = {
     // 天地图API密钥

@@ -126,7 +126,7 @@ const _sfc_main = {
     const getToStatistics = async () => {
       var _a;
       const params = {
-        merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+        merchantId: (_a = userStore.currentMerchant) == null ? void 0 : _a.id
       };
       if (selectedStatus.value !== null) {
         params.status = selectedStatus.value;
@@ -162,7 +162,7 @@ const _sfc_main = {
         }
         const params = {
           pageNum: pageNum.value,
-          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+          merchantId: (_a = userStore.currentMerchant) == null ? void 0 : _a.id
         };
         if (selectedStatus.value !== null) {
           params.status = selectedStatus.value;
@@ -234,18 +234,18 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "4d"),
         b: common_vendor.p({
           title: "商户收运统计"
         }),
-        c: common_vendor.o(onStatusChange),
-        d: common_vendor.o(($event) => selectedStatus.value = $event),
+        c: common_vendor.o(onStatusChange, "90"),
+        d: common_vendor.o(($event) => selectedStatus.value = $event, "24"),
         e: common_vendor.p({
           options: statusOptions.value,
           modelValue: selectedStatus.value
         }),
-        f: common_vendor.o(onTimeChange),
-        g: common_vendor.o(($event) => selectedTimeRange.value = $event),
+        f: common_vendor.o(onTimeChange, "f2"),
+        g: common_vendor.o(($event) => selectedTimeRange.value = $event, "e7"),
         h: common_vendor.p({
           modelValue: selectedTimeRange.value
         }),

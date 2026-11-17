@@ -46,9 +46,9 @@ const _sfc_main = {
       emit("abnormalReport", props.orderData);
     };
     const handleReport = () => {
-      const { carId, driverId, merchantId, id: planId, merchantName, registrationNumber } = props.orderData;
+      const { merchantId, id: planId, merchantName } = props.orderData;
       common_vendor.index.navigateTo({
-        url: `/pages/collection/syReport?carId=${carId}&driverId=${driverId}&merchantId=${merchantId}&planId=${planId}&merchantName=${merchantName}&registrationNumber=${registrationNumber}`
+        url: `/pages/collection/syReport?merchantId=${merchantId}&planId=${planId}&merchantName=${merchantName}`
       });
     };
     const handleView = () => {
@@ -61,29 +61,29 @@ const _sfc_main = {
       return common_vendor.e({
         a: __props.viewOnly
       }, __props.viewOnly ? {
-        b: common_vendor.o(handleView),
+        b: common_vendor.o(handleView, "fd"),
         c: common_vendor.p({
           size: "mini",
           type: "default"
         })
       } : __props.status === 0 || __props.status === "0" ? {
-        e: common_vendor.o(handleReport),
+        e: common_vendor.o(handleReport, "c7"),
         f: common_vendor.p({
           size: "mini",
           type: "primary"
         }),
-        g: common_vendor.o(handleCancel),
+        g: common_vendor.o(handleCancel, "d6"),
         h: common_vendor.p({
           size: "mini",
           type: "default"
         }),
-        i: common_vendor.o(handleView),
+        i: common_vendor.o(handleView, "af"),
         j: common_vendor.p({
           size: "mini",
           type: "default"
         })
       } : {
-        k: common_vendor.o(handleView),
+        k: common_vendor.o(handleView, "2e"),
         l: common_vendor.p({
           size: "mini",
           type: "default"

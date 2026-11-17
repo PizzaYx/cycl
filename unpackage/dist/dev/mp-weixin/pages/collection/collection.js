@@ -44,9 +44,10 @@ const _sfc_main = {
       drawProgressArc();
     });
     const getMerchantStatistics = async () => {
-      var _a;
+      var _a, _b;
       const res = await api_apis.apiGetDriverTodayStatistics({
-        driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
+        driverId: (_a = userStore.currentDriver) == null ? void 0 : _a.id,
+        carId: (_b = userStore.currentDriver) == null ? void 0 : _b.carId
       });
       if (res.code === 200) {
         dqNum.value = res.data.confirmNum;
@@ -117,13 +118,54 @@ const _sfc_main = {
       const res = await api_apis.apiGetDriverPlanPage({
         pageNum: 1,
         pageSize: 5,
-        driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
+        driverId: (_a = userStore.currentDriver) == null ? void 0 : _a.id
       });
       if (res.code === 200) {
         allOrderList.value = res.data.list;
       }
     };
-    const getUserInfo = () => {
+    const showMenu = common_vendor.ref(false);
+    const toggleMenu = () => {
+      showMenu.value = !showMenu.value;
+    };
+    const closeMenu = () => {
+      showMenu.value = false;
+    };
+    const handleSwitchVehicle = () => {
+      closeMenu();
+      const drivers = userStore.drivers;
+      if (!drivers || drivers.length <= 1) {
+        common_vendor.index.showToast({
+          title: "暂无其他车辆可切换",
+          icon: "none"
+        });
+        return;
+      }
+      const itemList = drivers.map((d) => d.registrationNumber || "未设置车牌");
+      common_vendor.index.showActionSheet({
+        itemList,
+        success: function(res) {
+          const index = res.tapIndex;
+          userStore.switchDriver(index);
+          common_vendor.index.showLoading({ title: "切换中..." });
+          Promise.all([
+            getMerchantStatistics(),
+            getMerchantSydList()
+          ]).finally(() => {
+            common_vendor.index.hideLoading();
+            common_vendor.index.showToast({
+              title: "已切换",
+              icon: "success"
+            });
+          });
+        },
+        fail: function(res) {
+          common_vendor.index.__f__("log", "at pages/collection/collection.vue:308", res.errMsg);
+        }
+      });
+    };
+    const handleUserInfo = () => {
+      closeMenu();
       common_vendor.index.navigateTo({
         url: "/pages/user/user"
       });
@@ -149,7 +191,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/collection/collection.vue:270", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/collection/collection.vue:346", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"
@@ -171,7 +213,7 @@ const _sfc_main = {
         await getMerchantSydList();
         drawProgressArc();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:296", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:372", "刷新失败:", error);
         common_vendor.index.showToast({
           title: "刷新失败",
           icon: "none"
@@ -186,7 +228,7 @@ const _sfc_main = {
         await getMerchantSydList();
         drawProgressArc();
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/collection/collection.vue:316", "刷新数据失败:", error);
+        common_vendor.index.__f__("error", "at pages/collection/collection.vue:392", "刷新数据失败:", error);
       }
     };
     const handleAbnormalReport = (orderData) => {
@@ -256,16 +298,34 @@ const _sfc_main = {
         a: common_assets._imports_0,
         b: common_vendor.t(common_vendor.unref(userStore).userSFAvatar),
         c: common_vendor.t(common_vendor.unref(userStore).nickName || "未登录"),
-        d: common_vendor.t(((_a = common_vendor.unref(userStore).sfmerchant) == null ? void 0 : _a.registrationNumber) || "未设置车牌"),
-        e: common_vendor.p({
-          type: "right",
-          size: "35rpx"
+        d: common_vendor.t(((_a = common_vendor.unref(userStore).currentDriver) == null ? void 0 : _a.registrationNumber) || "未设置车牌"),
+        e: common_vendor.o(handleUserInfo, "2e"),
+        f: common_vendor.p({
+          type: "gear-filled",
+          size: "20",
+          color: "#333"
         }),
-        f: common_vendor.o(getUserInfo),
-        g: common_vendor.t(syNum.value),
-        h: common_vendor.t(yyNum.value),
-        i: common_vendor.t(dqNum.value),
-        j: common_vendor.f(quickActions.value, (action, index, i0) => {
+        g: common_vendor.o(toggleMenu, "2e"),
+        h: showMenu.value
+      }, showMenu.value ? {
+        i: common_vendor.p({
+          type: "refreshempty",
+          size: "16",
+          color: "#333"
+        }),
+        j: common_vendor.o(handleSwitchVehicle, "aa"),
+        k: common_vendor.p({
+          type: "person",
+          size: "16",
+          color: "#333"
+        }),
+        l: common_vendor.o(handleUserInfo, "83")
+      } : {}, {
+        m: common_vendor.o(closeMenu, "9e"),
+        n: common_vendor.t(syNum.value),
+        o: common_vendor.t(yyNum.value),
+        p: common_vendor.t(dqNum.value),
+        q: common_vendor.f(quickActions.value, (action, index, i0) => {
           return {
             a: action.icon,
             b: common_vendor.t(action.name),
@@ -273,28 +333,28 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleQuickAction(action), action.id)
           };
         }),
-        k: common_vendor.p({
+        r: common_vendor.p({
           type: "right",
           size: "16",
           color: "rgba(19, 19, 19, 0.50)"
         }),
-        l: common_vendor.o(goToSydAllList),
-        m: allOrderList.value.length > 0
+        s: common_vendor.o(goToSydAllList, "49"),
+        t: allOrderList.value.length > 0
       }, allOrderList.value.length > 0 ? {
-        n: common_vendor.f(allOrderList.value, (item, index, i0) => {
+        v: common_vendor.f(allOrderList.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.merchantName),
-            b: "cd17183b-2-" + i0,
+            b: "cd17183b-4-" + i0,
             c: common_vendor.p({
               status: item.status
             }),
-            d: "cd17183b-3-" + i0,
+            d: "cd17183b-5-" + i0,
             e: common_vendor.p({
               fields: getInfoFields(item)
             }),
             f: common_vendor.o(handleRefresh, index),
             g: common_vendor.o(handleAbnormalReport, index),
-            h: "cd17183b-4-" + i0,
+            h: "cd17183b-6-" + i0,
             i: common_vendor.p({
               status: item.status,
               ["order-data"]: item
@@ -303,11 +363,11 @@ const _sfc_main = {
           };
         })
       } : {}, {
-        o: refreshing.value,
-        p: common_vendor.o(onRefresh),
-        q: common_vendor.o(closeAbnormalModal),
-        r: common_vendor.o(handleAbnormalSuccess),
-        s: common_vendor.p({
+        w: refreshing.value,
+        x: common_vendor.o(onRefresh, "6d"),
+        y: common_vendor.o(closeAbnormalModal, "c1"),
+        z: common_vendor.o(handleAbnormalSuccess, "26"),
+        A: common_vendor.p({
           show: showAbnormalModal.value,
           ["order-data"]: currentOrderData.value
         })

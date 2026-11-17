@@ -27,6 +27,7 @@ if (!Math) {
   "./pages/syContract/syContractFromAuth.js";
   "./pages/syContract/syPreview.js";
   "./pages/syContract/shSignature.js";
+  "./pages/syContract/contractWebview/contractWebview.js";
 }
 const _sfc_main = {
   onLaunch: function() {

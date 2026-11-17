@@ -91,17 +91,17 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "85"),
         b: common_vendor.p({
           title: "修改密码"
         }),
         c: formData.value.oldPassword,
-        d: common_vendor.o(($event) => formData.value.oldPassword = $event.detail.value),
+        d: common_vendor.o(($event) => formData.value.oldPassword = $event.detail.value, "2a"),
         e: formData.value.newPassword,
-        f: common_vendor.o(($event) => formData.value.newPassword = $event.detail.value),
+        f: common_vendor.o(($event) => formData.value.newPassword = $event.detail.value, "58"),
         g: formData.value.confirmPassword,
-        h: common_vendor.o(($event) => formData.value.confirmPassword = $event.detail.value),
-        i: common_vendor.o(handleSubmit)
+        h: common_vendor.o(($event) => formData.value.confirmPassword = $event.detail.value, "91"),
+        i: common_vendor.o(handleSubmit, "b1")
       };
     };
   }

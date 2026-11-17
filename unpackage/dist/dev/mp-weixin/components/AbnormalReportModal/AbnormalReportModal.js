@@ -90,7 +90,7 @@ const _sfc_main = {
       return common_vendor.e({
         a: __props.show
       }, __props.show ? {
-        b: common_vendor.o(handleClose),
+        b: common_vendor.o(handleClose, "de"),
         c: common_vendor.f(abnormalTypes, (type, index, i0) => {
           return common_vendor.e({
             a: selectedException.value === type.label
@@ -102,15 +102,15 @@ const _sfc_main = {
             f: common_vendor.o(($event) => selectExceptionType(type.label), index)
           });
         }),
-        d: common_vendor.o([($event) => otherReason.value = $event.detail.value, onOtherReasonInput]),
+        d: common_vendor.o([($event) => otherReason.value = $event.detail.value, onOtherReasonInput], "28"),
         e: otherReason.value,
         f: common_vendor.t(otherReason.value.length),
-        g: common_vendor.o(handleClose),
+        g: common_vendor.o(handleClose, "d7"),
         h: !selectedException.value.trim() ? 1 : "",
-        i: common_vendor.o(handleSubmit),
-        j: common_vendor.o(preventTouch),
-        k: common_vendor.o(preventTouch),
-        l: common_vendor.o(preventTouch)
+        i: common_vendor.o(handleSubmit, "3d"),
+        j: common_vendor.o(preventTouch, "12"),
+        k: common_vendor.o(preventTouch, "40"),
+        l: common_vendor.o(preventTouch, "e9")
       } : {});
     };
   }

@@ -12,7 +12,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "85"),
         b: common_vendor.p({
           title: "隐私服务"
         })

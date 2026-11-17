@@ -147,25 +147,26 @@ const _sfc_main = {
       fillFormData(null);
     });
     const fillFormData = (data) => {
-      var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j;
+      var _a, _b, _c, _d, _e, _f;
       common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:296", "开始数据回显:", data, "用户信息:", userStore.userInfo);
-      formData.merchantName = ((_a = userStore.merchant) == null ? void 0 : _a.name) || ((_b = userStore.userInfo) == null ? void 0 : _b.name) || "";
-      formData.address = ((_c = userStore.merchant) == null ? void 0 : _c.address) || ((_d = userStore.userInfo) == null ? void 0 : _d.address) || "";
-      formData.contactPerson = ((_e = userStore.merchant) == null ? void 0 : _e.contactTruename) || ((_f = userStore.userInfo) == null ? void 0 : _f.contactTruename) || "";
-      formData.contactPhone = ((_g = userStore.merchant) == null ? void 0 : _g.contactTel) || ((_h = userStore.userInfo) == null ? void 0 : _h.contactTel) || "";
+      const merchant = userStore.currentMerchant;
+      formData.merchantName = (merchant == null ? void 0 : merchant.name) || ((_a = userStore.userInfo) == null ? void 0 : _a.name) || "";
+      formData.address = (merchant == null ? void 0 : merchant.address) || ((_b = userStore.userInfo) == null ? void 0 : _b.address) || "";
+      formData.contactPerson = (merchant == null ? void 0 : merchant.contactTruename) || ((_c = userStore.userInfo) == null ? void 0 : _c.contactTruename) || "";
+      formData.contactPhone = (merchant == null ? void 0 : merchant.contactTel) || ((_d = userStore.userInfo) == null ? void 0 : _d.contactTel) || "";
       if (data) {
-        formData.bucketCount = ((_i = data.bucketNum) == null ? void 0 : _i.toString()) || "";
-        formData.estimatedWeight = ((_j = data.trashWeight) == null ? void 0 : _j.toString()) || "";
+        formData.bucketCount = ((_e = data.bucketNum) == null ? void 0 : _e.toString()) || "";
+        formData.estimatedWeight = ((_f = data.trashWeight) == null ? void 0 : _f.toString()) || "";
         formData.estimatedTime = data.estimatedTime || "";
         formData.estimatedRemarks = data.estimatedRemarks || "";
       }
-      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:312", "数据回显完成:", formData);
+      common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:313", "数据回显完成:", formData);
     };
     const validateForm = async () => {
       try {
         return await formRef.value.validate();
       } catch (error) {
-        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:321", "表单验证失败:", error);
+        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:322", "表单验证失败:", error);
         return false;
       }
     };
@@ -178,7 +179,7 @@ const _sfc_main = {
       submitting.value = true;
       try {
         const submitData = {
-          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+          merchantId: (_a = userStore.currentMerchant) == null ? void 0 : _a.id,
           // 用户ID
           name: formData.merchantName,
           // 商户名称
@@ -198,7 +199,7 @@ const _sfc_main = {
           // 备注说明
         };
         const result = await api_apis.apiPostaddPlanTemporary(submitData);
-        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:350", "预约提交API返回:", submitData);
+        common_vendor.index.__f__("log", "at pages/merchant/shReservation.vue:351", "预约提交API返回:", submitData);
         if (result && result.code === 200) {
           common_vendor.index.showToast({
             title: "预约申请提交成功",
@@ -215,7 +216,7 @@ const _sfc_main = {
           });
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/shReservation.vue:375", "提交认证失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/shReservation.vue:376", "提交认证失败:", error);
         common_vendor.index.showToast({
           title: "提交失败，请重试",
           icon: "none"
@@ -226,7 +227,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "d2"),
         b: common_vendor.p({
           title: "临时预约"
         }),
@@ -256,7 +257,7 @@ const _sfc_main = {
           color: "#ff4444"
         })
       } : {}, {
-        j: common_vendor.o(($event) => formData.merchantName = $event),
+        j: common_vendor.o(($event) => formData.merchantName = $event, "6a"),
         k: common_vendor.p({
           clearable: false,
           disabled: true,
@@ -266,7 +267,7 @@ const _sfc_main = {
           label: "商户名称",
           name: "merchantName"
         }),
-        m: common_vendor.o(($event) => formData.address = $event),
+        m: common_vendor.o(($event) => formData.address = $event, "b3"),
         n: common_vendor.p({
           clearable: false,
           disabled: true,
@@ -276,7 +277,7 @@ const _sfc_main = {
           label: "商户地址",
           name: "address"
         }),
-        p: common_vendor.o(($event) => formData.contactPhone = $event),
+        p: common_vendor.o(($event) => formData.contactPhone = $event, "63"),
         q: common_vendor.p({
           type: "number",
           maxlength: "11",
@@ -288,7 +289,7 @@ const _sfc_main = {
           label: "联系电话",
           name: "contactPhone"
         }),
-        s: common_vendor.o(($event) => formData.bucketCount = $event),
+        s: common_vendor.o(($event) => formData.bucketCount = $event, "18"),
         t: common_vendor.p({
           placeholder: "请输入垃圾桶数量",
           type: "number",
@@ -301,7 +302,7 @@ const _sfc_main = {
           name: "bucketCount",
           required: true
         }),
-        w: common_vendor.o(($event) => formData.estimatedWeight = $event),
+        w: common_vendor.o(($event) => formData.estimatedWeight = $event, "76"),
         x: common_vendor.p({
           placeholder: "请输入预估垃圾重量",
           type: "number",
@@ -332,8 +333,8 @@ const _sfc_main = {
           size: "20",
           color: "#999"
         }),
-        E: common_vendor.o(openDateTimePicker),
-        F: common_vendor.o(($event) => formData.estimatedTime = $event),
+        E: common_vendor.o(openDateTimePicker, "96"),
+        F: common_vendor.o(($event) => formData.estimatedTime = $event, "2c"),
         G: common_vendor.p({
           type: "date",
           start: minDate.value,
@@ -347,7 +348,7 @@ const _sfc_main = {
           name: "estimatedTime",
           required: true
         }),
-        I: common_vendor.o(($event) => formData.estimatedRemarks = $event),
+        I: common_vendor.o(($event) => formData.estimatedRemarks = $event, "a6"),
         J: common_vendor.p({
           placeholder: "请输入其他要说明的信息",
           type: "text",
@@ -372,7 +373,7 @@ const _sfc_main = {
         O: authStatus.value === "none" || authStatus.value === "rejected"
       }, authStatus.value === "none" || authStatus.value === "rejected" ? {
         P: common_vendor.t(authStatus.value === "rejected" ? "重新提交" : "提交"),
-        Q: common_vendor.o(submitAuth),
+        Q: common_vendor.o(submitAuth, "53"),
         R: submitting.value
       } : {});
     };

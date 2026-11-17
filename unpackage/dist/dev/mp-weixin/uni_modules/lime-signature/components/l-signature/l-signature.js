@@ -404,21 +404,21 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   }, $data.useCanvas2d ? {
     c: $options.canvasId,
     d: _ctx.disableScroll,
-    e: common_vendor.o((...args) => $options.touchStart && $options.touchStart(...args)),
-    f: common_vendor.o((...args) => $options.touchMove && $options.touchMove(...args)),
-    g: common_vendor.o((...args) => $options.touchEnd && $options.touchEnd(...args))
+    e: common_vendor.o((...args) => $options.touchStart && $options.touchStart(...args), "e4"),
+    f: common_vendor.o((...args) => $options.touchMove && $options.touchMove(...args), "06"),
+    g: common_vendor.o((...args) => $options.touchEnd && $options.touchEnd(...args), "b2")
   } : {
     h: _ctx.disableScroll,
     i: $options.canvasId,
     j: $options.canvasId,
     k: $data.canvasWidth,
     l: $data.canvasHeight,
-    m: common_vendor.o((...args) => $options.touchStart && $options.touchStart(...args)),
-    n: common_vendor.o((...args) => $options.touchMove && $options.touchMove(...args)),
-    o: common_vendor.o((...args) => $options.touchEnd && $options.touchEnd(...args)),
-    p: common_vendor.o((...args) => $options.touchStart && $options.touchStart(...args)),
-    q: common_vendor.o((...args) => $options.touchMove && $options.touchMove(...args)),
-    r: common_vendor.o((...args) => $options.touchEnd && $options.touchEnd(...args))
+    m: common_vendor.o((...args) => $options.touchStart && $options.touchStart(...args), "24"),
+    n: common_vendor.o((...args) => $options.touchMove && $options.touchMove(...args), "32"),
+    o: common_vendor.o((...args) => $options.touchEnd && $options.touchEnd(...args), "a3"),
+    p: common_vendor.o((...args) => $options.touchStart && $options.touchStart(...args), "ef"),
+    q: common_vendor.o((...args) => $options.touchMove && $options.touchMove(...args), "cf"),
+    r: common_vendor.o((...args) => $options.touchEnd && $options.touchEnd(...args), "ec")
   }, {
     s: $data.showOffscreen
   }, $data.showOffscreen ? {
@@ -428,9 +428,9 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   } : {}, {
     x: $data.showMask
   }, $data.showMask ? {
-    y: common_vendor.o((...args) => $options.touchStart && $options.touchStart(...args)),
-    z: common_vendor.o((...args) => $options.touchMove && $options.touchMove(...args)),
-    A: common_vendor.o((...args) => $options.touchEnd && $options.touchEnd(...args))
+    y: common_vendor.o((...args) => $options.touchStart && $options.touchStart(...args), "21"),
+    z: common_vendor.o((...args) => $options.touchMove && $options.touchMove(...args), "75"),
+    A: common_vendor.o((...args) => $options.touchEnd && $options.touchEnd(...args), "45")
   } : {}, {
     B: common_vendor.s($options.canvasStyle),
     C: common_vendor.s(_ctx.styles)

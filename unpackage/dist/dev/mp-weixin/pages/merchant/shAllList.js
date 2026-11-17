@@ -36,7 +36,7 @@ const _sfc_main = {
     const handleViewDetails = (item) => {
       common_vendor.index.__f__("log", "at pages/merchant/shAllList.vue:110", "查看详情按钮被点击", item);
       common_vendor.index.navigateTo({
-        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId=${item.merchantId}`
       });
     };
     const getInfoFields = (item) => {
@@ -120,7 +120,7 @@ const _sfc_main = {
         }
         const params = {
           pageNum: pageNum.value,
-          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+          merchantId: (_a = userStore.currentMerchant) == null ? void 0 : _a.id
         };
         if (selectedStatus.value !== null) {
           params.status = selectedStatus.value;
@@ -189,18 +189,18 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "85"),
         b: common_vendor.p({
           title: "收运记录"
         }),
-        c: common_vendor.o(onStatusChange),
-        d: common_vendor.o(($event) => selectedStatus.value = $event),
+        c: common_vendor.o(onStatusChange, "10"),
+        d: common_vendor.o(($event) => selectedStatus.value = $event, "ad"),
         e: common_vendor.p({
           options: statusOptions.value,
           modelValue: selectedStatus.value
         }),
-        f: common_vendor.o(onTimeChange),
-        g: common_vendor.o(($event) => selectedTimeRange.value = $event),
+        f: common_vendor.o(onTimeChange, "74"),
+        g: common_vendor.o(($event) => selectedTimeRange.value = $event, "4d"),
         h: common_vendor.p({
           modelValue: selectedTimeRange.value
         }),

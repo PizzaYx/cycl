@@ -1,6 +1,7 @@
 "use strict";
 const common_vendor = require("../common/vendor.js");
 const uploadUrl = "https://cc.cdlians.tech:8883/backend/api/merchantapi/webupload";
+const CONTRACT_DOWNLOAD_URL = "https://cc.cdlians.tech:8883/upload/img";
 const TIANDITU_CONFIG = {
   // 天地图API密钥
   API_KEY: "cd0affe367bfe3a6300580c3502b7f17",
@@ -17,6 +18,7 @@ const createUploadHeaders = () => {
     };
   });
 };
+exports.CONTRACT_DOWNLOAD_URL = CONTRACT_DOWNLOAD_URL;
 exports.TIANDITU_CONFIG = TIANDITU_CONFIG;
 exports.createUploadHeaders = createUploadHeaders;
 exports.uploadUrl = uploadUrl;

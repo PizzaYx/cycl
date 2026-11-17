@@ -32,7 +32,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "4e"),
         b: common_vendor.p({
           dark: true,
           fixed: true,
@@ -45,8 +45,8 @@ const _sfc_main = {
         c: common_vendor.p({
           content: contractContent.value
         }),
-        d: common_vendor.o(back),
-        e: common_vendor.o(printContract)
+        d: common_vendor.o(back, "c6"),
+        e: common_vendor.o(printContract, "99")
       };
     };
   }

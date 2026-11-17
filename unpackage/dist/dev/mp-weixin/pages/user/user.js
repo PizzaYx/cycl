@@ -48,7 +48,7 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "85"),
         b: common_vendor.p({
           title: "个人信息"
         }),
@@ -58,7 +58,7 @@ const _sfc_main = {
       } : {
         e: common_vendor.t(common_vendor.unref(userStore).userType == 1 ? common_vendor.unref(userStore).userAvatar : common_vendor.unref(userStore).userSFAvatar)
       }, {
-        f: common_vendor.o(handleAvatarClick),
+        f: common_vendor.o(handleAvatarClick, "61"),
         g: common_vendor.t(common_vendor.unref(userStore).nickName || "未设置"),
         h: common_vendor.t(common_vendor.unref(userStore).userName || "未设置"),
         i: common_vendor.t(common_vendor.unref(userStore).userTypeText),
@@ -67,8 +67,8 @@ const _sfc_main = {
           size: "16",
           color: "#999"
         }),
-        k: common_vendor.o(navigateToChangePassword),
-        l: common_vendor.o(handleLogout)
+        k: common_vendor.o(navigateToChangePassword, "93"),
+        l: common_vendor.o(handleLogout, "6c")
       });
     };
   }

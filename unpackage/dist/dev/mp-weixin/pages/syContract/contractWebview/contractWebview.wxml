@@ -1,0 +1,1 @@
+<view class="webview-container data-v-33a399a4"><web-view class="data-v-33a399a4" src="{{a}}" bindmessage="{{b}}"></web-view></view>

@@ -154,18 +154,13 @@ const _sfc_main = {
                   common_vendor.index.__f__("log", "at pages/syContract/shSignature.vue:237", "签名上传成功:", uploadRes);
                   setTimeout(() => {
                     common_vendor.index.__f__("log", "at pages/syContract/shSignature.vue:240", "===== shSignature.vue 准备返回 =====");
-                    common_vendor.index.__f__("log", "at pages/syContract/shSignature.vue:241", "执行uni.navigateBack，delta: 1");
+                    common_vendor.index.$emit("signatureUpdated", {
+                      partyB: response.url
+                    });
                     common_vendor.index.navigateBack({
                       delta: 1,
-                      success: () => {
-                        common_vendor.index.__f__("log", "at pages/syContract/shSignature.vue:245", "shSignature.vue uni.navigateBack 成功");
-                        common_vendor.index.__f__("log", "at pages/syContract/shSignature.vue:247", "发送signatureUpdated事件");
-                        common_vendor.index.$emit("signatureUpdated", {
-                          partyB: response.url
-                        });
-                      },
                       fail: (err) => {
-                        common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:253", "shSignature.vue uni.navigateBack 失败:", err);
+                        common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:248", "shSignature.vue uni.navigateBack 失败:", err);
                       }
                     });
                   }, 1500);
@@ -173,7 +168,7 @@ const _sfc_main = {
                   throw new Error(response.message || "上传失败");
                 }
               } catch (error) {
-                common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:261", "解析上传响应失败:", error);
+                common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:256", "解析上传响应失败:", error);
                 common_vendor.index.showToast({
                   title: "上传失败，请重试",
                   icon: "none"
@@ -182,7 +177,7 @@ const _sfc_main = {
             },
             fail: (error) => {
               common_vendor.index.hideLoading();
-              common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:270", "上传签名失败:", error);
+              common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:265", "上传签名失败:", error);
               common_vendor.index.showToast({
                 title: "上传失败，请重试",
                 icon: "none"
@@ -191,7 +186,7 @@ const _sfc_main = {
           });
         },
         fail: (error) => {
-          common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:279", "保存签名失败:", error);
+          common_vendor.index.__f__("error", "at pages/syContract/shSignature.vue:274", "保存签名失败:", error);
           common_vendor.index.showToast({
             title: "保存签名失败",
             icon: "none"
@@ -221,7 +216,7 @@ const _sfc_main = {
           size: "20",
           color: "#000"
         }),
-        c: common_vendor.o(back),
+        c: common_vendor.o(back, "ef"),
         d: common_vendor.t(contractTitle.value),
         e: common_vendor.s(navContentStyle.value),
         f: common_vendor.s(navBarStyle.value),
@@ -234,10 +229,10 @@ const _sfc_main = {
           openSmooth: openSmooth.value,
           openSmooth: true
         }),
-        i: common_vendor.o(clearSignature),
-        j: common_vendor.o(undoSignature),
-        k: common_vendor.o(saveSignature),
-        l: common_vendor.o(cancelSignature)
+        i: common_vendor.o(clearSignature, "b2"),
+        j: common_vendor.o(undoSignature, "34"),
+        k: common_vendor.o(saveSignature, "33"),
+        l: common_vendor.o(cancelSignature, "0f")
       };
     };
   }

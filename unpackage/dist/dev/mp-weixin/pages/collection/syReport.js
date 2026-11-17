@@ -80,7 +80,6 @@ const _sfc_main = {
     const autoRefreshCount = common_vendor.ref(0);
     const autoRefreshTimeout = common_vendor.ref(null);
     const isAutoRefreshTimeout = common_vendor.ref(false);
-    const carId = common_vendor.ref("");
     const driverId = common_vendor.ref("");
     const merchantId = common_vendor.ref("");
     const planId = common_vendor.ref("");
@@ -91,19 +90,16 @@ const _sfc_main = {
     const submitData = common_vendor.ref([]);
     const isSubmitting = common_vendor.ref(false);
     common_vendor.onLoad(async (options) => {
-      var _a;
-      if (options.carId)
-        carId.value = options.carId;
-      if (options.driverId)
-        driverId.value = options.driverId;
+      var _a, _b;
       if (options.merchantId)
         merchantId.value = options.merchantId;
       if (options.planId)
         planId.value = options.planId;
       if (options.merchantName)
         merchantName.value = options.merchantName;
-      registrationNumber.value = (_a = userStore.sfmerchant) == null ? void 0 : _a.registrationNumber;
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:189", "接收到的参数:", options);
+      registrationNumber.value = (_a = userStore.currentDriver) == null ? void 0 : _a.registrationNumber;
+      driverId.value = (_b = userStore.currentDriver) == null ? void 0 : _b.id;
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:187", "接收到的参数:", options);
       startAutoRefresh();
     });
     common_vendor.onUnload(() => {
@@ -129,9 +125,9 @@ const _sfc_main = {
                 });
                 longitude = locationRes.longitude;
                 latitude = locationRes.latitude;
-                common_vendor.index.__f__("log", "at pages/collection/syReport.vue:239", "当前经纬度 - 经度(lon):", longitude, "纬度(lat):", latitude);
+                common_vendor.index.__f__("log", "at pages/collection/syReport.vue:237", "当前经纬度 - 经度(lon):", longitude, "纬度(lat):", latitude);
               } catch (locationError) {
-                common_vendor.index.__f__("error", "at pages/collection/syReport.vue:241", "获取地理位置失败:", locationError);
+                common_vendor.index.__f__("error", "at pages/collection/syReport.vue:239", "获取地理位置失败:", locationError);
                 common_vendor.index.showToast({
                   title: "获取位置失败，将继续提交",
                   icon: "none"
@@ -143,8 +139,8 @@ const _sfc_main = {
                 lon: longitude,
                 lat: latitude
               };
-              common_vendor.index.__f__("log", "at pages/collection/syReport.vue:256", "提交的 body 数据:", bodyData);
-              common_vendor.index.__f__("log", "at pages/collection/syReport.vue:257", "提交的查询参数:", queryParams);
+              common_vendor.index.__f__("log", "at pages/collection/syReport.vue:254", "提交的 body 数据:", bodyData);
+              common_vendor.index.__f__("log", "at pages/collection/syReport.vue:255", "提交的查询参数:", queryParams);
               const confirmRes = await api_apis.apiPostreportWeight(bodyData, queryParams);
               if (confirmRes.code === 200) {
                 common_vendor.index.showToast({
@@ -162,7 +158,7 @@ const _sfc_main = {
                 isSubmitting.value = false;
               }
             } catch (error) {
-              common_vendor.index.__f__("error", "at pages/collection/syReport.vue:281", "确认收运异常:", error);
+              common_vendor.index.__f__("error", "at pages/collection/syReport.vue:279", "确认收运异常:", error);
               common_vendor.index.showToast({
                 title: "操作异常",
                 icon: "none"
@@ -210,12 +206,12 @@ const _sfc_main = {
         });
         ljNum.value++;
       });
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:325", "新增记录数据:", newWeightData);
-      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:326", "当前提交数据:", submitData.value);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:323", "新增记录数据:", newWeightData);
+      common_vendor.index.__f__("log", "at pages/collection/syReport.vue:324", "当前提交数据:", submitData.value);
     };
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "85"),
         b: common_vendor.p({
           title: "收运上报"
         }),
@@ -240,7 +236,7 @@ const _sfc_main = {
       }, isSubmitting.value ? {} : {}, {
         k: isSubmitting.value ? 1 : "",
         l: isSubmitting.value,
-        m: common_vendor.o(getSyCheckDetail)
+        m: common_vendor.o(getSyCheckDetail, "8b")
       });
     };
   }

@@ -238,17 +238,12 @@ const saveSignature = () => {
                             // 返回上一页并传递签名数据
                             setTimeout(() => {
                                 console.log('===== shSignature.vue 准备返回 =====')
-                                console.log('执行uni.navigateBack，delta: 1')
+                                // 先发送事件，再返回，避免页面销毁导致事件丢失
+                                uni.$emit('signatureUpdated', {
+                                    partyB: response.url
+                                })
                                 uni.navigateBack({
                                     delta: 1,
-                                    success: () => {
-                                        console.log('shSignature.vue uni.navigateBack 成功')
-                                        // 通过事件传递签名数据
-                                        console.log('发送signatureUpdated事件')
-                                        uni.$emit('signatureUpdated', {
-                                            partyB: response.url
-                                        })
-                                    },
                                     fail: (err) => {
                                         console.error('shSignature.vue uni.navigateBack 失败:', err)
                                     }

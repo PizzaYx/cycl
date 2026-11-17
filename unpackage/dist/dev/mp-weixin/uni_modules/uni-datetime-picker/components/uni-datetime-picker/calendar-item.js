@@ -50,8 +50,8 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     k: $props.weeks.beforeMultiple ? 1 : "",
     l: $props.weeks.multiple ? 1 : "",
     m: $props.weeks.afterMultiple ? 1 : "",
-    n: common_vendor.o(($event) => $options.choiceDate($props.weeks)),
-    o: common_vendor.o(($event) => $options.handleMousemove($props.weeks))
+    n: common_vendor.o(($event) => $options.choiceDate($props.weeks), "cf"),
+    o: common_vendor.o(($event) => $options.handleMousemove($props.weeks), "02")
   });
 }
 const Component = /* @__PURE__ */ common_vendor._export_sfc(_sfc_main, [["render", _sfc_render]]);

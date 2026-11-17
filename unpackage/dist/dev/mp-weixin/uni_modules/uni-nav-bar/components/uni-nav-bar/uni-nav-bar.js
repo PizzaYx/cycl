@@ -171,14 +171,14 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     f: $options.themeColor,
     g: !$props.leftIcon.length > 0 ? 1 : ""
   } : {}, {
-    h: common_vendor.o((...args) => $options.onClickLeft && $options.onClickLeft(...args)),
+    h: common_vendor.o((...args) => $options.onClickLeft && $options.onClickLeft(...args), "48"),
     i: $options.leftIconWidth,
     j: $props.title.length > 0
   }, $props.title.length > 0 ? {
     k: common_vendor.t($props.title),
     l: $options.themeColor
   } : {}, {
-    m: common_vendor.o((...args) => $options.onClickTitle && $options.onClickTitle(...args)),
+    m: common_vendor.o((...args) => $options.onClickTitle && $options.onClickTitle(...args), "be"),
     n: $props.rightIcon.length
   }, $props.rightIcon.length ? {
     o: common_vendor.p({
@@ -192,7 +192,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     q: common_vendor.t($props.rightText),
     r: $options.themeColor
   } : {}, {
-    s: common_vendor.o((...args) => $options.onClickRight && $options.onClickRight(...args)),
+    s: common_vendor.o((...args) => $options.onClickRight && $options.onClickRight(...args), "99"),
     t: $options.rightIconWidth,
     v: $options.themeColor,
     w: $options.themeBgColor,

@@ -86,7 +86,7 @@ const _sfc_main = {
           common_vendor.index.__f__("log", "at pages/merchant/shChecklist.vue:180", "用户点击了确定按钮", res);
           if (res.confirm) {
             const resdata = await api_apis.apiGetcancelPlanById({
-              merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+              merchantId: (_a = userStore.currentMerchant) == null ? void 0 : _a.id,
               id: item.id
             });
             if (resdata.code === 200) {
@@ -211,7 +211,7 @@ const _sfc_main = {
           title: "确认中..."
         });
         const params = {
-          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+          merchantId: (_a = userStore.currentMerchant) == null ? void 0 : _a.id,
           id: item.id
         };
         const res = await api_apis.apiGetconfirmPlanById(params);
@@ -242,7 +242,7 @@ const _sfc_main = {
     const getMerchantNotConfirmNum = async () => {
       var _a;
       const res = await api_apis.apiGetMerchantNotConfirmNum({
-        merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+        merchantId: (_a = userStore.currentMerchant) == null ? void 0 : _a.id
       });
       if (res.code === 200) {
         processingBadgeText.value = res.data ?? 0;
@@ -259,7 +259,7 @@ const _sfc_main = {
         }
         const res = await api_apis.apiGetPlanPage({
           pageNum: pageNum.value,
-          merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id,
+          merchantId: (_a = userStore.currentMerchant) == null ? void 0 : _a.id,
           status: tabs[currentTab.value].key
           // 使用tabs中的key值
         });
@@ -310,7 +310,7 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "af"),
         b: common_vendor.p({
           title: "收运清单"
         }),

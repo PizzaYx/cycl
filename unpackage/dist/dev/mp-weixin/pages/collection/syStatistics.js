@@ -130,7 +130,7 @@ const _sfc_main = {
       var _a;
       const res = await api_apis.apiGetDriverPlanStatistics({
         title: searchKeyword.value ?? "",
-        driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
+        driverId: (_a = userStore.currentDriver) == null ? void 0 : _a.id
       });
       if (res.code === 200) {
         merchantCount.value = res.data.merchantNum ?? 0;
@@ -147,7 +147,7 @@ const _sfc_main = {
         }
         const params = {
           pageNum: pageNum.value,
-          driverId: (_a = userStore.sfmerchant) == null ? void 0 : _a.id
+          driverId: (_a = userStore.currentDriver) == null ? void 0 : _a.id
         };
         if (searchKeyword.value) {
           params.title = searchKeyword.value;
@@ -214,7 +214,7 @@ const _sfc_main = {
     });
     return (_ctx, _cache) => {
       return common_vendor.e({
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "71"),
         b: common_vendor.p({
           title: "收运端统计"
         }),
@@ -223,12 +223,12 @@ const _sfc_main = {
           size: "24",
           color: "#999"
         }),
-        d: common_vendor.o(onSearch),
+        d: common_vendor.o(onSearch, "e0"),
         e: searchKeyword.value,
-        f: common_vendor.o(($event) => searchKeyword.value = $event.detail.value),
+        f: common_vendor.o(($event) => searchKeyword.value = $event.detail.value, "09"),
         g: searchKeyword.value
       }, searchKeyword.value ? {
-        h: common_vendor.o(clearSearch),
+        h: common_vendor.o(clearSearch, "a1"),
         i: common_vendor.p({
           type: "clear",
           size: "20",

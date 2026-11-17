@@ -27,10 +27,13 @@
             </view>
         </scroll-view>
 
-        <!-- 底部提交按钮（可编辑时显示） -->
-        <view v-if="!isReadOnly" class="bottom-actions">
-            <button class="action-btn submit-btn" @tap="submitContract" :disabled="!canSubmit">
+        <!-- 底部按钮 -->
+        <view class="bottom-actions">
+            <button v-if="!isReadOnly" class="action-btn submit-btn" @tap="submitContract" :disabled="!canSubmit">
                 提交合同
+            </button>
+            <button v-if="isReadOnly && !contractExpired" class="action-btn submit-btn" @tap="downloadContract">
+                保存合同
             </button>
         </view>
 
@@ -58,6 +61,28 @@ const signatures = ref({
     partyB: ''  // 乙方签名
 })
 
+
+// 甲方公章URL
+const COMPANY_SEAL_URL = 'https://cc.cdlians.tech:8883/upload/2026/08/04/a8NNtrGaRQh882f35874f5fb7a67edfda697970f9c2c_20260804104234A162.png'
+
+// 添加甲方公章（仅前端显示，审核通过后）
+const addCompanySeal = () => {
+    if (!isReadOnly.value || contractExpired.value) return
+
+    let content = contractContent.value
+
+    // 先移除已有公章（避免重复）
+    content = content.replace(/<img[^>]*alt="甲方公章"[^>]*\/?>/g, '')
+
+    // 在收运单位(甲方)后面的公司名称上覆盖公章（跨标签匹配，兼容新旧模板结构）
+    const sealImg = `<img src="${COMPANY_SEAL_URL}" style="position: absolute; left: 60%; top: 30%; transform: translate(-50%, -50%); max-width: 120px; max-height: 120px; opacity: 0.85; pointer-events: none;" alt="甲方公章" />`
+    content = content.replace(
+        /(收运单位\(甲方\)[\s\S]*?<div[^>]*>)(成都市新津蓉澄净环保科技有限公司)/,
+        `$1<span style="position: relative; display: inline-block;">$2${sealImg}</span>`
+    )
+
+    contractContent.value = content
+}
 
 // 富文本合同内容（HTML格式）
 const contractContent = ref('')
@@ -155,6 +180,63 @@ const loadCovenantTemplate = async () => {
     }
 }
 
+// 填充合同模板信息（乙方名称和日期）
+const fillContractTemplate = () => {
+    const merchantName = userStore.currentMerchant?.name || ''
+    const startTime = getCurrentDate()
+    const endTime = contractData.value.endTime || ''
+
+    console.log('===== 开始填充合同模板 =====')
+    console.log('商户名称:', merchantName)
+    console.log('开始时间:', startTime)
+    console.log('结束时间:', endTime)
+
+    let content = contractContent.value
+
+    // 1. 填充商户名称到"乙方(餐厨单位)："位置
+    content = content.replace(
+        /(<div><span style="font-weight: bold; color: #000;">乙方\(餐厨单位\)：<\/span>\s*<div style="margin-top: 4px; border-bottom: 1px solid #333; height: 20px;">)[^<]*(<\/div>)/,
+        `$1${merchantName || '&nbsp;'}$2`
+    )
+
+    // 2. 填充商户名称到"餐厨单位(乙方)："位置（签名部分）
+    content = content.replace(
+        /(<div style="font-weight: bold; margin-bottom: 5px;">餐厨单位\(乙方\)：<\/div>\s*<div style="border-bottom: 1px solid #333; height: 30px;">)[^<]*(<\/div>)/,
+        `$1${merchantName || '&nbsp;'}$2`
+    )
+
+    // 3. 填充合同有效期日期
+    if (endTime) {
+        const startDate = new Date(startTime)
+        const startYear = startDate.getFullYear()
+        const startMonth = startDate.getMonth() + 1
+        const startDay = startDate.getDate()
+
+        const endDate = new Date(endTime)
+        const endYear = endDate.getFullYear()
+        const endMonth = endDate.getMonth() + 1
+        const endDay = endDate.getDate()
+
+        const beforeReplace = content
+
+        content = content.replace(
+            /本合同有效期自\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*40px;\s*text-align:\s*center;">[^<]*<\/span>\s*年\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*25px;\s*text-align:\s*center;">[^<]*<\/span>\s*月\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*25px;\s*text-align:\s*center;">[^<]*<\/span>\s*日至\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*40px;\s*text-align:\s*center;">[^<]*<\/span>\s*年\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*25px;\s*text-align:\s*center;">[^<]*<\/span>\s*月\s*<span style="border-bottom:\s*1px solid #333;\s*display:\s*inline-block;\s*width:\s*25px;\s*text-align:\s*center;">[^<]*<\/span>\s*日止/,
+            `本合同有效期自 <span style="border-bottom: 1px solid #333; display: inline-block; width: 40px; text-align: center;">${startYear}</span>年 <span style="border-bottom: 1px solid #333; display: inline-block; width: 25px; text-align: center;">${startMonth}</span>月 <span style="border-bottom: 1px solid #333; display: inline-block; width: 25px; text-align: center;">${startDay}</span>日至 <span style="border-bottom: 1px solid #333; display: inline-block; width: 40px; text-align: center;">${endYear}</span>年 <span style="border-bottom: 1px solid #333; display: inline-block; width: 25px; text-align: center;">${endMonth}</span>月 <span style="border-bottom: 1px solid #333; display: inline-block; width: 25px; text-align: center;">${endDay}</span>日止`
+        )
+
+        if (beforeReplace === content) {
+            console.log('警告：日期替换未生效')
+        } else {
+            console.log('日期替换成功')
+        }
+    } else {
+        console.log('警告：没有结束时间，跳过日期填充')
+    }
+
+    contractContent.value = content
+    console.log('===== 合同模板填充完成 =====')
+}
+
 // 从merchant页面进入的合同加载逻辑
 const loadContractForMerchant = async () => {
     try {
@@ -175,24 +257,31 @@ const loadContractForMerchant = async () => {
                 contractExpired.value = true
                 await loadCovenantTemplate()
                 isReadOnly.value = false // 设置为可编辑模式
+                // 用新模板数据填充乙方名称和日期
+                fillContractTemplate()
             } else {
                 // 合同未过期，只读显示
                 console.log('合同未过期，只读显示')
                 contractContent.value = decodeHtmlEntities(merchantContractData.content)
                 contractData.value = merchantContractData // 设置合同数据，包含endTime
                 isReadOnly.value = true // 设置为只读模式
+                // 审核通过后显示甲方公章
+                addCompanySeal()
             }
         } else {
             // 没有商户合同，获取模板进入编辑模式
             console.log('未找到商户合同，获取模板进入编辑模式')
             await loadCovenantTemplate()
             isReadOnly.value = false // 设置为可编辑模式
+            // 首次签约也填充乙方名称和日期
+            fillContractTemplate()
         }
     } catch (error) {
         console.error('加载商户合同失败，尝试获取模板:', error)
         // 出错时也尝试获取模板
         await loadCovenantTemplate()
         isReadOnly.value = false
+        fillContractTemplate()
     }
 }
 
@@ -219,9 +308,15 @@ const updateContractWithSignature = () => {
     if (signatures.value.partyB) {
         const signatureHtml = `<img src="${signatures.value.partyB}" style="max-width: 270px; max-height: 80px; vertical-align: middle; cursor: pointer;" alt="乙方签名" />`
 
-        // 替换签名按钮或已存在的签名图片
+        // 替换签名按钮（span格式）：<span id="signature-btn">点击此处签名</span>
         contractContent.value = contractContent.value.replace(
-            /<span id="signature-btn"[^>]*>点击此处签名<\/span>/g,
+            /<span id="signature-btn"[^>]*>[^<]*<\/span>/g,
+            signatureHtml
+        )
+
+        // 替换签名按钮（div格式）：<div id="signature-btn">点击此处进行电子签名</div>
+        contractContent.value = contractContent.value.replace(
+            /<div id="signature-btn"[^>]*>[^<]*<\/div>/g,
             signatureHtml
         )
 
@@ -364,6 +459,16 @@ const submitContractToServer = async () => {
 // 返回上一页
 const back = () => {
     uni.navigateBack()
+}
+
+// 下载合同
+const downloadContract = () => {
+    const merchantId = userStore.currentMerchant?.id || ''
+    const url = `/pages/syContract/contractWebview/contractWebview?merchantId=${encodeURIComponent(merchantId)}`
+    console.log('跳转webview URL:', url)
+    uni.navigateTo({
+        url
+    })
 }
 
 // 页面显示时刷新签名状态

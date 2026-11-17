@@ -140,7 +140,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   return common_vendor.e({
     a: !$props.readonly
   }, !$props.readonly ? {
-    b: common_vendor.o((...args) => $options.choose && $options.choose(...args))
+    b: common_vendor.o((...args) => $options.choose && $options.choose(...args), "a4")
   } : {}, {
     c: $options.list.length > 0
   }, $options.list.length > 0 ? {

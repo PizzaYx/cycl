@@ -22,10 +22,17 @@ const _sfc_main = {
     const wcNum = common_vendor.ref(0);
     const refreshing = common_vendor.ref(false);
     const showAuthModal = common_vendor.ref(false);
+    const showMenu = common_vendor.ref(false);
+    const toggleMenu = () => {
+      showMenu.value = !showMenu.value;
+    };
+    const closeMenu = () => {
+      showMenu.value = false;
+    };
     common_vendor.onShow(async () => {
       const userInfo = await userStore.ensureUserInfo();
       if (userInfo === null) {
-        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:142", "用户未登录，已跳转到登录页");
+        common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:183", "用户未登录，已跳转到登录页");
         return;
       }
       if (checkUserAuthStatus()) {
@@ -33,17 +40,69 @@ const _sfc_main = {
         getMerchantSydList();
       }
     });
-    const showDetail = (item) => {
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:153", "查看详情按钮被点击", item);
+    const handleSwitchShop = () => {
+      closeMenu();
+      const merchants = userStore.merchants;
+      if (!merchants || merchants.length <= 1) {
+        common_vendor.index.showToast({
+          title: "暂无其他商户可切换",
+          icon: "none"
+        });
+        return;
+      }
+      const itemList = merchants.map((m) => m.name || "未命名商户");
+      common_vendor.index.showActionSheet({
+        itemList,
+        success: function(res) {
+          const index = res.tapIndex;
+          if (userStore.switchMerchant(index)) {
+            if (checkUserAuthStatus()) {
+              common_vendor.index.showLoading({ title: "切换中..." });
+              Promise.all([
+                getMerchantStatistics(),
+                getMerchantSydList()
+              ]).finally(() => {
+                common_vendor.index.hideLoading();
+                common_vendor.index.showToast({
+                  title: "已切换",
+                  icon: "success"
+                });
+              });
+            }
+          }
+        },
+        fail: function(res) {
+          common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:231", res.errMsg);
+        }
+      });
+    };
+    const handleAddShop = () => {
+      closeMenu();
       common_vendor.index.navigateTo({
-        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId =${item.merchantId}`
+        url: "/pages/merchant/shCertification?type=add"
+      });
+    };
+    const handleUserInfo = () => {
+      closeMenu();
+      getUserInfo();
+    };
+    const showDetail = (item) => {
+      if (!checkUserAuthStatus()) {
+        return;
+      }
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:254", "查看详情按钮被点击", item);
+      common_vendor.index.navigateTo({
+        url: `/pages/merchant/shsyDetail?id=${item.id}&merchantId=${item.merchantId}`
       });
     };
     const getMerchantStatistics = async () => {
       var _a;
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:161", "获取商户首页数据统计");
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:262", "获取商户首页数据统计");
+      const merchantId = (_a = userStore.currentMerchant) == null ? void 0 : _a.id;
+      if (!merchantId)
+        return;
       const res = await api_apis.apiGetMerchantStatistics({
-        merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+        merchantId
       });
       if (res.code === 200) {
         wcNum.value = res.data.accomplishNum;
@@ -53,15 +112,18 @@ const _sfc_main = {
     };
     const getMerchantSydList = async () => {
       var _a;
+      const merchantId = (_a = userStore.currentMerchant) == null ? void 0 : _a.id;
+      if (!merchantId)
+        return;
       const res = await api_apis.apiGetPlanAllPage({
         pageNum: 1,
         pageSize: 5,
-        merchantId: (_a = userStore.merchant) == null ? void 0 : _a.id
+        merchantId
       });
       if (res.code === 200) {
         records.value = res.data.list;
       } else {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:184", "商户首页收运记录失败", res.message);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:293", "商户首页收运记录失败", res.message);
       }
     };
     const checkUserAuthStatus = () => {
@@ -97,7 +159,7 @@ const _sfc_main = {
           getMerchantSydList();
         }
       } catch (error) {
-        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:249", "刷新失败:", error);
+        common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:358", "刷新失败:", error);
       } finally {
         refreshing.value = false;
       }
@@ -149,13 +211,13 @@ const _sfc_main = {
       }
     ]);
     const handleQuickAction = (action) => {
-      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:305", "快捷操作点击:", action);
+      common_vendor.index.__f__("log", "at pages/merchant/merchant.vue:414", "快捷操作点击:", action);
       if (action.name === "商户认证") {
         if (action.url) {
           common_vendor.index.navigateTo({
             url: action.url,
             fail: (err) => {
-              common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:313", "页面跳转失败:", err);
+              common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:422", "页面跳转失败:", err);
               common_vendor.index.showToast({
                 title: "页面暂未开放",
                 icon: "none"
@@ -172,7 +234,7 @@ const _sfc_main = {
         common_vendor.index.navigateTo({
           url: action.url,
           fail: (err) => {
-            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:334", "页面跳转失败:", err);
+            common_vendor.index.__f__("error", "at pages/merchant/merchant.vue:443", "页面跳转失败:", err);
             common_vendor.index.showToast({
               title: "页面暂未开放",
               icon: "none"
@@ -226,17 +288,44 @@ const _sfc_main = {
         a: common_assets._imports_0,
         b: common_vendor.t(common_vendor.unref(userStore).userAvatar),
         c: common_vendor.t(common_vendor.unref(userStore).nickName || "昵称未设置"),
-        d: common_vendor.t(getAuthStatusText()),
-        e: common_vendor.n(getAuthTagClass()),
-        f: common_vendor.p({
-          type: "right",
-          size: "35rpx"
+        d: common_vendor.unref(userStore).currentMerchant
+      }, common_vendor.unref(userStore).currentMerchant ? {
+        e: common_vendor.t(common_vendor.unref(userStore).currentMerchant.name)
+      } : {}, {
+        f: common_vendor.t(getAuthStatusText()),
+        g: common_vendor.n(getAuthTagClass()),
+        h: common_vendor.o(handleUserInfo, "59"),
+        i: common_vendor.p({
+          type: "gear-filled",
+          size: "20",
+          color: "#333"
         }),
-        g: common_vendor.o(getUserInfo),
-        h: common_vendor.t(yyNum.value),
-        i: common_vendor.t(syNum.value),
-        j: common_vendor.t(wcNum.value),
-        k: common_vendor.f(quickActions.value, (action, index, i0) => {
+        j: common_vendor.o(toggleMenu, "12"),
+        k: showMenu.value
+      }, showMenu.value ? {
+        l: common_vendor.p({
+          type: "refreshempty",
+          size: "16",
+          color: "#333"
+        }),
+        m: common_vendor.o(handleSwitchShop, "3c"),
+        n: common_vendor.p({
+          type: "plusempty",
+          size: "16",
+          color: "#333"
+        }),
+        o: common_vendor.o(handleAddShop, "6c"),
+        p: common_vendor.p({
+          type: "person",
+          size: "16",
+          color: "#333"
+        }),
+        q: common_vendor.o(handleUserInfo, "68")
+      } : {}, {
+        r: common_vendor.t(yyNum.value),
+        s: common_vendor.t(syNum.value),
+        t: common_vendor.t(wcNum.value),
+        v: common_vendor.f(quickActions.value, (action, index, i0) => {
           return {
             a: action.icon,
             b: common_vendor.t(action.name),
@@ -244,17 +333,17 @@ const _sfc_main = {
             d: common_vendor.o(($event) => handleQuickAction(action), action.id)
           };
         }),
-        l: common_vendor.p({
+        w: common_vendor.p({
           type: "right",
           size: "16",
           color: "rgba(19, 19, 19, 0.50)"
         }),
-        m: common_vendor.o(goToSydAllList),
-        n: common_vendor.f(records.value, (item, index, i0) => {
+        x: common_vendor.o(goToSydAllList, "d1"),
+        y: common_vendor.f(records.value, (item, index, i0) => {
           return {
             a: common_vendor.t(item.merchantName),
             b: common_vendor.t(item.status === 1 ? item.arrivalTime : item.appointmentTime),
-            c: "b35646dd-2-" + i0,
+            c: "b35646dd-5-" + i0,
             d: common_vendor.p({
               status: item.status
             }),
@@ -263,20 +352,22 @@ const _sfc_main = {
             g: common_vendor.o(($event) => showDetail(item), item.id)
           };
         }),
-        o: records.value.length === 0
+        z: records.value.length === 0
       }, records.value.length === 0 ? {} : {}, {
-        p: refreshing.value,
-        q: common_vendor.o(onRefresh),
-        r: showAuthModal.value
+        A: refreshing.value,
+        B: common_vendor.o(onRefresh, "df"),
+        C: showAuthModal.value
       }, showAuthModal.value ? {
-        s: common_assets._imports_1$1,
-        t: common_assets._imports_2,
-        v: common_vendor.o(handleAuth),
-        w: common_vendor.o(closeModal),
-        x: common_vendor.o(() => {
-        }),
-        y: common_vendor.o(closeModal)
-      } : {});
+        D: common_assets._imports_1$1,
+        E: common_assets._imports_2,
+        F: common_vendor.o(handleAuth, "7d"),
+        G: common_vendor.o(closeModal, "0b"),
+        H: common_vendor.o(() => {
+        }, "7c"),
+        I: common_vendor.o(closeModal, "6f")
+      } : {}, {
+        J: common_vendor.o(closeMenu, "57")
+      });
     };
   }
 };

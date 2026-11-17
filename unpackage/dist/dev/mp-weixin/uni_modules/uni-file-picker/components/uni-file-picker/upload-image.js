@@ -174,7 +174,7 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
     e: $props.filesList.length < $props.limit && !$props.readonly
   }, $props.filesList.length < $props.limit && !$props.readonly ? {
     f: common_vendor.s($options.borderStyle),
-    g: common_vendor.o((...args) => $options.choose && $options.choose(...args)),
+    g: common_vendor.o((...args) => $options.choose && $options.choose(...args), "d6"),
     h: common_vendor.s($options.boxStyle)
   } : {});
 }

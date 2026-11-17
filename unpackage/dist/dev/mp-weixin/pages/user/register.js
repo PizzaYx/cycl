@@ -88,19 +88,19 @@ const _sfc_main = {
     };
     return (_ctx, _cache) => {
       return {
-        a: common_vendor.o(back),
+        a: common_vendor.o(back, "fb"),
         b: common_vendor.p({
           title: "注册"
         }),
         c: formData.value.username,
-        d: common_vendor.o(($event) => formData.value.username = $event.detail.value),
+        d: common_vendor.o(($event) => formData.value.username = $event.detail.value, "bb"),
         e: formData.value.nickname,
-        f: common_vendor.o(($event) => formData.value.nickname = $event.detail.value),
+        f: common_vendor.o(($event) => formData.value.nickname = $event.detail.value, "5e"),
         g: formData.value.password,
-        h: common_vendor.o(($event) => formData.value.password = $event.detail.value),
+        h: common_vendor.o(($event) => formData.value.password = $event.detail.value, "64"),
         i: formData.value.confirmPassword,
-        j: common_vendor.o(($event) => formData.value.confirmPassword = $event.detail.value),
-        k: common_vendor.o(handleRegister)
+        j: common_vendor.o(($event) => formData.value.confirmPassword = $event.detail.value, "84"),
+        k: common_vendor.o(handleRegister, "ab")
       };
     };
   }

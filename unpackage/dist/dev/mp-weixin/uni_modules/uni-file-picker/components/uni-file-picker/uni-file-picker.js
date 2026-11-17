@@ -177,9 +177,9 @@ const _sfc_main = {
     }
   },
   created() {
-    if (!(common_vendor.tr.config && common_vendor.tr.config.provider)) {
+    if (!(common_vendor.Vs.config && common_vendor.Vs.config.provider)) {
       this.noSpace = true;
-      common_vendor.tr.chooseAndUploadFile = uni_modules_uniFilePicker_components_uniFilePicker_chooseAndUploadFile.chooseAndUploadFile;
+      common_vendor.Vs.chooseAndUploadFile = uni_modules_uniFilePicker_components_uniFilePicker_chooseAndUploadFile.chooseAndUploadFile;
     }
     this.form = this.getForm("uniForms");
     this.formItem = this.getForm("uniFormsItem");
@@ -279,7 +279,7 @@ const _sfc_main = {
      */
     chooseFiles() {
       const _extname = uni_modules_uniFilePicker_components_uniFilePicker_utils.get_extname(this.fileExtname);
-      common_vendor.tr.chooseAndUploadFile({
+      common_vendor.Vs.chooseAndUploadFile({
         type: this.fileMediatype,
         compressed: false,
         sizeType: this.sizeType,
@@ -511,7 +511,7 @@ const _sfc_main = {
       fileList = {
         fileList: [].concat(fileList)
       };
-      const urls = await common_vendor.tr.getTempFileURL(fileList);
+      const urls = await common_vendor.Vs.getTempFileURL(fileList);
       return urls.fileList[0].tempFileURL || "";
     },
     /**
@@ -545,9 +545,9 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   } : {}, {
     e: $props.fileMediatype === "image" && $options.showType === "grid"
   }, $props.fileMediatype === "image" && $options.showType === "grid" ? {
-    f: common_vendor.o($options.uploadFiles),
-    g: common_vendor.o($options.choose),
-    h: common_vendor.o($options.delFile),
+    f: common_vendor.o($options.uploadFiles, "1b"),
+    g: common_vendor.o($options.choose, "cd"),
+    h: common_vendor.o($options.delFile, "6b"),
     i: common_vendor.p({
       readonly: $props.readonly,
       ["image-styles"]: $props.imageStyles,
@@ -559,9 +559,9 @@ function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
   } : {}, {
     j: $props.fileMediatype !== "image" || $options.showType !== "grid"
   }, $props.fileMediatype !== "image" || $options.showType !== "grid" ? {
-    k: common_vendor.o($options.uploadFiles),
-    l: common_vendor.o($options.choose),
-    m: common_vendor.o($options.delFile),
+    k: common_vendor.o($options.uploadFiles, "a5"),
+    l: common_vendor.o($options.choose, "04"),
+    m: common_vendor.o($options.delFile, "e7"),
     n: common_vendor.p({
       readonly: $props.readonly,
       ["list-styles"]: $props.listStyles,

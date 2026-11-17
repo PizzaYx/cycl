@@ -261,39 +261,39 @@ const _sfc_main = {
         c: activeTab.value === 0
       }, activeTab.value === 0 ? {} : {}, {
         d: activeTab.value === 0 ? 1 : "",
-        e: common_vendor.o(($event) => activeTab.value = 0),
+        e: common_vendor.o(($event) => activeTab.value = 0, "79"),
         f: activeTab.value === 1
       }, activeTab.value === 1 ? {} : {}, {
         g: activeTab.value === 1 ? 1 : "",
-        h: common_vendor.o(($event) => activeTab.value = 1),
+        h: common_vendor.o(($event) => activeTab.value = 1, "42"),
         i: formData.account,
-        j: common_vendor.o(($event) => formData.account = $event.detail.value),
+        j: common_vendor.o(($event) => formData.account = $event.detail.value, "f9"),
         k: !passwordVisible.value,
         l: formData.password,
-        m: common_vendor.o(($event) => formData.password = $event.detail.value),
-        n: common_vendor.o(togglePasswordVisibility),
+        m: common_vendor.o(($event) => formData.password = $event.detail.value, "f5"),
+        n: common_vendor.o(togglePasswordVisibility, "cf"),
         o: common_vendor.p({
           type: passwordVisible.value ? "eye" : "eye-filled",
           size: "20",
           color: "rgba(61, 61, 61, 0.5)"
         }),
-        p: common_vendor.o(handleForgotPassword),
+        p: common_vendor.o(handleForgotPassword, "22"),
         q: common_vendor.t(isLoggingIn.value ? "登录中..." : "登录"),
-        r: common_vendor.o(handleLogin),
+        r: common_vendor.o(handleLogin, "fb"),
         s: isLoggingIn.value,
         t: isLoggingIn.value ? 1 : "",
         v: activeTab.value === 0
       }, activeTab.value === 0 ? {
-        w: common_vendor.o(handleRegister)
+        w: common_vendor.o(handleRegister, "42")
       } : {}, {
-        x: common_vendor.o(toggleAgreement),
+        x: common_vendor.o(toggleAgreement, "7f"),
         y: common_vendor.p({
           type: agreed.value ? "circle-filled" : "circle",
           size: "22",
           color: agreed.value ? "rgba(7, 193, 96, 1)" : "rgba(19, 19, 19, 0.5)"
         }),
-        z: common_vendor.o(($event) => openAgreement("user")),
-        A: common_vendor.o(($event) => openAgreement("privacy"))
+        z: common_vendor.o(($event) => openAgreement("user"), "f7"),
+        A: common_vendor.o(($event) => openAgreement("privacy"), "16")
       });
     };
   }

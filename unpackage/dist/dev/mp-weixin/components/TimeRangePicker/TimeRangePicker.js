@@ -94,10 +94,10 @@ const _sfc_main = {
         b: common_vendor.sr(datetimePicker, "b8a775ab-0", {
           "k": "datetimePicker"
         }),
-        c: common_vendor.o(onTimeChange),
-        d: common_vendor.o(onTimePickerShow),
-        e: common_vendor.o(onTimePickerClose),
-        f: common_vendor.o(($event) => selectedTimeRange.value = $event),
+        c: common_vendor.o(onTimeChange, "30"),
+        d: common_vendor.o(onTimePickerShow, "d2"),
+        e: common_vendor.o(onTimePickerClose, "e1"),
+        f: common_vendor.o(($event) => selectedTimeRange.value = $event, "20"),
         g: common_vendor.p({
           type: "datetimerange",
           rangeSeparator: "至",
@@ -106,7 +106,7 @@ const _sfc_main = {
           modelValue: selectedTimeRange.value
         }),
         h: showClearButton.value ? 1 : "",
-        i: common_vendor.o(clearTimeRange)
+        i: common_vendor.o(clearTimeRange, "6b")
       };
     };
   }

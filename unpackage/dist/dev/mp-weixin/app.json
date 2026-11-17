@@ -24,7 +24,8 @@
     "pages/syContract/syContract",
     "pages/syContract/syContractFromAuth",
     "pages/syContract/syPreview",
-    "pages/syContract/shSignature"
+    "pages/syContract/shSignature",
+    "pages/syContract/contractWebview/contractWebview"
   ],
   "window": {
     "navigationBarTextStyle": "black",
